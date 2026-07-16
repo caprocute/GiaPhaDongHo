@@ -1,0 +1,56 @@
+# Ứng dụng (api / portal / admin) — dùng kèm base hoặc remote infra.
+# Ví dụ: docker compose -f docker-compose.base.yml -f docker-compose.apps.yml up -d
+services:
+  api:
+    image: ${API_IMAGE:-ghcr.io/caprocute/giaphadongho/api:main}
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-giapha}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-giapha}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-giapha}
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_OIDC_ISSUER_URI: ${KC_ISSUER_URI:-http://keycloak:8081/realms/jhipster}
+      JASYPT_ENCRYPTOR_PASSWORD: ${JASYPT_ENCRYPTOR_PASSWORD:-change-me}
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/management/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+
+  portal:
+    image: ${PORTAL_IMAGE:-ghcr.io/caprocute/giaphadongho/portal:main}
+    build:
+      context: ../..
+      dockerfile: frontend/apps/portal/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${APP_API_PUBLIC_URL:-http://localhost:8080}
+        NEXT_PUBLIC_DEFAULT_TREE_SLUG: ${DEFAULT_TREE_SLUG:-ho-hoang}
+    ports:
+      - "${PORTAL_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  admin:
+    image: ${ADMIN_IMAGE:-ghcr.io/caprocute/giaphadongho/admin:main}
+    build:
+      context: ../..
+      dockerfile: frontend/apps/admin/Dockerfile
+      args:
+        VITE_API_BASE_URL: ${APP_API_PUBLIC_URL:-http://localhost:8080}
+        VITE_OIDC_AUTHORITY: ${KC_PUBLIC_ISSUER_URI:-http://localhost:8081/realms/jhipster}
+        VITE_OIDC_CLIENT_ID: ${ADMIN_OIDC_CLIENT_ID:-giapha_admin}
+        VITE_DEFAULT_TREE_SLUG: ${DEFAULT_TREE_SLUG:-ho-hoang}
+    ports:
+      - "${ADMIN_PORT:-5173}:80"
+    depends_on:
+      api:
+        condition: service_healthy

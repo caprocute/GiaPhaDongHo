@@ -179,11 +179,11 @@ Chia từng route (1 PR / route nếu lớn):
 - [ ] Golden tests can chi / nhuận (vector lunar đã có; bổ sung vector giỗ sau)
 
 ### R1.10 Đóng gói & staging R1  **[SS cuối với polish UI]**
-- [ ] Dockerfiles / buildpacks api + portal + admin
-- [ ] `deploy-staging.yml` SSH + smoke
-- [ ] Backup script Postgres + MinIO (TK-09)
+- [x] Dockerfiles api + portal + admin (+ `docker-compose.apps.yml`); CI `build-publish.yml` → GHCR
+- [x] `deploy-staging.yml` SSH + smoke HTTP (cần secrets/vars staging)
+- [x] Backup script Postgres + MinIO — `deploy/scripts/backup-pg-minio.sh` (TK-09)
 - [ ] Gate C visual trên vài story/màn pilot
-- [ ] Gate S: semgrep/trivy trên CI
+- [x] Gate S: semgrep/trivy trên CI (`ci.yml` security; continue-on-error lần đầu)
 
 **Cổng R1 (MVP):** 1 cây mẫu seed; khách xem phả đồ/giỗ/tin; admin CRUD người + bài; login 2FA; compose/staging chạy được.
 

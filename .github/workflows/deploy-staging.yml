@@ -1,0 +1,54 @@
+name: Deploy Staging
+on:
+  workflow_run:
+    workflows: ["Build & Publish"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_SSH_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd "${STAGING_DIR:-/opt/giapha}"
+            if [[ -x ./deploy/scripts/deploy.sh ]]; then
+              ./deploy/scripts/deploy.sh main
+            else
+              echo "Chưa có deploy.sh trên server — kéo image thủ công:"
+              docker compose -f deploy/compose/docker-compose.base.yml -f deploy/compose/docker-compose.apps.yml pull || true
+              docker compose -f deploy/compose/docker-compose.base.yml -f deploy/compose/docker-compose.apps.yml up -d
+            fi
+
+      - name: Smoke health
+        env:
+          STAGING_API_URL: ${{ vars.STAGING_API_URL }}
+          STAGING_PORTAL_URL: ${{ vars.STAGING_PORTAL_URL }}
+        run: |
+          set -euo pipefail
+          API="${STAGING_API_URL:-}"
+          PORTAL="${STAGING_PORTAL_URL:-}"
+          if [[ -z "$API" && -z "$PORTAL" ]]; then
+            echo "Chưa cấu hình vars STAGING_API_URL / STAGING_PORTAL_URL — bỏ qua smoke HTTP."
+            exit 0
+          fi
+          if [[ -n "$API" ]]; then
+            for i in $(seq 1 30); do
+              curl -fsS "$API/management/health" && break
+              sleep 10
+              [[ $i -eq 30 ]] && exit 1
+            done
+          fi
+          if [[ -n "$PORTAL" ]]; then
+            curl -fsSI "$PORTAL" >/dev/null
+          fi
+          echo "Smoke OK"
