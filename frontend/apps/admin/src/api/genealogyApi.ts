@@ -110,6 +110,44 @@ export async function deletePersonById(id: number, token: string | null): Promis
   await apiFetch<void>(`/api/people/${id}`, { method: "DELETE", token });
 }
 
+export type ChangeRequestDto = {
+  id?: number;
+  requesterUserId?: string;
+  entityType?: string;
+  summary?: string | null;
+  diffJson?: string;
+  status?: string | null;
+  reviewerNote?: string | null;
+  createdAt?: string | null;
+  reviewedAt?: string | null;
+  person?: PersonDto | null;
+};
+
+export async function listChangeRequests(
+  slug: string,
+  status: string | undefined,
+  token: string | null,
+): Promise<ChangeRequestDto[]> {
+  const q = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiFetch<ChangeRequestDto[]>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/change-requests${q}`,
+    { token },
+  );
+}
+
+export async function reviewChangeRequest(
+  slug: string,
+  id: number,
+  action: "approve" | "reject",
+  reviewerNote: string | undefined,
+  token: string | null,
+): Promise<ChangeRequestDto> {
+  return apiFetch<ChangeRequestDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/change-requests/${id}/${action}`,
+    { method: "POST", body: { reviewerNote }, token },
+  );
+}
+
 export async function listTreeUnions(
   slug: string,
   token: string | null,

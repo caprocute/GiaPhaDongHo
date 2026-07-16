@@ -26,7 +26,10 @@ public class RolePermissionCatalog implements PermissionService {
             "genealogy:person:read",
             "genealogy:person:write",
             "genealogy:union:write",
-            "cms:post:read"
+            "cms:post:read",
+            "moderation:request:read",
+            "moderation:request:review",
+            "moderation:request:write"
         ),
         RealmRoles.EDITOR,
         Set.of(
@@ -34,12 +37,19 @@ public class RolePermissionCatalog implements PermissionService {
             "cms:post:write",
             "media:asset:read",
             "media:asset:write",
-            "genealogy:person:read"
+            "genealogy:person:read",
+            "moderation:request:read",
+            "moderation:request:review"
         ),
         RealmRoles.MEMBER,
-        Set.of("cms:post:read", "genealogy:person:read"),
+        Set.of(
+            "cms:post:read",
+            "genealogy:person:read",
+            "moderation:request:write",
+            "moderation:request:read"
+        ),
         RealmRoles.USER,
-        Set.of("cms:post:read", "genealogy:person:read")
+        Set.of("cms:post:read", "genealogy:person:read", "moderation:request:write")
     );
 
     @Override

@@ -194,9 +194,9 @@ Chia từng route (1 PR / route nếu lớn):
 > Bắt đầu sau cổng R1. Các nhóm R2.x **[SS với nhau]** nếu không dùng chung schema đang migrate cùng lúc — ưu tiên 1 migration train / tuần.
 
 ### R2.1 Moderation — cổng tự khai (F3)
-- [ ] JDL/change_request + diff + hàng đợi duyệt
-- [ ] API member submit / admin approve-reject
-- [ ] UI portal “tự khai” + UI admin inbox
+- [x] JDL/change_request + diff + hàng đợi duyệt
+- [x] API member submit / admin approve-reject
+- [x] UI portal “tự khai” + UI admin inbox
 
 ### R2.2 Donation — quỹ / VietQR (F4)  **[SS với R2.1]**
 - [ ] Campaign, contribution, honor board

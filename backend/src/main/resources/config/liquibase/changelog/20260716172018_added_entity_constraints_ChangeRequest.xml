@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <!--
+        Added the constraints for entity ChangeRequest.
+    -->
+    <changeSet id="20260716172018-2" author="jhipster">
+
+        <addForeignKeyConstraint baseColumnNames="tree_id"
+                                 baseTableName="change_request"
+                                 constraintName="fk_change_request__tree_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="family_tree"
+                                 />
+
+        <addForeignKeyConstraint baseColumnNames="person_id"
+                                 baseTableName="change_request"
+                                 constraintName="fk_change_request__person_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="person"
+                                 />
+    </changeSet>
+</databaseChangeLog>

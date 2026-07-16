@@ -1,0 +1,43 @@
+{
+  "annotations": {
+    "changelogDate": "20260716172019"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "goalAmount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "raisedAmount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "vietqrPayload",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "String"
+    }
+  ],
+  "name": "DonationCampaign",
+  "relationships": [
+    {
+      "otherEntityField": "slug",
+      "otherEntityName": "familyTree",
+      "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

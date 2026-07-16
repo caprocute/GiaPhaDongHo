@@ -1,0 +1,38 @@
+{
+  "annotations": {
+    "changelogDate": "20260716172022"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "householdName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "headcount",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "vehicles",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "assignment",
+      "fieldType": "String"
+    }
+  ],
+  "name": "EventRsvp",
+  "relationships": [
+    {
+      "otherEntityField": "title",
+      "otherEntityName": "clanEvent",
+      "relationshipName": "event",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

@@ -24,6 +24,14 @@
     <include file="config/liquibase/changelog/20260716104029_added_entity_CmsComment.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260716104030_added_entity_MediaAlbum.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260716104031_added_entity_MediaPhoto.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172018_added_entity_ChangeRequest.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172019_added_entity_DonationCampaign.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172020_added_entity_DonationContribution.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172021_added_entity_ClanEvent.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172022_added_entity_EventRsvp.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172023_added_entity_AnniversarySubscription.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172024_added_entity_NotificationOutbox.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172025_added_entity_ScholarshipEntry.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
     <include file="config/liquibase/changelog/20260716104005_added_entity_constraints_Person.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260716104006_added_entity_constraints_FamilyUnion.xml" relativeToChangelogFile="false"/>
@@ -34,6 +42,13 @@
     <include file="config/liquibase/changelog/20260716104028_added_entity_constraints_CmsPost.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260716104029_added_entity_constraints_CmsComment.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260716104031_added_entity_constraints_MediaPhoto.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172018_added_entity_constraints_ChangeRequest.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172019_added_entity_constraints_DonationCampaign.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172020_added_entity_constraints_DonationContribution.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172021_added_entity_constraints_ClanEvent.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172022_added_entity_constraints_EventRsvp.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172023_added_entity_constraints_AnniversarySubscription.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260716172025_added_entity_constraints_ScholarshipEntry.xml" relativeToChangelogFile="false"/>
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
     <include file="config/liquibase/changelog/20260716224500_person_search_unaccent.xml" relativeToChangelogFile="false"/>

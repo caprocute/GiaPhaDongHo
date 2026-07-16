@@ -11,6 +11,7 @@ import { CommentsModerationPage } from "./comments/CommentsModerationPage";
 import { MediaLibraryPage } from "./media/MediaLibraryPage";
 import { PostFormPage } from "./posts/PostFormPage";
 import { PostsListPage } from "./posts/PostsListPage";
+import { ModerationInboxPage } from "./moderation/ModerationInboxPage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { TreeEditorPage } from "./tree/TreeEditorPage";
 
@@ -33,6 +34,7 @@ function Sidebar() {
     ["/", "Tổng quan"],
     ["/persons", "Thành viên"],
     ["/tree", "Tree editor"],
+    ["/moderation", "Duyệt tự khai"],
     ["/posts", "Bài viết"],
     ["/comments", "Bình luận"],
     ["/media", "Thư viện"],
@@ -100,6 +102,7 @@ function CrmRoutes() {
         <Route path="/persons/new" element={<PersonFormPage />} />
         <Route path="/persons/:id" element={<PersonFormPage />} />
         <Route path="/tree" element={<TreeEditorPage />} />
+        <Route path="/moderation" element={<ModerationInboxPage />} />
         <Route path="/posts" element={<PostsListPage />} />
         <Route path="/posts/new" element={<PostFormPage />} />
         <Route path="/posts/:id" element={<PostFormPage />} />

@@ -1,0 +1,67 @@
+{
+  "annotations": {
+    "changelogDate": "20260716172018"
+  },
+  "applications": ["*"],
+  "documentation": "R2 modules — npx generator-jhipster@9.2.0 jdl jdl/r2-modules.jdl --no-interactive\\nFamilyTree / Person đã generate ở genealogy.jdl → builtInEntity.",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "requesterUserId",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "entityType",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "summary",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "diffJson",
+      "fieldType": "TextBlob",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "reviewerNote",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "createdAt",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "reviewedAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "name": "ChangeRequest",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "slug",
+      "otherEntityName": "familyTree",
+      "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    },
+    {
+      "otherEntityField": "fullName",
+      "otherEntityName": "person",
+      "relationshipName": "person",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

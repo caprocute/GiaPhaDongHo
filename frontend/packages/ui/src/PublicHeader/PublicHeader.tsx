@@ -19,6 +19,7 @@ const NAV = [
   { href: "/", label: "Trang nhất" },
   { href: "/persons", label: "Dòng họ" },
   { href: "/tree", label: "Gia phả" },
+  { href: "/tu-khai", label: "Tự khai" },
   { href: "/news", label: "Tin tức" },
   { href: "/album", label: "Thư viện" },
 ] as const;

@@ -1,0 +1,35 @@
+{
+  "annotations": {
+    "changelogDate": "20260716172023"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "userId",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "daysBefore",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "channels",
+      "fieldType": "String"
+    }
+  ],
+  "name": "AnniversarySubscription",
+  "relationships": [
+    {
+      "otherEntityField": "fullName",
+      "otherEntityName": "person",
+      "relationshipName": "person",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

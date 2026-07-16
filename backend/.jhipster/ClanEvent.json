@@ -1,0 +1,44 @@
+{
+  "annotations": {
+    "changelogDate": "20260716172021"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "startSolar",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "lunarJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "location",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "checklistJson",
+      "fieldType": "TextBlob"
+    }
+  ],
+  "name": "ClanEvent",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "slug",
+      "otherEntityName": "familyTree",
+      "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

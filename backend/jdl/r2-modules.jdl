@@ -1,6 +1,10 @@
-/** R2 modules — npx generator-jhipster@9.2.0 jdl jdl/r2-modules.jdl --no-interactive */
+/** R2 modules — npx generator-jhipster@9.2.0 jdl jdl/r2-modules.jdl --no-interactive
+ * FamilyTree / Person đã generate ở genealogy.jdl → builtInEntity.
+ */
 entity ChangeRequest {
   requesterUserId String required
+  entityType String required
+  summary String
   diffJson TextBlob required
   status String
   reviewerNote TextBlob
@@ -61,14 +65,14 @@ entity ScholarshipEntry {
 }
 
 relationship ManyToOne {
-  ChangeRequest{tree(slug)} to FamilyTree
-  ChangeRequest{person(fullName)} to Person
-  DonationCampaign{tree(slug)} to FamilyTree
+  ChangeRequest{tree(slug)} to FamilyTree with builtInEntity
+  ChangeRequest{person(fullName)} to Person with builtInEntity
+  DonationCampaign{tree(slug)} to FamilyTree with builtInEntity
   DonationContribution{campaign(title)} to DonationCampaign
-  ClanEvent{tree(slug)} to FamilyTree
+  ClanEvent{tree(slug)} to FamilyTree with builtInEntity
   EventRsvp{event(title)} to ClanEvent
-  AnniversarySubscription{person(fullName)} to Person
-  ScholarshipEntry{tree(slug)} to FamilyTree
+  AnniversarySubscription{person(fullName)} to Person with builtInEntity
+  ScholarshipEntry{tree(slug)} to FamilyTree with builtInEntity
 }
 
 paginate ChangeRequest, DonationContribution, ClanEvent with pagination
