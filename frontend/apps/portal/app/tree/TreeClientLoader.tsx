@@ -8,9 +8,17 @@ export const TreeClientLoader = dynamic(
   {
     ssr: false,
     loading: () => (
-      <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
+      <div
+        style={{
+          padding: "48px 24px",
+          textAlign: "center",
+          color: "var(--color-text-muted)",
+          fontFamily: "var(--font-body)",
+          background: "var(--color-surface-page)",
+        }}
+      >
         Đang tải phả đồ…
-      </p>
+      </div>
     ),
   },
 );

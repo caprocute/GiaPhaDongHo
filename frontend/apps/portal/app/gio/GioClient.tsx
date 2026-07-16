@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { convertSolarToLunar } from "@giapha/lunar";
-import { Badge, EmptyState, FormField, GioCard, Select } from "@giapha/ui";
+import { EmptyState, FormField, GioCard, Select } from "@giapha/ui";
+import { PageShell } from "../../src/chrome/PageShell";
+import styles from "../../src/chrome/portal.module.css";
 import { fetchAnniversaries } from "../../src/lib/api";
 import { demoAnniversaries } from "../../src/lib/demoContent";
 import type { ApiAnniversary } from "../../src/lib/types";
@@ -39,37 +42,50 @@ export function GioClient() {
   }));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Ngày giỗ</h1>
-        {source === "demo" ? <Badge>Demo</Badge> : <Badge tone="success">API</Badge>}
-      </div>
-      <p style={{ margin: 0, color: "var(--color-text-muted)" }}>
-        Lọc theo tháng âm — hiện tại lịch: tháng {current.month}/{current.year} âm
-        {current.leap ? " (nhuận)" : ""}.
+    <PageShell
+      label="Hương hỏa"
+      title="Ngày giỗ"
+      lead={`Lọc theo tháng âm — hiện tại lịch: tháng ${current.month}/${current.year} âm${current.leap ? " (nhuận)" : ""}.`}
+      crumbs={[
+        { label: "Trang chủ", href: "/" },
+        { label: "Ngày giỗ" },
+      ]}
+      toolbarRight={
+        <Link href="/persons" className={styles.tool}>
+          Danh sách thành viên
+        </Link>
+      }
+    >
+      <p className={styles.note}>
+        {source === "demo" ? "Dữ liệu demo · " : "Nguồn API · "}
+        {rows.length} ngày trong tháng {month} âm
       </p>
-      <FormField label="Tháng âm">
-        <Select
-          value={String(month)}
-          options={monthOptions}
-          onChange={(e) => setMonth(Number(e.target.value))}
-        />
-      </FormField>
+
+      <div className={styles.filterBar}>
+        <FormField label="Tháng âm">
+          <Select
+            value={String(month)}
+            options={monthOptions}
+            onChange={(e) => setMonth(Number(e.target.value))}
+          />
+        </FormField>
+      </div>
+
       {rows.length === 0 ? (
         <EmptyState title="Không có giỗ" description="Chưa có bản ghi anniversary cho tháng này." />
       ) : (
-        <div style={{ display: "flex", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
+        <div className={styles.gioGrid}>
           {rows.map((g) => (
             <GioCard
               key={g.id}
               day={String(g.lunarDay).padStart(2, "0")}
-              month={`Tháng ${g.lunarMonth} âm`}
+              month={`Tháng ${g.lunarMonth} ÂL`}
               name={g.person?.fullName ?? "—"}
-              tag={g.person?.code}
+              tag={g.note ?? g.person?.code}
             />
           ))}
         </div>
       )}
-    </div>
+    </PageShell>
   );
 }

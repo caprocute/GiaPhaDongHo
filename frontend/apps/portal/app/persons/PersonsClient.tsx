@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Badge, EmptyState, Input, PersonNameDisplay } from "@giapha/ui";
+import { EmptyState } from "@giapha/ui";
+import { PageShell } from "../../src/chrome/PageShell";
+import { personInitial } from "../../src/chrome/personUi";
+import styles from "../../src/chrome/portal.module.css";
 import { fetchPersons } from "../../src/lib/api";
 import { DEMO_PERSONS } from "../../src/lib/demoContent";
 import type { ApiPerson } from "../../src/lib/types";
@@ -38,34 +41,66 @@ export function PersonsClient() {
   }, [query]);
 
   return (
-    <div style={{ maxWidth: 800, display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Gia phả</h1>
-        {source === "demo" ? <Badge>Demo</Badge> : null}
+    <PageShell
+      label="Gia phả"
+      title="Thành viên dòng họ"
+      lead="Danh sách hồ sơ theo mã hiệu — họ Hoàng thôn Trung Bính."
+      crumbs={[
+        { label: "Trang chủ", href: "/" },
+        { label: "Gia phả" },
+      ]}
+      toolbarRight={
+        <>
+          <Link href="/tree" className={styles.tool}>
+            Mở phả đồ
+          </Link>
+          <Link href="/search" className={styles.toolPrimary}>
+            Tìm kiếm
+          </Link>
+        </>
+      }
+    >
+      <p className={styles.note}>
+        {source === "demo" ? "Đang hiển thị dữ liệu demo · " : "Nguồn API · "}
+        {rows.length} hồ sơ
+      </p>
+
+      <div className={styles.filterBar}>
+        <input
+          className={styles.filterInput}
+          placeholder="Lọc theo tên / mã hiệu…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Lọc thành viên"
+        />
       </div>
-      <Input
-        placeholder="Lọc theo tên / mã…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label="Lọc thành viên"
-      />
+
       {rows.length === 0 ? (
         <EmptyState title="Không có hồ sơ" description="Thử từ khóa khác hoặc xem phả đồ." />
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}>
+        <ul className={styles.list}>
           {rows.map((p) => (
-            <li key={p.id} style={{ borderBottom: "1px solid var(--color-border-subtle)", padding: "var(--spacing-sm) 0" }}>
-              <Link href={`/persons/${encodeURIComponent(p.code)}`} style={{ textDecoration: "none", color: "inherit" }}>
-                <PersonNameDisplay fullName={p.fullName} generation={p.generation} />
-                <div style={{ color: "var(--color-text-muted)", fontSize: "var(--font-size-sm)" }}>
-                  <code>{p.code}</code>
-                  {p.lifeStatus === "deceased" ? " · đã mất" : " · còn sống"}
+            <li key={p.id}>
+              <Link
+                href={`/persons/${encodeURIComponent(p.code)}`}
+                className={styles.row}
+              >
+                <span className={p.gender === "F" ? styles.avatarF : styles.avatar}>
+                  {personInitial(p.fullName)}
+                </span>
+                <div className={styles.rowMain}>
+                  <div className={styles.rowName}>{p.fullName}</div>
+                  <div className={styles.rowMeta}>
+                    {p.generation != null ? `Đời ${p.generation}` : "—"}
+                    {p.lifeStatus === "deceased" ? " · đã mất" : " · còn sống"}
+                  </div>
                 </div>
+                <span className={styles.rowCode}>{p.code}</span>
               </Link>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

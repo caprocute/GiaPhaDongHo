@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Badge, EmptyState } from "@giapha/ui";
+import { EmptyState } from "@giapha/ui";
+import { PageShell } from "../../src/chrome/PageShell";
+import { formatViDate } from "../../src/chrome/personUi";
+import styles from "../../src/chrome/portal.module.css";
 import { fetchPosts } from "../../src/lib/api";
 import { DEMO_POSTS } from "../../src/lib/demoContent";
 import type { ApiPost } from "../../src/lib/types";
@@ -28,48 +31,60 @@ export function NewsListClient() {
     };
   }, []);
 
-  if (posts.length === 0) {
-    return <EmptyState title="Chưa có tin" description="Quay lại sau khi ban biên tập xuất bản bài." />;
-  }
+  const featured = posts[0];
+  const rest = posts.slice(1);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-lg)", maxWidth: 720 }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Tin tức</h1>
-        {source === "demo" ? <Badge>Demo</Badge> : null}
-      </div>
-      <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-        {posts.map((p) => (
-          <li key={p.slug}>
-            <article
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--spacing-xs)",
-                paddingBottom: "var(--spacing-md)",
-                borderBottom: "1px solid var(--color-border-subtle)",
-              }}
-            >
-              <Link
-                href={`/news/${p.slug}`}
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "var(--font-size-lg)",
-                  color: "var(--color-text-primary)",
-                  textDecoration: "none",
-                }}
-              >
-                {p.title}
+    <PageShell
+      label="Di sản sống"
+      title="Tin tức dòng họ"
+      lead="Hoạt động, thông báo và gương sáng của họ Hoàng – Huỳnh thôn Trung Bính."
+      crumbs={[
+        { label: "Trang chủ", href: "/" },
+        { label: "Tin tức" },
+      ]}
+    >
+      <p className={styles.note}>
+        {source === "demo" ? "Đang hiển thị bài demo" : "Nguồn API"}
+      </p>
+
+      {posts.length === 0 ? (
+        <EmptyState title="Chưa có tin" description="Quay lại sau khi ban biên tập xuất bản bài." />
+      ) : (
+        <div className={styles.newsGrid}>
+          {featured ? (
+            <Link href={`/news/${featured.slug}`} className={styles.feat}>
+              <span className={styles.featPh} aria-hidden />
+              <span className={styles.featOvl} aria-hidden />
+              <div className={styles.featBody}>
+                <div className={styles.featCat}>
+                  {featured.category?.name ?? featured.category?.slug ?? "Tin tức"}
+                </div>
+                <h3>{featured.title}</h3>
+                <div className={styles.featMeta}>
+                  {featured.authorName ?? "Ban biên tập"}
+                  {featured.publishedAt ? ` · ${formatViDate(featured.publishedAt)}` : ""}
+                </div>
+              </div>
+            </Link>
+          ) : null}
+
+          <div className={styles.newsList}>
+            {rest.map((p) => (
+              <Link key={p.slug} href={`/news/${p.slug}`} className={styles.newsItem}>
+                <span className={styles.thumb} aria-hidden />
+                <div>
+                  <h4>{p.title}</h4>
+                  <div className={styles.newsMeta}>
+                    {p.category?.name ?? p.category?.slug ?? "Tin"}
+                    {p.publishedAt ? ` · ${formatViDate(p.publishedAt)}` : ""}
+                  </div>
+                </div>
               </Link>
-              <p style={{ margin: 0, color: "var(--color-text-muted)" }}>{p.summary}</p>
-              <span style={{ fontSize: "var(--font-size-sm)", color: "var(--color-text-muted)" }}>
-                {p.category?.slug ? `${p.category.slug} · ` : ""}
-                {p.publishedAt ? new Date(p.publishedAt).toLocaleDateString("vi-VN") : ""}
-              </span>
-            </article>
-          </li>
-        ))}
-      </ul>
-    </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </PageShell>
   );
 }

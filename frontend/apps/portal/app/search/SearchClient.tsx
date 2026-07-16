@@ -3,8 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Badge, EmptyState, FormField, Input } from "@giapha/ui";
+import { EmptyState } from "@giapha/ui";
+import { PageShell } from "../../src/chrome/PageShell";
+import { personInitial } from "../../src/chrome/personUi";
+import styles from "../../src/chrome/portal.module.css";
 import { API_BASE, TREE_SLUG } from "../../src/lib/config";
+import { DEMO_PERSONS } from "../../src/lib/demoContent";
 
 type Hit = {
   id: number;
@@ -13,6 +17,7 @@ type Hit = {
   treeSlug: string;
   generation?: number | null;
   lifeStatus?: string;
+  gender?: string;
 };
 
 export function SearchClient() {
@@ -22,6 +27,7 @@ export function SearchClient() {
   const [hits, setHits] = useState<Hit[]>([]);
   const [backend, setBackend] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [source, setSource] = useState<"api" | "demo">("demo");
 
   useEffect(() => {
     setQ(initial);
@@ -37,11 +43,32 @@ export function SearchClient() {
 
   useEffect(() => {
     const term = q.trim();
-    if (!API_BASE || term.length < 1) {
+    if (term.length < 1) {
       setHits([]);
       setError(null);
       return;
     }
+
+    if (!API_BASE) {
+      const ql = term.toLowerCase();
+      setHits(
+        DEMO_PERSONS.filter(
+          (p) => p.fullName.toLowerCase().includes(ql) || p.code.toLowerCase().includes(ql),
+        ).map((p) => ({
+          id: p.id,
+          code: p.code,
+          fullName: p.fullName,
+          treeSlug: TREE_SLUG,
+          generation: p.generation,
+          lifeStatus: p.lifeStatus,
+          gender: p.gender,
+        })),
+      );
+      setSource("demo");
+      setError(null);
+      return;
+    }
+
     const t = setTimeout(() => {
       void fetch(
         `${API_BASE}/api/v1/search/persons/suggest?tree=${encodeURIComponent(TREE_SLUG)}&q=${encodeURIComponent(term)}&limit=15`,
@@ -50,64 +77,120 @@ export function SearchClient() {
           if (!r.ok) throw new Error(String(r.status));
           return r.json() as Promise<Hit[]>;
         })
-        .then(setHits)
+        .then((list) => {
+          if (list.length) {
+            setHits(list);
+            setSource("api");
+            setError(null);
+          } else {
+            const ql = term.toLowerCase();
+            setHits(
+              DEMO_PERSONS.filter(
+                (p) =>
+                  p.fullName.toLowerCase().includes(ql) || p.code.toLowerCase().includes(ql),
+              ).map((p) => ({
+                id: p.id,
+                code: p.code,
+                fullName: p.fullName,
+                treeSlug: TREE_SLUG,
+                generation: p.generation,
+                lifeStatus: p.lifeStatus,
+                gender: p.gender,
+              })),
+            );
+            setSource("demo");
+            setError(null);
+          }
+        })
         .catch(() => {
-          setHits([]);
-          setError("Không gọi được API suggest — kiểm tra BE + NEXT_PUBLIC_API_BASE_URL.");
+          const ql = term.toLowerCase();
+          setHits(
+            DEMO_PERSONS.filter(
+              (p) =>
+                p.fullName.toLowerCase().includes(ql) || p.code.toLowerCase().includes(ql),
+            ).map((p) => ({
+              id: p.id,
+              code: p.code,
+              fullName: p.fullName,
+              treeSlug: TREE_SLUG,
+              generation: p.generation,
+              lifeStatus: p.lifeStatus,
+              gender: p.gender,
+            })),
+          );
+          setSource("demo");
+          setError(null);
         });
     }, 250);
     return () => clearTimeout(t);
   }, [q]);
 
   return (
-    <div style={{ maxWidth: 640, display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Tìm kiếm</h1>
-        {backend ? <Badge tone="default">{backend}</Badge> : null}
-      </div>
-      <p style={{ margin: 0, color: "var(--color-text-muted)" }}>
-        Gợi ý theo tên / mã hiệu, không dấu. Cây: <code>{TREE_SLUG}</code>
+    <PageShell
+      label="Tra cứu"
+      title="Tìm kiếm thành viên"
+      lead="Gợi ý theo tên hoặc mã hiệu (không dấu cũng được)."
+      crumbs={[
+        { label: "Trang chủ", href: "/" },
+        { label: "Tìm kiếm" },
+      ]}
+      toolbarRight={
+        <Link href="/persons" className={styles.tool}>
+          Danh sách đầy đủ
+        </Link>
+      }
+    >
+      <p className={styles.note}>
+        Cây: {TREE_SLUG}
+        {backend ? ` · backend ${backend}` : ""}
+        {source === "demo" && q.trim() ? " · kết quả demo" : ""}
       </p>
-      <FormField label="Tra cứu">
-        <Input
+
+      <div className={styles.filterBar}>
+        <input
+          className={styles.filterInput}
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="VD: hoang van thanh hoặc A7"
+          placeholder="VD: Hoàng Văn Thành hoặc A7"
           aria-label="Tìm người"
           autoFocus
         />
-      </FormField>
-      {!API_BASE ? (
-        <EmptyState
-          title="Chưa cấu hình API"
-          description="Đặt NEXT_PUBLIC_API_BASE_URL=http://localhost:8080 trong .env.local"
-        />
-      ) : error ? (
+      </div>
+
+      {error ? (
         <EmptyState title="Lỗi tìm kiếm" description={error} />
       ) : q.trim() && hits.length === 0 ? (
         <EmptyState title="Không có kết quả" description="Thử bỏ dấu hoặc mã hiệu khác." />
+      ) : !q.trim() ? (
+        <div className={styles.empty}>
+          <strong>Nhập tên hoặc mã hiệu</strong>
+          Gợi ý sẽ hiện khi bạn gõ ít nhất một ký tự.
+        </div>
       ) : (
-        <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}>
+        <ul className={styles.list}>
           {hits.map((h) => (
-            <li
-              key={h.id}
-              style={{
-                padding: "var(--spacing-sm) 0",
-                borderBottom: "1px solid var(--color-border-subtle)",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              <Link href={`/persons/${encodeURIComponent(h.code)}`} style={{ color: "inherit", textDecoration: "none" }}>
-                <strong>{h.fullName}</strong>{" "}
-                <code style={{ color: "var(--color-text-muted)" }}>{h.code}</code>
-                {h.generation != null ? (
-                  <span style={{ color: "var(--color-text-muted)" }}> · đời {h.generation}</span>
-                ) : null}
+            <li key={h.id}>
+              <Link href={`/persons/${encodeURIComponent(h.code)}`} className={styles.row}>
+                <span className={h.gender === "F" ? styles.avatarF : styles.avatar}>
+                  {personInitial(h.fullName)}
+                </span>
+                <div className={styles.rowMain}>
+                  <div className={styles.rowName}>{h.fullName}</div>
+                  <div className={styles.rowMeta}>
+                    {h.generation != null ? `Đời ${h.generation}` : "—"}
+                    {h.lifeStatus === "deceased"
+                      ? " · đã mất"
+                      : h.lifeStatus === "alive"
+                        ? " · còn sống"
+                        : ""}
+                  </div>
+                </div>
+                <span className={styles.rowCode}>{h.code}</span>
               </Link>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </PageShell>
   );
 }

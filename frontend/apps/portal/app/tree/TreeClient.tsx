@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { demoFamilyGraph, FamilyTreeCanvas } from "@giapha/tree-viz";
-import { Badge, FormField, Select } from "@giapha/ui";
+import { FormField, Select } from "@giapha/ui";
+import { PageShell } from "../../src/chrome/PageShell";
+import styles from "../../src/chrome/portal.module.css";
 import { fetchPersons } from "../../src/lib/api";
 import { personsToFamilyGraph } from "../../src/lib/toFamilyGraph";
 
@@ -27,6 +30,11 @@ export function TreeClient() {
     };
   }, []);
 
+  const rootPerson = useMemo(
+    () => graph.persons.find((p) => p.id === rootId) ?? graph.persons[0],
+    [graph, rootId],
+  );
+
   const rootOptions = useMemo(
     () =>
       graph.persons.map((p) => ({
@@ -38,35 +46,126 @@ export function TreeClient() {
 
   const depthOptions = [0, 1, 2, 3, 4, 5, 6].map((d) => ({
     value: String(d),
-    label: d === 0 ? "Chỉ đời gốc" : `${d} đời hậu duệ`,
+    label: d === 0 ? "Chỉ đời gốc" : `Độ sâu: ${d} đời`,
   }));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--spacing-md)" }}>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Phả đồ</h1>
-        {source === "demo" ? <Badge>Demo graph</Badge> : <Badge tone="success">API</Badge>}
+    <PageShell
+      title="Phả đồ"
+      flush
+      crumbs={[
+        { label: "Gia phả", href: "/persons" },
+        { label: "Họ Hoàng Thôn Trung Bính" },
+        { label: `Phả đồ · ${graph.persons.length} người` },
+      ]}
+      toolbarRight={
+        <>
+          <label className={styles.tool} style={{ cursor: "default", gap: 8 }}>
+            <select
+              value={rootId}
+              onChange={(e) => setRootId(e.target.value)}
+              aria-label="Gốc phả đồ"
+              style={{
+                border: 0,
+                background: "transparent",
+                font: "inherit",
+                color: "inherit",
+                maxWidth: 180,
+              }}
+            >
+              {rootOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={styles.tool} style={{ cursor: "default" }}>
+            <select
+              value={String(maxDepth)}
+              onChange={(e) => setMaxDepth(Number(e.target.value))}
+              aria-label="Độ sâu"
+              style={{
+                border: 0,
+                background: "transparent",
+                font: "inherit",
+                color: "inherit",
+              }}
+            >
+              {depthOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Link href="/persons" className={styles.toolPrimary}>
+            Danh sách thành viên
+          </Link>
+        </>
+      }
+    >
+      <div className={styles.treeZone}>
+        <div className={styles.treeCanvas}>
+          <FamilyTreeCanvas graph={graph} rootId={rootId} maxDepth={maxDepth} height={560} />
+        </div>
+        <aside className={styles.sidepanel}>
+          <h3>{rootPerson?.fullName ?? "—"}</h3>
+          <p>
+            {rootPerson?.code ? `Mã ${rootPerson.code}` : ""}
+            {rootPerson?.generation != null ? ` · Đời ${rootPerson.generation}` : ""}
+            {source === "demo" ? " · Demo graph" : " · API"}
+          </p>
+          <div>
+            <div className={styles.sideRow}>
+              <span className={styles.sideKey}>Mã hiệu</span>
+              <span className={styles.sideVal}>{rootPerson?.code ?? "—"}</span>
+            </div>
+            <div className={styles.sideRow}>
+              <span className={styles.sideKey}>Đời</span>
+              <span className={styles.sideVal}>
+                {rootPerson?.generation != null ? `Thứ ${rootPerson.generation}` : "—"}
+              </span>
+            </div>
+            <div className={styles.sideRow}>
+              <span className={styles.sideKey}>Người trên đồ</span>
+              <span className={styles.sideVal}>{graph.persons.length}</span>
+            </div>
+          </div>
+          <div className={styles.spActions}>
+            {rootPerson?.code ? (
+              <Link
+                href={`/persons/${encodeURIComponent(rootPerson.code)}`}
+                className={styles.toolPrimary}
+              >
+                Xem hồ sơ
+              </Link>
+            ) : null}
+            <FormField label="Đổi gốc (chi tiết)">
+              <Select value={rootId} options={rootOptions} onChange={(e) => setRootId(e.target.value)} />
+            </FormField>
+          </div>
+          <div className={styles.legend}>
+            <span>
+              <i style={{ background: "var(--color-action-primary-bg)" }} />
+              Nam
+            </span>
+            <span>
+              <i style={{ background: "var(--color-heritage-accent)" }} />
+              Nữ
+            </span>
+            <span>
+              <i
+                style={{
+                  background: "transparent",
+                  border: "1.5px dashed var(--color-heritage-accent)",
+                }}
+              />
+              Hôn phối
+            </span>
+          </div>
+        </aside>
       </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "var(--spacing-md)",
-          maxWidth: 720,
-        }}
-      >
-        <FormField label="Gốc phả đồ (root)">
-          <Select value={rootId} options={rootOptions} onChange={(e) => setRootId(e.target.value)} />
-        </FormField>
-        <FormField label="Độ sâu (depth)">
-          <Select
-            value={String(maxDepth)}
-            options={depthOptions}
-            onChange={(e) => setMaxDepth(Number(e.target.value))}
-          />
-        </FormField>
-      </div>
-      <FamilyTreeCanvas graph={graph} rootId={rootId} maxDepth={maxDepth} height={560} />
-    </div>
+    </PageShell>
   );
 }
