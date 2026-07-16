@@ -1,6 +1,8 @@
 package vn.giapha.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.validation.constraints.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -36,11 +38,11 @@ public class FamilyTree implements Serializable {
     @Column(name = "province_code")
     private String provinceCode;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "meta_json")
     private String metaJson;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "stats_cache_json")
     private String statsCacheJson;
 

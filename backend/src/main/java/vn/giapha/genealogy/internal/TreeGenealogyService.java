@@ -83,7 +83,9 @@ public class TreeGenealogyService {
 
     @Transactional(readOnly = true)
     public Page<PersonDTO> listPersons(String slug, String query, Integer generation, Pageable pageable) {
-        String q = blankToNull(query);
+        // Rỗng thay vì null — tránh Hibernate bind concat LIKE thành bytea trên Postgres
+        String normalized = blankToNull(query);
+        String q = normalized == null ? "" : normalized;
         return personRepository
             .searchInTree(slug, q, generation, pageable)
             .map(personMapper::toDto)

@@ -1,6 +1,8 @@
 package vn.giapha.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.validation.constraints.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -54,18 +56,18 @@ public class Person implements Serializable {
     @Column(name = "birth_solar")
     private LocalDate birthSolar;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "birth_lunar_json")
     private String birthLunarJson;
 
     @Column(name = "death_solar")
     private LocalDate deathSolar;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "death_lunar_json")
     private String deathLunarJson;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "grave_info")
     private String graveInfo;
 
@@ -75,11 +77,11 @@ public class Person implements Serializable {
     @Column(name = "grave_lng")
     private Double graveLng;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "biography")
     private String biography;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "notes")
     private String notes;
 

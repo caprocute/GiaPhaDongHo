@@ -1,6 +1,8 @@
 package vn.giapha.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -24,7 +26,7 @@ public class FamilyUnion implements Serializable {
     @Column(name = "order_no")
     private Integer orderNo;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "marriage_info_json")
     private String marriageInfoJson;
 

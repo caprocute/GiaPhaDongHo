@@ -44,9 +44,8 @@ public interface CmsPostRepository extends JpaRepository<CmsPost, Long> {
             where lower(p.status) = lower(:status)
               and (:categorySlug is null or c.slug = :categorySlug)
               and (
-                :query is null
+                :query = ''
                 or lower(p.title) like concat('%', :query, '%')
-                or lower(coalesce(p.summary, '')) like concat('%', :query, '%')
               )
             order by p.publishedAt desc nulls last, p.id desc
             """,
@@ -55,9 +54,8 @@ public interface CmsPostRepository extends JpaRepository<CmsPost, Long> {
             where lower(p.status) = lower(:status)
               and (:categorySlug is null or c.slug = :categorySlug)
               and (
-                :query is null
+                :query = ''
                 or lower(p.title) like concat('%', :query, '%')
-                or lower(coalesce(p.summary, '')) like concat('%', :query, '%')
               )
             """
     )

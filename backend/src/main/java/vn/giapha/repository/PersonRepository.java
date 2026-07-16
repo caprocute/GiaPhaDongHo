@@ -47,7 +47,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             where tree.slug = :slug
               and (:generation is null or person.generation = :generation)
               and (
-                :query is null
+                :query = ''
                 or lower(person.fullName) like concat('%', :query, '%')
                 or lower(person.code) like concat('%', :query, '%')
                 or lower(coalesce(person.tenHuy, '')) like concat('%', :query, '%')
@@ -58,7 +58,7 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
             where person.tree.slug = :slug
               and (:generation is null or person.generation = :generation)
               and (
-                :query is null
+                :query = ''
                 or lower(person.fullName) like concat('%', :query, '%')
                 or lower(person.code) like concat('%', :query, '%')
                 or lower(coalesce(person.tenHuy, '')) like concat('%', :query, '%')

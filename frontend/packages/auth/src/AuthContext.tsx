@@ -39,8 +39,11 @@ export function AuthProvider({
   const manager = useMemo(() => {
     const settings: UserManagerSettings = {
       ...createUserManagerSettings(config),
-      userStore: new WebStorageStateStore({ store: window.localStorage }),
     };
+    // SSR (Next.js): không đụng window — store mặc định in-memory đủ cho render
+    if (typeof window !== "undefined") {
+      settings.userStore = new WebStorageStateStore({ store: window.localStorage });
+    }
     return new UserManager(settings);
   }, [config]);
 

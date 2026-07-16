@@ -1,6 +1,8 @@
 package vn.giapha.domain;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.validation.constraints.*;
 import java.io.Serial;
 import java.io.Serializable;
@@ -30,7 +32,7 @@ public class Chapter implements Serializable {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "body_html")
     private String bodyHtml;
 

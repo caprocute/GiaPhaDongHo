@@ -52,7 +52,7 @@ public class CmsPublicService {
 
     public Page<CmsPostDTO> listPublished(String categorySlug, String query, Pageable pageable) {
         return cmsPostRepository
-            .searchByStatus(CmsPostStatus.PUBLISHED, blankToNull(categorySlug), blankToNullLower(query), pageable)
+            .searchByStatus(CmsPostStatus.PUBLISHED, blankToNull(categorySlug), blankToEmptyLower(query), pageable)
             .map(cmsPostMapper::toDto);
     }
 
@@ -79,8 +79,9 @@ public class CmsPublicService {
         return t.isEmpty() ? null : t;
     }
 
-    private static String blankToNullLower(String value) {
+    /** Rỗng thay vì null — tránh Hibernate bind concat LIKE thành bytea trên Postgres. */
+    private static String blankToEmptyLower(String value) {
         String t = blankToNull(value);
-        return t == null ? null : t.toLowerCase(Locale.ROOT);
+        return t == null ? "" : t.toLowerCase(Locale.ROOT);
     }
 }
