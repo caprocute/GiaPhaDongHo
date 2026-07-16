@@ -52,7 +52,7 @@ flowchart TB
 ### R0.1 Repo & chuẩn làm việc
 - [x] Cấu trúc monorepo theo TK-01 (`backend/`, `frontend/apps/*`, `frontend/packages/*`, `design-tokens/`, `deploy/`)
 - [x] README gốc: cách chạy local, link TK/SRS
-- [ ] Branch protection `main` + Environments staging/production (TK-12 §5) — làm khi có remote GitHub
+- [x] Branch protection `main` + Environments staging/production (TK-12 §5) — checks `backend`/`frontend`/`security`, 1 approval, cấm force-push; prod reviewer `@caprocute`
 - [x] Glossary thuật ngữ VN — [14-glossary.md](14-glossary.md)
 
 ### R0.2 Hạ tầng DEV  **[SS với R0.3, R0.4]**
@@ -85,7 +85,7 @@ flowchart TB
 - [x] Gate B token-lint trong job frontend
 - [ ] (Chưa bắt buộc) visual.yml / deploy — để cuối R1
 
-**Cổng R0 (đạt tối thiểu):** tunnel infra OK; JHipster BE compile; FE portal/admin/ui build; lunar golden xanh; Gate B xanh; Modulith verify. Còn: branch protection.
+**Cổng R0 (đạt tối thiểu):** tunnel infra OK; JHipster BE compile; FE portal/admin/ui build; lunar golden xanh; Gate B xanh; Modulith verify; branch protection + Environments.
 
 ---
 
