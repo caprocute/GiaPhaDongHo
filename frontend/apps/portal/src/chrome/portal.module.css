@@ -513,14 +513,7 @@
 
 .treeCanvas {
   position: relative;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0 239px,
-      color-mix(in srgb, var(--color-heritage-line) 55%, transparent) 239px 240px
-    ),
-    var(--pattern-brocade),
-    var(--color-surface-page);
+  background: var(--pattern-brocade), var(--color-surface-page);
   padding: 0;
   min-height: 0;
   height: 100%;

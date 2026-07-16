@@ -93,17 +93,26 @@ function CanvasInner(
   );
 
   const genBands = useMemo(() => {
-    const map = new Map<number, { y: number; gen: number }>();
+    const map = new Map<number, { labelY: number; lineY: number; gen: number }>();
     for (const n of layout.nodes) {
       if (n.kind !== "person" || !n.person) continue;
       if (!map.has(n.depth)) {
-        map.set(n.depth, { y: n.y + 4, gen: n.person.generation });
+        map.set(n.depth, {
+          labelY: n.y + 4,
+          lineY: n.y + n.height,
+          gen: n.person.generation,
+        });
       }
     }
-    return [...map.values()];
+    return [...map.values()].sort((a, b) => a.labelY - b.labelY);
   }, [layout]);
 
-  const bandLeft = Math.min(layout.bounds.minX - 100, -20);
+  const guideLeft = layout.bounds.minX - 120;
+  const guideWidth = Math.max(
+    480,
+    layout.bounds.maxX - layout.bounds.minX + 240,
+  );
+  const bandLeft = guideLeft + 8;
 
   useEffect(() => {
     if (lastFitKey.current === fitKey) return;
@@ -217,15 +226,26 @@ function CanvasInner(
         aria-label="Sơ đồ phả hệ"
       >
         <ViewportPortal>
-          {genBands.map((b) => (
-            <div
-              key={`gen-${b.gen}-${b.y}`}
-              className={styles.genBand}
-              style={{ top: b.y, left: bandLeft }}
-            >
-              Đời {b.gen}
-            </div>
-          ))}
+          <div className={styles.genLayer} aria-hidden>
+            {genBands.map((b) => (
+              <div key={`guide-${b.gen}-${b.lineY}`}>
+                <div
+                  className={styles.genGuide}
+                  style={{
+                    top: b.lineY,
+                    left: guideLeft,
+                    width: guideWidth,
+                  }}
+                />
+                <div
+                  className={styles.genBand}
+                  style={{ top: b.labelY, left: bandLeft }}
+                >
+                  Đời {b.gen}
+                </div>
+              </div>
+            ))}
+          </div>
         </ViewportPortal>
         <Controls showInteractive={false} showFitView={false} position="bottom-left" />
         {showMiniMap !== false && (
