@@ -125,7 +125,7 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [x] Xếp package Modulith `genealogy/` (`api/` + `events/` + privacy); entity JHipster vẫn `domain/` OPEN tạm
 - [x] Privacy filter serializer (người sống) — TK-10 / NĐ13 (wire `PersonResource` GET)
 - [x] API: CRUD person/union theo cây (`/api/v1/trees/{slug}/persons|unions`), sinh mã hiệu A7/A7-sp1 + lineage_path
-- [x] Test authz `@RequiresPermission` (gate đăng nhập) + Modulith verify; ma trận role đầy đủ → R1.5
+- [x] Test authz `@RequiresPermission` + Modulith verify; ma trận role→permission (R1.5 `iam`)
 
 ### R1.2 Search index person  **[SS với R1.3 sau khi có Person API]**
 - [ ] Module `search`: index Person (ES hoặc PG FTS fallback khi ES tắt)
@@ -143,10 +143,10 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [ ] Quyền upload chỉ admin/editor
 
 ### R1.5 IAM & portal auth
-- [ ] Keycloak realm: roles editor / genealogy_admin / member
-- [ ] Bridge `iam`: profile, map user ↔ permissions
-- [ ] Portal/Admin login OIDC + silent refresh
-- [ ] 2FA qua Keycloak (parity SRS-10)
+- [x] Keycloak realm: roles `ROLE_EDITOR` / `ROLE_GENEALOGY_ADMIN` / `ROLE_MEMBER` (+ clients `giapha_admin` / `giapha_portal`) — `realm-config/README-IAM.md`
+- [x] Bridge `iam`: `GET /api/v1/me`, ma trận role→permission, `@RequiresPermission` enforce thật
+- [x] Portal/Admin login OIDC PKCE + silent renew (`packages/auth` + oidc-client-ts)
+- [x] 2FA qua Keycloak: `CONFIGURE_TOTP` bắt buộc admin/genealogy; recovery codes qua Account Console (SRS-10)
 
 ### R1.6 packages/tree-viz (phả đồ)
 - [x] Layout engine: đời ngang, union node, thứ tự con (`layoutFamily` + vitest)
@@ -165,7 +165,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [ ] Tìm kiếm
 
 ### R1.8 Admin CRM lõi  **[SS với R1.7 — cùng API]**
-- [x] AppShell + menu CRM (RBAC đầy đủ → R1.5)
+- [x] AppShell + menu CRM + OIDC login (RBAC BE R1.5; menu theo role tinh chỉnh sau)
 - [x] Danh sách / form hồ sơ người + DualDatePicker + Zod (local store; nối API sau)
 - [ ] Tree editor tối thiểu (CRUD quan hệ)
 - [ ] Quản lý bài viết + duyệt comment

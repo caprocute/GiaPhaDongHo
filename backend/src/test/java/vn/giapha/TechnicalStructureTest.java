@@ -25,16 +25,18 @@ class TechnicalStructureTest {
         .optionalLayer("Core").definedBy("..core..")
         .optionalLayer("Genealogy").definedBy("..genealogy..")
         .optionalLayer("Cms").definedBy("..cms..")
+        .optionalLayer("Iam").definedBy("..iam..")
 
         .whereLayer("Config").mayNotBeAccessedByAnyLayer()
         .whereLayer("Web").mayOnlyBeAccessedByLayers("Config")
-        .whereLayer("Service").mayOnlyBeAccessedByLayers("Web", "Config", "Genealogy", "Cms")
-        .whereLayer("Security").mayOnlyBeAccessedByLayers("Config", "Service", "Web", "Genealogy", "Cms")
-        .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service", "Security", "Web", "Config", "Genealogy", "Cms")
-        .whereLayer("Domain").mayOnlyBeAccessedByLayers("Persistence", "Service", "Security", "Web", "Config", "Genealogy", "Cms")
-        .whereLayer("Core").mayOnlyBeAccessedByLayers("Web", "Service", "Security", "Config", "Genealogy", "Cms", "Core")
+        .whereLayer("Service").mayOnlyBeAccessedByLayers("Web", "Config", "Genealogy", "Cms", "Iam")
+        .whereLayer("Security").mayOnlyBeAccessedByLayers("Config", "Service", "Web", "Genealogy", "Cms", "Iam")
+        .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service", "Security", "Web", "Config", "Genealogy", "Cms", "Iam")
+        .whereLayer("Domain").mayOnlyBeAccessedByLayers("Persistence", "Service", "Security", "Web", "Config", "Genealogy", "Cms", "Iam")
+        .whereLayer("Core").mayOnlyBeAccessedByLayers("Web", "Service", "Security", "Config", "Genealogy", "Cms", "Iam", "Core")
         .whereLayer("Genealogy").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Genealogy")
         .whereLayer("Cms").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Cms")
+        .whereLayer("Iam").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Security", "Iam")
 
         .ignoreDependency(belongToAnyOf(GiaphaApp.class), alwaysTrue())
         .ignoreDependency(alwaysTrue(), belongToAnyOf(

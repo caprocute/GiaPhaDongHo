@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Silent renew</title>
+  </head>
+  <body>
+    <script type="module">
+      import { UserManager } from "https://cdn.jsdelivr.net/npm/oidc-client-ts@3.2.0/+esm";
+      const authority =
+        window.__OIDC_AUTHORITY__ ||
+        localStorage.getItem("giapha.oidc.authority") ||
+        "http://localhost:18086/realms/jhipster";
+      const client_id =
+        window.__OIDC_CLIENT_ID__ ||
+        localStorage.getItem("giapha.oidc.client_id") ||
+        "giapha_admin";
+      const mgr = new UserManager({
+        authority,
+        client_id,
+        redirect_uri: `${window.location.origin}/auth/callback`,
+        silent_redirect_uri: `${window.location.origin}/silent-renew.html`,
+        response_type: "code",
+        scope: "openid profile email offline_access",
+      });
+      mgr.signinSilentCallback().catch((e) => console.error(e));
+    </script>
+  </body>
+</html>

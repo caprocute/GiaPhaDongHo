@@ -1,10 +1,12 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 export interface PublicHeaderProps {
   title?: string;
+  /** Slot bên phải (VD: nút đăng nhập OIDC). */
+  endSlot?: ReactNode;
 }
 
-export function PublicHeader({ title = "GiaPhaHub" }: PublicHeaderProps) {
+export function PublicHeader({ title = "GiaPhaHub", endSlot }: PublicHeaderProps) {
   const style: CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -27,17 +29,20 @@ export function PublicHeader({ title = "GiaPhaHub" }: PublicHeaderProps) {
   return (
     <header style={style}>
       <strong>{title}</strong>
-      <nav style={nav} aria-label="Điều hướng chính">
-        <a href="/persons" style={{ color: "var(--color-text-primary)" }}>
-          Gia phả
-        </a>
-        <a href="/news" style={{ color: "var(--color-text-primary)" }}>
-          Tin tức
-        </a>
-        <a href="/search" style={{ color: "var(--color-text-primary)" }}>
-          Tìm kiếm
-        </a>
-      </nav>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
+        <nav style={nav} aria-label="Điều hướng chính">
+          <a href="/persons" style={{ color: "var(--color-text-primary)" }}>
+            Gia phả
+          </a>
+          <a href="/news" style={{ color: "var(--color-text-primary)" }}>
+            Tin tức
+          </a>
+          <a href="/search" style={{ color: "var(--color-text-primary)" }}>
+            Tìm kiếm
+          </a>
+        </nav>
+        {endSlot}
+      </div>
     </header>
   );
 }

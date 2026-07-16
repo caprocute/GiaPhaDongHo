@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import "@giapha/tokens/tokens.css";
 import { PublicFooter } from "@giapha/ui/PublicFooter";
 import { PublicHeader } from "@giapha/ui/PublicHeader";
+import { AuthNav } from "../src/auth/AuthNav";
+import { PortalAuthProvider } from "../src/auth/PortalAuthProvider";
 
 export const metadata: Metadata = {
   title: "GiaPhaHub",
@@ -23,9 +25,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           fontFamily: "var(--font-body)",
         }}
       >
-        <PublicHeader />
-        <main style={{ flex: 1, padding: "var(--spacing-lg)" }}>{children}</main>
-        <PublicFooter />
+        <PortalAuthProvider>
+          <PublicHeader endSlot={<AuthNav />} />
+          <main style={{ flex: 1, padding: "var(--spacing-lg)" }}>{children}</main>
+          <PublicFooter />
+        </PortalAuthProvider>
       </body>
     </html>
   );

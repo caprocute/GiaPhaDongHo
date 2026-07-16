@@ -1,5 +1,10 @@
+import { useEffect } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
-import { AppShell } from "@giapha/ui";
+import { useAuth } from "@giapha/auth";
+import { AppShell, Button } from "@giapha/ui";
+import { AuthCallbackPage } from "./auth/AuthCallbackPage";
+import { RequireAuth } from "./auth/RequireAuth";
+import { persistOidcHints } from "./auth/oidcConfig";
 import { PersonFormPage } from "./persons/PersonFormPage";
 import { PersonsListPage } from "./persons/PersonsListPage";
 import { PostFormPage } from "./posts/PostFormPage";
@@ -50,23 +55,39 @@ function Placeholder({ title }: { title: string }) {
   );
 }
 
-export function App() {
+function AdminHeader() {
+  const { user, logout } = useAuth();
+  const name = user?.profile?.preferred_username ?? user?.profile?.name ?? "";
+
   return (
-    <AppShell
-      header={
-        <header
-          style={{
-            padding: "var(--spacing-md) var(--spacing-lg)",
-            borderBottom: "1px solid var(--color-border-subtle)",
-            fontFamily: "var(--font-display)",
-            background: "var(--color-surface-card)",
-          }}
-        >
-          GiaPhaHub Admin · CRM
-        </header>
-      }
-      sidebar={<Sidebar />}
+    <header
+      style={{
+        padding: "var(--spacing-md) var(--spacing-lg)",
+        borderBottom: "1px solid var(--color-border-subtle)",
+        fontFamily: "var(--font-display)",
+        background: "var(--color-surface-card)",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "var(--spacing-md)",
+      }}
     >
+      <span>GiaPhaHub Admin · CRM</span>
+      {user ? (
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-sm)", fontFamily: "var(--font-body)", fontSize: "var(--font-size-sm)" }}>
+          <span style={{ color: "var(--color-text-muted)" }}>{name}</span>
+          <Button type="button" variant="ghost" onClick={() => void logout()}>
+            Đăng xuất
+          </Button>
+        </div>
+      ) : null}
+    </header>
+  );
+}
+
+function CrmRoutes() {
+  return (
+    <AppShell header={<AdminHeader />} sidebar={<Sidebar />}>
       <Routes>
         <Route path="/" element={<Placeholder title="Bảng điều khiển" />} />
         <Route path="/persons" element={<PersonsListPage />} />
@@ -80,5 +101,25 @@ export function App() {
         <Route path="*" element={<Navigate to="/persons" replace />} />
       </Routes>
     </AppShell>
+  );
+}
+
+export function App() {
+  useEffect(() => {
+    persistOidcHints();
+  }, []);
+
+  return (
+    <Routes>
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route
+        path="/*"
+        element={
+          <RequireAuth>
+            <CrmRoutes />
+          </RequireAuth>
+        }
+      />
+    </Routes>
   );
 }

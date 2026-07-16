@@ -17,7 +17,18 @@
 ## 2. Kiểm soát theo OWASP ASVS (điểm nhấn)
 
 - **AuthN**: OIDC + PKCE; TOTP 2FA + backup codes (parity SRS-10); phiên: access token 10', refresh rotation, silent renew.
-- **AuthZ**: deny-by-default; permission `module:entity:action:scope`; kiểm tra subtree bằng `lineage_path` phía server; test ma trận role×endpoint trong CI.
+- **AuthZ**: deny-by-default; permission `module:entity:action` (scope subtree → phase sau); kiểm tra qua `iam.PermissionService` + `@RequiresPermission`; test ma trận role×permission trong CI.
+
+### 2.1 Ma trận role → permission (R1.5)
+
+| Role | Permissions |
+|------|-------------|
+| `ROLE_ADMIN` | `*` (toàn quyền) |
+| `ROLE_GENEALOGY_ADMIN` | `genealogy:person:read/write`, `genealogy:union:write`, `cms:post:read` |
+| `ROLE_EDITOR` | `cms:post:read/write`, `media:asset:read/write`, `genealogy:person:read` |
+| `ROLE_MEMBER` / `ROLE_USER` | `cms:post:read`, `genealogy:person:read` |
+
+2FA: user `admin` + `genealogy` có required action `CONFIGURE_TOTP`; recovery codes qua Keycloak Account Console (không tự code OTP).
 - **Input/Output**: Bean Validation + Zod; sanitize rich-text (server-side, allowlist — nội dung TipTap lưu JSON, render qua renderer kiểm soát, không dán HTML thô); SQLi: JPA/parameterized only (Semgrep rule cấm string concat query).
 - **Upload**: whitelist mime + magic bytes, giới hạn dung lượng, ảnh re-encode qua imgproxy (diệt payload), PDF/scan vào bucket riêng không execute.
 - **Headers/Web**: CSP nonce-based (portal SSR), HSTS, COOP/COEP, SameSite=Lax, CSRF token cho form SSR; admin SPA: CSP strict + không third-party script.

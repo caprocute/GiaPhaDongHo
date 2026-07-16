@@ -17,6 +17,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@giapha/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@giapha/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -60,6 +63,9 @@ importers:
 
   apps/portal:
     dependencies:
+      '@giapha/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@giapha/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
@@ -93,6 +99,25 @@ importers:
         version: 5.9.3
 
   packages/api-types: {}
+
+  packages/auth:
+    dependencies:
+      oidc-client-ts:
+        specifier: ^3.2.0
+        version: 3.5.0
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.7(react@19.2.7)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.10
+        version: 19.2.17
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
 
   packages/lunar:
     devDependencies:
@@ -1792,6 +1817,10 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
+  jwt-decode@4.0.0:
+    resolution: {integrity: sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==}
+    engines: {node: '>=18'}
+
   kleur@3.0.3:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
@@ -1911,6 +1940,10 @@ packages:
 
   nwsapi@2.2.24:
     resolution: {integrity: sha512-7YRhZ3jS45LwmSCT4b2sVFHt/WuovaktDU07QrtOBY2PXskss5a9jfmR9jptyumwXST+rFjrmppMY1KT/yn35A==}
+
+  oidc-client-ts@3.5.0:
+    resolution: {integrity: sha512-l2q8l9CTCTOlbX+AnK4p3M+4CEpKpyQhle6blQkdFhm0IsBqsxm15bYaSa11G7pWdsYr6epdsRZxJpCyCRbT8A==}
+    engines: {node: '>=18'}
 
   onetime@5.1.2:
     resolution: {integrity: sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==}
@@ -4155,6 +4188,8 @@ snapshots:
 
   json5@2.2.3: {}
 
+  jwt-decode@4.0.0: {}
+
   kleur@3.0.3: {}
 
   locate-path@6.0.0:
@@ -4252,6 +4287,10 @@ snapshots:
   node-releases@2.0.51: {}
 
   nwsapi@2.2.24: {}
+
+  oidc-client-ts@3.5.0:
+    dependencies:
+      jwt-decode: 4.0.0
 
   onetime@5.1.2:
     dependencies:

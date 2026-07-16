@@ -10,6 +10,7 @@
     "lint": "echo 'lint stub'"
   },
   "dependencies": {
+    "@giapha/auth": "workspace:*",
     "@giapha/tokens": "workspace:*",
     "@giapha/tree-viz": "workspace:*",
     "@giapha/ui": "workspace:*",
