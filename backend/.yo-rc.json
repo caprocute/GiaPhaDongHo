@@ -1,0 +1,32 @@
+{
+  "generator-jhipster": {
+    "applicationType": "monolith",
+    "authenticationType": "oauth2",
+    "baseName": "giapha",
+    "buildTool": "gradle",
+    "cacheProvider": "no",
+    "clientFramework": "no",
+    "creationTimestamp": 1703756156789,
+    "databaseType": "sql",
+    "defaultCommand": "app",
+    "devDatabaseType": "postgresql",
+    "enableHibernateCache": false,
+    "enableTranslation": false,
+    "entities": ["FamilyTree", "Person", "FamilyUnion", "UnionMember", "UnionChild", "Chapter", "DeathAnniversary"],
+    "jhipsterVersion": "9.2.0",
+    "lastLiquibaseTimestamp": 1784198410000,
+    "messageBroker": "no",
+    "monorepository": true,
+    "nativeLanguage": "vi",
+    "packageName": "vn.giapha",
+    "prodDatabaseType": "postgresql",
+    "reactive": false,
+    "searchEngine": "no",
+    "serverPort": "8080",
+    "serviceDiscoveryType": "no",
+    "skipClient": true,
+    "skipCommitHook": true,
+    "skipUserManagement": true,
+    "withAdminUi": false
+  }
+}

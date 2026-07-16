@@ -1,0 +1,50 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104010"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "lunarDay",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "lunarMonth",
+      "fieldType": "Integer",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "leapMonth",
+      "fieldType": "Boolean"
+    },
+    {
+      "fieldName": "canChi",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "note",
+      "fieldType": "String"
+    }
+  ],
+  "name": "DeathAnniversary",
+  "relationships": [
+    {
+      "otherEntityField": "slug",
+      "otherEntityName": "familyTree",
+      "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "fullName",
+      "otherEntityName": "person",
+      "relationshipName": "person",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

@@ -1,0 +1,12 @@
+apply plugin: "war"
+
+bootWar {
+    mainClass = "vn.giapha.GiaphaApp"
+    includes = ["WEB-INF/**", "META-INF/**"]
+}
+
+war {
+    enabled = true
+    archiveExtension = "war.original"
+    includes = ["WEB-INF/**", "META-INF/**"]
+}

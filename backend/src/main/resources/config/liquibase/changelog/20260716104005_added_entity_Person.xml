@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <!--
+        Added the entity Person.
+    -->
+    <changeSet id="20260716104005-1" author="jhipster">
+        <createTable tableName="person">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="code" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="full_name" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="ten_huy" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="ten_thuong" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="gender" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="life_status" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+            <column name="generation" type="integer">
+                <constraints nullable="true" />
+            </column>
+            <column name="lineage_path" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="birth_solar" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="birth_lunar_json" type="${clobType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="death_solar" type="date">
+                <constraints nullable="true" />
+            </column>
+            <column name="death_lunar_json" type="${clobType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="grave_info" type="${clobType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="grave_lat" type="double">
+                <constraints nullable="true" />
+            </column>
+            <column name="grave_lng" type="double">
+                <constraints nullable="true" />
+            </column>
+            <column name="biography" type="${clobType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="notes" type="${clobType}">
+                <constraints nullable="true" />
+            </column>
+            <column name="privacy" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="linked_user_id" type="varchar(255)">
+                <constraints nullable="true" />
+            </column>
+            <column name="version" type="integer">
+                <constraints nullable="true" />
+            </column>
+            <column name="tree_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
+        </createTable>
+    </changeSet>
+
+    <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
+
+    <!--
+        Load sample data generated with Faker.js
+        - This data can be easily edited using a CSV editor (or even MS Excel) and
+          is located in the 'src/main/resources/config/liquibase/fake-data' directory
+        - By default this data is applied when running with the JHipster 'dev' profile.
+          This can be customized by adding or removing 'faker' in the 'spring.liquibase.contexts'
+          Spring Boot configuration key.
+    -->
+    <changeSet id="20260716104005-1-data" author="jhipster" context="faker">
+        <loadData
+                  file="../fake-data/person.csv"
+                  relativeToChangelogFile="true"
+                  separator=";"
+                  tableName="person"
+                  usePreparedStatements="true">
+            <column name="id" type="numeric"/>
+            <column name="code" type="string"/>
+            <column name="full_name" type="string"/>
+            <column name="ten_huy" type="string"/>
+            <column name="ten_thuong" type="string"/>
+            <column name="gender" type="string"/>
+            <column name="life_status" type="string"/>
+            <column name="generation" type="numeric"/>
+            <column name="lineage_path" type="string"/>
+            <column name="birth_solar" type="date"/>
+            <column name="birth_lunar_json" type="clob"/>
+            <column name="death_solar" type="date"/>
+            <column name="death_lunar_json" type="clob"/>
+            <column name="grave_info" type="clob"/>
+            <column name="grave_lat" type="numeric"/>
+            <column name="grave_lng" type="numeric"/>
+            <column name="biography" type="clob"/>
+            <column name="notes" type="clob"/>
+            <column name="privacy" type="string"/>
+            <column name="linked_user_id" type="string"/>
+            <column name="version" type="numeric"/>
+            <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
+        </loadData>
+    </changeSet>
+</databaseChangeLog>

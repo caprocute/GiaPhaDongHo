@@ -1,0 +1,29 @@
+/**
+ * Bootstrap GiaPhaHub API — sinh bằng JHipster CLI (generator-jhipster@9).
+ * Không chỉnh tay các file core do CLI tạo; entity thêm qua JDL riêng + `jhipster jdl`.
+ */
+application {
+  config {
+    baseName giapha
+    applicationType monolith
+    packageName vn.giapha
+    authenticationType oauth2
+    databaseType sql
+    prodDatabaseType postgresql
+    devDatabaseType postgresql
+    cacheProvider no
+    enableHibernateCache false
+    buildTool gradle
+    skipClient true
+    skipUserManagement true
+    enableTranslation false
+    nativeLanguage vi
+    serverPort 8080
+    serviceDiscoveryType no
+    messageBroker no
+    searchEngine no
+    clientFramework no
+    reactive false
+    withAdminUi false
+  }
+}

@@ -1,0 +1,76 @@
+/** Entity lõi phả hệ — sinh bằng: npx generator-jhipster@9.2.0 jdl jdl/genealogy.jdl --no-interactive */
+entity FamilyTree {
+  slug String required unique
+  surname String required
+  branchName String
+  provinceCode String
+  metaJson TextBlob
+  statsCacheJson TextBlob
+}
+
+entity Person {
+  code String required
+  fullName String required
+  tenHuy String
+  tenThuong String
+  gender String required
+  lifeStatus String required
+  generation Integer
+  lineagePath String
+  birthSolar LocalDate
+  birthLunarJson TextBlob
+  deathSolar LocalDate
+  deathLunarJson TextBlob
+  graveInfo TextBlob
+  graveLat Double
+  graveLng Double
+  biography TextBlob
+  notes TextBlob
+  privacy String
+  linkedUserId String
+  version Integer
+}
+
+entity FamilyUnion {
+  orderNo Integer
+  marriageInfoJson TextBlob
+}
+
+entity UnionMember {
+  role String required
+}
+
+entity UnionChild {
+  orderNo Integer
+}
+
+entity Chapter {
+  kind String required
+  title String required
+  bodyHtml TextBlob
+  version Integer
+}
+
+entity DeathAnniversary {
+  lunarDay Integer required
+  lunarMonth Integer required
+  leapMonth Boolean
+  canChi String
+  note String
+}
+
+relationship ManyToOne {
+  Person{tree(slug)} to FamilyTree
+  FamilyUnion{tree(slug)} to FamilyTree
+  Chapter{tree(slug)} to FamilyTree
+  DeathAnniversary{tree(slug)} to FamilyTree
+  DeathAnniversary{person(fullName)} to Person
+  UnionMember{union} to FamilyUnion
+  UnionMember{person(fullName)} to Person
+  UnionChild{union} to FamilyUnion
+  UnionChild{child(fullName)} to Person
+}
+
+paginate Person, Chapter with pagination
+service Person, FamilyTree, FamilyUnion, Chapter, DeathAnniversary with serviceClass
+dto Person, FamilyTree, FamilyUnion, Chapter, DeathAnniversary with mapstruct

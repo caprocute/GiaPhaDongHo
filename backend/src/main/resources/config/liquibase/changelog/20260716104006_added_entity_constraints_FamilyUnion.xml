@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+    <!--
+        Added the constraints for entity FamilyUnion.
+    -->
+    <changeSet id="20260716104006-2" author="jhipster">
+
+        <addForeignKeyConstraint baseColumnNames="tree_id"
+                                 baseTableName="family_union"
+                                 constraintName="fk_family_union__tree_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="family_tree"
+                                 />
+    </changeSet>
+</databaseChangeLog>

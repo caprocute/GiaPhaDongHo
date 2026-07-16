@@ -1,0 +1,29 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104008"
+  },
+  "applications": ["*"],
+  "fields": [
+    {
+      "fieldName": "orderNo",
+      "fieldType": "Integer"
+    }
+  ],
+  "name": "UnionChild",
+  "relationships": [
+    {
+      "otherEntityName": "familyUnion",
+      "relationshipName": "union",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "fullName",
+      "otherEntityName": "person",
+      "relationshipName": "child",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no"
+}

@@ -1,0 +1,40 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104009"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "kind",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "bodyHtml",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "version",
+      "fieldType": "Integer"
+    }
+  ],
+  "name": "Chapter",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "slug",
+      "otherEntityName": "familyTree",
+      "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

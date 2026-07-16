@@ -1,0 +1,40 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104004"
+  },
+  "applications": ["*"],
+  "documentation": "Entity lõi phả hệ — sinh bằng: npx generator-jhipster@9.2.0 jdl jdl/genealogy.jdl --no-interactive",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "slug",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique"]
+    },
+    {
+      "fieldName": "surname",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "branchName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "provinceCode",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "metaJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "statsCacheJson",
+      "fieldType": "TextBlob"
+    }
+  ],
+  "name": "FamilyTree",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

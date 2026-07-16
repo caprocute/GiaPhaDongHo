@@ -1,0 +1,106 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104005"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "code",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "fullName",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "tenHuy",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "tenThuong",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "gender",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "lifeStatus",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "generation",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "lineagePath",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "birthSolar",
+      "fieldType": "LocalDate"
+    },
+    {
+      "fieldName": "birthLunarJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "deathSolar",
+      "fieldType": "LocalDate"
+    },
+    {
+      "fieldName": "deathLunarJson",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "graveInfo",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "graveLat",
+      "fieldType": "Double"
+    },
+    {
+      "fieldName": "graveLng",
+      "fieldType": "Double"
+    },
+    {
+      "fieldName": "biography",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "notes",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "privacy",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "linkedUserId",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "version",
+      "fieldType": "Integer"
+    }
+  ],
+  "name": "Person",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "slug",
+      "otherEntityName": "familyTree",
+      "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

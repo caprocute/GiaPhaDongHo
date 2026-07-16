@@ -1,0 +1,29 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104006"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "orderNo",
+      "fieldType": "Integer"
+    },
+    {
+      "fieldName": "marriageInfoJson",
+      "fieldType": "TextBlob"
+    }
+  ],
+  "name": "FamilyUnion",
+  "relationships": [
+    {
+      "otherEntityField": "slug",
+      "otherEntityName": "familyTree",
+      "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

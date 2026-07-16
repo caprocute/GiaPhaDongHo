@@ -1,0 +1,30 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104007"
+  },
+  "applications": ["*"],
+  "fields": [
+    {
+      "fieldName": "role",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    }
+  ],
+  "name": "UnionMember",
+  "relationships": [
+    {
+      "otherEntityName": "familyUnion",
+      "relationshipName": "union",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityField": "fullName",
+      "otherEntityName": "person",
+      "relationshipName": "person",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no"
+}
