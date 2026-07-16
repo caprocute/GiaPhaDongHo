@@ -77,10 +77,14 @@ function CanvasInner(
   ref: Ref<FamilyTreeCanvasHandle>,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { fitView, getNodes } = useReactFlow();
+  const { fitView: _fitViewUnused, getNodes, setViewport } = useReactFlow();
+  void _fitViewUnused;
   const [exporting, setExporting] = useState(false);
   const fitKey = `${rootId}:${maxDepth}:${graph.persons.length}:${graph.unions.length}`;
   const lastFitKey = useRef("");
+
+  /** Lề trái cho chữ «Đời N» — fitView mặc định chỉ ôm node nên chữ bị cắt */
+  const LABEL_GUTTER = 168;
 
   const layout = useMemo(
     () => layoutFamily(graph, { rootId, maxDepth }),
@@ -98,7 +102,7 @@ function CanvasInner(
       if (n.kind !== "person" || !n.person) continue;
       if (!map.has(n.depth)) {
         map.set(n.depth, {
-          labelY: n.y + 4,
+          labelY: n.y + 8,
           lineY: n.y + n.height,
           gen: n.person.generation,
         });
@@ -107,27 +111,44 @@ function CanvasInner(
     return [...map.values()].sort((a, b) => a.labelY - b.labelY);
   }, [layout]);
 
-  const guideLeft = layout.bounds.minX - 120;
+  const guideLeft = layout.bounds.minX - LABEL_GUTTER;
   const guideWidth = Math.max(
     480,
-    layout.bounds.maxX - layout.bounds.minX + 240,
+    layout.bounds.maxX - layout.bounds.minX + LABEL_GUTTER + 80,
   );
-  const bandLeft = guideLeft + 8;
+  /** Neo mép phải chữ ngay trước cột node trái nhất */
+  const bandRightEdge = layout.bounds.minX - 20;
+
+  const fitToTree = useCallback(
+    (duration = 0) => {
+      const rfNodes = getNodes().filter((n) => n.type === "person" || n.type === "union");
+      if (!rfNodes.length) return;
+      const b = getNodesBounds(rfNodes);
+      const expanded = {
+        x: b.x - LABEL_GUTTER,
+        y: b.y - 28,
+        width: b.width + LABEL_GUTTER + 56,
+        height: b.height + 56,
+      };
+      const rect = containerRef.current?.getBoundingClientRect();
+      const w = Math.max(320, rect?.width ?? 800);
+      const h = Math.max(240, rect?.height ?? 560);
+      const vp = getViewportForBounds(expanded, w, h, 0.12, 1.05, 0.08);
+      void setViewport(vp, { duration });
+    },
+    [getNodes, setViewport],
+  );
 
   useEffect(() => {
     if (lastFitKey.current === fitKey) return;
     lastFitKey.current = fitKey;
-    const id = window.setTimeout(() => {
-      void fitView({ padding: 0.16, duration: 0, maxZoom: 1 });
-    }, 50);
+    const id = window.setTimeout(() => fitToTree(0), 50);
     return () => window.clearTimeout(id);
-  }, [fitKey, fitView, nodes.length]);
+  }, [fitKey, fitToTree, nodes.length]);
 
-  const doFit = useCallback(() => {
-    void fitView({ padding: 0.16, duration: 200, maxZoom: 1 });
-  }, [fitView]);
+  const doFit = useCallback(() => fitToTree(200), [fitToTree]);
 
-  /** Xuất theo bounds node — ổn định hơn chụp cả `.react-flow` (tránh lỗi CSS/font). */
+  /** Xuất theo bounds node + lề chữ đời */
   const captureViewport = useCallback(
     async (kind: "png" | "svg" | "pdf") => {
       const viewport = containerRef.current?.querySelector(
@@ -138,11 +159,17 @@ function CanvasInner(
       const rfNodes = getNodes().filter((n) => n.type === "person" || n.type === "union");
       if (!rfNodes.length) throw new Error("Chưa có node để xuất.");
 
-      const bounds = getNodesBounds(rfNodes);
+      const b = getNodesBounds(rfNodes);
+      const bounds = {
+        x: b.x - LABEL_GUTTER,
+        y: b.y - 28,
+        width: b.width + LABEL_GUTTER + 56,
+        height: b.height + 56,
+      };
       const imageWidth = 1600;
       const aspect = bounds.width > 0 ? bounds.height / bounds.width : 0.7;
       const imageHeight = Math.max(900, Math.round(imageWidth * aspect));
-      const vb = getViewportForBounds(bounds, imageWidth, imageHeight, 0.15, 1.2, 0.18);
+      const vb = getViewportForBounds(bounds, imageWidth, imageHeight, 0.12, 1.2, 0.08);
       const bg = resolveExportBackground();
       const common = {
         backgroundColor: bg,
@@ -239,7 +266,7 @@ function CanvasInner(
                 />
                 <div
                   className={styles.genBand}
-                  style={{ top: b.labelY, left: bandLeft }}
+                  style={{ top: b.labelY, left: bandRightEdge }}
                 >
                   Đời {b.gen}
                 </div>
