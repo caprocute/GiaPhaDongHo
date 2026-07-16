@@ -1,0 +1,19 @@
+.union {
+  width: 18px;
+  height: 18px;
+  background: var(--color-heritage-accent);
+  border: 1.5px solid var(--color-heritage-frame);
+  box-shadow: var(--shadow-sm);
+  transform: rotate(45deg);
+  position: relative;
+}
+
+.handle {
+  opacity: 0;
+  width: 4px !important;
+  height: 4px !important;
+  min-width: 4px !important;
+  min-height: 4px !important;
+  background: transparent !important;
+  border: none !important;
+}

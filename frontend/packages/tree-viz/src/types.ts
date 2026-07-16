@@ -38,6 +38,8 @@ export interface LayoutOptions {
   unionSize?: number;
   hGap?: number;
   vGap?: number;
+  /** Khoảng giữa vợ–chồng (mỗi bên nút hôn phối) */
+  spouseGap?: number;
 }
 
 export type LayoutKind = "person" | "union";
@@ -61,6 +63,8 @@ export interface LayoutEdge {
   target: string;
   /** spouse | child */
   kind: "spouse" | "child";
+  sourceHandle?: string;
+  targetHandle?: string;
 }
 
 export interface LayoutResult {

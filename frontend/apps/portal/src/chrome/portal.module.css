@@ -484,17 +484,23 @@
   border: 1px solid var(--color-border-strong);
   background: var(--color-surface-card);
   box-shadow: var(--shadow-sm);
-  min-height: 560px;
+  min-height: 640px;
+  height: min(72vh, 760px);
 }
 
 .treeCanvas {
   position: relative;
   background:
-    repeating-linear-gradient(0deg, transparent 0 159px, var(--color-border-default) 159px 160px),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 239px,
+      color-mix(in srgb, var(--color-heritage-line) 55%, transparent) 239px 240px
+    ),
     var(--pattern-brocade),
     var(--color-surface-page);
-  padding: 16px;
+  padding: 0;
   min-height: 560px;
+  overflow: hidden;
 }
 
 .sidepanel {
@@ -811,9 +817,9 @@
   margin-top: 8px;
 }
 
-.treeCanvas :global(.family-tree-canvas),
 .treeCanvas :global([data-tree-canvas]) {
-  min-height: 520px;
+  min-height: 560px;
+  height: 100%;
 }
 
 @media (max-width: 960px) {
@@ -951,14 +957,18 @@
     min-height: 44px;
   }
 
-  .treeCanvas {
-    min-height: 360px;
-    padding: 8px;
+  .treeZone {
+    height: auto;
+    min-height: 0;
   }
 
-  .treeCanvas :global(.family-tree-canvas),
+  .treeCanvas {
+    min-height: 420px;
+    height: 55vh;
+  }
+
   .treeCanvas :global([data-tree-canvas]) {
-    min-height: 360px;
+    min-height: 420px;
   }
 
   .gioHead {

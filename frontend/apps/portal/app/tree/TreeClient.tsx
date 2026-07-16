@@ -107,7 +107,7 @@ export function TreeClient() {
     >
       <div className={styles.treeZone}>
         <div className={styles.treeCanvas}>
-          <FamilyTreeCanvas graph={graph} rootId={rootId} maxDepth={maxDepth} height={560} />
+          <FamilyTreeCanvas graph={graph} rootId={rootId} maxDepth={maxDepth} height="100%" />
         </div>
         <aside className={styles.sidepanel}>
           <h3>{rootPerson?.fullName ?? "—"}</h3>

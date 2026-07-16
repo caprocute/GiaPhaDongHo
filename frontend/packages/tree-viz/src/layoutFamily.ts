@@ -8,12 +8,17 @@ import type {
   UnionNodeData,
 } from "./types";
 
+/** Khớp kích thước thẻ PersonNode + khoảng thở mockup Di sản sống */
 const DEFAULTS = {
-  nodeWidth: 168,
-  nodeHeight: 76,
-  unionSize: 28,
-  hGap: 28,
-  vGap: 96,
+  nodeWidth: 180,
+  nodeHeight: 100,
+  unionSize: 18,
+  /** Khoảng giữa anh/chị/em (subtree) */
+  hGap: 56,
+  /** Khoảng dọc giữa các đời */
+  vGap: 140,
+  /** Khoảng giữa vợ–chồng qua nút hôn phối */
+  spouseGap: 36,
 };
 
 interface WalkFrame {
@@ -31,6 +36,7 @@ export function layoutFamily(graph: FamilyGraph, options: LayoutOptions): Layout
   const unionSize = options.unionSize ?? DEFAULTS.unionSize;
   const hGap = options.hGap ?? DEFAULTS.hGap;
   const vGap = options.vGap ?? DEFAULTS.vGap;
+  const spouseGap = options.spouseGap ?? DEFAULTS.spouseGap;
   const { rootId, maxDepth } = options;
 
   const personById = new Map(graph.persons.map((p) => [p.id, p]));
@@ -108,15 +114,23 @@ export function layoutFamily(graph: FamilyGraph, options: LayoutOptions): Layout
     for (const union of unions) {
       width = Math.max(width, measureUnion(union, personId));
     }
-    // chỗ cho cặp vợ chồng tối thiểu
-    width = Math.max(width, nodeWidth * 2 + hGap + unionSize);
+    // chỗ cho cặp vợ chồng tối thiểu: [người][gap][union][gap][phối]
+    width = Math.max(width, coupleWidth(2));
     subtreeWidth.set(personId, width);
     return width;
   }
 
+  function coupleWidth(memberCount: number): number {
+    if (memberCount <= 1) return nodeWidth;
+    return (
+      memberCount * nodeWidth +
+      (memberCount - 1) * (spouseGap * 2 + unionSize)
+    );
+  }
+
   function measureUnion(union: UnionNodeData, fromPersonId: string): number {
     const spouses = union.memberIds.filter((id) => includedPersons.has(id));
-    const coupleW = spouses.length * nodeWidth + Math.max(0, spouses.length - 1) * hGap + unionSize;
+    const coupleW = coupleWidth(spouses.length);
     if ((depthOf.get(fromPersonId) ?? 0) >= maxDepth) return coupleW;
     let childrenW = 0;
     for (const childId of union.childIds) {
@@ -170,8 +184,7 @@ export function layoutFamily(graph: FamilyGraph, options: LayoutOptions): Layout
       ...members.filter((id) => id !== primaryId),
     ];
 
-    const coupleSpan =
-      ordered.length * nodeWidth + Math.max(0, ordered.length - 1) * (hGap + unionSize / 2);
+    const coupleSpan = coupleWidth(ordered.length);
     let cursor = left + (slotWidth - coupleSpan) / 2;
 
     const memberCenters: number[] = [];
@@ -188,10 +201,10 @@ export function layoutFamily(graph: FamilyGraph, options: LayoutOptions): Layout
         });
       }
       memberCenters.push(cursor + nodeWidth / 2);
-      cursor += nodeWidth + hGap;
-      if (i === 0 && ordered.length > 1) {
-        // chèn chỗ union giữa hai vợ chồng
-        cursor += unionSize * 0.25;
+      cursor += nodeWidth;
+      if (i < ordered.length - 1) {
+        // khoảng trống: spouseGap + union + spouseGap
+        cursor += spouseGap * 2 + unionSize;
       }
     }
 
@@ -202,12 +215,16 @@ export function layoutFamily(graph: FamilyGraph, options: LayoutOptions): Layout
     const uy = primaryY + nodeHeight / 2 - unionSize / 2;
     positions.set(unionKey, { x: ux, y: uy, kind: "union", union, depth });
 
-    for (const mid of ordered) {
+    for (let i = 0; i < ordered.length; i++) {
+      const mid = ordered[i]!;
       edges.push({
         id: `e-${mid}-${union.id}`,
         source: mid,
         target: union.id,
         kind: "spouse",
+        /** Trái: cạnh phải → union; phải: cạnh trái → union */
+        sourceHandle: i === 0 ? "spouse-out" : "spouse-left",
+        targetHandle: i === 0 ? "from-left" : "from-right",
       });
     }
 
