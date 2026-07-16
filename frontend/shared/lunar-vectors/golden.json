@@ -20,6 +20,13 @@
   {
     "label": "Ngày giỗ mẫu ví dụ",
     "solar": { "day": 16, "month": 7, "year": 2024 },
-    "lunar": { "day": 11, "month": 6, "year": 2024, "leap": false }
+    "lunar": { "day": 11, "month": 6, "year": 2024, "leap": false },
+    "canChiYear": "Giáp Thìn"
+  },
+  {
+    "label": "Tháng 2 nhuận Quý Mão 2023",
+    "solar": { "day": 1, "month": 4, "year": 2023 },
+    "lunar": { "day": 11, "month": 2, "year": 2023, "leap": true },
+    "canChiYear": "Quý Mão"
   }
 ]

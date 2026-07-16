@@ -83,7 +83,7 @@ flowchart TB
 ### R0.6 CI tối thiểu  **[sau R0.3 + R0.4 + R0.5 stub]**
 - [x] `.github/workflows/ci.yml`: backend compile + tokens Gate B + FE build/test + gitleaks
 - [x] Gate B token-lint trong job frontend
-- [ ] (Chưa bắt buộc) visual.yml / deploy — để cuối R1
+- [x] visual.yml Gate C (cuối R1) + deploy workflows R1.10
 
 **Cổng R0 (đạt tối thiểu):** tunnel infra OK; JHipster BE compile; FE portal/admin/ui build; lunar golden xanh; Gate B xanh; Modulith verify; branch protection + Environments.
 
@@ -176,13 +176,13 @@ Chia từng route (1 PR / route nếu lớn):
 ### R1.9 Ngày giỗ & sự kiện domain
 - [x] Tự động upsert anniversary khi ghi người mất (`DeathAnniversarySync` + `DeathAnniversaryUpserted`; hook `TreeGenealogyService` / `PersonService`; unique `person_id`)
 - [x] Widget “giỗ tháng này/sau” API + block portal — `GET /api/v1/trees/{slug}/anniversaries` (R1.7); upsert auto → còn lại
-- [ ] Golden tests can chi / nhuận (vector lunar đã có; bổ sung vector giỗ sau)
+- [x] Golden tests can chi / nhuận (`golden.json` + vector tháng 2 nhuận 2023; FE/BE chung)
 
 ### R1.10 Đóng gói & staging R1  **[SS cuối với polish UI]**
 - [x] Dockerfiles api + portal + admin (+ `docker-compose.apps.yml`); CI `build-publish.yml` → GHCR
 - [x] `deploy-staging.yml` SSH + smoke HTTP (cần secrets/vars staging)
 - [x] Backup script Postgres + MinIO — `deploy/scripts/backup-pg-minio.sh` (TK-09)
-- [ ] Gate C visual trên vài story/màn pilot
+- [x] Gate C visual pilot (Button/Alert/Header/DataTable/GioCard) — `pnpm test:visual` + `visual.yml`
 - [x] Gate S: semgrep/trivy trên CI (`ci.yml` security; continue-on-error lần đầu)
 
 **Cổng R1 (MVP):** 1 cây mẫu seed; khách xem phả đồ/giỗ/tin; admin CRUD người + bài; login 2FA; compose/staging chạy được.

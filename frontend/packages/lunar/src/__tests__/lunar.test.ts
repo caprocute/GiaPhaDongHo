@@ -16,6 +16,9 @@ describe("@giapha/lunar golden vectors", () => {
       expect(lunar.month).toBe(vector.lunar.month);
       expect(lunar.year).toBe(vector.lunar.year);
       expect(lunar.leap).toBe(vector.lunar.leap);
+      if ("canChiYear" in vector && typeof vector.canChiYear === "string") {
+        expect(getCanChiYear(lunar.year).label).toBe(vector.canChiYear);
+      }
     });
 
     it(`lunar → solar round-trip: ${vector.label}`, () => {

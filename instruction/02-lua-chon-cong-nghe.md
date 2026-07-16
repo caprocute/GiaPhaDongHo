@@ -35,7 +35,7 @@
 | Realtime | SSE (Spring MVC) | — | Đủ cho thông báo CRM; tránh phức tạp WebSocket | WebSocket/STOMP |
 | API docs | springdoc-openapi | 2.x | Sinh OpenAPI 3.1 → typegen cho FE (`openapi-typescript`) | — |
 | Test BE | JUnit 5, Testcontainers, ArchUnit/Modulith test | — | Ranh giới module + test tích hợp DB thật | — |
-| Test FE | Vitest, Testing Library, **Playwright** (E2E + visual Gate C), **axe-core** (Gate D) | — | Theo 4 gates của PDF | — |
+| Test FE | Vitest, Testing Library, **Playwright** 1.51 (E2E + visual Gate C), **axe-core** (Gate D) | Apache-2.0 | Theo 4 gates của PDF; Gate C: `frontend/visual` + Storybook static | — |
 | Quan sát | OpenTelemetry + Grafana LGTM (Loki/Grafana/Tempo/Mimir) | — | 1 stack compose sẵn | ELK |
 | CI/CD | GitHub Actions (hoặc GitLab CI) | — | Chạy 6 gates (TK-11 §4) | Jenkins |
 

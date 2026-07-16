@@ -1,0 +1,54 @@
+name: Visual Regression
+on:
+  pull_request:
+    paths:
+      - "frontend/packages/ui/**"
+      - "frontend/apps/**"
+      - "frontend/visual/**"
+      - "frontend/playwright.config.ts"
+      - "design-tokens/**"
+      - ".github/workflows/visual.yml"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/packages/ui/**"
+      - "frontend/visual/**"
+      - "frontend/playwright.config.ts"
+      - "design-tokens/**"
+
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install design-tokens + frontend
+        run: |
+          cd design-tokens && npm install && npm run build
+          cd ../frontend && pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build Storybook + Gate C
+        working-directory: frontend
+        run: pnpm test:visual
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-diff
+          path: |
+            frontend/test-results
+            frontend/playwright-report
+          retention-days: 14

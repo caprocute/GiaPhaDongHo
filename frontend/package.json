@@ -9,9 +9,13 @@
     "lint:tokens": "pnpm --dir ../design-tokens run lint:tokens",
     "tokens:build": "pnpm --dir ../design-tokens run build",
     "test:a11y": "pnpm --filter @giapha/ui run test:a11y",
+    "build:storybook": "pnpm --filter @giapha/ui build-storybook",
+    "test:visual": "pnpm build:storybook && playwright test",
+    "test:visual:update": "pnpm build:storybook && playwright test --update-snapshots",
     "openapi": "openapi-typescript http://localhost:8080/v3/api-docs -o packages/api-types/schema.d.ts"
   },
   "devDependencies": {
+    "@playwright/test": "1.51.1",
     "openapi-typescript": "^7.6.1",
     "typescript": "^5.8.2"
   }
