@@ -25,6 +25,7 @@ import vn.giapha.genealogy.internal.TreeGenealogyService;
 import vn.giapha.genealogy.internal.TreeGenealogyService.DuplicatePersonCodeException;
 import vn.giapha.genealogy.internal.TreeGenealogyService.PersonCodeNotFoundException;
 import vn.giapha.genealogy.internal.TreeGenealogyService.TreeNotFoundException;
+import vn.giapha.service.dto.DeathAnniversaryDTO;
 import vn.giapha.service.dto.FamilyTreeDTO;
 import vn.giapha.service.dto.FamilyUnionDTO;
 import vn.giapha.service.dto.PersonDTO;
@@ -88,6 +89,19 @@ public class TreeGenealogyResource {
         Page<FamilyUnionDTO> page = treeGenealogyService.listUnions(slug, pageable);
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
+    }
+
+    /** Giỗ theo tháng âm — public R1.7 (widget /gio). */
+    @GetMapping("/anniversaries")
+    public ResponseEntity<List<DeathAnniversaryDTO>> listAnniversaries(
+        @PathVariable String slug,
+        @RequestParam(name = "lunarMonth", required = false) Integer lunarMonth
+    ) {
+        LOG.debug("GET anniversaries tree={} lunarMonth={}", slug, lunarMonth);
+        if (treeGenealogyService.findTree(slug).isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(treeGenealogyService.listAnniversaries(slug, lunarMonth));
     }
 
     @PostMapping("/persons")

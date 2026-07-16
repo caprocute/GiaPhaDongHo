@@ -1,7 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Badge, EmptyState, FormField, Input } from "@giapha/ui";
+import { API_BASE, TREE_SLUG } from "../../src/lib/config";
 
 type Hit = {
   id: number;
@@ -12,14 +15,17 @@ type Hit = {
   lifeStatus?: string;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/$/, "") ?? "";
-const DEFAULT_TREE = process.env.NEXT_PUBLIC_DEFAULT_TREE_SLUG ?? "ho-hoang";
-
 export function SearchClient() {
-  const [q, setQ] = useState("");
+  const params = useSearchParams();
+  const initial = params.get("q") ?? "";
+  const [q, setQ] = useState(initial);
   const [hits, setHits] = useState<Hit[]>([]);
   const [backend, setBackend] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setQ(initial);
+  }, [initial]);
 
   useEffect(() => {
     if (!API_BASE) return;
@@ -38,7 +44,7 @@ export function SearchClient() {
     }
     const t = setTimeout(() => {
       void fetch(
-        `${API_BASE}/api/v1/search/persons/suggest?tree=${encodeURIComponent(DEFAULT_TREE)}&q=${encodeURIComponent(term)}&limit=15`,
+        `${API_BASE}/api/v1/search/persons/suggest?tree=${encodeURIComponent(TREE_SLUG)}&q=${encodeURIComponent(term)}&limit=15`,
       )
         .then(async (r) => {
           if (!r.ok) throw new Error(String(r.status));
@@ -60,7 +66,7 @@ export function SearchClient() {
         {backend ? <Badge tone="default">{backend}</Badge> : null}
       </div>
       <p style={{ margin: 0, color: "var(--color-text-muted)" }}>
-        Gợi ý theo tên / mã hiệu, không dấu (R1.2). Cây: <code>{DEFAULT_TREE}</code>
+        Gợi ý theo tên / mã hiệu, không dấu. Cây: <code>{TREE_SLUG}</code>
       </p>
       <FormField label="Tra cứu">
         <Input
@@ -91,11 +97,13 @@ export function SearchClient() {
                 fontFamily: "var(--font-body)",
               }}
             >
-              <strong>{h.fullName}</strong>{" "}
-              <code style={{ color: "var(--color-text-muted)" }}>{h.code}</code>
-              {h.generation != null ? (
-                <span style={{ color: "var(--color-text-muted)" }}> · đời {h.generation}</span>
-              ) : null}
+              <Link href={`/persons/${encodeURIComponent(h.code)}`} style={{ color: "inherit", textDecoration: "none" }}>
+                <strong>{h.fullName}</strong>{" "}
+                <code style={{ color: "var(--color-text-muted)" }}>{h.code}</code>
+                {h.generation != null ? (
+                  <span style={{ color: "var(--color-text-muted)" }}> · đời {h.generation}</span>
+                ) : null}
+              </Link>
             </li>
           ))}
         </ul>

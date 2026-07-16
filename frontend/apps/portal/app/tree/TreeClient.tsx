@@ -1,18 +1,40 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { demoFamilyGraph, FamilyTreeCanvas } from "@giapha/tree-viz";
-import { FormField, Select } from "@giapha/ui";
+import { Badge, FormField, Select } from "@giapha/ui";
+import { fetchPersons } from "../../src/lib/api";
+import { personsToFamilyGraph } from "../../src/lib/toFamilyGraph";
 
 export function TreeClient() {
-  const graph = useMemo(() => demoFamilyGraph(), []);
+  const [graph, setGraph] = useState(demoFamilyGraph());
+  const [source, setSource] = useState<"api" | "demo">("demo");
   const [rootId, setRootId] = useState(graph.persons[0]?.id ?? "p1");
   const [maxDepth, setMaxDepth] = useState(3);
 
-  const rootOptions = graph.persons.map((p) => ({
-    value: p.id,
-    label: `${p.code} — ${p.fullName}`,
-  }));
+  useEffect(() => {
+    let cancelled = false;
+    void fetchPersons(undefined, 200).then((list) => {
+      if (cancelled || !list.length) return;
+      const g = personsToFamilyGraph(list);
+      if (!g.persons.length) return;
+      setGraph(g);
+      setSource("api");
+      setRootId(g.persons[0]?.id ?? "p1");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const rootOptions = useMemo(
+    () =>
+      graph.persons.map((p) => ({
+        value: p.id,
+        label: `${p.code} — ${p.fullName}`,
+      })),
+    [graph],
+  );
 
   const depthOptions = [0, 1, 2, 3, 4, 5, 6].map((d) => ({
     value: String(d),
@@ -21,6 +43,10 @@ export function TreeClient() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--spacing-md)" }}>
+        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Phả đồ</h1>
+        {source === "demo" ? <Badge>Demo graph</Badge> : <Badge tone="success">API</Badge>}
+      </div>
       <div
         style={{
           display: "grid",
@@ -30,11 +56,7 @@ export function TreeClient() {
         }}
       >
         <FormField label="Gốc phả đồ (root)">
-          <Select
-            value={rootId}
-            options={rootOptions}
-            onChange={(e) => setRootId(e.target.value)}
-          />
+          <Select value={rootId} options={rootOptions} onChange={(e) => setRootId(e.target.value)} />
         </FormField>
         <FormField label="Độ sâu (depth)">
           <Select

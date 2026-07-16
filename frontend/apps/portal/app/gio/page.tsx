@@ -1,3 +1,5 @@
+import { GioClient } from "./GioClient";
+
 export default function GioPage() {
-  return <h1 style={{ fontFamily: "var(--font-display)" }}>Ngày giỗ</h1>;
+  return <GioClient />;
 }

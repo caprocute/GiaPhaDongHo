@@ -19,14 +19,17 @@ import vn.giapha.genealogy.api.PersonPrivacyModel;
 import vn.giapha.genealogy.api.ViewerContext;
 import vn.giapha.genealogy.api.ViewerRole;
 import vn.giapha.genealogy.events.PersonUpdated;
+import vn.giapha.repository.DeathAnniversaryRepository;
 import vn.giapha.repository.FamilyTreeRepository;
 import vn.giapha.repository.FamilyUnionRepository;
 import vn.giapha.repository.PersonRepository;
 import vn.giapha.security.AuthoritiesConstants;
 import vn.giapha.security.SecurityUtils;
+import vn.giapha.service.dto.DeathAnniversaryDTO;
 import vn.giapha.service.dto.FamilyTreeDTO;
 import vn.giapha.service.dto.FamilyUnionDTO;
 import vn.giapha.service.dto.PersonDTO;
+import vn.giapha.service.mapper.DeathAnniversaryMapper;
 import vn.giapha.service.mapper.FamilyTreeMapper;
 import vn.giapha.service.mapper.FamilyUnionMapper;
 import vn.giapha.service.mapper.PersonMapper;
@@ -41,9 +44,11 @@ public class TreeGenealogyService {
     private final FamilyTreeRepository familyTreeRepository;
     private final PersonRepository personRepository;
     private final FamilyUnionRepository familyUnionRepository;
+    private final DeathAnniversaryRepository deathAnniversaryRepository;
     private final FamilyTreeMapper familyTreeMapper;
     private final PersonMapper personMapper;
     private final FamilyUnionMapper familyUnionMapper;
+    private final DeathAnniversaryMapper deathAnniversaryMapper;
     private final PersonPrivacyFilter personPrivacyFilter;
     private final ApplicationEventPublisher events;
 
@@ -51,18 +56,22 @@ public class TreeGenealogyService {
         FamilyTreeRepository familyTreeRepository,
         PersonRepository personRepository,
         FamilyUnionRepository familyUnionRepository,
+        DeathAnniversaryRepository deathAnniversaryRepository,
         FamilyTreeMapper familyTreeMapper,
         PersonMapper personMapper,
         FamilyUnionMapper familyUnionMapper,
+        DeathAnniversaryMapper deathAnniversaryMapper,
         PersonPrivacyFilter personPrivacyFilter,
         ApplicationEventPublisher events
     ) {
         this.familyTreeRepository = familyTreeRepository;
         this.personRepository = personRepository;
         this.familyUnionRepository = familyUnionRepository;
+        this.deathAnniversaryRepository = deathAnniversaryRepository;
         this.familyTreeMapper = familyTreeMapper;
         this.personMapper = personMapper;
         this.familyUnionMapper = familyUnionMapper;
+        this.deathAnniversaryMapper = deathAnniversaryMapper;
         this.personPrivacyFilter = personPrivacyFilter;
         this.events = events;
     }
@@ -92,6 +101,21 @@ public class TreeGenealogyService {
     @Transactional(readOnly = true)
     public Page<FamilyUnionDTO> listUnions(String slug, Pageable pageable) {
         return familyUnionRepository.findByTree_Slug(slug, pageable).map(familyUnionMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeathAnniversaryDTO> listAnniversaries(String slug, Integer lunarMonth) {
+        return deathAnniversaryRepository
+            .findByTreeSlugAndOptionalMonth(slug, lunarMonth)
+            .stream()
+            .map(deathAnniversaryMapper::toDto)
+            .map(dto -> {
+                if (dto.getPerson() != null) {
+                    dto.setPerson(applyPrivacy(dto.getPerson()));
+                }
+                return dto;
+            })
+            .toList();
     }
 
     /**

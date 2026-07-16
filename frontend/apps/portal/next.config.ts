@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
     "@giapha/tree-viz",
     "@giapha/auth",
   ],
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+  },
 };
 
 export default nextConfig;

@@ -31,11 +31,23 @@ export function PublicHeader({ title = "GiaPhaHub", endSlot }: PublicHeaderProps
       <strong>{title}</strong>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
         <nav style={nav} aria-label="Điều hướng chính">
+          <a href="/" style={{ color: "var(--color-text-primary)" }}>
+            Trang chủ
+          </a>
           <a href="/persons" style={{ color: "var(--color-text-primary)" }}>
             Gia phả
           </a>
+          <a href="/tree" style={{ color: "var(--color-text-primary)" }}>
+            Phả đồ
+          </a>
+          <a href="/gio" style={{ color: "var(--color-text-primary)" }}>
+            Ngày giỗ
+          </a>
           <a href="/news" style={{ color: "var(--color-text-primary)" }}>
             Tin tức
+          </a>
+          <a href="/album" style={{ color: "var(--color-text-primary)" }}>
+            Album
           </a>
           <a href="/search" style={{ color: "var(--color-text-primary)" }}>
             Tìm kiếm

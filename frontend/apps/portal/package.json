@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@giapha/auth": "workspace:*",
+    "@giapha/lunar": "workspace:*",
     "@giapha/tokens": "workspace:*",
     "@giapha/tree-viz": "workspace:*",
     "@giapha/ui": "workspace:*",

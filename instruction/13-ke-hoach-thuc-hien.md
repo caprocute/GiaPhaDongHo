@@ -156,13 +156,14 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 
 ### R1.7 Portal công khai  **[sau R0b đủ dùng + R1.1–1.4 API]**
 Chia từng route (1 PR / route nếu lớn):
-- [ ] Trang chủ (hero + block cấu hình cứng trước, registry sau)
-- [ ] Tra cứu / hồ sơ người (privacy)
-- [ ] Phả đồ
-- [ ] Ngày giỗ (lọc tháng âm)
-- [ ] Tin tức list/detail
-- [ ] Album
-- [ ] Tìm kiếm
+- [x] Trang chủ (hero full-bleed + block giỗ/tin cứng/API)
+- [x] Tra cứu / hồ sơ người (`/persons`, `/persons/[code]` — privacy qua trees API)
+- [x] Phả đồ (API persons → FamilyGraph; fallback demo)
+- [x] Ngày giỗ (lọc tháng âm — `GET …/anniversaries?lunarMonth=` + demo)
+- [x] Tin tức list/detail (API + demo fallback)
+- [x] Album (MediaLightbox demo — chờ public album API)
+- [x] Tìm kiếm (suggest + deep-link `?q=` → hồ sơ)
+
 
 ### R1.8 Admin CRM lõi  **[SS với R1.7 — cùng API]**
 - [x] AppShell + menu CRM + OIDC login (RBAC BE R1.5; menu theo role tinh chỉnh sau)
@@ -174,7 +175,7 @@ Chia từng route (1 PR / route nếu lớn):
 
 ### R1.9 Ngày giỗ & sự kiện domain
 - [ ] Tự động upsert anniversary khi ghi người mất
-- [ ] Widget “giỗ tháng này/sau” API + block portal
+- [x] Widget “giỗ tháng này/sau” API + block portal — `GET /api/v1/trees/{slug}/anniversaries` (R1.7); upsert auto → còn lại
 - [ ] Golden tests can chi / nhuận
 
 ### R1.10 Đóng gói & staging R1  **[SS cuối với polish UI]**

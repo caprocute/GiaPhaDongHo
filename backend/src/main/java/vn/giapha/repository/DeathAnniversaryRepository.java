@@ -41,4 +41,19 @@ public interface DeathAnniversaryRepository extends JpaRepository<DeathAnniversa
         "select deathAnniversary from DeathAnniversary deathAnniversary left join fetch deathAnniversary.tree left join fetch deathAnniversary.person where deathAnniversary.id =:id"
     )
     Optional<DeathAnniversary> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        """
+        select da from DeathAnniversary da
+        left join fetch da.tree t
+        left join fetch da.person
+        where t.slug = :slug
+          and (:lunarMonth is null or da.lunarMonth = :lunarMonth)
+        order by da.lunarDay asc, da.id asc
+        """
+    )
+    List<DeathAnniversary> findByTreeSlugAndOptionalMonth(
+        @Param("slug") String slug,
+        @Param("lunarMonth") Integer lunarMonth
+    );
 }

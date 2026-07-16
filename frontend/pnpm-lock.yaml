@@ -66,6 +66,9 @@ importers:
       '@giapha/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@giapha/lunar':
+        specifier: workspace:*
+        version: link:../../packages/lunar
       '@giapha/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens
