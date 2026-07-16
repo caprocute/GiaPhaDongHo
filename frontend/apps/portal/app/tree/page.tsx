@@ -1,5 +1,5 @@
 import { PublicFooter, PublicHeader } from "@giapha/ui";
-import { TreeClient } from "./TreeClient";
+import { TreeClientLoader } from "./TreeClientLoader";
 
 export default function TreePage() {
   return (
@@ -12,7 +12,7 @@ export default function TreePage() {
         <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
           Chọn gốc và độ sâu — pan/zoom, minimap, xuất PNG/SVG (mẫu họ Hoàng).
         </p>
-        <TreeClient />
+        <TreeClientLoader />
       </main>
       <PublicFooter />
     </>

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, type CSSProperties } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 import { Alert, Button, FormField, Input, Select, Textarea } from "@giapha/ui";
+import { RichTextEditor } from "../components/RichTextEditor/RichTextEditor";
 import { postSchema, type PostSchemaInput } from "./postSchema";
 import { getPost, listPosts, slugify, upsertPost } from "./postStore";
 import type { PostRecord } from "./types";
@@ -29,6 +30,7 @@ export function PostFormPage() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<PostSchemaInput>({
     resolver: zodResolver(postSchema),
@@ -116,13 +118,14 @@ export function PostFormPage() {
         <FormField label="Tóm tắt" error={errors.summary?.message}>
           <Textarea rows={2} {...register("summary")} />
         </FormField>
-        <FormField
-          label="Nội dung (HTML)"
-          required
-          hint="TipTap sẽ thay Textarea ở phase UI sau — TK-13 R1.3"
-          error={errors.bodyHtml?.message}
-        >
-          <Textarea rows={10} {...register("bodyHtml")} />
+        <FormField label="Nội dung" required error={errors.bodyHtml?.message}>
+          <Controller
+            name="bodyHtml"
+            control={control}
+            render={({ field }) => (
+              <RichTextEditor value={field.value} onChange={field.onChange} />
+            )}
+          />
         </FormField>
         <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
           <Button type="submit" disabled={isSubmitting}>
