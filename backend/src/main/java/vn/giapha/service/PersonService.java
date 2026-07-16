@@ -3,11 +3,14 @@ package vn.giapha.service;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.giapha.domain.Person;
+import vn.giapha.genealogy.api.DeathAnniversarySync;
+import vn.giapha.genealogy.events.PersonUpdated;
 import vn.giapha.repository.PersonRepository;
 import vn.giapha.service.dto.PersonDTO;
 import vn.giapha.service.mapper.PersonMapper;
@@ -25,9 +28,20 @@ public class PersonService {
 
     private final PersonMapper personMapper;
 
-    public PersonService(PersonRepository personRepository, PersonMapper personMapper) {
+    private final DeathAnniversarySync deathAnniversarySync;
+
+    private final ApplicationEventPublisher events;
+
+    public PersonService(
+        PersonRepository personRepository,
+        PersonMapper personMapper,
+        DeathAnniversarySync deathAnniversarySync,
+        ApplicationEventPublisher events
+    ) {
         this.personRepository = personRepository;
         this.personMapper = personMapper;
+        this.deathAnniversarySync = deathAnniversarySync;
+        this.events = events;
     }
 
     /**
@@ -40,7 +54,7 @@ public class PersonService {
         LOG.debug("Request to save Person : {}", personDTO);
         Person person = personMapper.toEntity(personDTO);
         person = personRepository.save(person);
-        return personMapper.toDto(person);
+        return afterPersist(person);
     }
 
     /**
@@ -53,7 +67,7 @@ public class PersonService {
         LOG.debug("Request to update Person : {}", personDTO);
         Person person = personMapper.toEntity(personDTO);
         person = personRepository.save(person);
-        return personMapper.toDto(person);
+        return afterPersist(person);
     }
 
     /**
@@ -73,7 +87,7 @@ public class PersonService {
                 return existingPerson;
             })
             .map(personRepository::save)
-            .map(personMapper::toDto);
+            .map(this::afterPersist);
     }
 
     /**
@@ -116,6 +130,16 @@ public class PersonService {
      */
     public void delete(Long id) {
         LOG.debug("Request to delete Person : {}", id);
+        deathAnniversarySync.removeForPerson(id);
         personRepository.deleteById(id);
+    }
+
+    private PersonDTO afterPersist(Person person) {
+        Person withRels = personRepository.findOneWithEagerRelationships(person.getId()).orElse(person);
+        deathAnniversarySync.syncFromPerson(withRels);
+        PersonDTO dto = personMapper.toDto(withRels);
+        String slug = withRels.getTree() != null ? withRels.getTree().getSlug() : null;
+        events.publishEvent(new PersonUpdated(dto.getId(), dto.getCode(), slug, dto.getLifeStatus()));
+        return dto;
     }
 }

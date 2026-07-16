@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import vn.giapha.domain.FamilyTree;
 import vn.giapha.domain.FamilyUnion;
 import vn.giapha.domain.Person;
+import vn.giapha.genealogy.api.DeathAnniversarySync;
 import vn.giapha.genealogy.api.PersonCodeGenerator;
 import vn.giapha.genealogy.api.PersonPrivacyFilter;
 import vn.giapha.genealogy.api.PersonPrivacyModel;
@@ -50,6 +51,7 @@ public class TreeGenealogyService {
     private final FamilyUnionMapper familyUnionMapper;
     private final DeathAnniversaryMapper deathAnniversaryMapper;
     private final PersonPrivacyFilter personPrivacyFilter;
+    private final DeathAnniversarySync deathAnniversarySync;
     private final ApplicationEventPublisher events;
 
     public TreeGenealogyService(
@@ -62,6 +64,7 @@ public class TreeGenealogyService {
         FamilyUnionMapper familyUnionMapper,
         DeathAnniversaryMapper deathAnniversaryMapper,
         PersonPrivacyFilter personPrivacyFilter,
+        DeathAnniversarySync deathAnniversarySync,
         ApplicationEventPublisher events
     ) {
         this.familyTreeRepository = familyTreeRepository;
@@ -73,6 +76,7 @@ public class TreeGenealogyService {
         this.familyUnionMapper = familyUnionMapper;
         this.deathAnniversaryMapper = deathAnniversaryMapper;
         this.personPrivacyFilter = personPrivacyFilter;
+        this.deathAnniversarySync = deathAnniversarySync;
         this.events = events;
     }
 
@@ -167,7 +171,36 @@ public class TreeGenealogyService {
         Person entity = personMapper.toEntity(personDTO);
         entity.setTree(tree);
         entity = personRepository.save(entity);
+        deathAnniversarySync.syncFromPerson(entity);
         PersonDTO saved = personMapper.toDto(entity);
+        events.publishEvent(new PersonUpdated(saved.getId(), saved.getCode(), slug, saved.getLifeStatus()));
+        return applyPrivacy(saved);
+    }
+
+    /**
+     * Cập nhật người theo mã hiệu trong cây — đồng bộ ngày giỗ khi lifeStatus/ngày mất đổi.
+     */
+    public PersonDTO updatePerson(String slug, String code, PersonDTO personDTO) {
+        FamilyTree tree = familyTreeRepository
+            .findBySlug(slug)
+            .orElseThrow(() -> new TreeNotFoundException(slug));
+        Person existing = personRepository
+            .findByTree_SlugAndCodeIgnoreCase(slug, code)
+            .orElseThrow(() -> new PersonCodeNotFoundException(slug, code));
+
+        Long existingId = existing.getId();
+        String existingCode = existing.getCode();
+        personDTO.setId(existingId);
+        personDTO.setCode(existingCode);
+        personDTO.setTree(familyTreeMapper.toDto(tree));
+
+        personMapper.partialUpdate(existing, personDTO);
+        existing.setTree(tree);
+        existing.setCode(existingCode);
+        existing = personRepository.save(existing);
+        deathAnniversarySync.syncFromPerson(existing);
+
+        PersonDTO saved = personMapper.toDto(existing);
         events.publishEvent(new PersonUpdated(saved.getId(), saved.getCode(), slug, saved.getLifeStatus()));
         return applyPrivacy(saved);
     }

@@ -56,4 +56,6 @@ public interface DeathAnniversaryRepository extends JpaRepository<DeathAnniversa
         @Param("slug") String slug,
         @Param("lunarMonth") Integer lunarMonth
     );
+
+    Optional<DeathAnniversary> findByPerson_Id(Long personId);
 }

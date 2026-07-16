@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -125,6 +126,23 @@ public class TreeGenealogyResource {
             throw new BadRequestAlertException(e.getMessage(), "person", "codeduplicate");
         } catch (PersonCodeNotFoundException e) {
             throw new BadRequestAlertException(e.getMessage(), "person", "parentnotfound");
+        }
+    }
+
+    @PutMapping("/persons/{code}")
+    @RequiresPermission("genealogy:person:write")
+    public ResponseEntity<PersonDTO> updatePerson(
+        @PathVariable String slug,
+        @PathVariable String code,
+        @Valid @RequestBody PersonDTO personDTO
+    ) {
+        LOG.debug("PUT person tree={} code={}", slug, code);
+        try {
+            return ResponseEntity.ok(treeGenealogyService.updatePerson(slug, code, personDTO));
+        } catch (TreeNotFoundException e) {
+            throw new BadRequestAlertException(e.getMessage(), "familyTree", "notfound");
+        } catch (PersonCodeNotFoundException e) {
+            throw new BadRequestAlertException(e.getMessage(), "person", "notfound");
         }
     }
 

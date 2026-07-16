@@ -37,4 +37,5 @@
     <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
     <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
     <include file="config/liquibase/changelog/20260716224500_person_search_unaccent.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260717010000_death_anniversary_person_unique.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

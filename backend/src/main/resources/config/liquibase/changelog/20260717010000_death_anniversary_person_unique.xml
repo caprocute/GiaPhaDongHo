@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- R1.9: một người tối đa một bản ghi giỗ (upsert an toàn). -->
+    <changeSet id="20260717010000-1" author="giapha">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="death_anniversary" indexName="ux_death_anniversary__person_id"/>
+            </not>
+        </preConditions>
+        <sql dbms="postgresql">
+            DELETE FROM death_anniversary a
+            USING death_anniversary b
+            WHERE a.person_id IS NOT NULL
+              AND a.person_id = b.person_id
+              AND a.id &lt; b.id;
+        </sql>
+        <sql dbms="h2">
+            DELETE FROM death_anniversary
+            WHERE person_id IS NOT NULL
+              AND id NOT IN (SELECT MAX(id) FROM death_anniversary WHERE person_id IS NOT NULL GROUP BY person_id);
+        </sql>
+        <addUniqueConstraint
+            tableName="death_anniversary"
+            columnNames="person_id"
+            constraintName="ux_death_anniversary__person_id"/>
+    </changeSet>
+</databaseChangeLog>
+
