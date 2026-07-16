@@ -10,6 +10,18 @@ import {
 } from "@giapha/tree-viz";
 import { fetchPersons } from "../../src/lib/api";
 import { personsToFamilyGraph } from "../../src/lib/toFamilyGraph";
+import {
+  IconBranch,
+  IconFrame,
+  IconFrameOff,
+  IconHome,
+  IconImage,
+  IconLayers,
+  IconPdf,
+  IconProfile,
+  IconSvg,
+  IconUserTree,
+} from "./TreeIcons";
 import styles from "./tree.module.css";
 
 function honorific(p: PersonNodeData): string {
@@ -41,7 +53,6 @@ export function TreeClient() {
     void fetchPersons(undefined, 200).then((list) => {
       if (cancelled || !list.length) return;
       const g = personsToFamilyGraph(list);
-      // API graph thường thiếu union vợ chồng — chỉ dùng khi đủ phong phú
       if (g.persons.length < 8 || g.unions.length < 2) return;
       setGraph(g);
       setSource("api");
@@ -56,17 +67,16 @@ export function TreeClient() {
     };
   }, []);
 
-  const focusPerson = selected ?? graph.persons.find((p) => p.id === rootId) ?? graph.persons[0] ?? null;
-  const visibleCount = useMemo(() => {
-    // số người trong nhánh đang layout — xấp xỉ bằng persons trong graph khi demo
-    return graph.persons.length;
-  }, [graph.persons.length]);
+  const focusPerson =
+    selected ?? graph.persons.find((p) => p.id === rootId) ?? graph.persons[0] ?? null;
+  const visibleCount = graph.persons.length;
 
   const rootOptions = useMemo(
     () =>
       graph.persons.map((p) => ({
         value: p.id,
         label: `${p.code} — ${p.fullName}`,
+        short: p.code,
       })),
     [graph],
   );
@@ -92,14 +102,22 @@ export function TreeClient() {
       <div className={styles.band} aria-hidden />
       <div className={styles.pdBar}>
         <div className={styles.wrap}>
-          <span className={styles.crumb}>
-            Gia phả / <b>Họ Hoàng Thôn Trung Bính</b> / Phả đồ ·{" "}
-            <span className={styles.num}>{visibleCount}</span> người trong nhánh
-            {source === "demo" ? " · demo" : ""}
+          <span className={styles.crumb} title={`Họ Hoàng Thôn Trung Bính · ${visibleCount} người`}>
+            <span className={styles.crumbLong}>
+              Gia phả / <b>Họ Hoàng Thôn Trung Bính</b> / Phả đồ ·{" "}
+              <span className={styles.num}>{visibleCount}</span>
+              {source === "demo" ? " · demo" : ""}
+            </span>
+            <span className={styles.crumbShort}>
+              Phả đồ · <span className={styles.num}>{visibleCount}</span>
+              {source === "demo" ? " · demo" : ""}
+            </span>
           </span>
-          <div className={styles.tools}>
-            <label className={styles.tool}>
-              Độ sâu:{" "}
+
+          <div className={styles.tools} role="toolbar" aria-label="Công cụ phả đồ">
+            <label className={styles.select} title="Độ sâu hậu duệ">
+              <IconLayers />
+              <span className={styles.srOnly}>Độ sâu</span>
               <select
                 value={String(maxDepth)}
                 onChange={(e) => setMaxDepth(Number(e.target.value))}
@@ -107,13 +125,15 @@ export function TreeClient() {
               >
                 {[0, 1, 2, 3, 4, 5, 6].map((d) => (
                   <option key={d} value={d}>
-                    {d === 0 ? "0 đời" : `${d} đời`}
+                    {d === 0 ? "Gốc" : `${d} đời`}
                   </option>
                 ))}
               </select>
             </label>
-            <label className={styles.tool}>
-              Gốc{" "}
+
+            <label className={`${styles.select} ${styles.selectRoot}`} title="Chọn gốc phả đồ">
+              <IconUserTree />
+              <span className={styles.srOnly}>Gốc phả đồ</span>
               <select
                 value={rootId}
                 onChange={(e) => {
@@ -130,38 +150,54 @@ export function TreeClient() {
                 ))}
               </select>
             </label>
-            <button type="button" className={styles.tool} onClick={goThuyTo}>
-              ⌂ Thủy tổ
+
+            <span className={styles.divider} aria-hidden />
+
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={goThuyTo}
+              title="Về thủy tổ"
+              aria-label="Về thủy tổ"
+            >
+              <IconHome />
             </button>
             <button
               type="button"
-              className={`${styles.tool}${!showFrame ? ` ${styles.toolActive}` : ""}`}
+              className={`${styles.iconBtn}${!showFrame ? ` ${styles.iconBtnActive}` : ""}`}
               onClick={() => setShowFrame((v) => !v)}
               aria-pressed={!showFrame}
+              title={showFrame ? "Tắt khung thẻ" : "Bật khung thẻ"}
+              aria-label={showFrame ? "Tắt khung thẻ" : "Bật khung thẻ"}
             >
-              {showFrame ? "Tắt khung" : "Bật khung"}
+              {showFrame ? <IconFrame /> : <IconFrameOff />}
             </button>
             <button
               type="button"
-              className={styles.tool}
+              className={styles.iconBtn}
               onClick={() => void canvasRef.current?.exportSvg()}
+              title="Tải SVG"
+              aria-label="Tải SVG"
             >
-              Tải SVG
+              <IconSvg />
             </button>
             <button
               type="button"
-              className={styles.tool}
+              className={styles.iconBtn}
               onClick={() => void canvasRef.current?.exportPng()}
+              title="Tải PNG"
+              aria-label="Tải PNG"
             >
-              Tải PNG
+              <IconImage />
             </button>
             <button
               type="button"
-              className={styles.toolPrimary}
+              className={styles.iconBtnPrimary}
               onClick={() => void canvasRef.current?.exportPng()}
-              title="Tạm xuất PNG — PDF ấn phẩm sẽ bổ sung sau"
+              title="Xuất PDF ấn phẩm (tạm PNG)"
+              aria-label="Xuất PDF ấn phẩm"
             >
-              Xuất PDF ấn phẩm
+              <IconPdf />
             </button>
           </div>
         </div>
@@ -221,12 +257,14 @@ export function TreeClient() {
               <div className={styles.actions}>
                 <Link
                   href={`/persons/${encodeURIComponent(focusPerson.code)}`}
-                  className={styles.toolPrimary}
+                  className={styles.actionBtnPrimary}
                 >
-                  Xem hồ sơ
+                  <IconProfile />
+                  Hồ sơ
                 </Link>
-                <button type="button" className={styles.tool} onClick={reRootHere}>
-                  Vẽ cây từ đây
+                <button type="button" className={styles.actionBtn} onClick={reRootHere}>
+                  <IconBranch />
+                  Từ đây
                 </button>
               </div>
             </>
@@ -259,7 +297,7 @@ export function TreeClient() {
                   border: "2px solid var(--color-action-primary-bg)",
                 }}
               />
-              Gốc đang xem
+              Gốc
             </span>
           </div>
         </aside>
