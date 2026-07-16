@@ -1,13 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
-  Background,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type Ref,
+} from "react";
+import {
   Controls,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
+  ViewportPortal,
   useReactFlow,
+  type Node,
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -17,35 +28,51 @@ import { demoFamilyGraph, layoutFamily } from "./layoutFamily";
 import { PersonNode } from "./nodes/PersonNode";
 import { UnionNode } from "./nodes/UnionNode";
 import { toReactFlowElements } from "./toReactFlow";
-import type { FamilyGraph } from "./types";
+import type { FamilyGraph, PersonNodeData } from "./types";
+import styles from "./FamilyTreeCanvas.module.css";
 
 const nodeTypes: NodeTypes = {
   person: PersonNode,
   union: UnionNode,
 };
 
+export type FamilyTreeCanvasHandle = {
+  fitView: () => void;
+  exportPng: () => Promise<void>;
+  exportSvg: () => Promise<void>;
+};
+
 export interface FamilyTreeCanvasProps {
   graph?: FamilyGraph;
-  /** Person id gốc — mặc định person đầu tiên */
   rootId?: string;
-  /** Số đời hậu duệ tối đa từ root (FR-04) */
   maxDepth?: number;
   height?: number | string;
   showMiniMap?: boolean;
+  /** Ẩn toolbar export nội bộ — dùng toolbar trang (mockup pd-tools) */
   showExport?: boolean;
+  showFrame?: boolean;
+  selectedId?: string | null;
+  onSelectPerson?: (person: PersonNodeData | null) => void;
   className?: string;
 }
 
-function CanvasInner({
-  graph,
-  rootId,
-  maxDepth,
-  height,
-  showMiniMap,
-  showExport,
-  className,
-}: Required<Pick<FamilyTreeCanvasProps, "graph" | "rootId" | "maxDepth">> &
-  Omit<FamilyTreeCanvasProps, "graph" | "rootId" | "maxDepth">) {
+type InnerProps = Required<Pick<FamilyTreeCanvasProps, "graph" | "rootId" | "maxDepth">> &
+  Omit<FamilyTreeCanvasProps, "graph" | "rootId" | "maxDepth">;
+
+function CanvasInner(
+  {
+    graph,
+    rootId,
+    maxDepth,
+    height,
+    showMiniMap,
+    showFrame = true,
+    selectedId = null,
+    onSelectPerson,
+    className,
+  }: InnerProps,
+  ref: Ref<FamilyTreeCanvasHandle>,
+) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { fitView } = useReactFlow();
   const [exporting, setExporting] = useState(false);
@@ -57,39 +84,35 @@ function CanvasInner({
     [graph, rootId, maxDepth],
   );
 
-  const { nodes, edges } = useMemo(() => toReactFlowElements(layout), [layout]);
+  const { nodes, edges } = useMemo(
+    () => toReactFlowElements(layout, { selectedId, showFrame }),
+    [layout, selectedId, showFrame],
+  );
 
-  /** Chỉ fit khi đổi gốc / độ sâu / graph — không animate liên tục gây nhảy loạn */
+  const genBands = useMemo(() => {
+    const map = new Map<number, { y: number; gen: number }>();
+    for (const n of layout.nodes) {
+      if (n.kind !== "person" || !n.person) continue;
+      if (!map.has(n.depth)) {
+        map.set(n.depth, { y: n.y + 4, gen: n.person.generation });
+      }
+    }
+    return [...map.values()];
+  }, [layout]);
+
+  const bandLeft = Math.min(layout.bounds.minX - 100, -20);
+
   useEffect(() => {
     if (lastFitKey.current === fitKey) return;
     lastFitKey.current = fitKey;
     const id = window.setTimeout(() => {
-      void fitView({ padding: 0.18, duration: 0, maxZoom: 1.05 });
-    }, 40);
+      void fitView({ padding: 0.16, duration: 0, maxZoom: 1 });
+    }, 50);
     return () => window.clearTimeout(id);
   }, [fitKey, fitView, nodes.length]);
 
-  /** Khi canvas full-viewport đổi kích thước (flex layout), căn lại khung một lần */
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    let first = true;
-    let t: number | undefined;
-    const ro = new ResizeObserver(() => {
-      if (first) {
-        first = false;
-        return;
-      }
-      window.clearTimeout(t);
-      t = window.setTimeout(() => {
-        void fitView({ padding: 0.18, duration: 0, maxZoom: 1.05 });
-      }, 120);
-    });
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-      window.clearTimeout(t);
-    };
+  const doFit = useCallback(() => {
+    void fitView({ padding: 0.16, duration: 200, maxZoom: 1 });
   }, [fitView]);
 
   const onExportPng = useCallback(async () => {
@@ -114,57 +137,36 @@ function CanvasInner({
     }
   }, [rootId, maxDepth]);
 
-  const shell: CSSProperties = {
-    height: height ?? 560,
-    width: "100%",
-    background: "var(--color-surface-page)",
-    overflow: "hidden",
-    position: "relative",
-  };
+  useImperativeHandle(
+    ref,
+    () => ({
+      fitView: doFit,
+      exportPng: onExportPng,
+      exportSvg: onExportSvg,
+    }),
+    [doFit, onExportPng, onExportSvg],
+  );
 
-  const toolbar: CSSProperties = {
-    position: "absolute",
-    zIndex: 5,
-    top: "var(--spacing-sm)",
-    right: "var(--spacing-sm)",
-    display: "flex",
-    gap: "var(--spacing-sm)",
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
-  };
+  const onNodeClick = useCallback(
+    (_: MouseEvent, node: Node) => {
+      if (node.type !== "person") return;
+      onSelectPerson?.(node.data as unknown as PersonNodeData);
+    },
+    [onSelectPerson],
+  );
 
-  const btn: CSSProperties = {
-    minHeight: 36,
-    padding: "0 var(--spacing-md)",
-    border: "1px solid var(--color-border-strong)",
-    background: "var(--color-surface-card)",
-    color: "var(--color-text-primary)",
-    fontFamily: "var(--font-body)",
-    fontSize: "var(--font-size-sm)",
-    fontWeight: 600,
-    cursor: exporting ? "wait" : "pointer",
-    boxShadow: "var(--shadow-sm)",
-  };
+  const onPaneClick = useCallback(() => {
+    onSelectPerson?.(null);
+  }, [onSelectPerson]);
 
   return (
-    <div ref={containerRef} style={shell} className={className} data-tree-canvas>
-      {showExport !== false && (
-        <div style={toolbar}>
-          <button
-            type="button"
-            style={btn}
-            onClick={() => void fitView({ padding: 0.18, duration: 200, maxZoom: 1.05 })}
-          >
-            Vừa khung
-          </button>
-          <button type="button" style={btn} disabled={exporting} onClick={() => void onExportPng()}>
-            PNG
-          </button>
-          <button type="button" style={btn} disabled={exporting} onClick={() => void onExportSvg()}>
-            SVG
-          </button>
-        </div>
-      )}
+    <div
+      ref={containerRef}
+      className={`${styles.shell}${className ? ` ${className}` : ""}`}
+      style={{ height: height ?? "100%" }}
+      data-tree-canvas
+      data-exporting={exporting ? "1" : "0"}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -179,23 +181,33 @@ function CanvasInner({
         zoomOnDoubleClick={false}
         onlyRenderVisibleElements
         defaultEdgeOptions={{ focusable: false }}
-        aria-label="Sơ đồ phả đồ gia phả"
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
+        aria-label="Sơ đồ phả hệ"
       >
-        <Background color="var(--color-heritage-line)" gap={28} size={1} />
-        <Controls showInteractive={false} position="bottom-left" />
+        <ViewportPortal>
+          {genBands.map((b) => (
+            <div
+              key={`gen-${b.gen}-${b.y}`}
+              className={styles.genBand}
+              style={{ top: b.y, left: bandLeft }}
+            >
+              Đời {b.gen}
+            </div>
+          ))}
+        </ViewportPortal>
+        <Controls showInteractive={false} showFitView={false} position="bottom-left" />
         {showMiniMap !== false && (
           <MiniMap
             pannable
             zoomable
             position="bottom-right"
-            maskColor="color-mix(in srgb, var(--color-ink-900) 35%, transparent)"
-            nodeColor={(n) =>
-              n.type === "union"
-                ? "var(--color-heritage-accent)"
-                : (n.data as { gender?: string })?.gender === "F"
-                  ? "var(--color-heritage-accent)"
-                  : "var(--color-heritage-frame)"
-            }
+            maskColor="color-mix(in srgb, var(--color-action-primary-bg) 12%, transparent)"
+            nodeColor={(n) => {
+              if (n.type === "union") return "transparent";
+              const g = (n.data as { gender?: string })?.gender;
+              return g === "F" ? "var(--color-heritage-accent)" : "var(--color-heritage-frame)";
+            }}
           />
         )}
       </ReactFlow>
@@ -203,14 +215,18 @@ function CanvasInner({
   );
 }
 
-export function FamilyTreeCanvas(props: FamilyTreeCanvasProps) {
-  const graph = props.graph ?? demoFamilyGraph();
-  const rootId = props.rootId ?? graph.persons[0]?.id ?? "";
-  const maxDepth = props.maxDepth ?? 6;
+const CanvasInnerForward = forwardRef(CanvasInner);
 
-  return (
-    <ReactFlowProvider>
-      <CanvasInner {...props} graph={graph} rootId={rootId} maxDepth={maxDepth} />
-    </ReactFlowProvider>
-  );
-}
+export const FamilyTreeCanvas = forwardRef<FamilyTreeCanvasHandle, FamilyTreeCanvasProps>(
+  function FamilyTreeCanvas(props, ref) {
+    const graph = props.graph ?? demoFamilyGraph();
+    const rootId = props.rootId ?? graph.persons.find((p) => p.code === "A22")?.id ?? graph.persons[0]?.id ?? "";
+    const maxDepth = props.maxDepth ?? 4;
+
+    return (
+      <ReactFlowProvider>
+        <CanvasInnerForward {...props} ref={ref} graph={graph} rootId={rootId} maxDepth={maxDepth} />
+      </ReactFlowProvider>
+    );
+  },
+);

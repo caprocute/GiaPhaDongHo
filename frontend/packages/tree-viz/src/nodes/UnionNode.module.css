@@ -1,11 +1,9 @@
+/* Nút hôn phối ẩn — đường marriage dashed thể hiện quan hệ */
 .union {
-  width: 18px;
-  height: 18px;
-  background: var(--color-heritage-accent);
-  border: 1.5px solid var(--color-heritage-frame);
-  box-shadow: var(--shadow-sm);
-  transform: rotate(45deg);
-  position: relative;
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .handle {

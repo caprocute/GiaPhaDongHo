@@ -7,7 +7,7 @@ export { exportTreePng, exportTreeSvg } from "./exportCanvas";
 export type { ExportOptions } from "./exportCanvas";
 
 export { FamilyTreeCanvas } from "./FamilyTreeCanvas";
-export type { FamilyTreeCanvasProps } from "./FamilyTreeCanvas";
+export type { FamilyTreeCanvasProps, FamilyTreeCanvasHandle } from "./FamilyTreeCanvas";
 
 export type {
   FamilyGraph,

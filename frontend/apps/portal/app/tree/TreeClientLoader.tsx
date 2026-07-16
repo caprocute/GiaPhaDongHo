@@ -10,11 +10,13 @@ export const TreeClientLoader = dynamic(
     loading: () => (
       <div
         style={{
-          padding: "48px 24px",
-          textAlign: "center",
+          flex: 1,
+          display: "grid",
+          placeItems: "center",
           color: "var(--color-text-muted)",
           fontFamily: "var(--font-body)",
           background: "var(--color-surface-page)",
+          minHeight: "50vh",
         }}
       >
         Đang tải phả đồ…

@@ -1,10 +1,10 @@
 .card {
-  width: 180px;
-  height: 100px;
+  width: 170px;
+  height: 88px;
   box-sizing: border-box;
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-strong);
-  padding: 11px 12px 10px;
+  padding: 11px 13px;
   box-shadow: var(--shadow-sm);
   position: relative;
   cursor: pointer;
@@ -20,11 +20,11 @@
   right: 0;
   height: 3px;
   background: var(--gradient-foil);
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 .card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: var(--shadow-md);
   border-color: var(--color-heritage-accent);
 }
@@ -36,11 +36,28 @@
     var(--shadow-md);
 }
 
+.selected:not(.root) {
+  border-color: var(--color-heritage-accent);
+  box-shadow: var(--shadow-md);
+}
+
+.bare {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.bare::before {
+  display: none;
+}
+
+.bare:hover {
+  border-color: var(--color-heritage-accent);
+}
+
 .top {
   display: flex;
   gap: 10px;
   align-items: center;
-  min-height: 40px;
 }
 
 .avatar {
@@ -51,8 +68,9 @@
   display: grid;
   place-items: center;
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
+  letter-spacing: -0.02em;
   color: var(--color-text-on-brand);
   box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--color-heritage-soft) 50%, transparent);
   background: radial-gradient(circle at 32% 28%, var(--color-son-500), var(--color-heritage-frame));
@@ -74,16 +92,15 @@
   font-weight: 700;
   line-height: 1.3;
   color: var(--color-text-primary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .years {
   font-size: 10.5px;
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: 1px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
@@ -94,8 +111,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
-  padding-top: 7px;
+  margin-top: 9px;
+  padding-top: 8px;
   border-top: 1px solid var(--color-border-default);
   gap: 8px;
 }
@@ -103,7 +120,7 @@
 .doi {
   font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--color-heritage-deep);
   text-transform: uppercase;
 }
@@ -112,7 +129,6 @@
   font-size: 10px;
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
 }
 
 .handle {

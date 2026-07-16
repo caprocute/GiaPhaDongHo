@@ -1,0 +1,68 @@
+.shell {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 165px,
+      var(--color-border-default) 165px 166px
+    ),
+    var(--pattern-brocade),
+    var(--color-surface-page);
+}
+
+.shell :global(.react-flow__attribution) {
+  display: none;
+}
+
+.shell :global(.react-flow__controls) {
+  left: 18px;
+  bottom: 18px;
+  right: auto;
+  top: auto;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.shell :global(.react-flow__controls-button) {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-strong);
+  background: var(--color-surface-card);
+  fill: var(--color-text-primary);
+}
+
+.shell :global(.react-flow__controls-button:hover) {
+  background: var(--color-surface-card);
+  fill: var(--color-action-primary-bg);
+}
+
+.shell :global(.react-flow__minimap) {
+  right: 18px;
+  bottom: 18px;
+  width: 152px !important;
+  height: 98px !important;
+  background: color-mix(in srgb, var(--color-surface-card) 94%, transparent) !important;
+  border: 1px solid var(--color-heritage-line) !important;
+  border-radius: 0 !important;
+  box-shadow: var(--shadow-sm);
+}
+
+.genBand {
+  position: absolute;
+  left: 26px;
+  font-family: var(--font-display);
+  font-size: 46px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: color-mix(in srgb, var(--color-heritage-deep) 16%, transparent);
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+  white-space: nowrap;
+}

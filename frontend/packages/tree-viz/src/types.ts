@@ -10,6 +10,8 @@ export interface PersonNodeData {
   generation: number;
   gender?: Gender;
   lifeStatus?: LifeStatus;
+  /** Dòng phụ dưới tên — VD: "1785 · Ất Tỵ — 14/6 ÂL" */
+  subtitle?: string;
 }
 
 /**

@@ -8,17 +8,17 @@ import type {
   UnionNodeData,
 } from "./types";
 
-/** Khớp kích thước thẻ PersonNode + khoảng thở mockup Di sản sống */
+/** Khớp mockup Di sản sống (.pnode 170px, hàng đời ~166px) */
 const DEFAULTS = {
-  nodeWidth: 180,
-  nodeHeight: 100,
-  unionSize: 18,
+  nodeWidth: 170,
+  nodeHeight: 88,
+  unionSize: 8,
   /** Khoảng giữa anh/chị/em (subtree) */
-  hGap: 56,
-  /** Khoảng dọc giữa các đời */
-  vGap: 140,
-  /** Khoảng giữa vợ–chồng qua nút hôn phối */
-  spouseGap: 36,
+  hGap: 40,
+  /** Khoảng dọc giữa đáy hàng trên → đỉnh hàng dưới */
+  vGap: 78,
+  /** Khoảng mỗi bên nút hôn phối (vợ–chồng) */
+  spouseGap: 18,
 };
 
 interface WalkFrame {
@@ -322,20 +322,123 @@ function emptyResult(rootId: string, maxDepth: number): LayoutResult {
   };
 }
 
-/** Demo graph nhỏ — họ mẫu (A1→A2/A3) */
+/** Demo graph khớp mockup — nhánh Hoàng Văn Thành / Thạch */
 export function demoFamilyGraph(): FamilyGraph {
   const persons: PersonNodeData[] = [
-    { id: "p1", code: "A1", fullName: "Hoàng Văn Tổ", generation: 1, gender: "M", lifeStatus: "deceased" },
-    { id: "p2", code: "A1-sp1", fullName: "Nguyễn Thị Tổ Mẫu", generation: 1, gender: "F", lifeStatus: "deceased" },
-    { id: "p3", code: "A2", fullName: "Hoàng Văn Trưởng", generation: 2, gender: "M", lifeStatus: "deceased" },
-    { id: "p4", code: "A3", fullName: "Hoàng Văn Thứ", generation: 2, gender: "M", lifeStatus: "alive" },
-    { id: "p5", code: "A2-sp1", fullName: "Trần Thị Hoa", generation: 2, gender: "F", lifeStatus: "deceased" },
-    { id: "p6", code: "A4", fullName: "Hoàng Minh", generation: 3, gender: "M", lifeStatus: "alive" },
-    { id: "p7", code: "A5", fullName: "Hoàng Lan", generation: 3, gender: "F", lifeStatus: "alive" },
+    {
+      id: "a7",
+      code: "A7",
+      fullName: "Hoàng Văn Thành",
+      generation: 5,
+      gender: "M",
+      lifeStatus: "deceased",
+      subtitle: "1785 · Ất Tỵ — 14/6 ÂL",
+    },
+    {
+      id: "a7sp",
+      code: "A7-sp1",
+      fullName: "Phạm Thị Soạn",
+      generation: 5,
+      gender: "F",
+      lifeStatus: "deceased",
+      subtitle: "Chánh thất",
+    },
+    {
+      id: "a18",
+      code: "A18",
+      fullName: "Hoàng Thị The",
+      generation: 6,
+      gender: "F",
+      lifeStatus: "deceased",
+      subtitle: "1810 — ?",
+    },
+    {
+      id: "a22",
+      code: "A22",
+      fullName: "Hoàng Văn Thạch",
+      generation: 6,
+      gender: "M",
+      lifeStatus: "deceased",
+      subtitle: "1815 · Ất Hợi — 23/2 ÂL",
+    },
+    {
+      id: "a27",
+      code: "A27",
+      fullName: "Hoàng Thị Thêu",
+      generation: 6,
+      gender: "F",
+      lifeStatus: "deceased",
+      subtitle: "1818 — ?",
+    },
+    {
+      id: "a27sp",
+      code: "A27-sp1",
+      fullName: "Võ Văn Đáp",
+      generation: 6,
+      gender: "M",
+      lifeStatus: "deceased",
+      subtitle: "Rể · thôn Sa Động",
+    },
+    {
+      id: "a31",
+      code: "A31",
+      fullName: "Hoàng Thị Vân",
+      generation: 7,
+      gender: "F",
+      lifeStatus: "deceased",
+      subtitle: "1842 — 1919",
+    },
+    {
+      id: "a36",
+      code: "A36",
+      fullName: "Hoàng Văn Cẩm",
+      generation: 7,
+      gender: "M",
+      lifeStatus: "deceased",
+      subtitle: "1846 — 12/8 ÂL",
+    },
+    {
+      id: "a38",
+      code: "A38",
+      fullName: "Hoàng Kỳ",
+      generation: 7,
+      gender: "M",
+      lifeStatus: "deceased",
+      subtitle: "1851 · Tân Hợi",
+    },
+    {
+      id: "a39",
+      code: "A39",
+      fullName: "Hoàng Thị Búa",
+      generation: 7,
+      gender: "F",
+      lifeStatus: "deceased",
+      subtitle: "1854 — ?",
+    },
+    {
+      id: "a55",
+      code: "A55",
+      fullName: "Hoàng Liệu",
+      generation: 8,
+      gender: "M",
+      lifeStatus: "alive",
+      subtitle: "1884 — 30/4 ÂL",
+    },
+    {
+      id: "a57",
+      code: "A57",
+      fullName: "Hoàng Văn Kĩnh",
+      generation: 8,
+      gender: "M",
+      lifeStatus: "deceased",
+      subtitle: "1889 — 19/4 ÂL",
+    },
   ];
   const unions: UnionNodeData[] = [
-    { id: "u1", memberIds: ["p1", "p2"], childIds: ["p3", "p4"] },
-    { id: "u2", memberIds: ["p3", "p5"], childIds: ["p6", "p7"] },
+    { id: "u1", memberIds: ["a7", "a7sp"], childIds: ["a18", "a22", "a27"] },
+    { id: "u2", memberIds: ["a27", "a27sp"], childIds: [] },
+    { id: "u3", memberIds: ["a22"], childIds: ["a31", "a36", "a38", "a39"] },
+    { id: "u4", memberIds: ["a38"], childIds: ["a55", "a57"] },
   ];
   return { persons, unions };
 }
