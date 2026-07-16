@@ -5,9 +5,9 @@
 | Tầng | Công nghệ chọn | Phiên bản | Lý do chọn | Phương án thay thế |
 |------|----------------|-----------|------------|--------------------|
 | Ngôn ngữ BE | Java (LTS) | 21 | Virtual threads, ổn định doanh nghiệp, đội ngũ VN dồi dào | Kotlin (nếu team quen) |
-| Framework BE | Spring Boot | 3.5.x | Yêu cầu chủ đầu tư; hệ sinh thái đầy đủ | — |
-| Sinh mã / scaffold BE | **JHipster** (JDL, `--skip-client`) | 8.x | Sinh Entity/CRUD/DTO/MapStruct/Liquibase/test chuẩn; giảm token AI viết boilerplate | Spring Initializr + viết tay (tốn công, không khuyến nghị) |
-| Kiến trúc BE | **Spring Modulith** | 1.3+ | Module hóa có kiểm chứng (yêu cầu 8), outbox event sẵn; xếp package sau khi JHipster generate | Maven multi-module thuần |
+| Framework BE | **Spring Boot** | **4.1.x** (tối thiểu 4.0.x) | Dòng OSS hiện hành (Framework 7, Jackson 3, Jakarta EE 11); Boot 3.5 đã hết OSS (06/2026). Greenfield → lên 4 ngay | Boot 3.5.x chỉ khi bị khóa dependency (không áp dụng dự án này) |
+| Sinh mã / scaffold BE | **JHipster** (JDL, `--skip-client`) | **9.x** | Hỗ trợ Spring Boot 4 + Java 21+; sinh Entity/CRUD/DTO/MapStruct/Liquibase/test chuẩn; giảm token AI viết boilerplate | JHipster 8 (Boot 3 — không dùng cho dự án mới) |
+| Kiến trúc BE | **Spring Modulith** | **2.x** (2.0 cho Boot 4.0; 2.1 cho Boot 4.1) | Module hóa có kiểm chứng (yêu cầu 8), outbox event sẵn; xếp package sau khi JHipster generate | Modulith 1.4 (chỉ gắn Boot 3.x) |
 | ORM/Migration | Spring Data JPA + **Liquibase** (chuẩn JHipster) | — | Changelog versioned do generator + chỉnh tay expand→migrate→contract | Flyway (chỉ nếu tách hẳn khỏi JHipster) |
 | FE Portal | **Next.js (React 19)** | 15.x | SSR/SSG cho SEO cổng thông tin (bản cũ rất mạnh SEO); OG image động | Vite + React Router 7 SSR |
 | FE Admin | **Vite + React 19 + TypeScript** | — | SPA tương tác dày, build nhanh | gộp vào Next.js (ít khuyến nghị) |
@@ -39,7 +39,7 @@
 
 ## 2. Các đề xuất bổ sung ngoài yêu cầu gốc
 
-1. **JHipster (backend-only)** — scaffold + JDL là đường chính sinh CRUD; AI chỉ viết JDL và logic miền (TK-01 §3.1). Cấu hình: OAuth2 Keycloak, PostgreSQL, Gradle, Java 21, bỏ client.
+1. **JHipster 9 (backend-only)** — scaffold + JDL là đường chính sinh CRUD trên **Spring Boot 4**; AI chỉ viết JDL và logic miền (TK-01 §3.1). Cấu hình: OAuth2 Keycloak, PostgreSQL, Gradle 9, Java 21, bỏ client.
 2. **imgproxy** — bắt buộc thực tế: album dòng họ nhiều ảnh scan lớn; không resize on-the-fly sẽ chậm và tốn băng thông.
 3. **Keycloak** — tách IAM khỏi app: 2FA TOTP + mã dự phòng (parity SRS-10) không phải tự code, đăng nhập Google/Facebook/Zalo cho con cháu lớn tuổi dễ dùng; khớp blueprint OAuth2 của JHipster.
 4. **pdf-render service** — "sách gia phả" là sản phẩm văn hóa quan trọng (SRS-03 FR-03.6); render bằng trình duyệt headless giữ đúng khung viền, font, chữ Hán-Nôm.
@@ -64,5 +64,7 @@
 
 ## 4. Chuẩn hóa phiên bản Node/Java
 
-- Java 21 (Temurin), Gradle 8.x, Node 22 LTS, pnpm 9 (workspace cho monorepo FE).
+- Java **21** (Temurin) — sàn của JHipster 9; Gradle **9.x**, Node **22** LTS, pnpm 9 (workspace FE).
+- Spring Boot **4.1.x** + Spring Modulith **2.1.x** (hoặc Boot 4.0.x + Modulith 2.0.x nếu cần nhánh dài hơn).
+- Cấm bootstrap backend bằng Spring Boot 3.x / JHipster 8 trên repo này.
 - Renovate bot cập nhật dependency + `npm audit`/`gradle dependencyCheck` trong CI (TK-10).

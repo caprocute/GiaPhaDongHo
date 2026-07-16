@@ -1,6 +1,6 @@
 # GiaPhaHub — Luật làm việc cho AI agent
 
-Dự án: nền tảng gia phả số dòng họ Việt Nam. Spring Boot 3.5/Java 21 (JHipster + Spring Modulith) + React 19
+Dự án: nền tảng gia phả số dòng họ Việt Nam. Spring Boot 4.x/Java 21 (JHipster 9 + Spring Modulith 2) + React 19
 (Next.js portal + Vite admin) + PostgreSQL 16 + Elasticsearch + Redis + MinIO + Keycloak.
 
 ## Tài liệu nguồn (đọc trước khi code)
@@ -16,7 +16,7 @@ Dự án: nền tảng gia phả số dòng họ Việt Nam. Spring Boot 3.5/Jav
 
 ## Backend rules
 - **JHipster trước, AI sau (TK-01 §3.1):** entity/CRUD mới = viết/sửa `backend/*.jdl` rồi `jhipster jdl`; CẤM AI tự sinh hàng loạt Entity/Repository/Resource/DTO/MapStruct boilerplate.
-- Bootstrap BE: JHipster monolith, `--skip-client`, OAuth2/Keycloak, Gradle, Java 21. FE Portal/Admin không dùng client JHipster.
+- Bootstrap BE: **JHipster 9** + **Spring Boot 4.x**, `--skip-client`, OAuth2/Keycloak, Gradle 9, Java 21. Cấm scaffold Boot 3 / JHipster 8. FE không dùng client JHipster.
 - Endpoint mới bắt buộc `@RequiresPermission(...)` + test authz. Controller admin đặt trong package `…/admin/`.
 - Chỉ JPA/parameterized query; cấm nối chuỗi SQL. Cấm tự viết crypto/auth — dùng `core.security`.
 - Âm–dương lịch CHỈ qua `core.lunar` (Java) / `packages/lunar` (TS); hai bản chung golden test vectors.

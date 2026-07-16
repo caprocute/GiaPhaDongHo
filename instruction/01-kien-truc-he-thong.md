@@ -19,10 +19,10 @@ graph TB
         AD[Admin CRM — Vite + React SPA]
     end
 
-    subgraph BE["Backend — Spring Boot 3.5 / Java 21 (JHipster + Spring Modulith)"]
+    subgraph BE["Backend — Spring Boot 4.x / Java 21 (JHipster 9 + Modulith 2)"]
         API[REST API /api/v1<br/>OpenAPI 3.1]
         MOD[Modules: genealogy · cms · media ·<br/>donation · event · notification · search · iam-bridge]
-        JH[JHipster JDL<br/>sinh Entity/CRUD/DTO]
+        JH[JHipster 9 JDL<br/>sinh Entity/CRUD/DTO]
     end
 
     subgraph Infra["Hạ tầng dữ liệu"]
@@ -51,8 +51,9 @@ graph TB
 
 | Quyết định | Lựa chọn | Lý do |
 |-----------|----------|-------|
-| Kiểu kiến trúc BE | **Modular monolith (Spring Modulith)** | 1 artifact dễ triển khai (yêu cầu 6); ranh giới module cưỡng chế bằng test (yêu cầu 8); tách microservice sau nếu cần |
-| Sinh mã BE | **JHipster** (JDL, `--skip-client`) | Sinh Entity/Repository/Service/Resource/DTO/MapStruct/Liquibase/test CRUD chuẩn; tránh AI (và người) viết boilerplate lãng phí token/thời gian |
+| Framework BE | **Spring Boot 4.x** (Java 21) | Dòng OSS hiện hành; 3.5 đã hết hỗ trợ miễn phí (06/2026). Không bootstrap trên 3.x |
+| Kiểu kiến trúc BE | **Modular monolith (Spring Modulith 2.x)** | 1 artifact dễ triển khai (yêu cầu 6); ranh giới module cưỡng chế bằng test (yêu cầu 8); tách microservice sau nếu cần |
+| Sinh mã BE | **JHipster 9** (JDL, `--skip-client`) | Cặp chuẩn với Boot 4; sinh Entity/Repository/Service/Resource/DTO/MapStruct/Liquibase/test CRUD — tránh AI viết boilerplate lãng phí token |
 | FE tách 2 app | Portal (Next.js SSR) + Admin (SPA) | Portal cần SEO/OpenGraph như bản cũ; Admin cần tương tác dày, không cần SEO; **không** dùng client mặc định của JHipster |
 | Giao tiếp module | Sự kiện nội bộ (Spring Modulith events + outbox) | Không gọi chéo trực tiếp giữa module → thay module không vỡ hệ |
 | Multi-tenant | Cột `tree_id`/`org_id` + Postgres RLS (giai đoạn SaaS) | Một mã nguồn phục vụ nhiều dòng họ như bản cũ (multi gia phả theo tỉnh) |
@@ -113,7 +114,7 @@ Mục tiêu: **AI không viết tay** lớp CRUD/boilerplate; chỉ viết JDL +
 
 | Bước | Ai làm | Việc |
 |------|--------|------|
-| 1. Bootstrap | Người / CI một lần | `jhipster` monolith, Java 21, Gradle, OAuth2/OIDC **Keycloak**, PostgreSQL, **`--skip-client`**, bật springdoc-openapi |
+| 1. Bootstrap | Người / CI một lần | **JHipster 9** monolith, Spring Boot 4.x, Java 21, Gradle 9, OAuth2/OIDC **Keycloak**, PostgreSQL, **`--skip-client`**, bật springdoc-openapi |
 | 2. Mô hình | Người hoặc AI viết **JDL** (không viết Java entity tay) | Entity, quan hệ, DTO fields, pagination — file `backend/*.jdl` (vd `genealogy.jdl`) |
 | 3. Generate | CLI | `jhipster jdl <file>.jdl` → Entity, Repository, Service, REST Resource, MapStruct, Liquibase, test scaffold |
 | 4. Module hóa | Người / AI | Di chuyển/đặt package theo Spring Modulith (`genealogy/`, `cms/…`); chỉ public `api/` + `events/` |

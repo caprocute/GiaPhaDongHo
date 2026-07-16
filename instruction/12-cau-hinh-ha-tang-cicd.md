@@ -100,7 +100,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: "21", cache: gradle }
+        with: { distribution: temurin, java-version: "21", cache: gradle }  # Boot 4 / JHipster 9
       - run: ./gradlew check modulithVerify jacocoTestReport --no-daemon
         working-directory: backend
 

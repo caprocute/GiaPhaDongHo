@@ -34,7 +34,7 @@ Xây dựng **nền tảng gia phả số** cho dòng họ Việt Nam:
 1. **Một source of truth**: design tokens (DTCG JSON) + code trong git; Figma là nơi khám phá, không phải chân lý (theo PDF §3).
 2. **Grounded generation**: AI lắp ráp UI từ component thật + tokens + rules, không "dịch" pixel; mọi output qua 4 cổng kiểm chứng máy (PDF §3.4).
 3. **Modular monolith trước, microservice khi cần**: Spring Modulith — ranh giới module được kiểm chứng bằng test, deploy 1 artifact.
-4. **Backend scaffold bằng JHipster**: CRUD/entity sinh từ JDL (`--skip-client`); AI không viết boilerplate BE — chỉ JDL + logic nghiệp vụ (TK-01 §3.1, TK-02).
+4. **Backend scaffold bằng JHipster 9 trên Spring Boot 4**: CRUD/entity sinh từ JDL (`--skip-client`); AI không viết boilerplate BE — chỉ JDL + logic nghiệp vụ (TK-01 §3.1, TK-02).
 5. **Văn hóa Việt là tính năng hạng nhất**: âm lịch/can chi, xưng hô, ngày giỗ, công đức, khuyến học — không phải bản dịch của phần mềm phương Tây.
 6. **Riêng tư theo vòng đời**: người còn sống được bảo vệ dữ liệu mặc định (NĐ 13/2023/NĐ-CP); người đã khuất hiển thị để thờ phụng tra cứu.
 7. **Không vibe coding**: mọi thay đổi đi qua spec → code → gate → review; AI là công cụ có kiểm soát (TK-11).
