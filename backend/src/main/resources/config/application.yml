@@ -222,4 +222,22 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+giapha:
+  search:
+    # Rỗng = tắt ES, dùng Postgres unaccent FTS (R1.2)
+    elasticsearch-url: ${ES_URL:}
+    index: person_v1
+    suggest-default-limit: 10
+    suggest-max-limit: 25
+  minio:
+    endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+    access-key: ${MINIO_ACCESS_KEY:minioadmin}
+    secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    bucket: ${MINIO_BUCKET:giapha-media}
+    presign-expire-seconds: 604800
+  imgproxy:
+    base-url: ${IMGPROXY_BASE_URL:http://localhost:8888}
+    # Hex key/salt — bắt buộc ENC(...) trên prod; dev dùng dummy (signing-enabled: false)
+    key: ${IMGPROXY_KEY:0000000000000000000000000000000000000000000000000000000000000000}
+    salt: ${IMGPROXY_SALT:0000000000000000000000000000000000000000000000000000000000000000}
+    signing-enabled: ${IMGPROXY_SIGNING_ENABLED:false}

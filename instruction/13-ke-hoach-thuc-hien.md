@@ -128,9 +128,9 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [x] Test authz `@RequiresPermission` + Modulith verify; ma trận role→permission (R1.5 `iam`)
 
 ### R1.2 Search index person  **[SS với R1.3 sau khi có Person API]**
-- [ ] Module `search`: index Person (ES hoặc PG FTS fallback khi ES tắt)
-- [ ] API suggest theo tên/mã, không dấu
-- [ ] Listener `PersonUpdated` → reindex
+- [x] Module `search`: index Person (ES `person_v1` hoặc PG `unaccent` khi `ES_URL` rỗng/down)
+- [x] API suggest `GET /api/v1/search/persons/suggest?tree=&q=` (không dấu) + portal `/search`
+- [x] Listener `PersonUpdated` → reindex ES
 
 ### R1.3 CMS tối thiểu  **[SS với R1.1 sau R0.4]**
 - [x] JDL: Category, Post, Comment (duyệt cơ bản)
@@ -138,9 +138,9 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [ ] TipTap hoặc editor đã chọn trong admin (phase UI — hiện Textarea HTML + CRM list/form localStorage; portal `/news`)
 
 ### R1.4 Media tối thiểu  **[SS với R1.3]**
-- [ ] Upload MinIO + metadata album/photo
-- [ ] Presigned URL; imgproxy URL ký (cấu hình)
-- [ ] Quyền upload chỉ admin/editor
+- [x] Upload MinIO + metadata album/photo — `media/` Modulith: `MinioStorageService`, `MediaUploadController` (`POST /api/v1/media/upload`)
+- [x] Presigned URL; imgproxy URL ký — `ImgproxyUrlBuilder` HMAC-SHA256; `signing-enabled: false` trên dev
+- [x] Quyền upload chỉ admin/editor — `@PreAuthorize("hasAnyRole('ADMIN','EDITOR')")` + `@RequiresPermission("media:photo:upload")`; authz test `MediaUploadControllerIT` (cần Docker)
 
 ### R1.5 IAM & portal auth
 - [x] Keycloak realm: roles `ROLE_EDITOR` / `ROLE_GENEALOGY_ADMIN` / `ROLE_MEMBER` (+ clients `giapha_admin` / `giapha_portal`) — `realm-config/README-IAM.md`

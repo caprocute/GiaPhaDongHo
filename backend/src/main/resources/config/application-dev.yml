@@ -83,4 +83,14 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+giapha:
+  search:
+    elasticsearch-url: ${ES_URL:http://localhost:19200}
+  minio:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket: giapha-media
+  imgproxy:
+    base-url: http://localhost:8888
+    signing-enabled: false

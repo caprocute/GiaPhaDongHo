@@ -107,5 +107,6 @@ dependencies {
     annotationProcessor "org.glassfish.jaxb:jaxb-runtime"
     annotationProcessor "org.hibernate.orm:hibernate-processor"
     developmentOnly "org.springframework.boot:spring-boot-docker-compose"
+    implementation libs.minio
     // jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
 }

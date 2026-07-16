@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.giapha.core.security.RequiresPermission;
 import vn.giapha.repository.MediaAlbumRepository;
 import vn.giapha.service.MediaAlbumService;
 import vn.giapha.service.dto.MediaAlbumDTO;
@@ -50,6 +51,7 @@ public class MediaAlbumResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
+    @RequiresPermission("media:album:write")
     public ResponseEntity<MediaAlbumDTO> createMediaAlbum(@Valid @RequestBody MediaAlbumDTO mediaAlbumDTO) throws URISyntaxException {
         LOG.debug("REST request to save MediaAlbum : {}", mediaAlbumDTO);
         if (mediaAlbumDTO.getId() != null) {
@@ -72,6 +74,7 @@ public class MediaAlbumResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
+    @RequiresPermission("media:album:write")
     public ResponseEntity<MediaAlbumDTO> updateMediaAlbum(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody MediaAlbumDTO mediaAlbumDTO
@@ -106,6 +109,7 @@ public class MediaAlbumResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @RequiresPermission("media:album:write")
     public ResponseEntity<MediaAlbumDTO> partialUpdateMediaAlbum(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody MediaAlbumDTO mediaAlbumDTO
@@ -161,6 +165,7 @@ public class MediaAlbumResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
+    @RequiresPermission("media:album:write")
     public ResponseEntity<Void> deleteMediaAlbum(@PathVariable("id") Long id) {
         LOG.debug("REST request to delete MediaAlbum : {}", id);
         mediaAlbumService.delete(id);

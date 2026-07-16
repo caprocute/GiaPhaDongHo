@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.giapha.core.security.RequiresPermission;
 import vn.giapha.repository.MediaPhotoRepository;
 import vn.giapha.service.MediaPhotoService;
 import vn.giapha.service.dto.MediaPhotoDTO;
@@ -50,6 +51,7 @@ public class MediaPhotoResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
+    @RequiresPermission("media:photo:write")
     public ResponseEntity<MediaPhotoDTO> createMediaPhoto(@Valid @RequestBody MediaPhotoDTO mediaPhotoDTO) throws URISyntaxException {
         LOG.debug("REST request to save MediaPhoto : {}", mediaPhotoDTO);
         if (mediaPhotoDTO.getId() != null) {
@@ -72,6 +74,7 @@ public class MediaPhotoResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
+    @RequiresPermission("media:photo:write")
     public ResponseEntity<MediaPhotoDTO> updateMediaPhoto(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody MediaPhotoDTO mediaPhotoDTO
@@ -106,6 +109,7 @@ public class MediaPhotoResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @RequiresPermission("media:photo:write")
     public ResponseEntity<MediaPhotoDTO> partialUpdateMediaPhoto(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody MediaPhotoDTO mediaPhotoDTO
@@ -164,6 +168,7 @@ public class MediaPhotoResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
+    @RequiresPermission("media:photo:write")
     public ResponseEntity<Void> deleteMediaPhoto(@PathVariable("id") Long id) {
         LOG.debug("REST request to delete MediaPhoto : {}", id);
         mediaPhotoService.delete(id);
