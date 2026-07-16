@@ -7,6 +7,7 @@
 }
 
 .mainFill {
-  /* Phả đồ: cao hết khoảng trống giữa header và footer */
-  overflow: hidden;
+  /* Chỉ cắt theo chiều cao — tránh cụt nút toolbar ngang */
+  overflow-x: clip;
+  overflow-y: hidden;
 }

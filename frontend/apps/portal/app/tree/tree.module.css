@@ -21,6 +21,7 @@
   flex: none;
   background: var(--color-surface-card);
   border-bottom: 1px solid var(--color-border-strong);
+  overflow: visible;
 }
 
 .exportError {
@@ -40,12 +41,16 @@
 }
 
 .wrap {
+  box-sizing: border-box;
   width: 100%;
-  margin: 0 auto;
-  padding: 10px 20px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px 16px;
+  max-width: 100%;
+  margin: 0;
+  padding: 10px 16px;
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-left: max(16px, env(safe-area-inset-left));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
   align-items: center;
 }
 
@@ -53,6 +58,7 @@
   font-size: 13px;
   color: var(--color-text-muted);
   font-family: var(--font-body);
+  flex: 1 1 180px;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -75,9 +81,11 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  flex: 1 1 auto;
   min-width: 0;
+  max-width: 100%;
 }
 
 .divider {
@@ -365,18 +373,15 @@
   }
 
   .wrap {
-    grid-template-columns: 1fr;
     padding: 10px 16px 12px;
-    gap: 10px;
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(16px, env(safe-area-inset-left));
   }
 
   .tools {
     justify-content: flex-start;
+    flex: 1 1 100%;
     width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    padding-bottom: 2px;
   }
 
   .zone {
