@@ -1,0 +1,20 @@
+{
+  "color": {
+    "son": {
+      "500": { "$type": "color", "$value": "#8B2E22" },
+      "600": { "$type": "color", "$value": "#6F241A" }
+    },
+    "nghe": {
+      "400": { "$type": "color", "$value": "#C99B2F" },
+      "500": { "$type": "color", "$value": "#B08A38" }
+    },
+    "ink": {
+      "900": { "$type": "color", "$value": "#1A1A1A" },
+      "700": { "$type": "color", "$value": "#3D3D3D" }
+    },
+    "paper": {
+      "50": { "$type": "color", "$value": "#F7F3EA" },
+      "0": { "$type": "color", "$value": "#FFFFFF" }
+    }
+  }
+}

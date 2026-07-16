@@ -1,0 +1,39 @@
+{
+  "name": "@giapha/ui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./PublicHeader": "./src/PublicHeader/PublicHeader.tsx",
+    "./PublicFooter": "./src/PublicFooter/PublicFooter.tsx"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test:a11y": "echo 'a11y: Storybook addon-a11y — chạy pnpm storybook để kiểm tra'",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@giapha/lunar": "workspace:*",
+    "@giapha/tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^8.6.4",
+    "@storybook/addon-essentials": "^8.6.4",
+    "@storybook/react": "^8.6.4",
+    "@storybook/react-vite": "^8.6.4",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "storybook": "^8.6.4",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.0"
+  }
+}

@@ -108,21 +108,26 @@ Bản cũ: mỗi module NukeViet có route, block, quyền, bảng riêng, bật
 3. Sự kiện nghiệp vụ đặt tên quá khứ: `PersonDeceasedRecorded`, `PostPublished`, `ContributionReceived`.
 4. Mỗi module tự có changelog Liquibase theo ngữ cảnh JHipster / package module (`config/liquibase/…` hoặc namespace tương đương); migration phải **backward-compatible 1 phiên bản** (expand → migrate → contract).
 
-## 3.1 Sinh mã backend bằng JHipster (bắt buộc)
+## 3.1 Sinh mã backend bằng JHipster CLI (bắt buộc — siết chặt)
 
-Mục tiêu: **AI không viết tay** lớp CRUD/boilerplate; chỉ viết JDL + logic nghiệp vụ sau khi generate.
+Mục tiêu: **mọi lớp core BE phải do `generator-jhipster` chạy trong thư mục `backend/` sinh ra**. AI chỉ viết JDL + code nghiệp vụ **sau** generate.
 
 | Bước | Ai làm | Việc |
 |------|--------|------|
-| 1. Bootstrap | Người / CI một lần | **JHipster 9** monolith, Spring Boot 4.x, Java 21, Gradle 9, OAuth2/OIDC **Keycloak**, PostgreSQL, **`--skip-client`**, bật springdoc-openapi |
-| 2. Mô hình | Người hoặc AI viết **JDL** (không viết Java entity tay) | Entity, quan hệ, DTO fields, pagination — file `backend/*.jdl` (vd `genealogy.jdl`) |
-| 3. Generate | CLI | `jhipster jdl <file>.jdl` → Entity, Repository, Service, REST Resource, MapStruct, Liquibase, test scaffold |
-| 4. Module hóa | Người / AI | Di chuyển/đặt package theo Spring Modulith (`genealogy/`, `cms/…`); chỉ public `api/` + `events/` |
-| 5. Nghiệp vụ | Người / AI | Privacy filter, âm lịch, sự kiện Modulith, `@RequiresPermission`, quy tắc họ tộc — **không** regenerate đè tay nếu chưa diff JDL |
+| 1. Bootstrap | Người / agent **chạy CLI** | Trong `backend/`: `npx generator-jhipster@9` (hoặc `jhipster` v9) — monolith, Boot 4, Java 21, Gradle, OAuth2/Keycloak, PostgreSQL, **`--skip-client`**. Không Initializr tay. |
+| 2. Mô hình | Người hoặc AI viết **JDL** | File `backend/*.jdl` — không viết Java entity tay |
+| 3. Generate | **CLI bắt buộc** | `jhipster jdl <file>.jdl` → Entity, Repository, Service, REST Resource, MapStruct, Liquibase, test |
+| 4. Module hóa | Người / AI | Xếp package Spring Modulith trên nền đã generate; chỉ public `api/` + `events/` |
+| 5. Nghiệp vụ | Người / AI | Privacy, âm lịch, event Modulith, permission, adapter — **không** bịa lại lớp CRUD |
 
-**Cấm khi có JHipster:** AI tự sinh hàng loạt `*Resource` / `*Repository` / `*Entity` / DTO mapper CRUD “từ đầu”. Được phép: sửa JDL → regenerate có kiểm soát, hoặc chỉnh tay **domain service** / adapter đã có.
+**Cấm tuyệt đối**
+1. AI/người viết tay Entity/Repository/Resource/DTO/MapStruct/Liquibase CRUD “giống JHipster”.
+2. Copy source từ sample, GitHub JHipster khác, hoặc zip generate sẵn rồi dán vào repo.
+3. Giữ song song một `backend/` scaffold tay khi đã có (hoặc sắp có) output CLI — phải xóa scaffold giả rồi generate lại.
 
-**Ranh giới với FE:** Portal/Admin vẫn Next.js + Vite riêng; OpenAPI từ backend (springdoc) → `openapi-typescript` cho FE. Không dùng blueprint Angular/React của JHipster cho UI sản phẩm.
+**Bắt buộc có bằng chứng:** log lệnh CLI hoặc ghi rõ trong PR; repo chứa `.yo-rc.json` + cấu trúc do generator tạo (không phải mô phỏng).
+
+**Ranh giới với FE:** Portal/Admin vẫn Next.js + Vite riêng; OpenAPI từ backend → `openapi-typescript`. Không dùng client blueprint JHipster.
 
 ## 4. Luồng nghiệp vụ tiêu biểu
 

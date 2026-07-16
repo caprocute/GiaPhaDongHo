@@ -56,6 +56,7 @@ Xây dựng **nền tảng gia phả số** cho dòng họ Việt Nam:
 | TK-10 | 10-an-toan-thong-tin.md | Threat model, ASVS, NĐ13, security gates |
 | TK-11 | 11-quy-trinh-phat-trien-voi-ai.md | Áp dụng mô hình PDF: tokens→gates→learn loop, skills |
 | TK-12 | 12-cau-hinh-ha-tang-cicd.md | Cấu hình máy chủ dev/staging/prod, GitHub Actions CI/CD chi tiết |
+| TK-13 | 13-ke-hoach-thuc-hien.md | Kế hoạch thực hiện R0→R3: checklist tiến độ + ghi chú song song |
 
 ## 5. Phạm vi phát hành (đề xuất)
 

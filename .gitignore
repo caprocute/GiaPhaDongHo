@@ -3,6 +3,12 @@
 .env.*
 !.env.example
 !.env.*.example
+!.env.tunnel.local.example
+!.env.local.example
+.env.tunnel.local
+.env.local
+.tunnel-infra.pid
+deploy/remote/.env
 *.pem
 *.key
 credentials.json
@@ -19,6 +25,10 @@ Thumbs.db
 
 # Node / frontend
 node_modules/
+design-tokens/node_modules/
+frontend/apps/portal/.next/
+frontend/apps/admin/dist/
+frontend/packages/ui/storybook-static/
 .pnpm-store/
 dist/
 build/

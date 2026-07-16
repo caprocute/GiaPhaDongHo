@@ -1,0 +1,56 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104028"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "slug",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique"]
+    },
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "summary",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "bodyHtml",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "publishedAt",
+      "fieldType": "Instant"
+    },
+    {
+      "fieldName": "viewCount",
+      "fieldType": "Long"
+    },
+    {
+      "fieldName": "authorName",
+      "fieldType": "String"
+    }
+  ],
+  "name": "CmsPost",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "name",
+      "otherEntityName": "cmsCategory",
+      "relationshipName": "category",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

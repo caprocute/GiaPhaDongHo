@@ -8,13 +8,15 @@
 | | DEV (máy lập trình viên) | STAGING (VPS nhỏ) | PRODUCTION (1 dòng họ) |
 |---|---|---|---|
 | Mục đích | code + test cục bộ | preview cho designer/tộc trưởng duyệt, chạy E2E/ZAP | phục vụ thật |
-| Nguồn chạy | `docker compose --profile dev` + hot-reload | auto deploy mỗi lần merge `main` | deploy theo tag `v*` có phê duyệt |
-| Cỡ máy | Laptop ≥16GB RAM (8GB được nếu tắt ES) | 2 vCPU · 4GB · 60GB SSD | **4 vCPU · 8GB · 160GB NVMe** (thoải mái: 16GB) |
-| Elasticsearch | tắt mặc định (PG FTS fallback) | tắt hoặc 1 node heap 512MB | 1 node heap 1–2GB |
-| Keycloak | dev-mode (`start-dev`), realm import sẵn | như prod, DB chung Postgres | `start --optimized`, schema riêng |
-| TLS | không (localhost) | Caddy/certbot Let's Encrypt | Let's Encrypt + HSTS |
+| Nguồn chạy | App local + **SSH tunnel** tới infra remote (`deploy/remote/`, skill `/infra-tunnel`) | auto deploy mỗi lần merge `main` | deploy theo tag `v*` có phê duyệt |
+| Cỡ máy | Laptop (infra không chạy local); server DEV dùng chung | 2 vCPU · 4GB · 60GB SSD | **4 vCPU · 8GB · 160GB NVMe** (thoải mái: 16GB) |
+| Elasticsearch | qua tunnel `localhost:19200` (container `gph-elasticsearch`) | tắt hoặc 1 node heap 512MB | 1 node heap 1–2GB |
+| Keycloak | tunnel `localhost:18086` (dev-mode trên remote) | như prod, DB chung Postgres | `start --optimized`, schema riêng |
+| TLS | không (localhost tunnel) | Caddy/certbot Let's Encrypt | Let's Encrypt + HSTS |
 | Dữ liệu | seed mẫu (SRS: 1.586 người ẩn danh hóa) | bản sao prod đã **mask PII** | thật + backup TK-09 §4 |
 | Observability | console log | Loki nhẹ | LGTM stack đầy đủ |
+
+> Infra DEV remote: compose tách `giapha-infra` (port 15432/16379/19000/19200/18086) — không chiếm 5432/9000 của stack `st-*`. SSH chỉ trong `.env.tunnel.local`. Secret app qua **Jasypt**.
 
 ### Phân bổ RAM production 8GB (limit đặt trong compose)
 

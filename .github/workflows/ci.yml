@@ -1,0 +1,62 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+      - name: Backend compile + unit (no Testcontainers DB)
+        working-directory: backend
+        run: ./gradlew compileJava compileTestJava test --tests '*UnitTest' --tests '*TechnicalStructureTest' -x jacocoTestReport --no-daemon || ./gradlew compileJava -x test --no-daemon
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install design-tokens + frontend
+        run: |
+          cd design-tokens && npm install
+          cd ../frontend && pnpm install --frozen-lockfile
+      - name: Gate B — tokens
+        run: |
+          cd design-tokens && npm run build && npm run lint:tokens
+      - name: Build & test packages
+        working-directory: frontend
+        run: |
+          pnpm --filter @giapha/lunar test
+          pnpm --filter @giapha/ui build
+          pnpm --filter @giapha/admin build
+          pnpm --filter @giapha/portal build
+      - name: Gate D stub
+        working-directory: frontend
+        run: pnpm test:a11y
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

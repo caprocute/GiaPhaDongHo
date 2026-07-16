@@ -22,7 +22,8 @@
 - **Upload**: whitelist mime + magic bytes, giới hạn dung lượng, ảnh re-encode qua imgproxy (diệt payload), PDF/scan vào bucket riêng không execute.
 - **Headers/Web**: CSP nonce-based (portal SSR), HSTS, COOP/COEP, SameSite=Lax, CSRF token cho form SSR; admin SPA: CSP strict + không third-party script.
 - **Secrets**: không có secret trong repo (gitleaks gate); runtime qua env/secret manager; khóa MinIO/Keycloak sinh lúc deploy.
-- **Mã hóa**: TLS 1.3; at-rest: PG `pgcrypto` cho trường nhạy cảm (SĐT), MinIO SSE; backup mã hóa.
+- **Jasypt (bắt buộc)**: mọi secret trong cấu hình ứng dụng (DB/Redis/MinIO/SMTP/Zalo/imgproxy/client-secret…) dùng `jasypt-spring-boot-starter`, giá trị `ENC(...)`; master password chỉ qua `JASYPT_ENCRYPTOR_PASSWORD`. Cấm plaintext trong YAML commit được; cấm tự viết AES/crypto thay Jasypt.
+- **Mã hóa**: TLS 1.3; at-rest: PG `pgcrypto` cho trường nhạy cảm (SĐT), MinIO SSE; backup mã hóa; cấu hình nhạy cảm qua Jasypt như trên.
 
 ## 3. Quyền riêng tư kiểu gia phả (khác biệt quan trọng nhất)
 

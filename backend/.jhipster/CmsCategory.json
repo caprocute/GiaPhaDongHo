@@ -1,0 +1,28 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104027"
+  },
+  "applications": ["*"],
+  "documentation": "CMS + Media — npx generator-jhipster@9.2.0 jdl jdl/cms-media.jdl --no-interactive",
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "slug",
+      "fieldType": "String",
+      "fieldValidateRules": ["required", "unique"]
+    },
+    {
+      "fieldName": "name",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "layout",
+      "fieldType": "String"
+    }
+  ],
+  "name": "CmsCategory",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

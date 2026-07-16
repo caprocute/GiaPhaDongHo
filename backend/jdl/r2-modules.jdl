@@ -1,0 +1,76 @@
+/** R2 modules — npx generator-jhipster@9.2.0 jdl jdl/r2-modules.jdl --no-interactive */
+entity ChangeRequest {
+  requesterUserId String required
+  diffJson TextBlob required
+  status String
+  reviewerNote TextBlob
+  createdAt Instant
+  reviewedAt Instant
+}
+
+entity DonationCampaign {
+  title String required
+  goalAmount BigDecimal
+  raisedAmount BigDecimal
+  vietqrPayload TextBlob
+  status String
+}
+
+entity DonationContribution {
+  donorName String required
+  amount BigDecimal
+  kind String
+  note TextBlob
+  createdAt Instant
+}
+
+entity ClanEvent {
+  title String required
+  startSolar Instant
+  lunarJson TextBlob
+  location String
+  checklistJson TextBlob
+}
+
+entity EventRsvp {
+  householdName String required
+  headcount Integer
+  vehicles Integer
+  assignment String
+}
+
+entity AnniversarySubscription {
+  userId String required
+  daysBefore Integer
+  channels String
+}
+
+entity NotificationOutbox {
+  channel String required
+  payloadJson TextBlob required
+  status String
+  createdAt Instant
+  sentAt Instant
+}
+
+entity ScholarshipEntry {
+  personName String required
+  achievement String required
+  year Integer
+  status String
+}
+
+relationship ManyToOne {
+  ChangeRequest{tree(slug)} to FamilyTree
+  ChangeRequest{person(fullName)} to Person
+  DonationCampaign{tree(slug)} to FamilyTree
+  DonationContribution{campaign(title)} to DonationCampaign
+  ClanEvent{tree(slug)} to FamilyTree
+  EventRsvp{event(title)} to ClanEvent
+  AnniversarySubscription{person(fullName)} to Person
+  ScholarshipEntry{tree(slug)} to FamilyTree
+}
+
+paginate ChangeRequest, DonationContribution, ClanEvent with pagination
+dto ChangeRequest, DonationCampaign, DonationContribution, ClanEvent, EventRsvp, AnniversarySubscription, NotificationOutbox, ScholarshipEntry with mapstruct
+service ChangeRequest, DonationCampaign, DonationContribution, ClanEvent, EventRsvp, AnniversarySubscription, NotificationOutbox, ScholarshipEntry with serviceClass

@@ -1,0 +1,6 @@
+{
+  "font": {
+    "display": { "$type": "fontFamily", "$value": ["Noto Serif", "Georgia", "serif"] },
+    "body": { "$type": "fontFamily", "$value": ["Be Vietnam Pro", "system-ui", "sans-serif"] }
+  }
+}

@@ -6,7 +6,7 @@
 |------|----------------|-----------|------------|--------------------|
 | Ngôn ngữ BE | Java (LTS) | 21 | Virtual threads, ổn định doanh nghiệp, đội ngũ VN dồi dào | Kotlin (nếu team quen) |
 | Framework BE | **Spring Boot** | **4.1.x** (tối thiểu 4.0.x) | Dòng OSS hiện hành (Framework 7, Jackson 3, Jakarta EE 11); Boot 3.5 đã hết OSS (06/2026). Greenfield → lên 4 ngay | Boot 3.5.x chỉ khi bị khóa dependency (không áp dụng dự án này) |
-| Sinh mã / scaffold BE | **JHipster** (JDL, `--skip-client`) | **9.x** | Hỗ trợ Spring Boot 4 + Java 21+; sinh Entity/CRUD/DTO/MapStruct/Liquibase/test chuẩn; giảm token AI viết boilerplate | JHipster 8 (Boot 3 — không dùng cho dự án mới) |
+| Sinh mã / scaffold BE | **JHipster CLI** (`npx generator-jhipster@9`, `jhipster jdl`) | **9.2.x** | Core BE **chỉ** do CLI sinh trong `backend/`; cấm copy sample / AI viết giả CRUD (TK-01 §3.1) | JHipster 8 / Initializr tay (cấm) |
 | Kiến trúc BE | **Spring Modulith** | **2.x** (2.0 cho Boot 4.0; 2.1 cho Boot 4.1) | Module hóa có kiểm chứng (yêu cầu 8), outbox event sẵn; xếp package sau khi JHipster generate | Modulith 1.4 (chỉ gắn Boot 3.x) |
 | ORM/Migration | Spring Data JPA + **Liquibase** (chuẩn JHipster) | — | Changelog versioned do generator + chỉnh tay expand→migrate→contract | Flyway (chỉ nếu tách hẳn khỏi JHipster) |
 | FE Portal | **Next.js (React 19)** | 15.x | SSR/SSG cho SEO cổng thông tin (bản cũ rất mạnh SEO); OG image động | Vite + React Router 7 SSR |
@@ -26,6 +26,7 @@
 | Ảnh động | **imgproxy** | 3.x | Resize/webp/avif on-the-fly từ MinIO, ký URL chống hotlink | Thumbor |
 | Cache/queue nhẹ | Redis | 7.x | Cache cây, rate-limit, session bridge, BullMQ-style job đơn giản | Valkey |
 | IAM | **Keycloak** | 26.x | OIDC chuẩn, TOTP 2FA + backup codes (parity bản cũ), social login, quản trị user tách khỏi app | Spring Authorization Server (nhẹ hơn, tự code 2FA) |
+| Mã hóa cấu hình | **Jasypt** (`jasypt-spring-boot-starter`) | 3.x | Secret dạng `ENC(...)`; master key `JASYPT_ENCRYPTOR_PASSWORD` — bắt buộc (CLAUDE.md) | Spring Cloud Config encrypt |
 | Xuất PDF | **pdf-render service** (Node + Playwright) | — | Render đúng CSS in của phả đồ/sách gia phả — fidelity 100% với web | OpenPDF/JasperReports (khó giữ giao diện) |
 | Xuất Excel | Apache POI | — | Xuất danh sách thành viên/phả đồ dạng bảng | — |
 | Âm lịch | Thuật toán **amlich (Hồ Ngọc Đức)** port Java + TS, chung bộ test vector | — | Chuẩn âm lịch VN (UTC+7, tháng nhuận); 2 bản đồng bộ bằng golden tests | lib `lunar-javascript` (lịch TQ — không dùng) |
@@ -59,6 +60,7 @@
 | Elasticsearch 8.16+ | AGPLv3/ELv2/SSPL (chọn AGPL) | Thấp (self-host, không phân phối SaaS đóng) | Nếu bán SaaS đóng mã → chuyển OpenSearch |
 | MinIO | AGPLv3 | Thấp (dùng như dịch vụ độc lập qua S3 API) | Không nhúng SDK server vào mã đóng |
 | Keycloak | Apache-2.0 | Không | |
+| Jasypt (jasypt-spring-boot) | Apache-2.0 | Không | Bắt buộc cho ENC secret cấu hình |
 | imgproxy | MIT | Không | |
 | Playwright | Apache-2.0 | Không | |
 

@@ -1,0 +1,11 @@
+{
+  "name": "@giapha/design-tokens-source",
+  "private": true,
+  "scripts": {
+    "build": "node ./build.mjs",
+    "lint:tokens": "node ./lint-tokens.mjs"
+  },
+  "devDependencies": {
+    "style-dictionary": "^4.3.0"
+  }
+}

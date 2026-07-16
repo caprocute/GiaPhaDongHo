@@ -1,0 +1,25 @@
+[
+  {
+    "label": "Tết Giáp Thìn 2024",
+    "solar": { "day": 10, "month": 2, "year": 2024 },
+    "lunar": { "day": 1, "month": 1, "year": 2024, "leap": false },
+    "canChiYear": "Giáp Thìn"
+  },
+  {
+    "label": "Đầu năm dương 2024",
+    "solar": { "day": 1, "month": 1, "year": 2024 },
+    "lunar": { "day": 20, "month": 11, "year": 2023, "leap": false },
+    "canChiYear": "Quý Mão"
+  },
+  {
+    "label": "Tết Quý Mão 2023",
+    "solar": { "day": 22, "month": 1, "year": 2023 },
+    "lunar": { "day": 1, "month": 1, "year": 2023, "leap": false },
+    "canChiYear": "Quý Mão"
+  },
+  {
+    "label": "Ngày giỗ mẫu ví dụ",
+    "solar": { "day": 16, "month": 7, "year": 2024 },
+    "lunar": { "day": 11, "month": 6, "year": 2024, "leap": false }
+  }
+]

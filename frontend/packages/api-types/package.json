@@ -1,0 +1,13 @@
+{
+  "name": "@giapha/api-types",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./schema.d.ts",
+  "exports": {
+    ".": "./schema.d.ts"
+  },
+  "scripts": {
+    "build": "echo 'api-types: run pnpm openapi when backend is up'"
+  }
+}

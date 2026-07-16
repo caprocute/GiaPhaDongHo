@@ -1,0 +1,26 @@
+/** R3 — npx generator-jhipster@9.2.0 jdl jdl/r3-modules.jdl --no-interactive */
+entity HeritageDocument {
+  title String required
+  kind String
+  objectKey String required
+  transcription TextBlob
+  translation TextBlob
+  status String
+}
+
+entity AiChatAudit {
+  userId String
+  question TextBlob required
+  answer TextBlob
+  sourcesJson TextBlob
+  createdAt Instant
+}
+
+relationship ManyToOne {
+  HeritageDocument{tree(slug)} to FamilyTree
+  AiChatAudit{tree(slug)} to FamilyTree
+}
+
+paginate HeritageDocument, AiChatAudit with pagination
+dto HeritageDocument, AiChatAudit with mapstruct
+service HeritageDocument, AiChatAudit with serviceClass

@@ -1,0 +1,20 @@
+# docker compose -f docker-compose.base.yml -f docker-compose.dev.yml --profile dev up -d
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      disable: true
+
+  keycloak:
+    ports:
+      - "8081:8081"

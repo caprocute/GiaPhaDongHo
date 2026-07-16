@@ -1,0 +1,100 @@
+# Compose RIÊNG GiaPhaHub — network_mode: host (tránh iptables DOCKER hỏng trên server).
+# Bind data vào ~/giapha-infra/data (named volume lỗi ghi với host net trên máy này).
+# Port: PG 15432 · Redis 16379 · MinIO 19000/19001 · ES 19200 · KC 18086
+
+name: giapha-infra
+
+services:
+  gph-postgres:
+    image: postgres:16-alpine
+    container_name: gph-postgres
+    restart: unless-stopped
+    network_mode: host
+    privileged: true
+    environment:
+      POSTGRES_DB: ${GPH_DB_NAME:-giapha}
+      POSTGRES_USER: ${GPH_DB_USER:-giapha}
+      POSTGRES_PASSWORD: ${GPH_DB_PASSWORD:?set GPH_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    command: ["postgres", "-c", "port=15432"]
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -p 15432"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  gph-redis:
+    image: redis:7-alpine
+    container_name: gph-redis
+    restart: unless-stopped
+    network_mode: host
+    command:
+      [
+        "redis-server",
+        "--port",
+        "16379",
+        "--dir",
+        "/data",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+        "--requirepass",
+        "${GPH_REDIS_PASSWORD:?set GPH_REDIS_PASSWORD}",
+      ]
+    volumes:
+      - ./data/redis:/data
+
+  gph-minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: gph-minio
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      MINIO_ROOT_USER: ${GPH_MINIO_USER:-giapha}
+      MINIO_ROOT_PASSWORD: ${GPH_MINIO_PASSWORD:?set GPH_MINIO_PASSWORD}
+    command: server /data --address ":19000" --console-address ":19001"
+    volumes:
+      - ./data/minio:/data
+
+  gph-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.16.1
+    container_name: gph-elasticsearch
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      http.port: "19200"
+      transport.port: "19300"
+      ES_JAVA_OPTS: ${GPH_ES_JAVA_OPTS:--Xms512m -Xmx512m}
+      cluster.name: giapha-dev
+    volumes:
+      - ./data/es:/usr/share/elasticsearch/data
+
+  gph-keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    container_name: gph-keycloak
+    restart: unless-stopped
+    network_mode: host
+    # http 18086; management tránh 9000 (st-minio đang chiếm)
+    command:
+      [
+        "start-dev",
+        "--http-port=18086",
+        "--http-management-port=18087",
+        "--hostname-strict=false",
+      ]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://127.0.0.1:15432/${GPH_DB_NAME:-giapha}
+      KC_DB_USERNAME: ${GPH_DB_USER:-giapha}
+      KC_DB_PASSWORD: ${GPH_DB_PASSWORD}
+      KEYCLOAK_ADMIN: ${GPH_KC_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${GPH_KC_ADMIN_PASSWORD:?set GPH_KC_ADMIN_PASSWORD}
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_MANAGEMENT_PORT: "18087"
+    depends_on:
+      - gph-postgres

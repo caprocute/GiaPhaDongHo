@@ -1,0 +1,38 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104031"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "objectKey",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "caption",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "blurhash",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "viewCount",
+      "fieldType": "Long"
+    }
+  ],
+  "name": "MediaPhoto",
+  "relationships": [
+    {
+      "otherEntityField": "title",
+      "otherEntityName": "mediaAlbum",
+      "relationshipName": "album",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

@@ -34,7 +34,8 @@ PR review (con người) → merge → staging → production
 - Sau khi sinh màn hình: chạy `pnpm lint:tokens && pnpm test:a11y` trước khi báo xong.
 
 ## Backend rules
-- Entity/CRUD: viết JDL → `jhipster jdl` (TK-01 §3.1); cấm AI sinh boilerplate Entity/Resource/DTO.
+- Core BE: **chỉ** sinh bằng JHipster CLI trong `backend/` (TK-01 §3.1). Cấm AI viết giả CRUD; cấm copy source JHipster từ nơi khác.
+- Secret cấu hình: **Jasypt** `ENC(...)` — cấm plaintext/tự viết crypto (CLAUDE.md).
 - Endpoint mới bắt buộc `@RequiresPermission(...)` + test authz; controller admin nằm trong `…/admin/`.
 - Không viết SQL nối chuỗi; chỉ JPA/parameterized. Không tự chế crypto/auth — dùng `core.security`.
 - Chuyển đổi âm–dương lịch CHỈ qua `core.lunar` (Java) / `packages/lunar` (TS); cấm tự tính.

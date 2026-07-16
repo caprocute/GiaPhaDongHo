@@ -1,0 +1,14 @@
+{
+  "name": "@giapha/tokens",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/tokens.css"
+  },
+  "scripts": {
+    "build": "echo 'tokens: use pnpm tokens:build from root'"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104030"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "title",
+      "fieldType": "String",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "description",
+      "fieldType": "TextBlob"
+    },
+    {
+      "fieldName": "coverObjectKey",
+      "fieldType": "String"
+    }
+  ],
+  "name": "MediaAlbum",
+  "relationships": [],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

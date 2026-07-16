@@ -1,0 +1,39 @@
+{
+  "annotations": {
+    "changelogDate": "20260716104029"
+  },
+  "applications": ["*"],
+  "dto": "mapstruct",
+  "fields": [
+    {
+      "fieldName": "authorName",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "body",
+      "fieldType": "TextBlob",
+      "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "status",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "createdAt",
+      "fieldType": "Instant"
+    }
+  ],
+  "name": "CmsComment",
+  "pagination": "pagination",
+  "relationships": [
+    {
+      "otherEntityField": "title",
+      "otherEntityName": "cmsPost",
+      "relationshipName": "post",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one"
+    }
+  ],
+  "searchEngine": "no",
+  "service": "serviceClass"
+}

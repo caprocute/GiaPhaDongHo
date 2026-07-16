@@ -1,0 +1,47 @@
+/** CMS + Media — npx generator-jhipster@9.2.0 jdl jdl/cms-media.jdl --no-interactive */
+entity CmsCategory {
+  slug String required unique
+  name String required
+  layout String
+}
+
+entity CmsPost {
+  slug String required unique
+  title String required
+  summary TextBlob
+  bodyHtml TextBlob
+  status String
+  publishedAt Instant
+  viewCount Long
+  authorName String
+}
+
+entity CmsComment {
+  authorName String
+  body TextBlob required
+  status String
+  createdAt Instant
+}
+
+entity MediaAlbum {
+  title String required
+  description TextBlob
+  coverObjectKey String
+}
+
+entity MediaPhoto {
+  objectKey String required
+  caption String
+  blurhash String
+  viewCount Long
+}
+
+relationship ManyToOne {
+  CmsPost{category(name)} to CmsCategory
+  CmsComment{post(title)} to CmsPost
+  MediaPhoto{album(title)} to MediaAlbum
+}
+
+paginate CmsPost, CmsComment with pagination
+dto CmsCategory, CmsPost, CmsComment, MediaAlbum, MediaPhoto with mapstruct
+service CmsCategory, CmsPost, CmsComment, MediaAlbum, MediaPhoto with serviceClass

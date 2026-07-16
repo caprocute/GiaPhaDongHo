@@ -14,19 +14,35 @@ Dự án: nền tảng gia phả số dòng họ Việt Nam. Spring Boot 4.x/Jav
 - Mọi form: `FormField` + Zod schema. Mọi bảng: `DataTable`. Mọi ngày tháng: `DualDatePicker` (dương/âm).
 - Sau khi sinh màn hình: chạy `pnpm lint:tokens && pnpm test:a11y` rồi mới báo kết quả (kèm output thật).
 
-## Backend rules
-- **JHipster trước, AI sau (TK-01 §3.1):** entity/CRUD mới = viết/sửa `backend/*.jdl` rồi `jhipster jdl`; CẤM AI tự sinh hàng loạt Entity/Repository/Resource/DTO/MapStruct boilerplate.
-- Bootstrap BE: **JHipster 9** + **Spring Boot 4.x**, `--skip-client`, OAuth2/Keycloak, Gradle 9, Java 21. Cấm scaffold Boot 3 / JHipster 8. FE không dùng client JHipster.
+## Backend rules — JHipster CLI bắt buộc (siết chặt)
+- **Core BE chỉ do JHipster CLI sinh tại chỗ trong repo** (`npx generator-jhipster@9` / `jhipster` / `jhipster jdl`). Không được:
+  - AI (hoặc người) viết tay giả Entity/Repository/Service/Resource/DTO/MapStruct/Liquibase CRUD “kiểu JHipster”;
+  - copy source từ sample/repo JHipster khác rồi dán vào `backend/`;
+  - scaffold Spring Initializr / Gradle tay thay cho bước bootstrap `jhipster`.
+- **Quy trình bắt buộc:** (1) viết/sửa JDL hoặc trả lời wizard CLI → (2) chạy CLI generate → (3) commit artifact do CLI tạo → (4) AI chỉ viết phần **ngoài** generate: Modulith package, `core.lunar`, privacy filter, `@RequiresPermission`, adapter MinIO/ES/Zalo, domain service.
+- Bằng chứng: PR có lệnh CLI trong mô tả (hoặc log generate) + diff chứa file do generator tạo (`.yo-rc.json`, `*.jdl`, liquibase changelog JHipster). Thiếu bằng chứng → từ chối merge phần core.
+- Bootstrap: **JHipster 9** + **Spring Boot 4.x**, `--skip-client`, OAuth2/Keycloak, Gradle 9, Java 21. Cấm JHipster 8 / Boot 3. FE không dùng client JHipster.
 - Endpoint mới bắt buộc `@RequiresPermission(...)` + test authz. Controller admin đặt trong package `…/admin/`.
-- Chỉ JPA/parameterized query; cấm nối chuỗi SQL. Cấm tự viết crypto/auth — dùng `core.security`.
+- Chỉ JPA/parameterized query; cấm nối chuỗi SQL. Cấm tự viết crypto/auth — dùng `core.security` (sau khi JHipster đã sinh lớp security gốc).
 - Âm–dương lịch CHỈ qua `core.lunar` (Java) / `packages/lunar` (TS); hai bản chung golden test vectors.
 - Module chỉ import `api/` + `events/` của module khác; `ApplicationModules.verify()` phải xanh.
-- Đổi schema DB: Liquibase (chuẩn JHipster) backward-compatible (expand→migrate→contract) và cần người duyệt.
+- Đổi schema entity: sửa JDL → `jhipster jdl` lại; changelog Liquibase do CLI; expand→migrate→contract + người duyệt.
 
 ## Bảo mật & riêng tư (bắt buộc)
 - Người còn sống = PII (NĐ 13/2023): mọi serializer/export phải qua privacy filter; không lộ ngày sinh đầy đủ/SĐT cho khách.
 - Diff chạm auth / donation / privacy / upload → chạy `/security-review` và yêu cầu người duyệt thứ hai.
-- Không bao giờ ghi secret vào repo; dùng `.env.local`.
+- Không bao giờ ghi secret vào repo; dùng `.env.local` / `.env.tunnel.local` (đã gitignore).
+
+## Jasypt — mã hóa cấu hình (bắt buộc)
+- Mọi **bí mật trong cấu hình ứng dụng** (mật khẩu DB, Redis, MinIO, SMTP, Zalo OA, JWT/client secret phụ, khóa imgproxy…) phải tích hợp **Jasypt** (`jasypt-spring-boot-starter`): giá trị dạng `ENC(...)` trong `application-*.yml` / env được decrypt lúc runtime.
+- CẤM lưu plaintext secret trong file YAML commit được; CẤM tự viết crypto/AES tùy hứng thay Jasypt.
+- Master password Jasypt chỉ qua env/secret manager: `JASYPT_ENCRYPTOR_PASSWORD` (không commit). Sinh ciphertext bằng CLI Jasypt của dự án / skill khi có.
+- Diff chạm secret/encrypt → `/security-review` + người duyệt thứ hai.
+
+## Hạ tầng DEV remote + tunnel
+- Postgres / Redis / Elasticsearch / MinIO / Keycloak **DEV** chạy trên server riêng (`deploy/remote/`), không chiếm port dịch vụ sẵn có.
+- Máy local: skill `/infra-tunnel` (hoặc `deploy/scripts/tunnel-infra.sh`) — SSH tunnel port cố định; nếu port local bị chiếm thì **kill** tiến trình chiếm rồi mở tunnel lại.
+- Thông tin SSH chỉ trong `.env.tunnel.local` — không commit.
 
 ## Definition of Done
 - Component mới: đủ 4 mảnh — spec + code (states/responsive/keyboard) + Storybook story + usage doc/mapping.
