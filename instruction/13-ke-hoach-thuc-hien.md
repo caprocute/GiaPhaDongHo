@@ -170,7 +170,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Danh sách / form hồ sơ người + DualDatePicker + Zod (local store; nối API sau)
 - [ ] Tree editor tối thiểu (CRUD quan hệ)
 - [x] Quản lý bài viết + duyệt comment (`/posts`, `/comments` → `/api/cms-posts` / `/api/cms-comments`)
-- [ ] Media library
+- [x] Media library (album CRUD + upload `/api/v1/media/upload` + list/xóa photos)
 - [ ] Cài đặt site cơ bản
 
 ### R1.9 Ngày giỗ & sự kiện domain

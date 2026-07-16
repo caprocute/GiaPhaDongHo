@@ -16,6 +16,8 @@ type ApiFetchOptions = {
   method?: string;
   body?: unknown;
   token?: string | null;
+  /** FormData / Blob — không set Content-Type (browser tự boundary). */
+  formData?: FormData;
 };
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
@@ -25,17 +27,24 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   }
 
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (options.body !== undefined) {
+  if (options.body !== undefined && !options.formData) {
     headers["Content-Type"] = "application/json";
   }
   if (options.token) {
     headers.Authorization = `Bearer ${options.token}`;
   }
 
+  let body: BodyInit | undefined;
+  if (options.formData) {
+    body = options.formData;
+  } else if (options.body !== undefined) {
+    body = JSON.stringify(options.body);
+  }
+
   const res = await fetch(`${base}${path}`, {
     method: options.method ?? "GET",
     headers,
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    body,
   });
 
   if (res.status === 204) {

@@ -15,8 +15,9 @@ import vn.giapha.core.security.RequiresPermission;
 import vn.giapha.media.api.UploadResponse;
 import vn.giapha.media.internal.ImgproxyUrlBuilder;
 import vn.giapha.media.internal.MinioStorageService;
-import vn.giapha.repository.MediaPhotoRepository;
+import vn.giapha.repository.MediaAlbumRepository;
 import vn.giapha.service.MediaPhotoService;
+import vn.giapha.service.dto.MediaAlbumDTO;
 import vn.giapha.service.dto.MediaPhotoDTO;
 
 /**
@@ -36,18 +37,18 @@ public class MediaUploadController {
     private final MinioStorageService storageService;
     private final ImgproxyUrlBuilder imgproxyUrlBuilder;
     private final MediaPhotoService mediaPhotoService;
-    private final MediaPhotoRepository mediaPhotoRepository;
+    private final MediaAlbumRepository mediaAlbumRepository;
 
     public MediaUploadController(
         MinioStorageService storageService,
         ImgproxyUrlBuilder imgproxyUrlBuilder,
         MediaPhotoService mediaPhotoService,
-        MediaPhotoRepository mediaPhotoRepository
+        MediaAlbumRepository mediaAlbumRepository
     ) {
         this.storageService = storageService;
         this.imgproxyUrlBuilder = imgproxyUrlBuilder;
         this.mediaPhotoService = mediaPhotoService;
-        this.mediaPhotoRepository = mediaPhotoRepository;
+        this.mediaAlbumRepository = mediaAlbumRepository;
     }
 
     /**
@@ -77,11 +78,10 @@ public class MediaUploadController {
         MediaPhotoDTO dto = new MediaPhotoDTO();
         dto.setObjectKey(objectKey);
         dto.setCaption(caption);
-        if (albumId != null) {
-            // Gán album qua JHipster nested DTO nếu album tồn tại
-            mediaPhotoRepository.findById(albumId).ifPresent(ignored -> {
-                // albumId được gán trực tiếp qua JHipster DTO setAlbum — xử lý trong service
-            });
+        if (albumId != null && mediaAlbumRepository.existsById(albumId)) {
+            MediaAlbumDTO album = new MediaAlbumDTO();
+            album.setId(albumId);
+            dto.setAlbum(album);
         }
         MediaPhotoDTO saved = mediaPhotoService.save(dto);
 
