@@ -149,10 +149,10 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [ ] 2FA qua Keycloak (parity SRS-10)
 
 ### R1.6 packages/tree-viz (phả đồ)
-- [ ] Layout engine: đời ngang, union node, thứ tự con
-- [ ] React Flow render + token style
-- [ ] Pan/zoom/minimap/fitView; export SVG/PNG (client)
-- [ ] Giới hạn depth/root (parity FR-04)
+- [x] Layout engine: đời ngang, union node, thứ tự con (`layoutFamily` + vitest)
+- [x] React Flow render + token style (`FamilyTreeCanvas`, Person/Union node)
+- [x] Pan/zoom/minimap/fitView; export SVG/PNG (client, `html-to-image`)
+- [x] Giới hạn depth/root (parity FR-04) — demo Portal `/tree`
 
 ### R1.7 Portal công khai  **[sau R0b đủ dùng + R1.1–1.4 API]**
 Chia từng route (1 PR / route nếu lớn):

@@ -44,6 +44,8 @@ jobs:
         working-directory: frontend
         run: |
           pnpm --filter @giapha/lunar test
+          pnpm --filter @giapha/tree-viz test
+          pnpm --filter @giapha/tree-viz build
           pnpm --filter @giapha/ui build
           pnpm --filter @giapha/admin build
           pnpm --filter @giapha/portal build

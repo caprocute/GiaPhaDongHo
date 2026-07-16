@@ -19,8 +19,8 @@
 | Scroll trải nghiệm | Lenis (smooth scroll — chỉ trang storytelling portal) | — | Trang giới thiệu dòng họ dạng "cuộn kể chuyện" | tắt cho trang CRUD |
 | Icon | lucide-react + **bộ icon hoa văn riêng** (SVG sprite: rồng, mây, triện, đèn thờ) | — | Nhận diện di sản không lib nào có sẵn | — |
 | Chart CRM | Recharts token-hóa (theo skill `dataviz`) | 2.x | Dashboard quỹ/thống kê đồng bộ design system | visx (khi cần control sâu) |
-| Phả đồ — render | **React Flow (`@xyflow/react`)** (MIT) | 12.x | Node = React component → style bằng token/shadcn/Motion (thẩm mỹ tối đa); minimap, pan/zoom, fitView animation, custom edge có sẵn; cộng đồng lớn | Tự vẽ d3 (nhiều công), family-chart (renderer khó style) |
-| Phả đồ — layout | **Layout engine riêng** trong `packages/tree-viz`: d3-dag/elkjs + luật gia phả Việt (union node hôn phối, thứ tự con, hàng ngang theo đời) | — | React Flow **không có layout** — vị trí node do ta tính; tham khảo thuật toán của [family-chart](https://github.com/donatso/family-chart) (MIT) nhưng không dùng renderer | dagre (kém gom cặp vợ chồng) |
+| Phả đồ — render | **React Flow (`@xyflow/react`)** (MIT) | **12.6.x** | Node = React component → style bằng token; minimap, pan/zoom, fitView; export PNG/SVG client qua `html-to-image` | Tự vẽ d3 (nhiều công), family-chart (renderer khó style) |
+| Phả đồ — layout | **Layout engine riêng** `layoutFamily` trong `packages/tree-viz` (luật gia phả Việt: union hôn phối, thứ tự con, hàng ngang theo đời; `rootId`+`maxDepth`) | — | React Flow **không có layout** — vị trí node do ta tính; elkjs/d3-dag có thể bổ sung sau nếu cây rất lớn | dagre (kém gom cặp vợ chồng) |
 | Search | **Elasticsearch** | 8.16+ (AGPLv3) | Yêu cầu chủ đầu tư; analyzer ICU folding cho tiếng Việt không dấu | OpenSearch 2.x (Apache-2.0) nếu ngại AGPL |
 | Object storage | **MinIO** | RELEASE.2025-x | Yêu cầu chủ đầu tư; S3-compatible, versioning, presigned URL | SeaweedFS, Garage |
 | Ảnh động | **imgproxy** | 3.x | Resize/webp/avif on-the-fly từ MinIO, ký URL chống hotlink | Thumbor |
