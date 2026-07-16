@@ -17,13 +17,15 @@ import {
   ReactFlow,
   ReactFlowProvider,
   ViewportPortal,
+  getNodesBounds,
+  getViewportForBounds,
   useReactFlow,
   type Node,
   type NodeTypes,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
-import { exportTreePng, exportTreeSvg } from "./exportCanvas";
+import { exportTreePdf, exportTreePng, exportTreeSvg, resolveExportBackground } from "./exportCanvas";
 import { demoFamilyGraph, layoutFamily } from "./layoutFamily";
 import { PersonNode } from "./nodes/PersonNode";
 import { UnionNode } from "./nodes/UnionNode";
@@ -40,6 +42,7 @@ export type FamilyTreeCanvasHandle = {
   fitView: () => void;
   exportPng: () => Promise<void>;
   exportSvg: () => Promise<void>;
+  exportPdf: () => Promise<void>;
 };
 
 export interface FamilyTreeCanvasProps {
@@ -74,7 +77,7 @@ function CanvasInner(
   ref: Ref<FamilyTreeCanvasHandle>,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { fitView } = useReactFlow();
+  const { fitView, getNodes } = useReactFlow();
   const [exporting, setExporting] = useState(false);
   const fitKey = `${rootId}:${maxDepth}:${graph.persons.length}:${graph.unions.length}`;
   const lastFitKey = useRef("");
@@ -115,27 +118,54 @@ function CanvasInner(
     void fitView({ padding: 0.16, duration: 200, maxZoom: 1 });
   }, [fitView]);
 
-  const onExportPng = useCallback(async () => {
-    const el = containerRef.current?.querySelector(".react-flow") as HTMLElement | null;
-    if (!el) return;
-    setExporting(true);
-    try {
-      await exportTreePng(el, { fileName: `pha-do-${rootId}-d${maxDepth}.png` });
-    } finally {
-      setExporting(false);
-    }
-  }, [rootId, maxDepth]);
+  /** Xuất theo bounds node — ổn định hơn chụp cả `.react-flow` (tránh lỗi CSS/font). */
+  const captureViewport = useCallback(
+    async (kind: "png" | "svg" | "pdf") => {
+      const viewport = containerRef.current?.querySelector(
+        ".react-flow__viewport",
+      ) as HTMLElement | null;
+      if (!viewport) throw new Error("Không tìm thấy viewport phả đồ.");
 
-  const onExportSvg = useCallback(async () => {
-    const el = containerRef.current?.querySelector(".react-flow") as HTMLElement | null;
-    if (!el) return;
-    setExporting(true);
-    try {
-      await exportTreeSvg(el, { fileName: `pha-do-${rootId}-d${maxDepth}.svg` });
-    } finally {
-      setExporting(false);
-    }
-  }, [rootId, maxDepth]);
+      const rfNodes = getNodes().filter((n) => n.type === "person" || n.type === "union");
+      if (!rfNodes.length) throw new Error("Chưa có node để xuất.");
+
+      const bounds = getNodesBounds(rfNodes);
+      const imageWidth = 1600;
+      const aspect = bounds.width > 0 ? bounds.height / bounds.width : 0.7;
+      const imageHeight = Math.max(900, Math.round(imageWidth * aspect));
+      const vb = getViewportForBounds(bounds, imageWidth, imageHeight, 0.15, 1.2, 0.18);
+      const bg = resolveExportBackground();
+      const common = {
+        backgroundColor: bg,
+        width: imageWidth,
+        height: imageHeight,
+        style: {
+          width: `${imageWidth}px`,
+          height: `${imageHeight}px`,
+          transform: `translate(${vb.x}px, ${vb.y}px) scale(${vb.zoom})`,
+        },
+      };
+      const base = `pha-do-${rootId}-d${maxDepth}`;
+
+      setExporting(true);
+      try {
+        if (kind === "png") {
+          await exportTreePng(viewport, { ...common, fileName: `${base}.png` });
+        } else if (kind === "svg") {
+          await exportTreeSvg(viewport, { ...common, fileName: `${base}.svg` });
+        } else {
+          await exportTreePdf(viewport, { ...common, fileName: `${base}.pdf` });
+        }
+      } finally {
+        setExporting(false);
+      }
+    },
+    [getNodes, rootId, maxDepth],
+  );
+
+  const onExportPng = useCallback(() => captureViewport("png"), [captureViewport]);
+  const onExportSvg = useCallback(() => captureViewport("svg"), [captureViewport]);
+  const onExportPdf = useCallback(() => captureViewport("pdf"), [captureViewport]);
 
   useImperativeHandle(
     ref,
@@ -143,8 +173,9 @@ function CanvasInner(
       fitView: doFit,
       exportPng: onExportPng,
       exportSvg: onExportSvg,
+      exportPdf: onExportPdf,
     }),
-    [doFit, onExportPng, onExportSvg],
+    [doFit, onExportPng, onExportSvg, onExportPdf],
   );
 
   const onNodeClick = useCallback(

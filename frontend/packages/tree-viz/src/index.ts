@@ -3,7 +3,7 @@ export type { LayoutNode } from "./layoutTree";
 
 export { layoutFamily, demoFamilyGraph } from "./layoutFamily";
 export { toReactFlowElements } from "./toReactFlow";
-export { exportTreePng, exportTreeSvg } from "./exportCanvas";
+export { exportTreePng, exportTreeSvg, exportTreePdf, resolveExportBackground } from "./exportCanvas";
 export type { ExportOptions } from "./exportCanvas";
 
 export { FamilyTreeCanvas } from "./FamilyTreeCanvas";

@@ -23,6 +23,22 @@
   border-bottom: 1px solid var(--color-border-strong);
 }
 
+.exportError {
+  margin: 0;
+  padding: 8px 20px 10px;
+  font-size: 12.5px;
+  color: var(--color-status-error-fg);
+  background: var(--color-status-error-bg);
+  font-family: var(--font-body);
+  border-top: 1px solid color-mix(in srgb, var(--color-status-danger) 35%, transparent);
+}
+
+.iconBtn:disabled,
+.iconBtnPrimary:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+
 .wrap {
   width: 100%;
   margin: 0 auto;

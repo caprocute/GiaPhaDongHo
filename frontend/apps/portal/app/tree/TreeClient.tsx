@@ -47,6 +47,8 @@ export function TreeClient() {
     () => demo.persons.find((p) => p.id === defaultRoot) ?? demo.persons[0] ?? null,
   );
   const canvasRef = useRef<FamilyTreeCanvasHandle>(null);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,6 +97,23 @@ export function TreeClient() {
   const reRootHere = () => {
     if (!focusPerson) return;
     setRootId(focusPerson.id);
+  };
+
+  const runExport = async (kind: "png" | "svg" | "pdf") => {
+    const api = canvasRef.current;
+    if (!api || exportBusy) return;
+    setExportError(null);
+    setExportBusy(true);
+    try {
+      if (kind === "png") await api.exportPng();
+      else if (kind === "svg") await api.exportSvg();
+      else await api.exportPdf();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Xuất file thất bại.";
+      setExportError(msg);
+    } finally {
+      setExportBusy(false);
+    }
   };
 
   return (
@@ -175,32 +194,40 @@ export function TreeClient() {
             <button
               type="button"
               className={styles.iconBtn}
-              onClick={() => void canvasRef.current?.exportSvg()}
+              onClick={() => void runExport("svg")}
               title="Tải SVG"
               aria-label="Tải SVG"
+              disabled={exportBusy}
             >
               <IconSvg />
             </button>
             <button
               type="button"
               className={styles.iconBtn}
-              onClick={() => void canvasRef.current?.exportPng()}
+              onClick={() => void runExport("png")}
               title="Tải PNG"
               aria-label="Tải PNG"
+              disabled={exportBusy}
             >
               <IconImage />
             </button>
             <button
               type="button"
               className={styles.iconBtnPrimary}
-              onClick={() => void canvasRef.current?.exportPng()}
-              title="Xuất PDF ấn phẩm (tạm PNG)"
-              aria-label="Xuất PDF ấn phẩm"
+              onClick={() => void runExport("pdf")}
+              title="Xuất PDF"
+              aria-label="Xuất PDF"
+              disabled={exportBusy}
             >
               <IconPdf />
             </button>
           </div>
         </div>
+        {exportError ? (
+          <p className={styles.exportError} role="alert">
+            {exportError}
+          </p>
+        ) : null}
       </div>
 
       <div className={styles.zone}>
