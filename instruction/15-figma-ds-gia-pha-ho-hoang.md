@@ -43,8 +43,40 @@ Từ `design-tokens/semantic/color.tokens.json` (resolve primitive):
 - `color/surface/page`, `card`
 - `color/heritage/accent`, `frame`
 
+## Code Connect
+
+`@figma/code-connect@1.4.9` đã cài trong `frontend/packages/ui`.
+
+**Files mapping** (`.figma.tsx` cạnh component):
+
+| File | Figma node | Props |
+|------|-----------|-------|
+| `Button/Button.figma.tsx` | `6:87`, `6:89`, `6:91` | variant=primary/secondary/ghost |
+| `Badge/Badge.figma.tsx` | `6:94..102`, `6:732` | tone=default/accent/success/warning/error |
+| `Alert/Alert.figma.tsx` | `6:715`, `6:718` | DiffChip → variant=success/info |
+| `Input/Input.figma.tsx` | `6:815` (SearchBar), `6:727` (CommandBar) | type=search |
+| `DataTable/DataTable.figma.tsx` | `6:31` (CRM Admin screen) | columns+rows |
+| `StatCard/StatCard.figma.tsx` | `6:115` | value, label |
+| `GioCard/GioCard.figma.tsx` | `6:119` | day, month, name, tag |
+| `KPICard/KPICard.figma.tsx` | `6:124` | label, value, delta, trend |
+| `SideNavItem/SideNavItem.figma.tsx` | `6:129` | icon, active, badge |
+| `Panel/Panel.figma.tsx` | `6:132` | title, action, children |
+
+**Publish** (cần Figma PAT với scope *File Content* + *Code Connect Write*):
+
+```bash
+# Lưu token (gitignored)
+echo 'FIGMA_ACCESS_TOKEN=figd_...' >> frontend/packages/ui/.env.local
+
+# Publish
+cd frontend/packages/ui
+FIGMA_ACCESS_TOKEN=$(grep FIGMA_ACCESS_TOKEN .env.local | cut -d= -f2) \
+  npx figma connect publish
+```
+
 ## Liên kết repo
 
 - Token SoT: `design-tokens/`
 - UI code: `frontend/packages/ui`
+- Code Connect config: `frontend/packages/ui/figma.config.json`
 - Quy trình: [11-quy-trinh-phat-trien-voi-ai.md](11-quy-trinh-phat-trien-voi-ai.md), [04-design-system-giao-dien.md](04-design-system-giao-dien.md)

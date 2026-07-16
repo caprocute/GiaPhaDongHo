@@ -13,7 +13,9 @@
     "build": "tsc --noEmit",
     "test:a11y": "echo 'a11y: Storybook addon-a11y — chạy pnpm storybook để kiểm tra'",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "figma:check": "figma connect --dry-run",
+    "figma:publish": "figma connect publish"
   },
   "peerDependencies": {
     "react": "^19.0.0",
@@ -24,6 +26,7 @@
     "@giapha/tokens": "workspace:*"
   },
   "devDependencies": {
+    "@figma/code-connect": "^1.4.9",
     "@storybook/addon-a11y": "^8.6.4",
     "@storybook/addon-essentials": "^8.6.4",
     "@storybook/react": "^8.6.4",

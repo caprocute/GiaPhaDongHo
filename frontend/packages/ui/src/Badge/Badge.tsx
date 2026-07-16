@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 
-export type BadgeTone = "default" | "accent" | "success";
+export type BadgeTone = "default" | "accent" | "success" | "warning" | "error";
 
 export interface BadgeProps {
   children: ReactNode;
@@ -19,6 +19,14 @@ const tones: Record<BadgeTone, CSSProperties> = {
   success: {
     background: "var(--color-status-success-bg)",
     color: "var(--color-status-success-fg)",
+  },
+  warning: {
+    background: "var(--color-status-warning-bg)",
+    color: "var(--color-status-warning-fg)",
+  },
+  error: {
+    background: "var(--color-status-error-bg)",
+    color: "var(--color-status-error-fg)",
   },
 };
 
