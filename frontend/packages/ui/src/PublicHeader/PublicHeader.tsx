@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, useId, useState, type ReactNode } from "react";
 import styles from "./PublicHeader.module.css";
 
 export interface PublicHeaderProps {
@@ -51,6 +53,40 @@ function Seal() {
   );
 }
 
+function NavLinks({
+  activeHref,
+  onNavigate,
+  ctaClassName,
+}: {
+  activeHref: string;
+  onNavigate?: () => void;
+  ctaClassName: string;
+}) {
+  return (
+    <>
+      {NAV.map((item) => {
+        const cur =
+          item.href === "/"
+            ? activeHref === "/"
+            : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+        return (
+          <a
+            key={item.href}
+            href={item.href}
+            className={cur ? styles.cur : undefined}
+            onClick={onNavigate}
+          >
+            {item.label}
+          </a>
+        );
+      })}
+      <a href="/tree" className={ctaClassName} onClick={onNavigate}>
+        Tra cứu phả đồ
+      </a>
+    </>
+  );
+}
+
 export function PublicHeader({
   brand = "Họ Hoàng – Huỳnh",
   subtitle = "Thôn Trung Bính · Bảo Ninh · Đồng Hới",
@@ -59,11 +95,38 @@ export function PublicHeader({
   utilityLeft,
   utilityRight,
 }: PublicHeaderProps) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+
+  useEffect(() => {
+    setOpen(false);
+  }, [activeHref]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   return (
     <div className={styles.root}>
       <div className={styles.utility}>
         <div className={styles.wrap}>
-          <span>{utilityLeft ?? <>☎ 0970 307 9059 · <b>hohoang@giapha.vn</b></>}</span>
+          <span className={styles.utilityLeft}>
+            {utilityLeft ?? (
+              <>
+                ☎ 0970 307 9059 · <b>hohoang@giapha.vn</b>
+              </>
+            )}
+          </span>
           <span className={styles.utilityRight}>
             {utilityRight}
             {endSlot}
@@ -80,24 +143,46 @@ export function PublicHeader({
               <div className={styles.sub}>{subtitle}</div>
             </div>
           </a>
+
           <nav className={styles.nav} aria-label="Menu chính">
-            {NAV.map((item) => {
-              const cur =
-                item.href === "/"
-                  ? activeHref === "/"
-                  : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
-              return (
-                <a key={item.href} href={item.href} className={cur ? styles.cur : undefined}>
-                  {item.label}
-                </a>
-              );
-            })}
-            <a href="/tree" className={styles.cta}>
-              Tra cứu phả đồ
-            </a>
+            <NavLinks activeHref={activeHref} ctaClassName={styles.cta} />
+          </nav>
+
+          <button
+            type="button"
+            className={styles.menuBtn}
+            aria-expanded={open}
+            aria-controls={panelId}
+            aria-label={open ? "Đóng menu" : "Mở menu"}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className={open ? styles.menuIconOpen : styles.menuIcon} aria-hidden />
+          </button>
+        </div>
+
+        <div
+          id={panelId}
+          className={open ? `${styles.drawer} ${styles.drawerOpen}` : styles.drawer}
+          hidden={!open}
+        >
+          <nav className={styles.drawerNav} aria-label="Menu di động">
+            <NavLinks
+              activeHref={activeHref}
+              onNavigate={() => setOpen(false)}
+              ctaClassName={`${styles.cta} ${styles.drawerCta}`}
+            />
           </nav>
         </div>
       </header>
+
+      {open ? (
+        <button
+          type="button"
+          className={styles.backdrop}
+          aria-label="Đóng menu"
+          onClick={() => setOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

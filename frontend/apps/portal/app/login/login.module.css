@@ -238,8 +238,8 @@
   }
 
   .brandPane {
-    min-height: 220px;
-    padding: 48px 24px 40px;
+    min-height: 200px;
+    padding: 40px 20px 32px;
   }
 
   .brandTitle {
@@ -250,5 +250,33 @@
     width: 64px;
     height: 64px;
     margin-bottom: 16px;
+  }
+
+  .formPane {
+    padding: 32px 20px 48px;
+  }
+}
+
+@media (max-width: 640px) {
+  .brandPane {
+    min-height: 160px;
+    padding: 32px 16px 28px;
+  }
+
+  .brandTitle {
+    font-size: 1.45rem;
+  }
+
+  .seal {
+    width: 52px;
+    height: 52px;
+  }
+
+  .formPane {
+    padding: 28px 16px 40px;
+  }
+
+  .card {
+    padding: 22px 18px;
   }
 }

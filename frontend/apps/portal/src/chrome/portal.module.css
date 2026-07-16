@@ -817,22 +817,194 @@
 }
 
 @media (max-width: 960px) {
+  .wrap {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .body {
+    padding: 32px 0 56px;
+  }
+
+  .flushBody {
+    padding-bottom: 32px;
+  }
+
+  .toolbarInner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 0;
+  }
+
+  .tools {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .tools .tool,
+  .tools .toolPrimary {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .crumb {
+    font-size: 12px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .secHead {
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .title {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .lead {
+    font-size: 14.5px;
+  }
+
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .filterBar > * {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .filterInput {
+    min-height: 48px;
+    font-size: 16px; /* tránh zoom iOS */
+  }
+
+  .row {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .rowCode {
+    width: 100%;
+    padding-left: 60px;
+    margin-top: -4px;
+  }
+
   .newsGrid,
   .profileGrid,
   .treeZone {
     grid-template-columns: 1fr;
   }
 
+  .feat {
+    min-height: 280px;
+  }
+
+  .featBody {
+    padding: 20px;
+  }
+
+  .featBody h3 {
+    font-size: 20px;
+  }
+
+  .thumb {
+    width: 72px;
+    height: 58px;
+  }
+
   .sidepanel {
     border-left: 0;
     border-top: 1px solid var(--color-heritage-line);
+    padding: 22px 18px;
   }
 
   .pfCards {
     grid-template-columns: 1fr;
   }
 
+  .profileGrid {
+    gap: 28px;
+    padding: 28px 0 48px;
+  }
+
+  .portrait {
+    height: 220px;
+  }
+
+  .glyph {
+    font-size: 64px;
+  }
+
+  .baiviBtns {
+    flex-direction: column;
+  }
+
+  .baiviBtns a {
+    min-height: 44px;
+  }
+
+  .treeCanvas {
+    min-height: 360px;
+    padding: 8px;
+  }
+
+  .treeCanvas :global(.family-tree-canvas),
+  .treeCanvas :global([data-tree-canvas]) {
+    min-height: 360px;
+  }
+
   .gioHead {
     width: 100%;
+  }
+
+  .gioGrid {
+    gap: 12px;
+  }
+
+  .albumGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .article h1 {
+    font-size: clamp(1.45rem, 6vw, 2rem);
+  }
+}
+
+@media (max-width: 640px) {
+  .band {
+    height: 12px;
+    background-size: auto 10px;
+  }
+
+  .rowCode {
+    padding-left: 0;
+  }
+
+  .avatar,
+  .avatarF {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .newsItem {
+    align-items: flex-start;
+  }
+
+  .pfBody h2 {
+    font-size: clamp(1.4rem, 6.5vw, 1.85rem);
+  }
+
+  .tools select {
+    max-width: 100% !important;
   }
 }

@@ -52,3 +52,20 @@
 .search button:hover {
   background: var(--color-action-primary-bg-hover);
 }
+
+@media (max-width: 640px) {
+  .search {
+    flex-direction: column;
+    max-width: none;
+  }
+
+  .search input {
+    padding: 14px 16px;
+    font-size: 16px; /* tránh zoom iOS */
+  }
+
+  .search button {
+    padding: 14px 20px;
+    min-height: 48px;
+  }
+}

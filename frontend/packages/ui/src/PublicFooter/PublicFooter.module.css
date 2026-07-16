@@ -68,5 +68,11 @@
   .wrap {
     grid-template-columns: 1fr;
     gap: 28px;
+    padding: 36px 16px 32px;
+  }
+
+  .base {
+    padding: 14px 16px;
+    font-size: 11px;
   }
 }
