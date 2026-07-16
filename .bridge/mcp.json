@@ -1,0 +1,10 @@
+{
+  "figma_file_key": "ETrlAF4vsj0uHiJd69jcnD",
+  "figma_file_name": "Gia phả họ Hoàng",
+  "transport": "websocket",
+  "bridge_port": 9223,
+  "token_source": "../design-tokens/",
+  "kb_path": "../bridge-ds/knowledge-base/",
+  "setup_at": "2026-07-16T14:20:00Z",
+  "bridge_version": "7.3.1"
+}

@@ -1,0 +1,18 @@
+ds_name: GiaPhaHub
+figma_file_key: ETrlAF4vsj0uHiJd69jcnD
+figma_file_name: "Gia phả họ Hoàng"
+figma_file_url: "https://www.figma.com/design/ETrlAF4vsj0uHiJd69jcnD/Gia-ph%E1%BA%A3-h%E1%BB%8D-Ho%C3%A0ng"
+
+token_source: design-tokens/
+token_git_sot: true
+
+kb_path: bridge-ds/knowledge-base/
+registries_path: bridge-ds/knowledge-base/registries/
+recipes_path: bridge-ds/knowledge-base/recipes/
+specs_path: bridge-ds/specs/
+
+cron_cadence: daily
+cron_time: "06:00"
+
+transport: websocket
+bridge_port: 9223

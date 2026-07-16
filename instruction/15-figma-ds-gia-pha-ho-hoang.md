@@ -9,7 +9,9 @@
 |-----|---------|
 | Tên file Figma | **Gia phả họ Hoàng** |
 | Vai trò | Design System + mẫu màn GiaPhaHub (Portal + Admin CRM) |
-| URL / file key | *(điền sau khi tạo — dạng `https://www.figma.com/design/<KEY>/…`)* |
+| URL / file key | `https://www.figma.com/design/ETrlAF4vsj0uHiJd69jcnD/Gia-ph%E1%BA%A3-h%E1%BB%8D-Ho%C3%A0ng` |
+| File key | `ETrlAF4vsj0uHiJd69jcnD` |
+| Bridge setup | 2026-07-16 · 24 variables synced (Primitive / Semantic / Spacing) |
 
 ## Cấu trúc trang (sau khi Bridge nối)
 

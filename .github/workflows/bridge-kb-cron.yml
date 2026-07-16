@@ -1,0 +1,23 @@
+name: Bridge KB Sync
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Note — manual sync required
+        run: |
+          echo "Bridge KB sync requires Desktop Bridge (WebSocket)."
+          echo "Run 'setup bridge' in Claude Code with Figma Desktop open to re-extract."
+          echo "Automated REST sync needs FIGMA_ACCESS_TOKEN secret configured."
