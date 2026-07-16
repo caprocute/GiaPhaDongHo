@@ -35,4 +35,19 @@ File import: `jhipster-realm.json` (realm `jhipster`).
 
 Local compose (`backend` docker / `deploy/compose`): mount `realm-config` + `--import-realm`.
 
-Remote `gph-keycloak`: nếu realm đã tồn tại, import chỉ chạy lần đầu — cập nhật role bằng Admin UI hoặc `kc.sh import` / xóa realm DEV rồi recreate.
+Remote `gph-keycloak` (đã chạy, không auto-import):
+
+```bash
+# Cần .env.tunnel.local + tunnel (hoặc SSH trực tiếp)
+./deploy/scripts/sync-keycloak-realm.sh
+```
+
+Script upload `jhipster-realm.json` → `~/giapha-infra/realm-config/`, chạy `kc.sh import --override=true`, restart container.
+
+Sau đó local:
+
+```bash
+./deploy/scripts/tunnel-infra.sh start
+# Admin:  cp frontend/apps/admin/.env.example  frontend/apps/admin/.env.local
+# Portal: cp frontend/apps/portal/.env.example frontend/apps/portal/.env.local
+```

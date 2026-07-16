@@ -29,3 +29,5 @@ docker compose -f docker-compose.giapha-infra.yml ps
 1. Điền `.env.tunnel.local` (từ `.env.tunnel.local.example`) — **không commit**.
 2. Chạy `deploy/scripts/tunnel-infra.sh start` hoặc skill `/infra-tunnel`.
 3. App trỏ `localhost:<port tunnel cố định>` (xem script / example).
+4. OIDC FE: copy `frontend/apps/admin/.env.example` → `.env.local` và portal tương tự.
+5. Đồng bộ realm IAM R1.5 lên Keycloak remote: `./deploy/scripts/sync-keycloak-realm.sh`.

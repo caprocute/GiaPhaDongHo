@@ -571,22 +571,6 @@
   "webAuthnPolicyPasswordlessExtraOrigins": [],
   "users": [
     {
-      "id": "f742ba6f-1d8a-4dec-bf15-e02dab508283",
-      "createdTimestamp": 1598681172054,
-      "username": "service-account-internal",
-      "enabled": true,
-      "totp": false,
-      "emailVerified": false,
-      "serviceAccountClientId": "internal",
-      "disableableCredentialTypes": [],
-      "requiredActions": [],
-      "realmRoles": [
-        "default-roles-jhipster"
-      ],
-      "notBefore": 0,
-      "groups": []
-    },
-    {
       "id": "4c973896-5761-41fc-8217-07c5d13a004b",
       "createdTimestamp": 1505479415590,
       "username": "admin",
@@ -675,7 +659,7 @@
       "email": "member@localhost",
       "credentials": [
         {
-          "id": "7821832b-1e82-45a2-b8d3-f1a6ad909e64",
+          "id": "34a55cb0-595a-4514-9364-7edc309bc744",
           "type": "password",
           "createdDate": 1505479392766,
           "secretData": "{\"value\":\"MbKsMgWPnZyImih8s4SaoCSCq+XIY/c6S9F93sXEidHF1TjPWxCqMkec0+o3860CMLXHt3az61cIJOWI0FW9aw==\",\"salt\":\"fmpBI1r8R1u75hDLMUlwBw==\"}",
@@ -712,7 +696,7 @@
       "email": "editor@localhost",
       "credentials": [
         {
-          "id": "7821832b-1e82-45a2-b8d3-f1a6ad909e64",
+          "id": "a3dc72b6-bfa2-4228-bcdb-16ba5da87311",
           "type": "password",
           "createdDate": 1505479392766,
           "secretData": "{\"value\":\"MbKsMgWPnZyImih8s4SaoCSCq+XIY/c6S9F93sXEidHF1TjPWxCqMkec0+o3860CMLXHt3az61cIJOWI0FW9aw==\",\"salt\":\"fmpBI1r8R1u75hDLMUlwBw==\"}",
@@ -750,7 +734,7 @@
       "email": "genealogy@localhost",
       "credentials": [
         {
-          "id": "7821832b-1e82-45a2-b8d3-f1a6ad909e64",
+          "id": "47de89f0-ce24-4bc1-8cd5-fea376eeacf2",
           "type": "password",
           "createdDate": 1505479392766,
           "secretData": "{\"value\":\"MbKsMgWPnZyImih8s4SaoCSCq+XIY/c6S9F93sXEidHF1TjPWxCqMkec0+o3860CMLXHt3az61cIJOWI0FW9aw==\",\"salt\":\"fmpBI1r8R1u75hDLMUlwBw==\"}",
@@ -1223,7 +1207,7 @@
       ]
     },
     {
-      "id": "c3333333-3333-4333-8333-676961706861",
+      "id": "c3333333-3333-4333-8333-111111111101",
       "clientId": "giapha_admin",
       "rootUrl": "http://localhost:5173",
       "adminUrl": "http://localhost:5173",
@@ -1272,7 +1256,7 @@
       ]
     },
     {
-      "id": "c3333333-3333-4333-8333-676961706861",
+      "id": "c3333333-3333-4333-8333-111111111102",
       "clientId": "giapha_portal",
       "rootUrl": "http://localhost:3000",
       "adminUrl": "http://localhost:3000",
