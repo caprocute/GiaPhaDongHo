@@ -168,10 +168,10 @@ Chia từng route (1 PR / route nếu lớn):
 ### R1.8 Admin CRM lõi  **[SS với R1.7 — cùng API]**
 - [x] AppShell + menu CRM + OIDC login (RBAC BE R1.5; menu theo role tinh chỉnh sau)
 - [x] Danh sách / form hồ sơ người + DualDatePicker + Zod (local store; nối API sau)
-- [ ] Tree editor tối thiểu (CRUD quan hệ)
+- [x] Tree editor tối thiểu (CRUD union + member/child — `/tree`)
 - [x] Quản lý bài viết + duyệt comment (`/posts`, `/comments` → `/api/cms-posts` / `/api/cms-comments`)
 - [x] Media library (album CRUD + upload `/api/v1/media/upload` + list/xóa photos)
-- [ ] Cài đặt site cơ bản
+- [x] Cài đặt site cơ bản (slug cây + tên site local; API site settings sau)
 
 ### R1.9 Ngày giỗ & sự kiện domain
 - [x] Tự động upsert anniversary khi ghi người mất (`DeathAnniversarySync` + `DeathAnniversaryUpserted`; hook `TreeGenealogyService` / `PersonService`; unique `person_id`)

@@ -11,6 +11,8 @@ import { CommentsModerationPage } from "./comments/CommentsModerationPage";
 import { MediaLibraryPage } from "./media/MediaLibraryPage";
 import { PostFormPage } from "./posts/PostFormPage";
 import { PostsListPage } from "./posts/PostsListPage";
+import { SettingsPage } from "./settings/SettingsPage";
+import { TreeEditorPage } from "./tree/TreeEditorPage";
 
 const navStyle = {
   display: "flex",
@@ -30,6 +32,7 @@ function Sidebar() {
   const items = [
     ["/", "Tổng quan"],
     ["/persons", "Thành viên"],
+    ["/tree", "Tree editor"],
     ["/posts", "Bài viết"],
     ["/comments", "Bình luận"],
     ["/media", "Thư viện"],
@@ -96,12 +99,13 @@ function CrmRoutes() {
         <Route path="/persons" element={<PersonsListPage />} />
         <Route path="/persons/new" element={<PersonFormPage />} />
         <Route path="/persons/:id" element={<PersonFormPage />} />
+        <Route path="/tree" element={<TreeEditorPage />} />
         <Route path="/posts" element={<PostsListPage />} />
         <Route path="/posts/new" element={<PostFormPage />} />
         <Route path="/posts/:id" element={<PostFormPage />} />
         <Route path="/comments" element={<CommentsModerationPage />} />
         <Route path="/media" element={<MediaLibraryPage />} />
-        <Route path="/settings" element={<Placeholder title="Cài đặt" />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/persons" replace />} />
       </Routes>
     </AppShell>
