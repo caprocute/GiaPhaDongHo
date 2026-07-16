@@ -7,6 +7,7 @@ import { RequireAuth } from "./auth/RequireAuth";
 import { persistOidcHints } from "./auth/oidcConfig";
 import { PersonFormPage } from "./persons/PersonFormPage";
 import { PersonsListPage } from "./persons/PersonsListPage";
+import { CommentsModerationPage } from "./comments/CommentsModerationPage";
 import { PostFormPage } from "./posts/PostFormPage";
 import { PostsListPage } from "./posts/PostsListPage";
 
@@ -29,6 +30,7 @@ function Sidebar() {
     ["/", "Tổng quan"],
     ["/persons", "Thành viên"],
     ["/posts", "Bài viết"],
+    ["/comments", "Bình luận"],
     ["/media", "Thư viện"],
     ["/settings", "Cài đặt"],
   ] as const;
@@ -96,6 +98,7 @@ function CrmRoutes() {
         <Route path="/posts" element={<PostsListPage />} />
         <Route path="/posts/new" element={<PostFormPage />} />
         <Route path="/posts/:id" element={<PostFormPage />} />
+        <Route path="/comments" element={<CommentsModerationPage />} />
         <Route path="/media" element={<Placeholder title="Thư viện media" />} />
         <Route path="/settings" element={<Placeholder title="Cài đặt" />} />
         <Route path="*" element={<Navigate to="/persons" replace />} />

@@ -135,7 +135,7 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 ### R1.3 CMS tối thiểu  **[SS với R1.1 sau R0.4]**
 - [x] JDL: Category, Post, Comment (duyệt cơ bản)
 - [x] API public list/detail + admin CRUD (`GET /api/v1/posts|categories`; JHipster `/api/cms-posts` + `@RequiresPermission`; sự kiện `PostPublished`)
-- [ ] TipTap hoặc editor đã chọn trong admin (phase UI — hiện Textarea HTML + CRM list/form localStorage; portal `/news`)
+- [x] TipTap trong admin (`RichTextEditor`) + CRUD bài viết qua `/api/cms-posts` (portal `/news`)
 
 ### R1.4 Media tối thiểu  **[SS với R1.3]**
 - [x] Upload MinIO + metadata album/photo — `media/` Modulith: `MinioStorageService`, `MediaUploadController` (`POST /api/v1/media/upload`)
@@ -169,7 +169,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] AppShell + menu CRM + OIDC login (RBAC BE R1.5; menu theo role tinh chỉnh sau)
 - [x] Danh sách / form hồ sơ người + DualDatePicker + Zod (local store; nối API sau)
 - [ ] Tree editor tối thiểu (CRUD quan hệ)
-- [ ] Quản lý bài viết + duyệt comment
+- [x] Quản lý bài viết + duyệt comment (`/posts`, `/comments` → `/api/cms-posts` / `/api/cms-comments`)
 - [ ] Media library
 - [ ] Cài đặt site cơ bản
 
