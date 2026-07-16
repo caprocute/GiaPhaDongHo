@@ -1,19 +1,24 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@giapha/auth";
 
 export function AuthNav() {
-  const { user, loading, login, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
+  const pathname = usePathname() ?? "/";
 
   if (loading) {
     return null;
   }
 
   if (!user) {
+    if (pathname === "/login") {
+      return null;
+    }
     return (
-      <button
-        type="button"
-        onClick={() => void login()}
+      <Link
+        href={`/login?next=${encodeURIComponent(pathname)}`}
         style={{
           font: "inherit",
           border: "1px solid color-mix(in srgb, var(--color-heritage-line) 70%, transparent)",
@@ -23,10 +28,11 @@ export function AuthNav() {
           cursor: "pointer",
           fontSize: "var(--font-size-sm)",
           letterSpacing: "0.04em",
+          textDecoration: "none",
         }}
       >
         Đăng nhập
-      </button>
+      </Link>
     );
   }
 

@@ -21,13 +21,32 @@ type AuthState = {
   user: User | null;
   loading: boolean;
   error: string | null;
+  /** Redirect Hosted Login Keycloak (giữ cho fallback / admin). */
   login: () => Promise<void>;
+  /** Đăng nhập trong app — Resource Owner Password (không rời portal). */
+  loginWithPassword: (username: string, password: string) => Promise<User>;
+  /** Đăng xuất local — không điều hướng sang Keycloak. */
   logout: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
   completeSignIn: () => Promise<User | null>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
+
+function mapPasswordGrantError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  const lower = msg.toLowerCase();
+  if (lower.includes("invalid_grant") || lower.includes("invalid user credentials")) {
+    return "Sai tên đăng nhập hoặc mật khẩu.";
+  }
+  if (lower.includes("unauthorized_client") || lower.includes("unauthorized")) {
+    return "Client chưa bật Direct Access Grants — đồng bộ realm Keycloak.";
+  }
+  if (lower.includes("failed to fetch") || lower.includes("network")) {
+    return "Không kết nối được máy chủ xác thực. Kiểm tra tunnel Keycloak.";
+  }
+  return msg || "Đăng nhập thất bại.";
+}
 
 export function AuthProvider({
   config,
@@ -40,7 +59,6 @@ export function AuthProvider({
     const settings: UserManagerSettings = {
       ...createUserManagerSettings(config),
     };
-    // SSR (Next.js): không đụng window — store mặc định in-memory đủ cho render
     if (typeof window !== "undefined") {
       settings.userStore = new WebStorageStateStore({ store: window.localStorage });
     }
@@ -89,9 +107,29 @@ export function AuthProvider({
     await manager.signinRedirect();
   }, [manager]);
 
+  const loginWithPassword = useCallback(
+    async (username: string, password: string) => {
+      setError(null);
+      try {
+        const u = await manager.signinResourceOwnerCredentials({
+          username: username.trim(),
+          password,
+        });
+        setUser(u);
+        return u;
+      } catch (e: unknown) {
+        const mapped = mapPasswordGrantError(e);
+        setError(mapped);
+        throw new Error(mapped);
+      }
+    },
+    [manager],
+  );
+
   const logout = useCallback(async () => {
     setError(null);
-    await manager.signoutRedirect();
+    await manager.removeUser();
+    setUser(null);
   }, [manager]);
 
   const getAccessToken = useCallback(async () => {
@@ -114,8 +152,17 @@ export function AuthProvider({
   }, [manager]);
 
   const value = useMemo(
-    () => ({ user, loading, error, login, logout, getAccessToken, completeSignIn }),
-    [user, loading, error, login, logout, getAccessToken, completeSignIn],
+    () => ({
+      user,
+      loading,
+      error,
+      login,
+      loginWithPassword,
+      logout,
+      getAccessToken,
+      completeSignIn,
+    }),
+    [user, loading, error, login, loginWithPassword, logout, getAccessToken, completeSignIn],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -129,7 +176,6 @@ export function useAuth(): AuthState {
   return ctx;
 }
 
-/** Xử lý iframe silent renew — gọi từ silent-renew.html / route. */
 export async function handleSilentRenew(config: OidcAppConfig): Promise<void> {
   const manager = new UserManager(createUserManagerSettings(config));
   await manager.signinSilentCallback();

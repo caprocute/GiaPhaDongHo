@@ -31,6 +31,11 @@ function lunarUtilityLabel() {
 
 export function PortalChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/";
+  const isLogin = pathname === "/login";
+
+  if (isLogin) {
+    return <main style={{ flex: 1 }}>{children}</main>;
+  }
 
   return (
     <>
@@ -38,11 +43,7 @@ export function PortalChrome({ children }: { children: ReactNode }) {
         brand="Họ Hoàng – Huỳnh"
         subtitle="Thôn Trung Bính · Bảo Ninh · Đồng Hới"
         activeHref={pathname}
-        utilityRight={
-          <span style={{ opacity: 0.95 }}>
-            {lunarUtilityLabel()}
-          </span>
-        }
+        utilityRight={<span style={{ opacity: 0.95 }}>{lunarUtilityLabel()}</span>}
         endSlot={<AuthNav />}
       />
       <main style={{ flex: 1 }}>{children}</main>
