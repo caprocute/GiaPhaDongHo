@@ -93,27 +93,27 @@ flowchart TB
 
 > **[SS một phần với R0.4/R1 BE]** miễn là không block chờ màn hình. Làm theo từng component (spec → code → story → doc).
 
-Mỗi component: `- [ ]` đủ 4 mảnh (TK-04 / CLAUDE.md).
+Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapping). Figma Code Connect gắn sau khi có component chuẩn trên file «Gia phả họ Hoàng».
 
 ### R0b.1 Form & input
-- [x] Button, Input, Textarea, Select, Checkbox, Switch (+ stories)
-- [x] FormField (+ stories; Zod helper — bổ sung khi form thật)
-- [x] DualDatePicker (dương/âm) + lunar golden xanh
+- [x] Button, Input, Textarea, Select, Checkbox, Switch (+ stories + USAGE.md)
+- [x] FormField (+ stories + USAGE.md; Zod helper — bổ sung khi form thật)
+- [x] DualDatePicker (dương/âm) + lunar golden xanh (+ USAGE.md)
 
 ### R0b.2 Data & feedback  **[SS với R0b.1]**
-- [x] DataTable, Pagination, Badge, Alert, Toast, Skeleton, EmptyState, Dialog (+ stories)
+- [x] DataTable, Pagination, Badge, Alert, Toast, Skeleton, EmptyState, Dialog (+ stories + USAGE.md)
 
 ### R0b.3 Navigation & layout  **[SS với R0b.1]**
-- [x] AppShell (admin), PublicHeader/Footer (portal), Breadcrumb, Tabs (+ stories)
+- [x] AppShell (admin), PublicHeader/Footer (portal), Breadcrumb, Tabs (+ stories + USAGE.md)
 
 ### R0b.4 Domain UI sớm
-- [x] LunarDateBadge, PersonNameDisplay (privacy stub), MediaLightbox (stub) (+ stories)
+- [x] LunarDateBadge, PersonNameDisplay (privacy stub), MediaLightbox (stub) (+ stories + USAGE.md)
 
 ### R0b.5 Âm lịch TS/Java  **[SS sớm, trước DualDatePicker hoàn chỉnh]**
 - [x] Port amlich TS + golden vectors `frontend/shared/lunar-vectors/golden.json`
 - [x] `core.lunar` Java đồng bộ cùng vectors (`LunarCalendarUnitTest` + golden.json)
 
-**Cổng R0b (gần đạt):** ≥12/20 component có story; DualDatePicker + lunar TS/Java xanh. Còn: usage doc 4 mảnh đầy đủ.
+**Cổng R0b (đạt):** ≥12/20 component có story + `USAGE.md` 4 mảnh (catalog `frontend/packages/ui/README.md`); DualDatePicker + lunar TS/Java xanh.
 
 ---
 
