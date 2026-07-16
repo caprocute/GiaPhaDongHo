@@ -1,0 +1,28 @@
+---
+description: Xong một đơn vị việc thì commit + push ngay — không để dồn
+alwaysApply: true
+---
+
+# Commit + push khi xong việc
+
+Sau khi hoàn thành **một đơn vị giao nộp** (một task/checklist item, một generate JDL, một màn hình/component, một sửa infra/docs có ý nghĩa), agent **tự commit và push** lên remote tracking branch — không chờ người dùng nhắc, không gom nhiều milestone vào một commit lớn.
+
+## Khi nào coi là “xong”
+- Diff ổn định, không WIP nửa vời; gate/test bắt buộc của task đã chạy (hoặc ghi rõ còn thiếu nếu task chỉ là docs).
+- Một commit = một ý (theo module / TK / FR), không trộn FE + BE + infra không liên quan.
+
+## Quy trình bắt buộc
+1. `git status` + `git diff` + `git log` (style message gần đây).
+2. Stage chỉ file liên quan; **cấm** stage secret (`.env.local`, `.env.tunnel.local`, credential, pid tunnel…).
+3. Commit message tiếng Việt: `[module] hành động — tham chiếu TK/FR`.
+4. `git push -u origin HEAD` (hoặc `git push` nếu đã track).
+5. Báo người dùng: hash commit + remote/branch.
+
+## Ngoại lệ (không commit/push tự động)
+- Người dùng bảo tạm dừng / chưa commit / chỉ review.
+- Working tree chỉ có thay đổi nhạy cảm hoặc chưa rõ có được commit không — hỏi trước.
+- Hook reject: sửa rồi tạo commit mới (không `--amend` trừ khi đủ điều kiện amend an toàn).
+- Không `push --force` lên `main`/`master`.
+
+## Trái với thói quen “chỉ commit khi được hỏi”
+Trong repo này, rule này **ghi đè**: mặc định là commit+push khi xong đơn vị việc; chỉ dừng khi thuộc ngoại lệ ở trên.
