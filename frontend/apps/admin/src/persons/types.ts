@@ -12,19 +12,7 @@ export interface PersonRecord {
   generation?: number;
   /** ISO date yyyy-mm-dd */
   birthSolar?: string;
-  birthLunarLabel?: string;
+  deathSolar?: string;
   privacy: Privacy;
   notes?: string;
 }
-
-export type PersonFormValues = {
-  code: string;
-  fullName: string;
-  tenHuy: string;
-  gender: Gender;
-  lifeStatus: LifeStatus;
-  generation: string;
-  birthSolar: string;
-  privacy: Privacy;
-  notes: string;
-};

@@ -22,8 +22,10 @@ public final class PersonDtoPrivacyMapper {
         if (
             SecurityUtils.hasCurrentUserAnyOfAuthorities(
                 AuthoritiesConstants.ADMIN,
+                "ROLE_EDITOR",
                 "ROLE_GENEALOGY_ADMIN",
-                "genealogy_admin"
+                "genealogy_admin",
+                "editor"
             )
         ) {
             return ViewerContext.editor();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useId, useMemo, useState, type CSSProperties } from "react";
 import { convertSolarToLunar } from "@giapha/lunar";
 import { FormField } from "../FormField/FormField";
 import { Input } from "../Input/Input";
@@ -12,8 +12,10 @@ export interface DualDateValue {
 
 export interface DualDatePickerProps {
   label?: string;
-  value?: DualDateValue;
-  onChange?: (value: DualDateValue) => void;
+  value?: DualDateValue | null;
+  onChange?: (value: DualDateValue | null) => void;
+  /** Cho phép để trống (không ép ngày mặc định). */
+  optional?: boolean;
 }
 
 function parseDate(value: string): { day: number; month: number; year: number } | null {
@@ -22,13 +24,22 @@ function parseDate(value: string): { day: number; month: number; year: number } 
   return { year: Number(match[1]), month: Number(match[2]), day: Number(match[3]) };
 }
 
-export function DualDatePicker({ label = "Ngày sinh", value, onChange }: DualDatePickerProps) {
-  const initial =
-    value?.solar ??
-    ({ day: 1, month: 1, year: 1990 } satisfies DualDateValue["solar"]);
-  const [solarInput, setSolarInput] = useState(
-    `${initial.year}-${String(initial.month).padStart(2, "0")}-${String(initial.day).padStart(2, "0")}`,
-  );
+function toIso(solar: DualDateValue["solar"]): string {
+  return `${solar.year}-${String(solar.month).padStart(2, "0")}-${String(solar.day).padStart(2, "0")}`;
+}
+
+export function DualDatePicker({
+  label = "Ngày sinh",
+  value,
+  onChange,
+  optional = false,
+}: DualDatePickerProps) {
+  const inputId = useId();
+  const [solarInput, setSolarInput] = useState(() => (value?.solar ? toIso(value.solar) : ""));
+
+  useEffect(() => {
+    setSolarInput(value?.solar ? toIso(value.solar) : "");
+  }, [value?.solar?.year, value?.solar?.month, value?.solar?.day]);
 
   const lunarLabel = useMemo(() => {
     const parsed = parseDate(solarInput);
@@ -47,15 +58,29 @@ export function DualDatePicker({ label = "Ngày sinh", value, onChange }: DualDa
 
   const handleChange = (next: string) => {
     setSolarInput(next);
+    if (!next) {
+      if (optional) onChange?.(null);
+      return;
+    }
     const parsed = parseDate(next);
     if (parsed) {
-      onChange?.({ solar: parsed, lunarLabel });
+      const lunar = convertSolarToLunar(parsed.day, parsed.month, parsed.year);
+      const leap = lunar.leap ? " (nhuận)" : "";
+      onChange?.({
+        solar: parsed,
+        lunarLabel: `${lunar.day}/${lunar.month}/${lunar.year}${leap}`,
+      });
     }
   };
 
   return (
-    <FormField label={label} htmlFor="dual-date" hint="Dương lịch — âm lịch tự quy đổi">
-      <Input id="dual-date" type="date" value={solarInput} onChange={(e) => handleChange(e.target.value)} />
+    <FormField label={label} htmlFor={inputId} hint="Dương lịch — âm lịch tự quy đổi">
+      <Input
+        id={inputId}
+        type="date"
+        value={solarInput}
+        onChange={(e) => handleChange(e.target.value)}
+      />
       <p style={lunarStyle} aria-live="polite">
         Âm lịch: {lunarLabel}
       </p>

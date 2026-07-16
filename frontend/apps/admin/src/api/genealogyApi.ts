@@ -2,10 +2,18 @@ import { apiFetch } from "./http";
 
 export type PersonDto = {
   id?: number;
-  code?: string;
-  fullName?: string;
-  lifeStatus?: string;
+  code?: string | null;
+  fullName?: string | null;
+  tenHuy?: string | null;
+  gender?: string | null;
+  lifeStatus?: string | null;
   generation?: number | null;
+  birthSolar?: string | null;
+  birthLunarJson?: string | null;
+  deathSolar?: string | null;
+  deathLunarJson?: string | null;
+  privacy?: string | null;
+  notes?: string | null;
 };
 
 export type FamilyUnionDto = {
@@ -45,11 +53,61 @@ export function setStoredTreeSlug(slug: string) {
 export async function listTreePersons(
   slug: string,
   token: string | null,
+  query?: string,
 ): Promise<PersonDto[]> {
+  const q = query?.trim() ? `&query=${encodeURIComponent(query.trim())}` : "";
   return apiFetch<PersonDto[]>(
-    `/api/v1/trees/${encodeURIComponent(slug)}/persons?size=200&sort=code,asc`,
+    `/api/v1/trees/${encodeURIComponent(slug)}/persons?size=200&sort=code,asc${q}`,
     { token },
   );
+}
+
+export async function getTreePerson(
+  slug: string,
+  code: string,
+  token: string | null,
+): Promise<PersonDto> {
+  return apiFetch<PersonDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/persons/${encodeURIComponent(code)}`,
+    { token },
+  );
+}
+
+export async function getPersonById(id: number, token: string | null): Promise<PersonDto> {
+  return apiFetch<PersonDto>(`/api/people/${id}`, { token });
+}
+
+export async function createTreePerson(
+  slug: string,
+  dto: PersonDto,
+  token: string | null,
+  opts?: { parentCode?: string; spouse?: boolean },
+): Promise<PersonDto> {
+  const params = new URLSearchParams();
+  if (opts?.parentCode) params.set("parentCode", opts.parentCode);
+  if (opts?.spouse) params.set("spouse", "true");
+  const qs = params.toString() ? `?${params}` : "";
+  return apiFetch<PersonDto>(`/api/v1/trees/${encodeURIComponent(slug)}/persons${qs}`, {
+    method: "POST",
+    body: dto,
+    token,
+  });
+}
+
+export async function updateTreePerson(
+  slug: string,
+  code: string,
+  dto: PersonDto,
+  token: string | null,
+): Promise<PersonDto> {
+  return apiFetch<PersonDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/persons/${encodeURIComponent(code)}`,
+    { method: "PUT", body: dto, token },
+  );
+}
+
+export async function deletePersonById(id: number, token: string | null): Promise<void> {
+  await apiFetch<void>(`/api/people/${id}`, { method: "DELETE", token });
 }
 
 export async function listTreeUnions(

@@ -1,7 +1,8 @@
-import { useEffect, useMemo, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
+import { useAuth } from "@giapha/auth";
 import {
   Alert,
   Button,
@@ -11,8 +12,15 @@ import {
   Select,
   Textarea,
 } from "@giapha/ui";
+import {
+  createTreePerson,
+  defaultTreeSlug,
+  getTreePerson,
+  updateTreePerson,
+} from "../api/genealogyApi";
+import { ApiError } from "../api/http";
+import { fromPersonDto, toPersonDto } from "./personMappers";
 import { personSchema, type PersonSchemaInput } from "./personSchema";
-import { getPerson, listPersons, nextTempCode, upsertPerson } from "./personStore";
 import type { PersonRecord } from "./types";
 
 function toFormValues(p?: PersonRecord): PersonSchemaInput {
@@ -24,59 +32,121 @@ function toFormValues(p?: PersonRecord): PersonSchemaInput {
     lifeStatus: p?.lifeStatus ?? "alive",
     generation: p?.generation != null ? String(p.generation) : "",
     birthSolar: p?.birthSolar ?? "",
+    deathSolar: p?.deathSolar ?? "",
     privacy: p?.privacy ?? "members",
     notes: p?.notes ?? "",
   };
 }
 
+function isoToDual(iso?: string) {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  return {
+    solar: {
+      year: Number(iso.slice(0, 4)),
+      month: Number(iso.slice(5, 7)),
+      day: Number(iso.slice(8, 10)),
+    },
+  };
+}
+
 export function PersonFormPage() {
-  const { id } = useParams();
+  const { id: codeParam } = useParams();
   const navigate = useNavigate();
-  const isNew = !id || id === "new";
-  const existing = useMemo(() => (isNew ? undefined : getPerson(id)), [id, isNew]);
+  const { getAccessToken } = useAuth();
+  const slug = defaultTreeSlug();
+  const isNew = !codeParam || codeParam === "new";
+
+  const [existing, setExisting] = useState<PersonRecord | undefined>();
+  const [loading, setLoading] = useState(!isNew);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const {
     register,
     control,
     handleSubmit,
     reset,
-    setValue,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<PersonSchemaInput>({
     resolver: zodResolver(personSchema),
-    defaultValues: toFormValues(existing),
+    defaultValues: toFormValues(),
   });
 
+  const lifeStatus = watch("lifeStatus");
+
   useEffect(() => {
-    reset(toFormValues(existing));
-  }, [existing, reset]);
+    let cancelled = false;
+    void (async () => {
+      if (isNew) {
+        reset(toFormValues());
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      setLoadError(null);
+      try {
+        const token = await getAccessToken();
+        const dto = await getTreePerson(slug, codeParam!, token);
+        const record = fromPersonDto(dto);
+        if (!cancelled) {
+          setExisting(record);
+          reset(toFormValues(record));
+          setLoading(false);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setLoadError(e instanceof ApiError ? e.message : "Không tải được hồ sơ.");
+          setLoading(false);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [codeParam, getAccessToken, isNew, reset, slug]);
 
-  const birthSolar = watch("birthSolar");
-
-  const onSubmit = handleSubmit((values) => {
-    const all = listPersons();
-    const code = values.code?.trim() || (isNew ? nextTempCode(all) : existing!.code);
+  const onSubmit = handleSubmit(async (values) => {
+    setSaveError(null);
     const record: PersonRecord = {
-      id: isNew ? `p-${crypto.randomUUID()}` : existing!.id,
-      code,
+      id: isNew ? "" : existing!.id,
+      code: values.code?.trim() || (isNew ? "" : existing!.code),
       fullName: values.fullName.trim(),
       tenHuy: values.tenHuy?.trim() || undefined,
       gender: values.gender,
       lifeStatus: values.lifeStatus,
       generation: values.generation ? Number(values.generation) : undefined,
       birthSolar: values.birthSolar || undefined,
+      deathSolar: values.lifeStatus === "deceased" ? values.deathSolar || undefined : undefined,
       privacy: values.privacy,
       notes: values.notes?.trim() || undefined,
     };
-    upsertPerson(record);
-    navigate("/persons");
+
+    try {
+      const token = await getAccessToken();
+      const dto = toPersonDto(record);
+      if (isNew) {
+        const { id: _omit, ...body } = dto;
+        await createTreePerson(slug, body, token);
+      } else {
+        await updateTreePerson(slug, existing!.code, { ...dto, id: Number(existing!.id) }, token);
+      }
+      navigate("/persons");
+    } catch (e) {
+      setSaveError(e instanceof ApiError ? e.message : "Lưu hồ sơ thất bại.");
+    }
   });
 
-  if (!isNew && !existing) {
+  if (loading) {
+    return (
+      <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)" }}>Đang tải…</p>
+    );
+  }
+
+  if (loadError || (!isNew && !existing)) {
     return (
       <Alert title="Không tìm thấy hồ sơ" variant="error">
-        <Link to="/persons">Quay lại danh sách</Link>
+        {loadError ?? "Hồ sơ không tồn tại."} <Link to="/persons">Quay lại danh sách</Link>
       </Alert>
     );
   }
@@ -90,7 +160,14 @@ export function PersonFormPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "var(--spacing-md)" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "baseline",
+          gap: "var(--spacing-md)",
+        }}
+      >
         <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>
           {isNew ? "Thêm thành viên" : `Sửa — ${existing!.fullName}`}
         </h1>
@@ -99,10 +176,19 @@ export function PersonFormPage() {
         </Link>
       </div>
 
-      <form onSubmit={onSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}>
+      {saveError ? (
+        <Alert title="Lỗi lưu" variant="error">
+          {saveError}
+        </Alert>
+      ) : null}
+
+      <form
+        onSubmit={onSubmit}
+        style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}
+      >
         <div style={grid}>
-          <FormField label="Mã hiệu" hint="Để trống sẽ tự sinh A… khi tạo mới" error={errors.code?.message}>
-            <Input placeholder="A7" {...register("code")} />
+          <FormField label="Mã hiệu" hint="Để trống sẽ tự sinh A…" error={errors.code?.message}>
+            <Input placeholder="A7" disabled={!isNew} {...register("code")} />
           </FormField>
           <FormField label="Họ tên" required error={errors.fullName?.message}>
             <Input {...register("fullName")} />
@@ -150,21 +236,15 @@ export function PersonFormPage() {
           render={({ field }) => (
             <DualDatePicker
               label="Ngày sinh (dương / âm)"
-              value={
-                field.value && /^\d{4}-\d{2}-\d{2}$/.test(field.value)
-                  ? {
-                      solar: {
-                        year: Number(field.value.slice(0, 4)),
-                        month: Number(field.value.slice(5, 7)),
-                        day: Number(field.value.slice(8, 10)),
-                      },
-                    }
-                  : undefined
-              }
+              optional
+              value={isoToDual(field.value)}
               onChange={(v) => {
+                if (!v) {
+                  field.onChange("");
+                  return;
+                }
                 const iso = `${v.solar.year}-${String(v.solar.month).padStart(2, "0")}-${String(v.solar.day).padStart(2, "0")}`;
                 field.onChange(iso);
-                setValue("birthSolar", iso, { shouldValidate: true });
               }}
             />
           )}
@@ -174,10 +254,34 @@ export function PersonFormPage() {
             {errors.birthSolar.message}
           </p>
         ) : null}
-        {birthSolar ? (
-          <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)", fontSize: "var(--font-size-sm)" }}>
-            Đã chọn dương lịch: {birthSolar}
-          </p>
+
+        {lifeStatus === "deceased" ? (
+          <>
+            <Controller
+              name="deathSolar"
+              control={control}
+              render={({ field }) => (
+                <DualDatePicker
+                  label="Ngày mất (dương / âm) — tạo ngày giỗ"
+                  optional
+                  value={isoToDual(field.value)}
+                  onChange={(v) => {
+                    if (!v) {
+                      field.onChange("");
+                      return;
+                    }
+                    const iso = `${v.solar.year}-${String(v.solar.month).padStart(2, "0")}-${String(v.solar.day).padStart(2, "0")}`;
+                    field.onChange(iso);
+                  }}
+                />
+              )}
+            />
+            {errors.deathSolar ? (
+              <p style={{ color: "var(--color-status-error-fg)", fontFamily: "var(--font-body)" }}>
+                {errors.deathSolar.message}
+              </p>
+            ) : null}
+          </>
         ) : null}
 
         <FormField label="Ghi chú" error={errors.notes?.message}>
@@ -186,7 +290,7 @@ export function PersonFormPage() {
 
         <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
           <Button type="submit" disabled={isSubmitting}>
-            Lưu
+            {isSubmitting ? "Đang lưu…" : "Lưu"}
           </Button>
           <Button type="button" variant="secondary" onClick={() => navigate("/persons")}>
             Hủy
