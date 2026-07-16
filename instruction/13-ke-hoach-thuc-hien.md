@@ -124,7 +124,7 @@ Mỗi component: `- [ ]` đủ 4 mảnh (TK-04 / CLAUDE.md).
 - [x] `jhipster jdl` → Liquibase + entity
 - [x] Xếp package Modulith `genealogy/` (`api/` + `events/` + privacy); entity JHipster vẫn `domain/` OPEN tạm
 - [x] Privacy filter serializer (người sống) — TK-10 / NĐ13 (wire `PersonResource` GET)
-- [ ] API: CRUD person/union, list theo cây, mã hiệu A7…
+- [x] API: CRUD person/union theo cây (`/api/v1/trees/{slug}/persons|unions`), sinh mã hiệu A7/A7-sp1 + lineage_path
 - [x] Test authz `@RequiresPermission` (gate đăng nhập) + Modulith verify; ma trận role đầy đủ → R1.5
 
 ### R1.2 Search index person  **[SS với R1.3 sau khi có Person API]**

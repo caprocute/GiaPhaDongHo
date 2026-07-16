@@ -37,4 +37,6 @@ public interface FamilyUnionRepository extends JpaRepository<FamilyUnion, Long> 
 
     @Query("select familyUnion from FamilyUnion familyUnion left join fetch familyUnion.tree where familyUnion.id =:id")
     Optional<FamilyUnion> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Page<FamilyUnion> findByTree_Slug(String slug, Pageable pageable);
 }

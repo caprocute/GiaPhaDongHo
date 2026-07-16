@@ -34,4 +34,41 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     @Query("select person from Person person left join fetch person.tree where person.id =:id")
     Optional<Person> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Optional<Person> findByTree_SlugAndCodeIgnoreCase(String slug, String code);
+
+    @Query("select person.code from Person person where person.tree.slug = :slug")
+    List<String> findCodesByTreeSlug(@Param("slug") String slug);
+
+    @Query(
+        value = """
+            select person from Person person
+            left join fetch person.tree tree
+            where tree.slug = :slug
+              and (:generation is null or person.generation = :generation)
+              and (
+                :query is null
+                or lower(person.fullName) like concat('%', :query, '%')
+                or lower(person.code) like concat('%', :query, '%')
+                or lower(coalesce(person.tenHuy, '')) like concat('%', :query, '%')
+              )
+            """,
+        countQuery = """
+            select count(person) from Person person
+            where person.tree.slug = :slug
+              and (:generation is null or person.generation = :generation)
+              and (
+                :query is null
+                or lower(person.fullName) like concat('%', :query, '%')
+                or lower(person.code) like concat('%', :query, '%')
+                or lower(coalesce(person.tenHuy, '')) like concat('%', :query, '%')
+              )
+            """
+    )
+    Page<Person> searchInTree(
+        @Param("slug") String slug,
+        @Param("query") String query,
+        @Param("generation") Integer generation,
+        Pageable pageable
+    );
 }
