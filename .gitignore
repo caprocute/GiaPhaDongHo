@@ -1,0 +1,57 @@
+# Secrets & môi trường
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+credentials.json
+secrets/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+.claude/settings.local.json
+
+# Node / frontend
+node_modules/
+.pnpm-store/
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+storybook-static/
+
+# Java / backend
+backend/.gradle/
+backend/build/
+backend/out/
+*.class
+*.jar
+*.war
+!gradle/wrapper/gradle-wrapper.jar
+.gradle/
+
+# Docker / dữ liệu cục bộ
+deploy/compose/.env
+*.log
+data/
+pgdata/
+esdata/
+minio-data/
+redis-data/
+
+# Tooling tạm
+*.tmp
+.cache/
+.vercel/
+.terraform/
