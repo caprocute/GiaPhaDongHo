@@ -37,4 +37,21 @@ public interface CmsCommentRepository extends JpaRepository<CmsComment, Long> {
 
     @Query("select cmsComment from CmsComment cmsComment left join fetch cmsComment.post where cmsComment.id =:id")
     Optional<CmsComment> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        value = """
+            select c from CmsComment c left join fetch c.post p
+            where p.slug = :postSlug and lower(c.status) = lower(:status)
+            order by c.createdAt desc nulls last, c.id desc
+            """,
+        countQuery = """
+            select count(c) from CmsComment c join c.post p
+            where p.slug = :postSlug and lower(c.status) = lower(:status)
+            """
+    )
+    Page<CmsComment> findApprovedByPostSlug(
+        @Param("postSlug") String postSlug,
+        @Param("status") String status,
+        Pageable pageable
+    );
 }

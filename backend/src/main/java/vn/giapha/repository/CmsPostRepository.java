@@ -37,4 +37,37 @@ public interface CmsPostRepository extends JpaRepository<CmsPost, Long> {
 
     @Query("select cmsPost from CmsPost cmsPost left join fetch cmsPost.category where cmsPost.id =:id")
     Optional<CmsPost> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        value = """
+            select p from CmsPost p left join fetch p.category c
+            where lower(p.status) = lower(:status)
+              and (:categorySlug is null or c.slug = :categorySlug)
+              and (
+                :query is null
+                or lower(p.title) like concat('%', :query, '%')
+                or lower(coalesce(p.summary, '')) like concat('%', :query, '%')
+              )
+            order by p.publishedAt desc nulls last, p.id desc
+            """,
+        countQuery = """
+            select count(p) from CmsPost p left join p.category c
+            where lower(p.status) = lower(:status)
+              and (:categorySlug is null or c.slug = :categorySlug)
+              and (
+                :query is null
+                or lower(p.title) like concat('%', :query, '%')
+                or lower(coalesce(p.summary, '')) like concat('%', :query, '%')
+              )
+            """
+    )
+    Page<CmsPost> searchByStatus(
+        @Param("status") String status,
+        @Param("categorySlug") String categorySlug,
+        @Param("query") String query,
+        Pageable pageable
+    );
+
+    @Query("select p from CmsPost p left join fetch p.category where p.slug = :slug")
+    Optional<CmsPost> findBySlug(@Param("slug") String slug);
 }

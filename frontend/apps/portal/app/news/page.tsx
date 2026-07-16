@@ -1,3 +1,5 @@
+import { NewsListClient } from "./NewsListClient";
+
 export default function NewsPage() {
-  return <h1 style={{ fontFamily: "var(--font-display)" }}>Tin tức</h1>;
+  return <NewsListClient />;
 }

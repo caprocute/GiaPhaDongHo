@@ -19,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.giapha.core.security.RequiresPermission;
 import vn.giapha.repository.CmsPostRepository;
 import vn.giapha.service.CmsPostService;
 import vn.giapha.service.dto.CmsPostDTO;
@@ -55,6 +56,7 @@ public class CmsPostResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
+    @RequiresPermission("cms:post:write")
     public ResponseEntity<CmsPostDTO> createCmsPost(@Valid @RequestBody CmsPostDTO cmsPostDTO) throws URISyntaxException {
         LOG.debug("REST request to save CmsPost : {}", cmsPostDTO);
         if (cmsPostDTO.getId() != null) {
@@ -77,6 +79,7 @@ public class CmsPostResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
+    @RequiresPermission("cms:post:write")
     public ResponseEntity<CmsPostDTO> updateCmsPost(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody CmsPostDTO cmsPostDTO
@@ -111,6 +114,7 @@ public class CmsPostResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @RequiresPermission("cms:post:write")
     public ResponseEntity<CmsPostDTO> partialUpdateCmsPost(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody CmsPostDTO cmsPostDTO
@@ -143,6 +147,7 @@ public class CmsPostResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of Cms Posts in body.
      */
     @GetMapping("")
+    @RequiresPermission("cms:post:read")
     public ResponseEntity<List<CmsPostDTO>> getAllCmsPosts(
         @org.springdoc.core.annotations.ParameterObject Pageable pageable,
         @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload
@@ -165,6 +170,7 @@ public class CmsPostResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the cmsPostDTO, or with status {@code 404 (Not Found)}.
      */
     @GetMapping("/{id}")
+    @RequiresPermission("cms:post:read")
     public ResponseEntity<CmsPostDTO> getCmsPost(@PathVariable("id") Long id) {
         LOG.debug("REST request to get CmsPost : {}", id);
         Optional<CmsPostDTO> cmsPostDTO = cmsPostService.findOne(id);
@@ -178,6 +184,7 @@ public class CmsPostResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
+    @RequiresPermission("cms:post:write")
     public ResponseEntity<Void> deleteCmsPost(@PathVariable("id") Long id) {
         LOG.debug("REST request to delete CmsPost : {}", id);
         cmsPostService.delete(id);

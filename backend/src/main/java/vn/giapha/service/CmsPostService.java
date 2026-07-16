@@ -3,10 +3,13 @@ package vn.giapha.service;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.giapha.cms.api.CmsPostStatus;
+import vn.giapha.cms.events.PostPublished;
 import vn.giapha.domain.CmsPost;
 import vn.giapha.repository.CmsPostRepository;
 import vn.giapha.service.dto.CmsPostDTO;
@@ -25,9 +28,16 @@ public class CmsPostService {
 
     private final CmsPostMapper cmsPostMapper;
 
-    public CmsPostService(CmsPostRepository cmsPostRepository, CmsPostMapper cmsPostMapper) {
+    private final ApplicationEventPublisher eventPublisher;
+
+    public CmsPostService(
+        CmsPostRepository cmsPostRepository,
+        CmsPostMapper cmsPostMapper,
+        ApplicationEventPublisher eventPublisher
+    ) {
         this.cmsPostRepository = cmsPostRepository;
         this.cmsPostMapper = cmsPostMapper;
+        this.eventPublisher = eventPublisher;
     }
 
     /**
@@ -40,7 +50,9 @@ public class CmsPostService {
         LOG.debug("Request to save CmsPost : {}", cmsPostDTO);
         CmsPost cmsPost = cmsPostMapper.toEntity(cmsPostDTO);
         cmsPost = cmsPostRepository.save(cmsPost);
-        return cmsPostMapper.toDto(cmsPost);
+        CmsPostDTO dto = cmsPostMapper.toDto(cmsPost);
+        publishIfNeeded(dto);
+        return dto;
     }
 
     /**
@@ -53,7 +65,9 @@ public class CmsPostService {
         LOG.debug("Request to update CmsPost : {}", cmsPostDTO);
         CmsPost cmsPost = cmsPostMapper.toEntity(cmsPostDTO);
         cmsPost = cmsPostRepository.save(cmsPost);
-        return cmsPostMapper.toDto(cmsPost);
+        CmsPostDTO dto = cmsPostMapper.toDto(cmsPost);
+        publishIfNeeded(dto);
+        return dto;
     }
 
     /**
@@ -73,7 +87,17 @@ public class CmsPostService {
                 return existingCmsPost;
             })
             .map(cmsPostRepository::save)
-            .map(cmsPostMapper::toDto);
+            .map(cmsPostMapper::toDto)
+            .map(dto -> {
+                publishIfNeeded(dto);
+                return dto;
+            });
+    }
+
+    private void publishIfNeeded(CmsPostDTO dto) {
+        if (dto != null && CmsPostStatus.isPublished(dto.getStatus())) {
+            eventPublisher.publishEvent(new PostPublished(dto.getId(), dto.getSlug(), dto.getTitle()));
+        }
     }
 
     /**

@@ -133,9 +133,9 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [ ] Listener `PersonUpdated` → reindex
 
 ### R1.3 CMS tối thiểu  **[SS với R1.1 sau R0.4]**
-- [ ] JDL: Category, Post, Comment (duyệt cơ bản)
-- [ ] API public list/detail + admin CRUD
-- [ ] TipTap hoặc editor đã chọn trong admin (có thể phase UI sau API)
+- [x] JDL: Category, Post, Comment (duyệt cơ bản)
+- [x] API public list/detail + admin CRUD (`GET /api/v1/posts|categories`; JHipster `/api/cms-posts` + `@RequiresPermission`; sự kiện `PostPublished`)
+- [ ] TipTap hoặc editor đã chọn trong admin (phase UI — hiện Textarea HTML + CRM list/form localStorage; portal `/news`)
 
 ### R1.4 Media tối thiểu  **[SS với R1.3]**
 - [ ] Upload MinIO + metadata album/photo
