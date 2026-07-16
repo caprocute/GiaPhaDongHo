@@ -165,8 +165,8 @@ Chia từng route (1 PR / route nếu lớn):
 - [ ] Tìm kiếm
 
 ### R1.8 Admin CRM lõi  **[SS với R1.7 — cùng API]**
-- [ ] AppShell + RBAC menu
-- [ ] Danh sách / form hồ sơ người + DualDatePicker
+- [x] AppShell + menu CRM (RBAC đầy đủ → R1.5)
+- [x] Danh sách / form hồ sơ người + DualDatePicker + Zod (local store; nối API sau)
 - [ ] Tree editor tối thiểu (CRUD quan hệ)
 - [ ] Quản lý bài viết + duyệt comment
 - [ ] Media library
