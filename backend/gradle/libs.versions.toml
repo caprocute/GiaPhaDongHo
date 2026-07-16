@@ -3,6 +3,7 @@ mapstruct = "1.6.3"
 archunit-junit5 = "1.4.2"
 checkstyle = "13.7.0"
 jacoco = "0.8.15"
+spring-modulith = "2.0.7"
 # jhipster-needle-gradle-dependency-catalog-version - JHipster will add additional versions for convention plugins here
 
 [libraries]
@@ -12,6 +13,9 @@ archunit-junit5-api = { module = "com.tngtech.archunit:archunit-junit5-api", ver
 archunit-junit5-engine = { module = "com.tngtech.archunit:archunit-junit5-engine", version.ref = "archunit-junit5" }
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
 mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+spring-modulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "spring-modulith" }
+spring-modulith-starter-core = { module = "org.springframework.modulith:spring-modulith-starter-core" }
+spring-modulith-starter-test = { module = "org.springframework.modulith:spring-modulith-starter-test" }
 # jhipster-needle-gradle-dependency-catalog-libraries - JHipster will add additional libraries versions
 
 [plugins]

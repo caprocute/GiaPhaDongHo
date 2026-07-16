@@ -71,7 +71,7 @@ flowchart TB
 - [x] `./gradlew compileJava` xanh (full Testcontainers check — bổ sung sau)
 - [x] Keycloak realm JHipster trong `backend/src/main/docker/realm-config/`
 - [x] springdoc-openapi (JHipster)
-- [ ] Spring Modulith 2.x + `ApplicationModules.verify()` — xếp package sau generate
+- [x] Spring Modulith 2.0.7 + `ApplicationModules.verify()` — `core`/`genealogy` + package JHipster `OPEN` (R0)
 - [x] Entity genealogy + CMS/media đã `jhipster jdl` (không scaffold tay)
 
 ### R0.5 Frontend workspace  **[SS với R0.4 sau khi có OpenAPI; tokens cần R0.3]**
@@ -85,7 +85,7 @@ flowchart TB
 - [x] Gate B token-lint trong job frontend
 - [ ] (Chưa bắt buộc) visual.yml / deploy — để cuối R1
 
-**Cổng R0 (đạt tối thiểu):** tunnel infra OK; JHipster BE compile; FE portal/admin/ui build; lunar golden xanh; Gate B xanh. Còn: Modulith verify, branch protection.
+**Cổng R0 (đạt tối thiểu):** tunnel infra OK; JHipster BE compile; FE portal/admin/ui build; lunar golden xanh; Gate B xanh; Modulith verify. Còn: branch protection.
 
 ---
 
@@ -111,21 +111,21 @@ Mỗi component: `- [ ]` đủ 4 mảnh (TK-04 / CLAUDE.md).
 
 ### R0b.5 Âm lịch TS/Java  **[SS sớm, trước DualDatePicker hoàn chỉnh]**
 - [x] Port amlich TS + golden vectors `frontend/shared/lunar-vectors/golden.json`
-- [ ] `core.lunar` Java đồng bộ cùng vectors (còn lại)
+- [x] `core.lunar` Java đồng bộ cùng vectors (`LunarCalendarUnitTest` + golden.json)
 
-**Cổng R0b (gần đạt):** ≥12/20 component có story; DualDatePicker + lunar TS xanh. Còn: Java lunar + usage doc 4 mảnh đầy đủ.
+**Cổng R0b (gần đạt):** ≥12/20 component có story; DualDatePicker + lunar TS/Java xanh. Còn: usage doc 4 mảnh đầy đủ.
 
 ---
 
 ## R1 — MVP (parity lõi)
 
 ### R1.1 Genealogy schema & JDL (BE)
-- [ ] JDL: Tree, Person, Union, Chapter (phả ký/tộc ước/hương hỏa), DeathAnniversary
-- [ ] `jhipster jdl` → Liquibase + entity
-- [ ] Xếp package Modulith `genealogy/`; chỉ public `api/` + `events/`
-- [ ] Privacy filter serializer (người sống) — TK-10 / NĐ13
+- [x] JDL: Tree, Person, Union, Chapter (phả ký/tộc ước/hương hỏa), DeathAnniversary
+- [x] `jhipster jdl` → Liquibase + entity
+- [x] Xếp package Modulith `genealogy/` (`api/` + `events/` + privacy); entity JHipster vẫn `domain/` OPEN tạm
+- [x] Privacy filter serializer (người sống) — TK-10 / NĐ13 (wire `PersonResource` GET)
 - [ ] API: CRUD person/union, list theo cây, mã hiệu A7…
-- [ ] Test authz `@RequiresPermission` + Modulith verify
+- [x] Test authz `@RequiresPermission` (gate đăng nhập) + Modulith verify; ma trận role đầy đủ → R1.5
 
 ### R1.2 Search index person  **[SS với R1.3 sau khi có Person API]**
 - [ ] Module `search`: index Person (ES hoặc PG FTS fallback khi ES tắt)

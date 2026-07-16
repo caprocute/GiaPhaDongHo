@@ -92,6 +92,9 @@ management:
 spring:
   application:
     name: giapha
+  modulith:
+    # Chỉ package có @ApplicationModule (core, genealogy…) — tránh verify layout JHipster phẳng
+    detection-strategy: explicitly-annotated
   docker:
     compose:
       enabled: true

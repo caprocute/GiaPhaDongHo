@@ -50,6 +50,9 @@ eclipse {
 }
 
 dependencies {
+    implementation platform(libs.spring.modulith.bom)
+    implementation libs.spring.modulith.starter.core
+    testImplementation libs.spring.modulith.starter.test
     implementation libs.jhipster.framework
     implementation libs.mapstruct
     implementation libs.springdoc.openapi.starter.webmvc.api

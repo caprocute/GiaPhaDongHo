@@ -7,7 +7,7 @@
 | Ngôn ngữ BE | Java (LTS) | 21 | Virtual threads, ổn định doanh nghiệp, đội ngũ VN dồi dào | Kotlin (nếu team quen) |
 | Framework BE | **Spring Boot** | **4.1.x** (tối thiểu 4.0.x) | Dòng OSS hiện hành (Framework 7, Jackson 3, Jakarta EE 11); Boot 3.5 đã hết OSS (06/2026). Greenfield → lên 4 ngay | Boot 3.5.x chỉ khi bị khóa dependency (không áp dụng dự án này) |
 | Sinh mã / scaffold BE | **JHipster CLI** (`npx generator-jhipster@9`, `jhipster jdl`) | **9.2.x** | Core BE **chỉ** do CLI sinh trong `backend/`; cấm copy sample / AI viết giả CRUD (TK-01 §3.1) | JHipster 8 / Initializr tay (cấm) |
-| Kiến trúc BE | **Spring Modulith** | **2.x** (2.0 cho Boot 4.0; 2.1 cho Boot 4.1) | Module hóa có kiểm chứng (yêu cầu 8), outbox event sẵn; xếp package sau khi JHipster generate | Modulith 1.4 (chỉ gắn Boot 3.x) |
+| Kiến trúc BE | **Spring Modulith** | **2.0.7** (Boot 4.0.x; lên 2.1 khi Boot 4.1) | Module hóa có kiểm chứng (yêu cầu 8), outbox event sẵn; `core`/`genealogy` đóng + package JHipster `OPEN` tạm thời | Modulith 1.4 (chỉ gắn Boot 3.x) |
 | ORM/Migration | Spring Data JPA + **Liquibase** (chuẩn JHipster) | — | Changelog versioned do generator + chỉnh tay expand→migrate→contract | Flyway (chỉ nếu tách hẳn khỏi JHipster) |
 | FE Portal | **Next.js (React 19)** | 15.x | SSR/SSG cho SEO cổng thông tin (bản cũ rất mạnh SEO); OG image động | Vite + React Router 7 SSR |
 | FE Admin | **Vite + React 19 + TypeScript** | — | SPA tương tác dày, build nhanh | gộp vào Next.js (ít khuyến nghị) |

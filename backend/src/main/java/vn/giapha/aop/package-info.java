@@ -1,4 +1,4 @@
 /**
  * Package JHipster — chưa phải application module Modulith (detection: explicitly-annotated).
  */
-package vn.giapha.security;
+package vn.giapha.aop;

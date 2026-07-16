@@ -19,10 +19,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
+import vn.giapha.core.security.RequiresPermission;
+import vn.giapha.genealogy.api.PersonPrivacyFilter;
 import vn.giapha.repository.PersonRepository;
 import vn.giapha.service.PersonService;
 import vn.giapha.service.dto.PersonDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.rest.support.PersonDtoPrivacyMapper;
 
 /**
  * REST controller for managing {@link vn.giapha.domain.Person}.
@@ -42,9 +45,16 @@ public class PersonResource {
 
     private final PersonRepository personRepository;
 
-    public PersonResource(PersonService personService, PersonRepository personRepository) {
+    private final PersonPrivacyFilter personPrivacyFilter;
+
+    public PersonResource(
+        PersonService personService,
+        PersonRepository personRepository,
+        PersonPrivacyFilter personPrivacyFilter
+    ) {
         this.personService = personService;
         this.personRepository = personRepository;
+        this.personPrivacyFilter = personPrivacyFilter;
     }
 
     /**
@@ -55,12 +65,13 @@ public class PersonResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
+    @RequiresPermission("genealogy:person:write")
     public ResponseEntity<PersonDTO> createPerson(@Valid @RequestBody PersonDTO personDTO) throws URISyntaxException {
         LOG.debug("REST request to save Person : {}", personDTO);
         if (personDTO.getId() != null) {
             throw new BadRequestAlertException("A new person cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        personDTO = personService.save(personDTO);
+        personDTO = PersonDtoPrivacyMapper.apply(personService.save(personDTO), personPrivacyFilter);
         return ResponseEntity.created(new URI("/api/people/" + personDTO.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, false, ENTITY_NAME, personDTO.getId().toString()))
             .body(personDTO);
@@ -77,6 +88,7 @@ public class PersonResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
+    @RequiresPermission("genealogy:person:write")
     public ResponseEntity<PersonDTO> updatePerson(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody PersonDTO personDTO
@@ -93,7 +105,7 @@ public class PersonResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        personDTO = personService.update(personDTO);
+        personDTO = PersonDtoPrivacyMapper.apply(personService.update(personDTO), personPrivacyFilter);
         return ResponseEntity.ok()
             .headers(HeaderUtil.createEntityUpdateAlert(applicationName, false, ENTITY_NAME, personDTO.getId().toString()))
             .body(personDTO);
@@ -111,6 +123,7 @@ public class PersonResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    @RequiresPermission("genealogy:person:write")
     public ResponseEntity<PersonDTO> partialUpdatePerson(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody PersonDTO personDTO
@@ -127,7 +140,9 @@ public class PersonResource {
             throw new BadRequestAlertException("Entity not found", ENTITY_NAME, "idnotfound");
         }
 
-        Optional<PersonDTO> result = personService.partialUpdate(personDTO);
+        Optional<PersonDTO> result = personService
+            .partialUpdate(personDTO)
+            .map(dto -> PersonDtoPrivacyMapper.apply(dto, personPrivacyFilter));
 
         return ResponseUtil.wrapOrNotFound(
             result,
@@ -155,7 +170,8 @@ public class PersonResource {
             page = personService.findAll(pageable);
         }
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(ServletUriComponentsBuilder.fromCurrentRequest(), page);
-        return ResponseEntity.ok().headers(headers).body(page.getContent());
+        List<PersonDTO> body = page.getContent().stream().map(dto -> PersonDtoPrivacyMapper.apply(dto, personPrivacyFilter)).toList();
+        return ResponseEntity.ok().headers(headers).body(body);
     }
 
     /**
@@ -167,7 +183,7 @@ public class PersonResource {
     @GetMapping("/{id}")
     public ResponseEntity<PersonDTO> getPerson(@PathVariable("id") Long id) {
         LOG.debug("REST request to get Person : {}", id);
-        Optional<PersonDTO> personDTO = personService.findOne(id);
+        Optional<PersonDTO> personDTO = personService.findOne(id).map(dto -> PersonDtoPrivacyMapper.apply(dto, personPrivacyFilter));
         return ResponseUtil.wrapOrNotFound(personDTO);
     }
 
@@ -178,6 +194,7 @@ public class PersonResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
+    @RequiresPermission("genealogy:person:write")
     public ResponseEntity<Void> deletePerson(@PathVariable("id") Long id) {
         LOG.debug("REST request to delete Person : {}", id);
         personService.delete(id);
