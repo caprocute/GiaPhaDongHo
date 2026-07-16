@@ -1,38 +1,18 @@
-# PublicHeader — Header Portal
+# PublicHeader
 
-> **Done 4 mảnh (TK-04):** ① Spec (file này) · ② Code `PublicHeader.tsx` · ③ Story `PublicHeader.stories.tsx` · ④ Usage/mapping (file này).
+Masthead cổng công khai theo mockup **Di sản sống**: utility bar + băng hồi văn + ấn triện + brand dòng họ + nav.
 
-## ① Spec
+## Props
 
-| | |
-|--|--|
-| **Khi dùng** | Điều hướng công khai trang họ. |
-| **Khi không** | Không dùng trong Admin AppShell. |
-| **Variants / API** | nav items / brand |
-| **A11y** | nav landmark; mobile menu focusable. |
+| Prop | Mô tả |
+|------|--------|
+| `brand` | Tên dòng họ (mặc định: Họ Hoàng – Huỳnh) |
+| `subtitle` | Địa danh |
+| `activeHref` | Path hiện tại để highlight menu |
+| `utilityLeft` / `utilityRight` | Slot thanh tiện ích |
+| `endSlot` | Thường là nút đăng nhập OIDC |
 
-## ④ Usage
+## Mapping
 
-```tsx
-import { PublicHeader } from "@giapha/ui";
-
-<PublicHeader />
-```
-
-### Tokens (chỉ semantic)
-
-`--color-heritage-frame`, `--font-display`
-
-### Mapping
-
-| Nguồn | Liên kết |
-|-------|----------|
-| Storybook | `PublicHeader` |
-| Figma DS | Gia phả họ Hoàng (`ETrlAF4vsj0uHiJd69jcnD`) — Components/PublicHeader (Code Connect phase sau) |
-| Import | `@giapha/ui` → `PublicHeader` |
-
-### Do / Don't
-
-- ✅ Compose trong Portal/Admin; không styled-div trùng pattern.
-- ✅ Màu/spacing qua `var(--…)` từ `@giapha/tokens`.
-- ❌ Hardcode hex/px/font ngoài token.
+- Mockup: `instruction/mockups/giapha-ui-mockup.html` → `.utility` / `.masthead` / `.nav`
+- Tokens: `--color-heritage-*`, `--pattern-meander`, `--font-display`

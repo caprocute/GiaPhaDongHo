@@ -53,6 +53,7 @@ export { PublicHeader } from "./PublicHeader/PublicHeader";
 export type { PublicHeaderProps } from "./PublicHeader/PublicHeader";
 
 export { PublicFooter } from "./PublicFooter/PublicFooter";
+export type { PublicFooterProps } from "./PublicFooter/PublicFooter";
 
 export { Breadcrumb } from "./Breadcrumb/Breadcrumb";
 export type { BreadcrumbItem, BreadcrumbProps } from "./Breadcrumb/Breadcrumb";

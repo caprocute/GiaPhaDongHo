@@ -1,137 +1,156 @@
 import Link from "next/link";
-import { Button, GioCard } from "@giapha/ui";
-import { HomeSearch } from "./HomeSearch";
-import { DEMO_ALBUM, DEMO_POSTS, demoAnniversaries } from "../src/lib/demoContent";
-import { fetchAnniversaries, fetchPosts } from "../src/lib/api";
+import { GioCard, StatCard } from "@giapha/ui";
 import { convertSolarToLunar } from "@giapha/lunar";
+import { HomeSearch } from "./HomeSearch";
+import { HeroConstellation } from "./HeroConstellation";
+import styles from "./home.module.css";
+import {
+  DEMO_CONG_DUC,
+  DEMO_POSTS,
+  DEMO_STATS,
+  demoAnniversaries,
+} from "../src/lib/demoContent";
+import { fetchAnniversaries, fetchPosts } from "../src/lib/api";
+
+function formatPostDate(iso?: string | null) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("vi-VN");
+}
 
 export default async function HomePage() {
   const now = new Date();
   const lunar = convertSolarToLunar(now.getDate(), now.getMonth() + 1, now.getFullYear());
-  const apiPosts = await fetchPosts(3);
-  const posts = apiPosts.length ? apiPosts.slice(0, 3) : DEMO_POSTS.slice(0, 3);
+  const apiPosts = await fetchPosts(5);
+  const posts = apiPosts.length >= 2 ? apiPosts.slice(0, 5) : DEMO_POSTS;
+  const featured = posts[0];
+  const rest = posts.slice(1, 5);
   const apiGio = await fetchAnniversaries(lunar.month);
-  const gio = apiGio.length ? apiGio.slice(0, 4) : demoAnniversaries(lunar.month).slice(0, 4);
+  const gio = apiGio.length ? apiGio.slice(0, 6) : demoAnniversaries(lunar.month).slice(0, 6);
 
   return (
-    <div style={{ margin: "calc(-1 * var(--spacing-lg))", marginBottom: 0 }}>
-      {/* Hero full-bleed — brand first */}
-      <section
-        style={{
-          position: "relative",
-          minHeight: "min(78vh, 720px)",
-          display: "flex",
-          alignItems: "flex-end",
-          padding: "var(--spacing-xl) var(--spacing-lg)",
-          background: `
-            linear-gradient(105deg, color-mix(in srgb, var(--color-heritage-frame) 88%, transparent) 0%,
-              color-mix(in srgb, var(--color-action-primary-bg) 55%, transparent) 45%,
-              transparent 75%),
-            url(${DEMO_ALBUM[0].src}) center/cover no-repeat
-          `,
-          color: "var(--color-text-on-brand)",
-          borderBottom: "3px solid var(--color-heritage-line)",
-        }}
-      >
-        <div style={{ maxWidth: 640, display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-          <p
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--font-size-sm)",
-              letterSpacing: "0.28em",
-              textTransform: "uppercase",
-              color: "var(--color-heritage-accent)",
-              fontWeight: 700,
-            }}
-          >
-            Gia phả số
-          </p>
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.4rem, 5vw, 3.75rem)",
-              lineHeight: 1.1,
-              fontWeight: 700,
-            }}
-          >
-            GiaPhaHub
-          </h1>
-          <p style={{ margin: 0, fontSize: "var(--font-size-lg)", maxWidth: "40ch", lineHeight: 1.7, opacity: 0.95 }}>
-            Di sản sống — kết nối thế hệ, giữ gìn phả đồ và ngày giỗ dòng họ Việt.
-          </p>
-          <HomeSearch />
-          <div style={{ display: "flex", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-            <Link href="/tree">
-              <Button type="button">Xem phả đồ</Button>
-            </Link>
-            <Link href="/gio">
-              <Button type="button" variant="secondary">
-                Ngày giỗ tháng {lunar.month} âm
-              </Button>
-            </Link>
+    <div className={styles.page}>
+      <section className={styles.hero}>
+        <div className={styles.wrap}>
+          <div className={styles.heroGrid}>
+            <div>
+              <span className={styles.eyebrow}>Phả hệ dòng họ · Mười ba đời</span>
+              <h2 className={styles.heroTitle}>
+                Cây có cội,
+                <br />
+                nước có <span className={styles.foil}>nguồn</span>
+              </h2>
+              <p className={styles.lead}>
+                Nơi lưu giữ cội nguồn và kết nối con cháu họ Hoàng – Huỳnh muôn phương: gia phả mười
+                ba đời, ngày giỗ tổ tiên, tư liệu di sản và những gương sáng của dòng tộc.
+              </p>
+              <HomeSearch />
+              <p className={styles.heroLinks}>
+                Hoặc <Link href="/tree">mở sơ đồ phả hệ toàn họ →</Link>
+              </p>
+            </div>
+            <HeroConstellation />
+          </div>
+
+          <div className={styles.stats}>
+            {DEMO_STATS.map((s) => (
+              <StatCard key={s.label} value={s.value} label={s.label} />
+            ))}
           </div>
         </div>
       </section>
 
-      <div
-        style={{
-          maxWidth: 1100,
-          margin: "0 auto",
-          padding: "var(--spacing-xl) var(--spacing-lg)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "var(--spacing-xl)",
-        }}
-      >
-        <section style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Giỗ tháng này</h2>
-          <p style={{ margin: 0, color: "var(--color-text-muted)" }}>
-            Tháng {lunar.month} năm {lunar.year} âm lịch
-            {lunar.leap ? " (nhuận)" : ""}
-          </p>
-          <div style={{ display: "flex", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-            {gio.map((g) => (
-              <GioCard
-                key={g.id}
-                day={String(g.lunarDay).padStart(2, "0")}
-                month={`Tháng ${g.lunarMonth} âm`}
-                name={g.person?.fullName ?? "—"}
-                tag={g.person?.code}
-              />
-            ))}
+      <section className={styles.gio} aria-labelledby="gio-heading">
+        <div className={`${styles.wrap} ${styles.gioInner}`}>
+          <div className={styles.gioHead}>
+            <span className={styles.label}>Hương hỏa</span>
+            <h3 id="gio-heading">Ngày giỗ sắp tới</h3>
+            <Link href="/gio">Xem cả năm →</Link>
           </div>
-          <Link href="/gio" style={{ color: "var(--color-action-primary-bg)", fontWeight: 600 }}>
-            Xem tất cả ngày giỗ →
-          </Link>
-        </section>
+          {gio.map((g) => (
+            <GioCard
+              key={g.id}
+              day={String(g.lunarDay).padStart(2, "0")}
+              month={`Tháng ${g.lunarMonth} ÂL`}
+              name={g.person?.fullName ?? "—"}
+              tag={g.note ?? (g.lunarMonth === lunar.month ? "Tháng này" : "Tháng sau")}
+            />
+          ))}
+        </div>
+      </section>
 
-        <section style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-          <h2 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Tin mới</h2>
-          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-            {posts.map((p) => (
-              <li key={p.slug} style={{ borderBottom: "1px solid var(--color-border-subtle)", paddingBottom: "var(--spacing-sm)" }}>
-                <Link
-                  href={`/news/${p.slug}`}
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "var(--font-size-lg)",
-                    color: "var(--color-text-primary)",
-                    textDecoration: "none",
-                  }}
-                >
-                  {p.title}
+      <section className={styles.sec}>
+        <div className={styles.wrap}>
+          <div className={styles.secHead}>
+            <div>
+              <span className={styles.label}>Tộc sự</span>
+              <h3>Tin tức & hoạt động dòng họ</h3>
+            </div>
+            <span className={styles.rule} />
+            <Link href="/news">Tất cả bài viết →</Link>
+          </div>
+          <div className={styles.news}>
+            {featured && (
+              <Link href={`/news/${featured.slug}`} className={styles.feat}>
+                <div className={styles.featPh} />
+                <div className={styles.featOvl} />
+                <div className={styles.featBody}>
+                  <span className={styles.featCat}>{featured.category?.name ?? "Tin tức"}</span>
+                  <h4>{featured.title}</h4>
+                  <div className={styles.featMeta}>
+                    {featured.authorName ?? "Ban biên tập"} · {formatPostDate(featured.publishedAt)}
+                    {featured.viewCount != null ? ` · ${featured.viewCount} lượt xem` : ""}
+                  </div>
+                </div>
+              </Link>
+            )}
+            <div className={styles.newsList}>
+              {rest.map((p, i) => (
+                <Link key={p.slug} href={`/news/${p.slug}`} className={styles.newsItem}>
+                  <div
+                    className={styles.thumb}
+                    style={{
+                      background:
+                        i % 2 === 0
+                          ? "linear-gradient(140deg, var(--color-heritage-accent), var(--color-heritage-deep))"
+                          : "linear-gradient(140deg, var(--color-action-primary-bg), var(--color-heritage-frame))",
+                    }}
+                  />
+                  <div>
+                    <h5>{p.title}</h5>
+                    <div className={styles.newsMeta}>
+                      {formatPostDate(p.publishedAt)}
+                      {p.viewCount != null ? ` · ${p.viewCount} lượt xem` : ""}
+                    </div>
+                  </div>
                 </Link>
-                <p style={{ margin: "var(--spacing-xs) 0 0", color: "var(--color-text-muted)" }}>{p.summary}</p>
-              </li>
-            ))}
-          </ul>
-          <Link href="/news" style={{ color: "var(--color-action-primary-bg)", fontWeight: 600 }}>
-            Tất cả tin tức →
-          </Link>
-        </section>
-      </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.congduc} aria-labelledby="congduc-heading">
+        <div className={styles.wrap}>
+          <div className={styles.sacphong}>
+            <span className={styles.kicker}>Uống nước nhớ nguồn</span>
+            <h3 id="congduc-heading">
+              <span className={styles.foil}>Bảng vàng công đức</span>
+            </h3>
+            <p className={styles.sacSub}>Khắc ghi tấm lòng của con cháu hướng về tông tộc</p>
+            <div className={styles.cdGrid}>
+              {DEMO_CONG_DUC.map((item) => (
+                <div key={item.name} className={styles.cdItem}>
+                  <div className={styles.medal}>{item.medal}</div>
+                  <div className={styles.cdNm}>{item.name}</div>
+                  <div className={styles.cdDs}>{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -21,6 +21,7 @@ export type ApiPost = {
   bodyHtml?: string;
   publishedAt?: string;
   authorName?: string;
+  viewCount?: number;
   category?: { slug?: string; name?: string };
 };
 

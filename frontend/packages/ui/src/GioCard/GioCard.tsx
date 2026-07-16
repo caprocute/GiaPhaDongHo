@@ -26,7 +26,7 @@ export function GioCard({ day, month, name, tag }: GioCardProps) {
     background: "var(--color-action-primary-bg)",
   };
   const dayStyle: CSSProperties = {
-    fontFamily: "var(--font-heading)",
+    fontFamily: "var(--font-display)",
     fontSize: 28,
     color: "var(--color-action-primary-bg)",
     lineHeight: 1,
@@ -46,7 +46,7 @@ export function GioCard({ day, month, name, tag }: GioCardProps) {
     fontSize: 13.5,
     fontWeight: 600,
     lineHeight: 1.4,
-    fontFamily: "var(--font-heading)",
+    fontFamily: "var(--font-display)",
   };
   const tagStyle: CSSProperties = {
     display: "inline-block",

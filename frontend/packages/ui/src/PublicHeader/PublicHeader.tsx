@@ -1,60 +1,103 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
+import styles from "./PublicHeader.module.css";
 
 export interface PublicHeaderProps {
-  title?: string;
-  /** Slot bên phải (VD: nút đăng nhập OIDC). */
+  /** Tên dòng họ — hero brand trên masthead */
+  brand?: string;
+  subtitle?: string;
+  /** Slot bên phải nav (VD: AuthNav) */
   endSlot?: ReactNode;
+  /** Path hiện tại để highlight menu */
+  activeHref?: string;
+  utilityLeft?: ReactNode;
+  utilityRight?: ReactNode;
 }
 
-export function PublicHeader({ title = "GiaPhaHub", endSlot }: PublicHeaderProps) {
-  const style: CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "var(--spacing-md) var(--spacing-lg)",
-    background: "var(--color-surface-card)",
-    borderBottom: "2px solid var(--color-heritage-frame)",
-    color: "var(--color-text-primary)",
-    fontFamily: "var(--font-display)",
-    fontSize: "var(--font-size-xl)",
-  };
+const NAV = [
+  { href: "/", label: "Trang nhất" },
+  { href: "/persons", label: "Dòng họ" },
+  { href: "/tree", label: "Gia phả" },
+  { href: "/news", label: "Tin tức" },
+  { href: "/album", label: "Thư viện" },
+] as const;
 
-  const nav: CSSProperties = {
-    display: "flex",
-    gap: "var(--spacing-md)",
-    fontFamily: "var(--font-body)",
-    fontSize: "var(--font-size-sm)",
-  };
-
+function Seal() {
   return (
-    <header style={style}>
-      <strong>{title}</strong>
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-md)" }}>
-        <nav style={nav} aria-label="Điều hướng chính">
-          <a href="/" style={{ color: "var(--color-text-primary)" }}>
-            Trang chủ
-          </a>
-          <a href="/persons" style={{ color: "var(--color-text-primary)" }}>
-            Gia phả
-          </a>
-          <a href="/tree" style={{ color: "var(--color-text-primary)" }}>
-            Phả đồ
-          </a>
-          <a href="/gio" style={{ color: "var(--color-text-primary)" }}>
-            Ngày giỗ
-          </a>
-          <a href="/news" style={{ color: "var(--color-text-primary)" }}>
-            Tin tức
-          </a>
-          <a href="/album" style={{ color: "var(--color-text-primary)" }}>
-            Album
-          </a>
-          <a href="/search" style={{ color: "var(--color-text-primary)" }}>
-            Tìm kiếm
-          </a>
-        </nav>
-        {endSlot}
+    <svg className={styles.seal} viewBox="0 0 72 72" aria-hidden="true">
+      <circle cx="36" cy="36" r="34" fill="none" stroke="var(--color-heritage-accent)" strokeWidth="2" />
+      <circle
+        cx="36"
+        cy="36"
+        r="30.5"
+        fill="none"
+        stroke="var(--color-heritage-accent)"
+        strokeWidth=".8"
+        opacity=".7"
+      />
+      <circle cx="36" cy="36" r="26" fill="var(--color-heritage-frame)" />
+      <path
+        d="M36 50 V30 M36 37 L26 27 M36 37 L46 27 M36 30 L30 22.5 M36 30 L42 22.5"
+        stroke="var(--color-heritage-soft)"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <circle cx="26" cy="27" r="2.8" fill="var(--color-heritage-accent)" />
+      <circle cx="46" cy="27" r="2.8" fill="var(--color-heritage-accent)" />
+      <circle cx="30" cy="22.5" r="2" fill="var(--color-heritage-line)" />
+      <circle cx="42" cy="22.5" r="2" fill="var(--color-heritage-line)" />
+      <path d="M27 50 h18" stroke="var(--color-heritage-accent)" strokeWidth="2.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function PublicHeader({
+  brand = "Họ Hoàng – Huỳnh",
+  subtitle = "Thôn Trung Bính · Bảo Ninh · Đồng Hới",
+  endSlot,
+  activeHref = "/",
+  utilityLeft,
+  utilityRight,
+}: PublicHeaderProps) {
+  return (
+    <div className={styles.root}>
+      <div className={styles.utility}>
+        <div className={styles.wrap}>
+          <span>{utilityLeft ?? <>☎ 0970 307 9059 · <b>hohoang@giapha.vn</b></>}</span>
+          <span className={styles.utilityRight}>
+            {utilityRight}
+            {endSlot}
+          </span>
+        </div>
       </div>
-    </header>
+      <div className={styles.band} aria-hidden="true" />
+      <header className={styles.masthead}>
+        <div className={styles.wrap}>
+          <a href="/" className={styles.brandLink} aria-label={brand}>
+            <Seal />
+            <div className={styles.brand}>
+              <h1>{brand}</h1>
+              <div className={styles.sub}>{subtitle}</div>
+            </div>
+          </a>
+          <nav className={styles.nav} aria-label="Menu chính">
+            {NAV.map((item) => {
+              const cur =
+                item.href === "/"
+                  ? activeHref === "/"
+                  : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+              return (
+                <a key={item.href} href={item.href} className={cur ? styles.cur : undefined}>
+                  {item.label}
+                </a>
+              );
+            })}
+            <a href="/tree" className={styles.cta}>
+              Tra cứu phả đồ
+            </a>
+          </nav>
+        </div>
+      </header>
+    </div>
   );
 }

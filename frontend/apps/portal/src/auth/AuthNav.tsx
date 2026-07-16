@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@giapha/auth";
-import { Button } from "@giapha/ui";
 
 export function AuthNav() {
   const { user, loading, login, logout } = useAuth();
@@ -12,20 +11,45 @@ export function AuthNav() {
 
   if (!user) {
     return (
-      <Button type="button" variant="secondary" onClick={() => void login()}>
+      <button
+        type="button"
+        onClick={() => void login()}
+        style={{
+          font: "inherit",
+          border: "1px solid color-mix(in srgb, var(--color-heritage-line) 70%, transparent)",
+          background: "transparent",
+          color: "var(--color-text-on-brand)",
+          padding: "4px 12px",
+          cursor: "pointer",
+          fontSize: "var(--font-size-sm)",
+          letterSpacing: "0.04em",
+        }}
+      >
         Đăng nhập
-      </Button>
+      </button>
     );
   }
 
   const name = user.profile.preferred_username ?? user.profile.name ?? "Thành viên";
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-sm)" }}>
-      <span style={{ fontFamily: "var(--font-body)", fontSize: "var(--font-size-sm)" }}>{name}</span>
-      <Button type="button" variant="ghost" onClick={() => void logout()}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--spacing-sm)" }}>
+      <span style={{ opacity: 0.9 }}>{name}</span>
+      <button
+        type="button"
+        onClick={() => void logout()}
+        style={{
+          font: "inherit",
+          border: 0,
+          background: "transparent",
+          color: "var(--color-heritage-soft)",
+          cursor: "pointer",
+          textDecoration: "underline",
+          fontSize: "var(--font-size-sm)",
+        }}
+      >
         Đăng xuất
-      </Button>
-    </div>
+      </button>
+    </span>
   );
 }

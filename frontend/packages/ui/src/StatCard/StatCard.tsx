@@ -22,7 +22,7 @@ export function StatCard({ value, label }: StatCardProps) {
     background: "var(--color-heritage-line)",
   };
   const val: CSSProperties = {
-    fontFamily: "var(--font-heading)",
+    fontFamily: "var(--font-display)",
     fontSize: "var(--font-size-display)",
     color: "var(--color-action-primary-bg)",
     fontVariantNumeric: "tabular-nums",
@@ -36,10 +36,21 @@ export function StatCard({ value, label }: StatCardProps) {
     marginTop: "var(--spacing-xs)",
     fontWeight: 600,
   };
+  const foilAccent: CSSProperties = {
+    ...accent,
+    background: "var(--gradient-foil)",
+  };
+  const inner: CSSProperties = {
+    position: "absolute",
+    inset: 4,
+    border: "1px solid color-mix(in srgb, var(--color-heritage-line) 45%, transparent)",
+    pointerEvents: "none",
+  };
 
   return (
     <div style={card}>
-      <div style={accent} />
+      <div style={foilAccent} />
+      <div style={inner} aria-hidden />
       <div style={val}>{value}</div>
       <div style={lbl}>{label}</div>
     </div>
