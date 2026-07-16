@@ -1,20 +1,36 @@
 {
   "color": {
     "action": {
-      "primary-bg": { "$type": "color", "$value": "{color.son.500}" },
-      "primary-fg": { "$type": "color", "$value": "{color.paper.0}" }
+      "primary-bg":       { "$type": "color", "$value": "{color.son.400}" },
+      "primary-bg-hover": { "$type": "color", "$value": "{color.son.500}" },
+      "primary-bg-deep":  { "$type": "color", "$value": "{color.son.700}" },
+      "primary-fg":       { "$type": "color", "$value": "{color.son.ink}" }
     },
     "text": {
-      "primary": { "$type": "color", "$value": "{color.ink.900}" },
-      "muted": { "$type": "color", "$value": "{color.ink.700}" }
+      "primary":  { "$type": "color", "$value": "{color.ink.900}" },
+      "muted":    { "$type": "color", "$value": "{color.ink.700}" },
+      "on-brand": { "$type": "color", "$value": "{color.son.ink}" }
     },
     "surface": {
-      "page": { "$type": "color", "$value": "{color.paper.50}" },
-      "card": { "$type": "color", "$value": "{color.paper.0}" }
+      "page":    { "$type": "color", "$value": "{color.bg.L1}" },
+      "card":    { "$type": "color", "$value": "{color.bg.L0}" },
+      "sunken":  { "$type": "color", "$value": "{color.bg.L2}" }
+    },
+    "border": {
+      "default": { "$type": "color", "$value": "{color.line.L}" },
+      "strong":  { "$type": "color", "$value": "{color.line.L-strong}" }
     },
     "heritage": {
-      "accent": { "$type": "color", "$value": "{color.nghe.400}" },
-      "frame": { "$type": "color", "$value": "{color.son.600}" }
+      "accent":  { "$type": "color", "$value": "{color.gold.400}" },
+      "deep":    { "$type": "color", "$value": "{color.gold.500}" },
+      "soft":    { "$type": "color", "$value": "{color.gold.soft}" },
+      "line":    { "$type": "color", "$value": "{color.gold.line}" },
+      "frame":   { "$type": "color", "$value": "{color.son.700}" }
+    },
+    "status": {
+      "success": { "$type": "color", "$value": "{color.status.good-L}" },
+      "warning": { "$type": "color", "$value": "{color.status.warn-L}" },
+      "danger":  { "$type": "color", "$value": "{color.status.bad-L}" }
     }
   }
 }
