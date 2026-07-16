@@ -5,6 +5,16 @@
   min-height: 50vh;
 }
 
+.pageFill {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  background: var(--color-surface-page);
+}
+
 .band {
   height: 16px;
   background: var(--color-heritage-frame) var(--pattern-meander) center / auto 13px repeat-x;
@@ -113,6 +123,16 @@
 
 .flushBody {
   padding: 0 0 48px;
+}
+
+.fillBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
 }
 
 .label {
@@ -481,11 +501,14 @@
   display: grid;
   grid-template-columns: 1fr 300px;
   gap: 0;
-  border: 1px solid var(--color-border-strong);
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-top: 1px solid var(--color-border-strong);
   background: var(--color-surface-card);
-  box-shadow: var(--shadow-sm);
-  min-height: 640px;
-  height: min(72vh, 760px);
+  box-shadow: none;
 }
 
 .treeCanvas {
@@ -499,8 +522,15 @@
     var(--pattern-brocade),
     var(--color-surface-page);
   padding: 0;
-  min-height: 560px;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
+}
+
+.treeCanvas :global([data-tree-canvas]) {
+  min-height: 0 !important;
+  height: 100% !important;
+  width: 100%;
 }
 
 .sidepanel {
@@ -510,6 +540,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
+  overflow: auto;
 }
 
 .sidepanel h3 {
@@ -817,11 +849,6 @@
   margin-top: 8px;
 }
 
-.treeCanvas :global([data-tree-canvas]) {
-  min-height: 560px;
-  height: 100%;
-}
-
 @media (max-width: 960px) {
   .wrap {
     padding-left: 16px;
@@ -958,17 +985,20 @@
   }
 
   .treeZone {
-    height: auto;
-    min-height: 0;
+    grid-template-columns: 1fr;
+    /* Mobile: canvas vẫn ưu tiên cao, panel cuộn dưới */
+    grid-template-rows: minmax(55vh, 1fr) auto;
+    overflow: auto;
   }
 
   .treeCanvas {
-    min-height: 420px;
+    min-height: 55vh;
     height: 55vh;
   }
 
   .treeCanvas :global([data-tree-canvas]) {
-    min-height: 420px;
+    min-height: 55vh !important;
+    height: 100% !important;
   }
 
   .gioHead {

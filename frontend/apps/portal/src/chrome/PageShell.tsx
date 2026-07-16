@@ -11,10 +11,12 @@ type Props = {
   crumbs?: Crumb[];
   toolbarRight?: ReactNode;
   children: ReactNode;
-  /** Bỏ padding body (vd. phả đồ full-bleed zone) */
+  /** Bỏ padding body (vd. phả đồ) */
   flush?: boolean;
   /** Chỉ band + toolbar + children (hồ sơ / layout riêng) */
   hideHeader?: boolean;
+  /** Full bề ngang + cao phần còn lại viewport (phả đồ) */
+  fillViewport?: boolean;
 };
 
 export function PageShell({
@@ -26,10 +28,13 @@ export function PageShell({
   children,
   flush,
   hideHeader,
+  fillViewport,
 }: Props) {
+  const pageClass = fillViewport ? `${styles.page} ${styles.pageFill}` : styles.page;
+
   return (
-    <div className={styles.page}>
-      <div className={styles.band} aria-hidden />
+    <div className={pageClass}>
+      {!fillViewport ? <div className={styles.band} aria-hidden /> : null}
       {(crumbs?.length || toolbarRight) && (
         <div className={styles.toolbar}>
           <div className={`${styles.wrap} ${styles.toolbarInner}`}>
@@ -53,7 +58,9 @@ export function PageShell({
           </div>
         </div>
       )}
-      {flush || hideHeader ? (
+      {fillViewport ? (
+        <div className={styles.fillBody}>{children}</div>
+      ) : flush || hideHeader ? (
         <div className={`${styles.wrap} ${flush ? styles.flushBody : styles.body}`}>
           {children}
         </div>

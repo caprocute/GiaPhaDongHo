@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { PublicFooter, PublicHeader } from "@giapha/ui";
 import { convertSolarToLunar, getCanChiYear } from "@giapha/lunar";
 import { AuthNav } from "../auth/AuthNav";
+import styles from "./PortalChrome.module.css";
 
 function lunarUtilityLabel() {
   const now = new Date();
@@ -32,9 +33,10 @@ function lunarUtilityLabel() {
 export function PortalChrome({ children }: { children: ReactNode }) {
   const pathname = usePathname() ?? "/";
   const isLogin = pathname === "/login";
+  const isTree = pathname === "/tree" || pathname.startsWith("/tree/");
 
   if (isLogin) {
-    return <main style={{ flex: 1 }}>{children}</main>;
+    return <main className={styles.mainGrow}>{children}</main>;
   }
 
   return (
@@ -46,8 +48,10 @@ export function PortalChrome({ children }: { children: ReactNode }) {
         utilityRight={<span style={{ opacity: 0.95 }}>{lunarUtilityLabel()}</span>}
         endSlot={<AuthNav />}
       />
-      <main style={{ flex: 1 }}>{children}</main>
-      <PublicFooter />
+      <main className={isTree ? `${styles.mainGrow} ${styles.mainFill}` : styles.mainGrow}>
+        {children}
+      </main>
+      {!isTree ? <PublicFooter /> : null}
     </>
   );
 }

@@ -69,6 +69,29 @@ function CanvasInner({
     return () => window.clearTimeout(id);
   }, [fitKey, fitView, nodes.length]);
 
+  /** Khi canvas full-viewport đổi kích thước (flex layout), căn lại khung một lần */
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let first = true;
+    let t: number | undefined;
+    const ro = new ResizeObserver(() => {
+      if (first) {
+        first = false;
+        return;
+      }
+      window.clearTimeout(t);
+      t = window.setTimeout(() => {
+        void fitView({ padding: 0.18, duration: 0, maxZoom: 1.05 });
+      }, 120);
+    });
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      window.clearTimeout(t);
+    };
+  }, [fitView]);
+
   const onExportPng = useCallback(async () => {
     const el = containerRef.current?.querySelector(".react-flow") as HTMLElement | null;
     if (!el) return;

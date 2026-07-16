@@ -1,0 +1,12 @@
+.mainGrow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.mainFill {
+  /* Phả đồ: chiếm hết phần còn lại dưới header, không footer */
+  overflow: hidden;
+}

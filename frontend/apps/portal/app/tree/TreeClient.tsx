@@ -52,7 +52,7 @@ export function TreeClient() {
   return (
     <PageShell
       title="Phả đồ"
-      flush
+      fillViewport
       crumbs={[
         { label: "Gia phả", href: "/persons" },
         { label: "Họ Hoàng Thôn Trung Bính" },
