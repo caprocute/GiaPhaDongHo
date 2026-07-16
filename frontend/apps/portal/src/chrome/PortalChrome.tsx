@@ -51,7 +51,7 @@ export function PortalChrome({ children }: { children: ReactNode }) {
       <main className={isTree ? `${styles.mainGrow} ${styles.mainFill}` : styles.mainGrow}>
         {children}
       </main>
-      {!isTree ? <PublicFooter /> : null}
+      <PublicFooter />
     </>
   );
 }
