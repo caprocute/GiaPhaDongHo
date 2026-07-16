@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- R1.2 — PG FTS fallback (unaccent) khi ES tắt -->
+    <changeSet id="20260716224500-1" author="giapha" dbms="postgresql">
+        <comment>Enable unaccent for Vietnamese accent-insensitive person suggest</comment>
+        <sql>CREATE EXTENSION IF NOT EXISTS unaccent;</sql>
+    </changeSet>
+</databaseChangeLog>

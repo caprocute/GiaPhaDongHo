@@ -63,6 +63,7 @@ public class SecurityConfiguration {
                     .requestMatchers("/api/authenticate").permitAll()
                     .requestMatchers("/api/auth-info").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/trees/**").permitAll()
+                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/search/**").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/posts/**").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories/**").permitAll()
                     .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/categories").permitAll()
