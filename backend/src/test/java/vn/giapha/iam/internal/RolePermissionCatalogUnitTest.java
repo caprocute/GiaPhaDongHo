@@ -43,7 +43,7 @@ class RolePermissionCatalogUnitTest {
     @Test
     void genealogyAdminCanWriteTree() {
         Set<String> perms = catalog.resolvePermissions(List.of(RealmRoles.GENEALOGY_ADMIN));
-        assertThat(perms).contains("genealogy:person:write", "genealogy:union:write");
+        assertThat(perms).contains("genealogy:person:write", "genealogy:union:write", "genealogy:tree:write");
         assertThat(catalog.hasPermission(List.of(RealmRoles.GENEALOGY_ADMIN), "cms:post:write")).isFalse();
     }
 

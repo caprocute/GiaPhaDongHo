@@ -4,13 +4,22 @@ import "@giapha/tokens/tokens.css";
 import { ThemeProvider, ThemeScript } from "@giapha/ui";
 import { PortalAuthProvider } from "../src/auth/PortalAuthProvider";
 import { PortalChrome } from "../src/chrome/PortalChrome";
+import { SiteSettingsProvider } from "../src/chrome/SiteSettingsProvider";
+import { fetchTreeSettings } from "../src/lib/treeSettings";
 
-export const metadata: Metadata = {
-  title: "Họ Hoàng – Huỳnh · GiaPhaHub",
-  description: "Trang thông tin họ Hoàng thôn Trung Bính — gia phả, ngày giỗ, di sản dòng tộc",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const s = await fetchTreeSettings();
+  const title = s.displayName ? `${s.displayName} · GiaPhaHub` : "GiaPhaHub";
+  return {
+    title,
+    description: s.description ?? undefined,
+    keywords: s.seoKeywords?.length ? s.seoKeywords : undefined,
+  };
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const settings = await fetchTreeSettings();
+
   return (
     <html lang="vi" suppressHydrationWarning>
       <head>
@@ -35,9 +44,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         }}
       >
         <ThemeProvider>
-          <PortalAuthProvider>
-            <PortalChrome>{children}</PortalChrome>
-          </PortalAuthProvider>
+          <SiteSettingsProvider value={settings}>
+            <PortalAuthProvider>
+              <PortalChrome>{children}</PortalChrome>
+            </PortalAuthProvider>
+          </SiteSettingsProvider>
         </ThemeProvider>
       </body>
     </html>

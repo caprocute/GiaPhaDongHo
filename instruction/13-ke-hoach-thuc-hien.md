@@ -173,7 +173,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Soạn phả đồ fullscreen SRS-12a — layout 3 cột + canvas SVG + Person/Union panel + `?root=` (`/tree`)
 - [x] Quản lý bài viết + duyệt comment (`/posts`, `/comments` → `/api/cms-posts` / `/api/cms-comments`)
 - [x] Media library (album CRUD + upload `/api/v1/media/upload` + list/xóa photos)
-- [x] Cài đặt site cơ bản (slug cây + tên site local; API site settings sau)
+- [x] Cài đặt site động — `GET/PUT /api/v1/trees/{slug}/settings` (metaJson) + admin `/settings` + portal header/footer/meta/tree/tự khai/nhắc giỗ (FR-12.18)
 
 ### R1.9 Ngày giỗ & sự kiện domain
 - [x] Tự động upsert anniversary khi ghi người mất (`DeathAnniversarySync` + `DeathAnniversaryUpserted`; hook `TreeGenealogyService` / `PersonService`; unique `person_id`)

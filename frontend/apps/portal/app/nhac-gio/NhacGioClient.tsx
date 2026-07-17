@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@giapha/auth";
 import { Alert, Button, EmptyState, FormField, Input, Select } from "@giapha/ui";
 import { PageShell } from "../../src/chrome/PageShell";
+import { useSiteSettings } from "../../src/chrome/SiteSettingsProvider";
 import { API_BASE, TREE_SLUG } from "../../src/lib/config";
 import { fetchPerson } from "../../src/lib/api";
 
@@ -15,16 +16,35 @@ type Sub = {
 };
 
 export function NhacGioClient() {
+  const settings = useSiteSettings();
+  const defaultDays = String(settings.notify?.remindDaysBefore ?? 7);
+  const allowEmail = settings.notify?.channelEmail !== false;
+  const allowZalo = settings.notify?.channelZalo === true;
   const { user, loading: authLoading, getAccessToken, login } = useAuth();
   const [subs, setSubs] = useState<Sub[]>([]);
   const [code, setCode] = useState("");
   const [personId, setPersonId] = useState<number | null>(null);
   const [personName, setPersonName] = useState("");
-  const [daysBefore, setDaysBefore] = useState("3");
-  const [channels, setChannels] = useState("email");
+  const [daysBefore, setDaysBefore] = useState(defaultDays);
+  const [channels, setChannels] = useState(allowEmail ? "email" : allowZalo ? "zalo" : "email");
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    setDaysBefore(defaultDays);
+  }, [defaultDays]);
+
+  useEffect(() => {
+    if (allowEmail) setChannels("email");
+    else if (allowZalo) setChannels("zalo");
+  }, [allowEmail, allowZalo]);
+
+  const channelOptions = [
+    ...(allowEmail ? [{ value: "email", label: "Email" }] : []),
+    ...(allowZalo ? [{ value: "zalo", label: "Zalo" }] : []),
+    ...(allowEmail && allowZalo ? [{ value: "email,zalo", label: "Email + Zalo" }] : []),
+  ];
 
   const icsPublic = API_BASE
     ? `${API_BASE}/api/v1/trees/${encodeURIComponent(TREE_SLUG)}/anniversaries.ics`
@@ -141,7 +161,7 @@ export function NhacGioClient() {
   }
 
   return (
-    <PageShell title="Nhắc ngày giỗ" lead="Đăng ký email / Zalo / push · đồng bộ iCal (F1).">
+    <PageShell title="Nhắc ngày giỗ" lead="Đăng ký nhận thông báo trước ngày giỗ · đồng bộ lịch cá nhân.">
       {err ? (
         <Alert title="Lỗi" variant="error">
           {err}
@@ -154,13 +174,13 @@ export function NhacGioClient() {
       ) : null}
 
       <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)" }}>
-        Lịch giỗ cả cây (công khai):{" "}
+        Lịch giỗ cả dòng họ:{" "}
         {icsPublic ? (
           <a href={icsPublic} target="_blank" rel="noreferrer">
-            Tải anniversaries.ics
+            Tải lịch (.ics)
           </a>
         ) : (
-          "chưa cấu hình API"
+          "chưa kết nối máy chủ"
         )}
       </p>
 
@@ -185,18 +205,19 @@ export function NhacGioClient() {
               <Input value={daysBefore} onChange={(e) => setDaysBefore(e.target.value)} inputMode="numeric" />
             </FormField>
             <FormField label="Kênh">
-              <Select
-                value={channels}
-                onChange={(e) => setChannels(e.target.value)}
-                options={[
-                  { value: "email", label: "Email" },
-                  { value: "zalo", label: "Zalo OA" },
-                  { value: "email,zalo", label: "Email + Zalo" },
-                  { value: "web_push", label: "Web Push (stub)" },
-                ]}
-              />
+              {channelOptions.length === 0 ? (
+                <Alert title="Chưa bật kênh" variant="info">
+                  Ban quản trị chưa bật kênh nhắc giỗ. Vào Cấu hình hệ thống để bật Email hoặc Zalo.
+                </Alert>
+              ) : (
+                <Select
+                  value={channels}
+                  onChange={(e) => setChannels(e.target.value)}
+                  options={channelOptions}
+                />
+              )}
             </FormField>
-            <Button type="submit" disabled={busy || !personId}>
+            <Button type="submit" disabled={busy || !personId || channelOptions.length === 0}>
               {busy ? "Đang lưu…" : "Đăng ký nhắc"}
             </Button>
           </form>

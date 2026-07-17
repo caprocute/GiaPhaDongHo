@@ -26,6 +26,7 @@ public class RolePermissionCatalog implements PermissionService {
             "genealogy:person:read",
             "genealogy:person:write",
             "genealogy:union:write",
+            "genealogy:tree:write",
             "cms:post:read",
             "moderation:request:read",
             "moderation:request:review",

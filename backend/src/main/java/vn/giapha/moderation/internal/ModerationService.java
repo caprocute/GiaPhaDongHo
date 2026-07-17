@@ -15,6 +15,8 @@ import vn.giapha.domain.ChangeRequest;
 import vn.giapha.domain.FamilyTree;
 import vn.giapha.domain.Person;
 import vn.giapha.genealogy.api.DeathAnniversarySync;
+import vn.giapha.genealogy.api.TreeSettingsDTO;
+import vn.giapha.genealogy.api.TreeSettingsQuery;
 import vn.giapha.moderation.api.ChangeRequestStatuses;
 import vn.giapha.moderation.events.ChangeApproved;
 import vn.giapha.moderation.events.ChangeRejected;
@@ -44,6 +46,7 @@ public class ModerationService {
     private final FamilyTreeMapper familyTreeMapper;
     private final PersonMapper personMapper;
     private final DeathAnniversarySync deathAnniversarySync;
+    private final TreeSettingsQuery treeSettingsQuery;
     private final ApplicationEventPublisher events;
     private final ObjectMapper objectMapper;
 
@@ -55,6 +58,7 @@ public class ModerationService {
         FamilyTreeMapper familyTreeMapper,
         PersonMapper personMapper,
         DeathAnniversarySync deathAnniversarySync,
+        TreeSettingsQuery treeSettingsQuery,
         ApplicationEventPublisher events,
         ObjectMapper objectMapper
     ) {
@@ -65,6 +69,7 @@ public class ModerationService {
         this.familyTreeMapper = familyTreeMapper;
         this.personMapper = personMapper;
         this.deathAnniversarySync = deathAnniversarySync;
+        this.treeSettingsQuery = treeSettingsQuery;
         this.events = events;
         this.objectMapper = objectMapper;
     }
@@ -73,6 +78,11 @@ public class ModerationService {
         FamilyTree tree = familyTreeRepository
             .findBySlug(treeSlug)
             .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy cây slug=" + treeSlug));
+
+        TreeSettingsDTO settings = treeSettingsQuery.findBySlug(treeSlug).orElse(null);
+        if (settings != null && settings.getTree() != null && !settings.getTree().isAllowSelfDeclare()) {
+            throw new IllegalStateException("Dòng họ đang tạm khóa chức năng tự khai hồ sơ.");
+        }
 
         if (dto.getDiffJson() == null || dto.getDiffJson().isBlank()) {
             throw new IllegalArgumentException("diffJson bắt buộc");

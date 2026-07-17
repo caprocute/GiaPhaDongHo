@@ -14,6 +14,7 @@ import vn.giapha.domain.FamilyTree;
 import vn.giapha.domain.FamilyUnion;
 import vn.giapha.domain.Person;
 import vn.giapha.genealogy.api.DeathAnniversarySync;
+import vn.giapha.genealogy.api.TreeSettingsDTO;
 import vn.giapha.genealogy.api.PersonCodeGenerator;
 import vn.giapha.genealogy.api.PersonPrivacyFilter;
 import vn.giapha.genealogy.api.PersonPrivacyModel;
@@ -53,6 +54,7 @@ public class TreeGenealogyService {
     private final PersonPrivacyFilter personPrivacyFilter;
     private final DeathAnniversarySync deathAnniversarySync;
     private final ApplicationEventPublisher events;
+    private final TreeSettingsCodec treeSettingsCodec;
 
     public TreeGenealogyService(
         FamilyTreeRepository familyTreeRepository,
@@ -65,7 +67,8 @@ public class TreeGenealogyService {
         DeathAnniversaryMapper deathAnniversaryMapper,
         PersonPrivacyFilter personPrivacyFilter,
         DeathAnniversarySync deathAnniversarySync,
-        ApplicationEventPublisher events
+        ApplicationEventPublisher events,
+        TreeSettingsCodec treeSettingsCodec
     ) {
         this.familyTreeRepository = familyTreeRepository;
         this.personRepository = personRepository;
@@ -78,6 +81,7 @@ public class TreeGenealogyService {
         this.personPrivacyFilter = personPrivacyFilter;
         this.deathAnniversarySync = deathAnniversarySync;
         this.events = events;
+        this.treeSettingsCodec = treeSettingsCodec;
     }
 
     @Transactional(readOnly = true)
@@ -86,38 +90,71 @@ public class TreeGenealogyService {
     }
 
     @Transactional(readOnly = true)
+    public Optional<TreeSettingsDTO> getSettings(String slug) {
+        return familyTreeRepository.findBySlug(slug).map(treeSettingsCodec::read);
+    }
+
+    public TreeSettingsDTO updateSettings(String slug, TreeSettingsDTO incoming) {
+        FamilyTree tree = familyTreeRepository.findBySlug(slug).orElseThrow(() -> new TreeNotFoundException(slug));
+        if (incoming.getTree() != null && incoming.getTree().getCodePrefix() != null) {
+            incoming.getTree().setCodePrefix(PersonCodeGenerator.normalizePrefix(incoming.getTree().getCodePrefix()));
+        }
+        if (incoming.getBrandPalette() != null) {
+            String pal = incoming.getBrandPalette().trim();
+            if (!pal.equals("bang-vang") && !pal.equals("co")) {
+                incoming.setBrandPalette("bang-vang");
+            }
+        }
+        treeSettingsCodec.write(tree, incoming);
+        familyTreeRepository.save(tree);
+        return treeSettingsCodec.read(tree);
+    }
+
+    @Transactional(readOnly = true)
     public Page<PersonDTO> listPersons(String slug, String query, Integer generation, Pageable pageable) {
+        if (!isTreeReadable(slug)) {
+            return Page.empty(pageable);
+        }
         // Rỗng thay vì null — tránh Hibernate bind concat LIKE thành bytea trên Postgres
         String normalized = blankToNull(query);
         String q = normalized == null ? "" : normalized;
         return personRepository
             .searchInTree(slug, q, generation, pageable)
             .map(personMapper::toDto)
-            .map(this::applyPrivacy);
+            .map(dto -> applyPrivacy(slug, dto));
     }
 
     @Transactional(readOnly = true)
     public Optional<PersonDTO> findPersonByCode(String slug, String code) {
+        if (!isTreeReadable(slug)) {
+            return Optional.empty();
+        }
         return personRepository
             .findByTree_SlugAndCodeIgnoreCase(slug, code)
             .map(personMapper::toDto)
-            .map(this::applyPrivacy);
+            .map(dto -> applyPrivacy(slug, dto));
     }
 
     @Transactional(readOnly = true)
     public Page<FamilyUnionDTO> listUnions(String slug, Pageable pageable) {
+        if (!isTreeReadable(slug)) {
+            return Page.empty(pageable);
+        }
         return familyUnionRepository.findByTree_Slug(slug, pageable).map(familyUnionMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     public List<DeathAnniversaryDTO> listAnniversaries(String slug, Integer lunarMonth) {
+        if (!isTreeReadable(slug)) {
+            return List.of();
+        }
         return deathAnniversaryRepository
             .findByTreeSlugAndOptionalMonth(slug, lunarMonth)
             .stream()
             .map(deathAnniversaryMapper::toDto)
             .map(dto -> {
                 if (dto.getPerson() != null) {
-                    dto.setPerson(applyPrivacy(dto.getPerson()));
+                    dto.setPerson(applyPrivacy(slug, dto.getPerson()));
                 }
                 return dto;
             })
@@ -136,13 +173,14 @@ public class TreeGenealogyService {
         personDTO.setTree(treeDto);
 
         Set<String> codes = new HashSet<>(personRepository.findCodesByTreeSlug(slug));
+        String codePrefix = treeSettingsCodec.read(tree).getTree().getCodePrefix();
         String requestedCode = personDTO.getCode();
         final String code;
         if (requestedCode == null || requestedCode.isBlank()) {
             if (spouseOfParent && parentCode != null && !parentCode.isBlank()) {
                 code = PersonCodeGenerator.nextSpouseCode(parentCode.trim(), codes);
             } else {
-                code = PersonCodeGenerator.nextLineageCode(codes);
+                code = PersonCodeGenerator.nextLineageCode(codes, codePrefix);
             }
             personDTO.setCode(code);
         } else {
@@ -174,7 +212,7 @@ public class TreeGenealogyService {
         deathAnniversarySync.syncFromPerson(entity);
         PersonDTO saved = personMapper.toDto(entity);
         events.publishEvent(new PersonUpdated(saved.getId(), saved.getCode(), slug, saved.getLifeStatus()));
-        return applyPrivacy(saved);
+        return applyPrivacy(slug, saved);
     }
 
     /**
@@ -202,7 +240,7 @@ public class TreeGenealogyService {
 
         PersonDTO saved = personMapper.toDto(existing);
         events.publishEvent(new PersonUpdated(saved.getId(), saved.getCode(), slug, saved.getLifeStatus()));
-        return applyPrivacy(saved);
+        return applyPrivacy(slug, saved);
     }
 
     public FamilyUnionDTO createUnion(String slug, FamilyUnionDTO unionDTO) {
@@ -221,10 +259,27 @@ public class TreeGenealogyService {
         return personRepository.findCodesByTreeSlug(slug);
     }
 
-    private PersonDTO applyPrivacy(PersonDTO dto) {
+    /**
+     * Cây công khai hoặc người đã đăng nhập (thành viên/quản trị) mới đọc được danh sách.
+     */
+    private boolean isTreeReadable(String slug) {
+        ViewerContext viewer = currentViewer();
+        if (viewer.role() != ViewerRole.GUEST) {
+            return true;
+        }
+        return familyTreeRepository
+            .findBySlug(slug)
+            .map(treeSettingsCodec::read)
+            .map(s -> s.getTree() == null || s.getTree().isPublicTree())
+            .orElse(false);
+    }
+
+    private PersonDTO applyPrivacy(String slug, PersonDTO dto) {
         if (dto == null) {
             return null;
         }
+        java.time.LocalDate birthSolar = dto.getBirthSolar();
+        String birthLunar = dto.getBirthLunarJson();
         PersonPrivacyModel redacted = personPrivacyFilter.apply(toPrivacyModel(dto), currentViewer());
         if (redacted != null) {
             dto.setBirthSolar(redacted.birthSolar());
@@ -234,6 +289,15 @@ public class TreeGenealogyService {
             dto.setGraveInfo(redacted.graveInfo());
             dto.setGraveLat(redacted.graveLat());
             dto.setGraveLng(redacted.graveLng());
+        }
+        boolean maskBirth = familyTreeRepository
+            .findBySlug(slug)
+            .map(treeSettingsCodec::read)
+            .map(s -> s.getTree() == null || s.getTree().isMaskLivingBirthDate())
+            .orElse(true);
+        if (!maskBirth && currentViewer().role() == ViewerRole.GUEST) {
+            dto.setBirthSolar(birthSolar);
+            dto.setBirthLunarJson(birthLunar);
         }
         return dto;
     }

@@ -383,6 +383,66 @@ export async function deleteFamilyUnion(id: number, token: string | null): Promi
   await apiFetch<void>(`/api/family-unions/${id}`, { method: "DELETE", token });
 }
 
+export type TreeFeatureSettings = {
+  maxNodesDefault?: number;
+  publicTree?: boolean;
+  maskLivingBirthDate?: boolean;
+  allowSelfDeclare?: boolean;
+  allowTreeExport?: boolean;
+  codePrefix?: string;
+};
+
+export type NotifySettings = {
+  remindDaysBefore?: number;
+  channelEmail?: boolean;
+  channelZalo?: boolean;
+};
+
+export type TreeSettingsDto = {
+  slug?: string;
+  displayName?: string;
+  shortName?: string | null;
+  provinceCode?: string | null;
+  address?: string | null;
+  contactName?: string | null;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
+  description?: string | null;
+  seoKeywords?: string[];
+  bankName?: string | null;
+  bankBranch?: string | null;
+  bankAccountNo?: string | null;
+  bankAccountName?: string | null;
+  socialFacebook?: string | null;
+  socialZalo?: string | null;
+  brandPalette?: string | null;
+  logoUrl?: string | null;
+  faviconUrl?: string | null;
+  tree?: TreeFeatureSettings;
+  notify?: NotifySettings;
+};
+
+export async function getTreeSettings(
+  slug: string,
+  token?: string | null,
+): Promise<TreeSettingsDto> {
+  return apiFetch<TreeSettingsDto>(`/api/v1/trees/${encodeURIComponent(slug)}/settings`, {
+    token: token ?? null,
+  });
+}
+
+export async function updateTreeSettings(
+  slug: string,
+  dto: TreeSettingsDto,
+  token: string | null,
+): Promise<TreeSettingsDto> {
+  return apiFetch<TreeSettingsDto>(`/api/v1/trees/${encodeURIComponent(slug)}/settings`, {
+    method: "PUT",
+    body: dto,
+    token,
+  });
+}
+
 export async function listUnionMembers(token: string | null): Promise<UnionMemberDto[]> {
   return apiFetch<UnionMemberDto[]>("/api/union-members?eagerload=true", { token });
 }

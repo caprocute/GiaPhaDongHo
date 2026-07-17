@@ -8,6 +8,7 @@ import {
   type FamilyTreeCanvasHandle,
   type PersonNodeData,
 } from "@giapha/tree-viz";
+import { useSiteSettings } from "../../src/chrome/SiteSettingsProvider";
 import { fetchPersons } from "../../src/lib/api";
 import { personsToFamilyGraph } from "../../src/lib/toFamilyGraph";
 import {
@@ -36,6 +37,12 @@ function glyphOf(name: string): string {
 }
 
 export function TreeClient() {
+  const settings = useSiteSettings();
+  const brand = settings.displayName ?? "Họ Hoàng Trung Bính";
+  const allowExport = settings.tree?.allowTreeExport === true;
+  const publicTree = settings.tree?.publicTree !== false;
+  const pageSize = Math.min(500, Math.max(20, settings.tree?.maxNodesDefault ?? 43));
+
   const demo = useMemo(() => demoFamilyGraph(), []);
   const [graph, setGraph] = useState(demo);
   const [source, setSource] = useState<"api" | "demo">("demo");
@@ -51,8 +58,14 @@ export function TreeClient() {
   const [exportError, setExportError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!publicTree) {
+      setGraph({ persons: [], unions: [] });
+      setSource("api");
+      setSelected(null);
+      return;
+    }
     let cancelled = false;
-    void fetchPersons(undefined, 200).then((list) => {
+    void fetchPersons(undefined, pageSize).then((list) => {
       if (cancelled || !list.length) return;
       const g = personsToFamilyGraph(list);
       if (g.persons.length < 8 || g.unions.length < 2) return;
@@ -67,7 +80,7 @@ export function TreeClient() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [pageSize, publicTree]);
 
   const focusPerson =
     selected ?? graph.persons.find((p) => p.id === rootId) ?? graph.persons[0] ?? null;
@@ -100,6 +113,10 @@ export function TreeClient() {
   };
 
   const runExport = async (kind: "png" | "svg" | "pdf") => {
+    if (!allowExport) {
+      setExportError("Xuất phả đồ đang tắt trong cấu hình dòng họ.");
+      return;
+    }
     const api = canvasRef.current;
     if (!api || exportBusy) return;
     setExportError(null);
@@ -116,14 +133,37 @@ export function TreeClient() {
     }
   };
 
+  if (!publicTree) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.band} aria-hidden />
+        <div className={styles.pdBar}>
+          <div className={styles.wrap}>
+            <span className={styles.crumb}>
+              Gia phả / <b>{brand}</b> / Phả đồ
+            </span>
+          </div>
+        </div>
+        <div className={styles.zone} style={{ padding: "var(--spacing-xl)", textAlign: "center" }}>
+          <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-secondary)" }}>
+            Phả đồ hiện chỉ dành cho thành viên đã đăng nhập. Vui lòng đăng nhập hoặc liên hệ ban quản trị.
+          </p>
+          <p>
+            <Link href="/login">Đăng nhập</Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.band} aria-hidden />
       <div className={styles.pdBar}>
         <div className={styles.wrap}>
-          <span className={styles.crumb} title={`Họ Hoàng Thôn Trung Bính · ${visibleCount} người`}>
+          <span className={styles.crumb} title={`${brand} · ${visibleCount} người`}>
             <span className={styles.crumbLong}>
-              Gia phả / <b>Họ Hoàng Thôn Trung Bính</b> / Phả đồ ·{" "}
+              Gia phả / <b>{brand}</b> / Phả đồ ·{" "}
               <span className={styles.num}>{visibleCount}</span>
               {source === "demo" ? " · demo" : ""}
             </span>
@@ -191,36 +231,40 @@ export function TreeClient() {
             >
               {showFrame ? <IconFrame /> : <IconFrameOff />}
             </button>
-            <button
-              type="button"
-              className={styles.iconBtn}
-              onClick={() => void runExport("svg")}
-              title="Tải SVG"
-              aria-label="Tải SVG"
-              disabled={exportBusy}
-            >
-              <IconSvg />
-            </button>
-            <button
-              type="button"
-              className={styles.iconBtn}
-              onClick={() => void runExport("png")}
-              title="Tải PNG"
-              aria-label="Tải PNG"
-              disabled={exportBusy}
-            >
-              <IconImage />
-            </button>
-            <button
-              type="button"
-              className={styles.iconBtnPrimary}
-              onClick={() => void runExport("pdf")}
-              title="Xuất PDF"
-              aria-label="Xuất PDF"
-              disabled={exportBusy}
-            >
-              <IconPdf />
-            </button>
+            {allowExport ? (
+              <>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  onClick={() => void runExport("svg")}
+                  title="Tải SVG"
+                  aria-label="Tải SVG"
+                  disabled={exportBusy}
+                >
+                  <IconSvg />
+                </button>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  onClick={() => void runExport("png")}
+                  title="Tải PNG"
+                  aria-label="Tải PNG"
+                  disabled={exportBusy}
+                >
+                  <IconImage />
+                </button>
+                <button
+                  type="button"
+                  className={styles.iconBtnPrimary}
+                  onClick={() => void runExport("pdf")}
+                  title="Xuất PDF"
+                  aria-label="Xuất PDF"
+                  disabled={exportBusy}
+                >
+                  <IconPdf />
+                </button>
+              </>
+            ) : null}
           </div>
         </div>
         {exportError ? (

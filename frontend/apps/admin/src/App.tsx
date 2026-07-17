@@ -98,13 +98,28 @@ function portalBase(): string {
   return import.meta.env.VITE_PORTAL_URL?.replace(/\/$/, "") || "http://localhost:3000";
 }
 
+function useLiveSiteTitle(): string {
+  const [title, setTitle] = useState(() => adminSiteTitle());
+  useEffect(() => {
+    const sync = () => setTitle(adminSiteTitle());
+    window.addEventListener("giapha-site-title", sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener("giapha-site-title", sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  return title;
+}
+
 function Sidebar({ pendingCount }: { pendingCount: number | null }) {
+  const siteTitle = useLiveSiteTitle();
   return (
     <nav aria-label="Menu quản trị" style={{ display: "flex", flexDirection: "column" }}>
       <div className="crm-org">
         <ClanSeal compact className="crm-org-seal" />
         <div>
-          <b>{adminSiteTitle()}</b>
+          <b>{siteTitle}</b>
           <small>Bàn quản trị tộc sự</small>
         </div>
       </div>
@@ -142,10 +157,12 @@ function AdminHeader() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const portal = portalBase();
+  const siteTitle = useLiveSiteTitle();
   const displayName = String(user?.profile?.name ?? user?.profile?.preferred_username ?? "Quản trị");
 
   return (
     <PublicHeader
+      brand={siteTitle}
       brandHref="/"
       fluid
       sticky={false}

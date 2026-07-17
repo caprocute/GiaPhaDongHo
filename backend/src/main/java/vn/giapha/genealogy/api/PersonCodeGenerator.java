@@ -8,23 +8,29 @@ import java.util.regex.Pattern;
 
 /**
  * Sinh mã hiệu kiểu NukeViet / glossary: {@code A1}, {@code A7}, {@code A7-sp1}.
+ * Prefix cấu hình được theo cây (mặc định {@code A}).
  */
 public final class PersonCodeGenerator {
 
-    private static final Pattern LINEAGE = Pattern.compile("^A(\\d+)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern SPOUSE = Pattern.compile("^(.+)-sp(\\d+)$", Pattern.CASE_INSENSITIVE);
 
     private PersonCodeGenerator() {}
 
-    /** Mã dòng chính tiếp theo trong cây (A1, A2, …). */
     public static String nextLineageCode(Collection<String> existingCodes) {
+        return nextLineageCode(existingCodes, "A");
+    }
+
+    /** Mã dòng chính tiếp theo trong cây ({@code A1}, {@code B1}, …). */
+    public static String nextLineageCode(Collection<String> existingCodes, String prefix) {
+        String p = normalizePrefix(prefix);
+        Pattern lineage = Pattern.compile("^" + Pattern.quote(p) + "(\\d+)$", Pattern.CASE_INSENSITIVE);
         int max = existingCodes
             .stream()
-            .map(PersonCodeGenerator::lineageNumber)
+            .map(code -> lineageNumber(code, lineage))
             .flatMapToInt(OptionalInt::stream)
             .max()
             .orElse(0);
-        return "A" + (max + 1);
+        return p + (max + 1);
     }
 
     /** Mã phối ngẫu: {@code A7-sp1}, {@code A7-sp2}, … */
@@ -33,7 +39,7 @@ public final class PersonCodeGenerator {
             throw new IllegalArgumentException("personCode bắt buộc để sinh mã phối ngẫu");
         }
         String base = personCode.trim();
-        String prefix = base.toLowerCase(Locale.ROOT) + "-sp";
+        String pref = base.toLowerCase(Locale.ROOT) + "-sp";
         int max = 0;
         for (String code : existingCodes) {
             if (code == null) {
@@ -42,8 +48,8 @@ public final class PersonCodeGenerator {
             Matcher m = SPOUSE.matcher(code.trim());
             if (m.matches() && m.group(1).equalsIgnoreCase(base)) {
                 max = Math.max(max, Integer.parseInt(m.group(2)));
-            } else if (code.toLowerCase(Locale.ROOT).startsWith(prefix)) {
-                // fallback
+            } else if (code.toLowerCase(Locale.ROOT).startsWith(pref)) {
+                // fallback ignored
             }
         }
         return base + "-sp" + (max + 1);
@@ -59,11 +65,22 @@ public final class PersonCodeGenerator {
         return parentPathOrCode + "." + newCode;
     }
 
-    private static OptionalInt lineageNumber(String code) {
+    public static String normalizePrefix(String prefix) {
+        if (prefix == null || prefix.isBlank()) {
+            return "A";
+        }
+        String p = prefix.trim().toUpperCase(Locale.ROOT);
+        if (!p.matches("[A-Z]{1,4}")) {
+            return "A";
+        }
+        return p;
+    }
+
+    private static OptionalInt lineageNumber(String code, Pattern lineage) {
         if (code == null) {
             return OptionalInt.empty();
         }
-        Matcher m = LINEAGE.matcher(code.trim());
+        Matcher m = lineage.matcher(code.trim());
         if (!m.matches()) {
             return OptionalInt.empty();
         }

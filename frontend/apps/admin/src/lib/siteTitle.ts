@@ -8,3 +8,12 @@ export function adminSiteTitle(): string {
     return DEFAULT;
   }
 }
+
+export function persistAdminSiteTitle(title: string): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, title.trim() || DEFAULT);
+    window.dispatchEvent(new Event("giapha-site-title"));
+  } catch {
+    /* ignore */
+  }
+}

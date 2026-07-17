@@ -4,10 +4,13 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@giapha/auth";
 import { Alert, Button, FormField, Input, Select, Textarea } from "@giapha/ui";
 import { PageShell } from "../../src/chrome/PageShell";
+import { useSiteSettings } from "../../src/chrome/SiteSettingsProvider";
 import { API_BASE, TREE_SLUG } from "../../src/lib/config";
 import { fetchPerson } from "../../src/lib/api";
 
 export function TuKhaiClient() {
+  const settings = useSiteSettings();
+  const allowSelfDeclare = settings.tree?.allowSelfDeclare !== false;
   const { user, loading: authLoading, getAccessToken, login } = useAuth();
   const [code, setCode] = useState("");
   const [fullName, setFullName] = useState("");
@@ -42,7 +45,11 @@ export function TuKhaiClient() {
     setErr(null);
     setMsg(null);
     if (!API_BASE) {
-      setErr("Chưa cấu hình NEXT_PUBLIC_API_BASE_URL.");
+      setErr("Không kết nối được máy chủ. Thử lại sau.");
+      return;
+    }
+    if (!allowSelfDeclare) {
+      setErr("Dòng họ đang tạm khóa chức năng tự khai hồ sơ.");
       return;
     }
     if (!personId) {
@@ -92,8 +99,12 @@ export function TuKhaiClient() {
   }
 
   return (
-    <PageShell title="Tự khai hồ sơ" lead="Gửi đề xuất sửa nhánh — chờ tộc trưởng duyệt (F3).">
-      {authLoading ? (
+    <PageShell title="Tự khai hồ sơ" lead="Gửi đề xuất sửa nhánh — chờ tộc trưởng duyệt.">
+      {!allowSelfDeclare ? (
+        <Alert title="Tạm khóa" variant="info">
+          Ban quản trị đang tạm khóa tự khai. Liên hệ thư ký dòng họ nếu cần sửa hồ sơ.
+        </Alert>
+      ) : authLoading ? (
         <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)" }}>Đang tải…</p>
       ) : !user ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)", maxWidth: 480 }}>
@@ -110,7 +121,7 @@ export function TuKhaiClient() {
           style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)", maxWidth: 560 }}
         >
           <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)", margin: 0 }}>
-            Cây <code>{TREE_SLUG}</code>. Thay đổi chỉ áp dụng sau khi thư ký/tộc trưởng duyệt.
+            Thay đổi chỉ áp dụng sau khi thư ký hoặc tộc trưởng duyệt.
           </p>
           {err ? (
             <Alert title="Lỗi" variant="error">

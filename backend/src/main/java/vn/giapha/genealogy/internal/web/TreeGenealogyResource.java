@@ -22,6 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
 import vn.giapha.core.security.RequiresPermission;
+import vn.giapha.genealogy.api.TreeSettingsDTO;
 import vn.giapha.genealogy.internal.TreeGenealogyService;
 import vn.giapha.genealogy.internal.TreeGenealogyService.DuplicatePersonCodeException;
 import vn.giapha.genealogy.internal.TreeGenealogyService.PersonCodeNotFoundException;
@@ -55,6 +56,26 @@ public class TreeGenealogyResource {
     public ResponseEntity<FamilyTreeDTO> getTree(@PathVariable String slug) {
         LOG.debug("GET tree slug={}", slug);
         return ResponseUtil.wrapOrNotFound(treeGenealogyService.findTree(slug));
+    }
+
+    @GetMapping("/settings")
+    public ResponseEntity<TreeSettingsDTO> getSettings(@PathVariable String slug) {
+        LOG.debug("GET tree settings slug={}", slug);
+        return ResponseUtil.wrapOrNotFound(treeGenealogyService.getSettings(slug));
+    }
+
+    @PutMapping("/settings")
+    @RequiresPermission("genealogy:tree:write")
+    public ResponseEntity<TreeSettingsDTO> updateSettings(
+        @PathVariable String slug,
+        @Valid @RequestBody TreeSettingsDTO body
+    ) {
+        LOG.debug("PUT tree settings slug={}", slug);
+        try {
+            return ResponseEntity.ok(treeGenealogyService.updateSettings(slug, body));
+        } catch (TreeNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/persons")

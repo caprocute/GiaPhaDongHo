@@ -9,6 +9,8 @@ import vn.giapha.domain.AnniversarySubscription;
 import vn.giapha.domain.DeathAnniversary;
 import vn.giapha.domain.FamilyTree;
 import vn.giapha.domain.Person;
+import vn.giapha.genealogy.api.TreeSettingsDTO;
+import vn.giapha.genealogy.api.TreeSettingsQuery;
 import vn.giapha.notification.api.NotifyChannels;
 import vn.giapha.repository.AnniversarySubscriptionRepository;
 import vn.giapha.repository.DeathAnniversaryRepository;
@@ -37,6 +39,7 @@ public class NotificationService {
     private final OutboxDispatcher outboxDispatcher;
     private final ReminderPlanner reminderPlanner;
     private final ICalBuilder iCalBuilder;
+    private final TreeSettingsQuery treeSettingsQuery;
 
     public NotificationService(
         AnniversarySubscriptionRepository subscriptionRepository,
@@ -49,7 +52,8 @@ public class NotificationService {
         PersonMapper personMapper,
         OutboxDispatcher outboxDispatcher,
         ReminderPlanner reminderPlanner,
-        ICalBuilder iCalBuilder
+        ICalBuilder iCalBuilder,
+        TreeSettingsQuery treeSettingsQuery
     ) {
         this.subscriptionRepository = subscriptionRepository;
         this.outboxRepository = outboxRepository;
@@ -62,6 +66,7 @@ public class NotificationService {
         this.outboxDispatcher = outboxDispatcher;
         this.reminderPlanner = reminderPlanner;
         this.iCalBuilder = iCalBuilder;
+        this.treeSettingsQuery = treeSettingsQuery;
     }
 
     public AnniversarySubscriptionDTO subscribe(String treeSlug, String userId, AnniversarySubscriptionDTO dto) {
@@ -75,20 +80,25 @@ public class NotificationService {
         person = personRepository
             .findByTree_SlugAndCodeIgnoreCase(treeSlug, person.getCode())
             .orElseThrow(() -> new IllegalArgumentException("Người không thuộc cây " + treeSlug));
-        String channels = normalizeChannels(dto.getChannels());
+        TreeSettingsDTO.NotifySettings notify = treeSettingsQuery
+            .findBySlug(treeSlug)
+            .map(TreeSettingsDTO::getNotify)
+            .orElse(new TreeSettingsDTO.NotifySettings());
+        String channels = filterChannelsBySettings(normalizeChannels(dto.getChannels()), notify);
+        int defaultDays = notify.getRemindDaysBefore() > 0 ? notify.getRemindDaysBefore() : 7;
         AnniversarySubscription existing = subscriptionRepository
             .findByUserIdAndPerson_Id(userId, person.getId())
             .orElse(null);
         AnniversarySubscription entity;
         if (existing != null) {
             entity = existing;
-            entity.setDaysBefore(dto.getDaysBefore() == null ? 3 : dto.getDaysBefore());
+            entity.setDaysBefore(dto.getDaysBefore() == null ? defaultDays : dto.getDaysBefore());
             entity.setChannels(channels);
         } else {
             entity = new AnniversarySubscription();
             entity.setUserId(userId);
             entity.setPerson(person);
-            entity.setDaysBefore(dto.getDaysBefore() == null ? 3 : dto.getDaysBefore());
+            entity.setDaysBefore(dto.getDaysBefore() == null ? defaultDays : dto.getDaysBefore());
             entity.setChannels(channels);
         }
         return subscriptionMapper.toDto(subscriptionRepository.save(entity));
@@ -181,5 +191,30 @@ public class NotificationService {
 
     private static String normalizeChannels(String raw) {
         return String.join(",", ReminderPlanner.parseChannels(raw));
+    }
+
+    private static String filterChannelsBySettings(String channels, TreeSettingsDTO.NotifySettings notify) {
+        List<String> allowed = ReminderPlanner.parseChannels(channels)
+            .stream()
+            .filter(ch -> {
+                if (NotifyChannels.EMAIL.equals(ch)) {
+                    return notify.isChannelEmail();
+                }
+                if (NotifyChannels.ZALO.equals(ch)) {
+                    return notify.isChannelZalo();
+                }
+                return true;
+            })
+            .toList();
+        if (allowed.isEmpty()) {
+            if (notify.isChannelEmail()) {
+                return NotifyChannels.EMAIL;
+            }
+            if (notify.isChannelZalo()) {
+                return NotifyChannels.ZALO;
+            }
+            throw new IllegalStateException("Dòng họ chưa bật kênh nhắc giỗ nào.");
+        }
+        return String.join(",", allowed);
     }
 }
