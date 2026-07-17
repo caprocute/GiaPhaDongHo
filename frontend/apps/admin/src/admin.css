@@ -449,3 +449,738 @@ code {
   }
 
 }
+
+/* ══════════════════════════════════════════════════════
+   SHARED ADMIN PATTERNS
+   (dùng trên nhiều trang: mod-tabs, admin-form, mod-cards)
+   ══════════════════════════════════════════════════════ */
+
+/* ── Tab strip ── */
+.mod-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: var(--spacing-md);
+}
+
+.mod-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: none;
+  background: transparent;
+  font-size: 13.5px;
+  font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+
+.mod-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.mod-tab-on {
+  color: var(--color-action-primary-bg);
+  font-weight: 700;
+  border-bottom-color: var(--color-action-primary-bg);
+}
+
+.mod-tab-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+
+.mod-tab-badge-success {
+  background: color-mix(in srgb, var(--color-status-success-fg) 14%, transparent);
+  color: var(--color-status-success-fg);
+}
+
+.mod-tab-badge-warning {
+  background: color-mix(in srgb, var(--color-status-warning-fg) 16%, transparent);
+  color: var(--color-status-warning-fg);
+}
+
+.mod-tab-badge-error {
+  background: color-mix(in srgb, var(--color-status-error-fg) 14%, transparent);
+  color: var(--color-status-error-fg);
+}
+
+.mod-tab-badge-neutral {
+  background: var(--color-surface-sunken);
+  color: var(--color-text-muted);
+}
+
+/* ── Filter bar ── */
+.admin-filter-bar {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-md);
+}
+
+.admin-help-text {
+  padding: var(--spacing-lg) var(--spacing-md);
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+/* ── Form container (new/edit forms) ── */
+.admin-form {
+  display: grid;
+  gap: var(--spacing-md);
+  max-width: 540px;
+}
+
+.admin-form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding-top: var(--spacing-xs);
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm) var(--spacing-md);
+}
+
+@media (max-width: 640px) {
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Mod cards (review/moderation pattern) ── */
+.mod-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.mod-card {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: border-color 0.13s, box-shadow 0.13s;
+}
+
+.mod-card:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.mod-card-selected {
+  border-color: var(--color-action-primary-bg);
+  box-shadow: inset 3px 0 0 var(--color-action-primary-bg);
+}
+
+.mod-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.mod-card-who {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  font-family: var(--font-body);
+}
+
+.mod-card-who b {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.mod-card-who small {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.mod-card-meta {
+  display: flex;
+  gap: var(--spacing-sm);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  flex-wrap: wrap;
+}
+
+.mod-card-summary {
+  font-size: 13px;
+  color: var(--color-text-secondary, var(--color-text-muted));
+  font-family: var(--font-body);
+  margin: var(--spacing-xs) 0;
+  line-height: 1.5;
+}
+
+.mod-card-acts {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+/* ══════════════════════════════════════════════════════
+   DONATION / FUND FEATURE
+   ══════════════════════════════════════════════════════ */
+
+/* ── Stats row ── */
+.fund-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* ── Master-detail layout ── */
+.fund-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 0;
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-card);
+  min-height: 500px;
+  align-items: start;
+}
+
+/* ── Campaign sidebar ── */
+.fund-sidebar {
+  border-right: 1px solid var(--color-border-subtle);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+}
+
+.fund-sidebar-head {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fund-sidebar-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-heritage-deep, var(--color-text-muted));
+  font-family: var(--font-body);
+}
+
+.fund-campaign-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.fund-campaign-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  border: none;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background 0.12s;
+}
+
+.fund-campaign-item:hover {
+  background: var(--color-surface-sunken);
+}
+
+.fund-campaign-item:last-child {
+  border-bottom: 0;
+}
+
+.fund-campaign-item-on {
+  background: color-mix(in srgb, var(--color-action-primary-bg) 6%, transparent);
+  box-shadow: inset 3px 0 0 var(--color-action-primary-bg);
+}
+
+.fund-campaign-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.fund-campaign-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
+}
+
+.fund-campaign-raised-mini {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  margin-bottom: 5px;
+}
+
+.fund-mini-progress-wrap {
+  height: 3px;
+  background: var(--color-surface-sunken);
+  overflow: hidden;
+}
+
+.fund-mini-progress-bar {
+  height: 100%;
+  background: var(--color-heritage-line, var(--color-action-primary-bg));
+  transition: width 0.4s;
+}
+
+.fund-sidebar-empty {
+  padding: var(--spacing-lg);
+  font-size: 13px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+/* ── Campaign detail main area ── */
+.fund-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fund-detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl, 48px) var(--spacing-lg);
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-align: center;
+  min-height: 300px;
+}
+
+.fund-detail-empty-icon {
+  font-size: 36px;
+  opacity: 0.35;
+}
+
+/* ── Detail header ── */
+.fund-detail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  flex-wrap: wrap;
+}
+
+.fund-detail-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+  min-width: 160px;
+  color: var(--color-text-primary);
+}
+
+.fund-detail-acts {
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Progress section ── */
+.fund-progress-section {
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-sunken);
+}
+
+.fund-raised-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.fund-raised-amount {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-action-primary-bg);
+  font-variant-numeric: tabular-nums;
+}
+
+.fund-goal-text {
+  font-size: 13.5px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+}
+
+.fund-contributor-count {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.fund-progress-wrap {
+  height: 6px;
+  background: var(--color-border-subtle);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.fund-progress-bar {
+  height: 100%;
+  background: var(--gradient-foil, linear-gradient(90deg, var(--color-heritage-line), var(--color-action-primary-bg)));
+  transition: width 0.4s;
+}
+
+.fund-progress-pct {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── VietQR section ── */
+.fund-qr-section {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.fund-qr-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  margin-bottom: 8px;
+}
+
+.fund-qr-box {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  padding: 12px 14px;
+  flex-wrap: wrap;
+}
+
+.fund-qr-img {
+  width: 80px;
+  height: 80px;
+  flex: none;
+  object-fit: contain;
+  border: 1px solid var(--color-border-subtle);
+  background: #fff;
+}
+
+.fund-qr-img-placeholder {
+  width: 80px;
+  height: 80px;
+  flex: none;
+  background: var(--color-surface-sunken);
+  border: 1px dashed var(--color-border-strong);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.fund-qr-info {
+  flex: 1;
+  min-width: 180px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.fund-qr-info strong {
+  color: var(--color-text-primary);
+}
+
+.fund-qr-content-code {
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  padding: 2px 8px;
+  color: var(--color-text-primary);
+  display: inline-block;
+  margin-top: 3px;
+}
+
+/* ── Contribution section ── */
+.fund-contribs {
+  padding: 14px 20px 20px;
+}
+
+.fund-contribs-filter {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Inline add-contribution form */
+.fund-add-form {
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.fund-add-form-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-sm);
+  color: var(--color-text-primary);
+}
+
+.fund-add-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.fund-add-form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+/* Contribution table (CSS grid) */
+.fund-contrib-table {
+  border: 1px solid var(--color-border-subtle);
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.fund-contrib-thead {
+  display: grid;
+  grid-template-columns: 1fr 110px 90px 100px 90px 120px;
+  padding: 8px 14px;
+  background: var(--color-surface-sunken);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  gap: 10px;
+}
+
+.fund-contrib-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 90px 100px 90px 120px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border-subtle);
+  align-items: center;
+  gap: 10px;
+  transition: background 0.1s;
+}
+
+.fund-contrib-row:hover {
+  background: var(--color-surface-sunken);
+}
+
+.fund-contrib-row:last-child {
+  border-bottom: 0;
+}
+
+.fund-contrib-donor {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.fund-contrib-note {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.fund-contrib-amount {
+  font-weight: 700;
+  color: var(--color-status-success-fg, var(--color-heritage-deep));
+  font-variant-numeric: tabular-nums;
+}
+
+.fund-contrib-acts {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.fund-action-btn {
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border: 1px solid var(--color-border-strong);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-family: var(--font-body);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.fund-action-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-muted);
+}
+
+.fund-action-btn-confirm:hover {
+  color: var(--color-status-success-fg);
+  border-color: var(--color-status-success-fg);
+}
+
+.fund-action-btn-reject:hover {
+  color: var(--color-status-error-fg);
+  border-color: var(--color-status-error-fg);
+}
+
+.fund-action-btn-receipt {
+  color: var(--color-action-primary-bg);
+  border-color: transparent;
+}
+
+.fund-action-btn-receipt:hover {
+  border-color: var(--color-action-primary-bg);
+}
+
+.fund-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Campaign dialog section divider ── */
+.fund-dlg-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  padding-top: var(--spacing-sm);
+  padding-bottom: 2px;
+  border-top: 1px solid var(--color-border-subtle);
+  margin-top: var(--spacing-xs);
+}
+
+/* ── Responsive ── */
+
+/* Tablet */
+@media (max-width: 1023px) {
+  .fund-layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .fund-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-subtle);
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .fund-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fund-contrib-thead,
+  .fund-contrib-row {
+    grid-template-columns: 1fr 100px 80px 90px;
+  }
+
+  .fund-contrib-thead span:nth-child(5),
+  .fund-contrib-thead span:nth-child(6),
+  .fund-contrib-row > *:nth-child(5),
+  .fund-contrib-row > *:nth-child(6) {
+    display: none;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .fund-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fund-contrib-thead {
+    display: none;
+  }
+
+  .fund-contrib-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    padding: 12px 14px;
+    gap: 6px;
+  }
+
+  .fund-contrib-row > *:nth-child(3),
+  .fund-contrib-row > *:nth-child(4),
+  .fund-contrib-row > *:nth-child(5) {
+    display: none;
+  }
+
+  .fund-contrib-acts {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+
+  .fund-add-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fund-detail-head {
+    flex-wrap: wrap;
+  }
+
+  .fund-qr-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
