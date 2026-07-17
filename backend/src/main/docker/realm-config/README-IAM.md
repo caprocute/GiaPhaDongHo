@@ -16,11 +16,11 @@ File import: `jhipster-realm.json` (realm `jhipster`).
 
 | clientId | App | Redirect | Direct Access Grants |
 |----------|-----|----------|----------------------|
-| `giapha_admin` | Vite Admin `:5173` | `http://localhost:5173/*` | tắt (redirect OIDC) |
-| `giapha_portal` | Next Portal `:3000` | `http://localhost:3000/*` | **bật** — form `/login` trong app (ROPC) |
+| `giapha_admin` | Vite Admin `:5173` | `http://localhost:5173/*` | **bật** — form `/login` CRM (ROPC) |
+| `giapha_portal` | Next Portal `:3000` | `http://localhost:3000/*` | **bật** — form `/login` thành viên (ROPC) |
 | `web_app` | JHipster / dụng chung | localhost wildcard | tắt |
 
-Portal đăng nhập tại `/login` (không redirect Hosted Login Keycloak). Cần re-import realm sau khi đổi DAG.
+Admin và Portal đều đăng nhập **trong app** (username/password → token endpoint Keycloak), không redirect Hosted Login. UI hai màn tách biệt (CRM tối vs cổng thành viên). Cần re-import realm sau khi đổi DAG.
 
 ## Users mẫu (password giống user JHipster mặc định: `user` / admin: `admin`)
 

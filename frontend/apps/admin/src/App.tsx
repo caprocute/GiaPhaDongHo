@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType, type SVGProps } from "react";
-import { NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
 import {
   AppShell,
@@ -23,6 +23,7 @@ import {
   Users,
 } from "lucide-react";
 import { AuthCallbackPage } from "./auth/AuthCallbackPage";
+import { AdminLoginPage } from "./auth/AdminLoginPage";
 import { RequireAuth } from "./auth/RequireAuth";
 import { persistOidcHints } from "./auth/oidcConfig";
 import { defaultTreeSlug, listChangeRequests } from "./api/genealogyApi";
@@ -139,6 +140,7 @@ function Sidebar({ pendingCount }: { pendingCount: number | null }) {
 
 function AdminHeader() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const portal = portalBase();
   const displayName = String(user?.profile?.name ?? user?.profile?.preferred_username ?? "Quản trị");
 
@@ -155,7 +157,9 @@ function AdminHeader() {
             <span style={{ opacity: 0.9 }}>{displayName}</span>
             <button
               type="button"
-              onClick={() => void logout()}
+              onClick={() => {
+                void logout().then(() => navigate("/login", { replace: true }));
+              }}
               style={{
                 font: "inherit",
                 border: 0,
@@ -230,6 +234,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/login" element={<AdminLoginPage />} />
       <Route
         path="/*"
         element={

@@ -21,9 +21,9 @@ type AuthState = {
   user: User | null;
   loading: boolean;
   error: string | null;
-  /** Redirect Hosted Login Keycloak (giữ cho fallback / admin). */
+  /** Redirect Hosted Login Keycloak (fallback / silent renew callback). */
   login: () => Promise<void>;
-  /** Đăng nhập trong app — Resource Owner Password (không rời portal). */
+  /** Đăng nhập trong app — Resource Owner Password (portal + admin CRM). */
   loginWithPassword: (username: string, password: string) => Promise<User>;
   /** Đăng xuất local — không điều hướng sang Keycloak. */
   logout: () => Promise<void>;

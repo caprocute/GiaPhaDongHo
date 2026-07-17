@@ -146,6 +146,7 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [x] Keycloak realm: roles `ROLE_EDITOR` / `ROLE_GENEALOGY_ADMIN` / `ROLE_MEMBER` (+ clients `giapha_admin` / `giapha_portal`) — `realm-config/README-IAM.md`
 - [x] Bridge `iam`: `GET /api/v1/me`, ma trận role→permission, `@RequiresPermission` enforce thật
 - [x] Portal/Admin login OIDC PKCE + silent renew (`packages/auth` + oidc-client-ts)
+- [x] Admin `/login` form riêng (ROPC `giapha_admin`, UI CRM khác portal) — FR-12.1
 - [x] 2FA qua Keycloak: `CONFIGURE_TOTP` bắt buộc admin/genealogy; recovery codes qua Account Console (SRS-10)
 
 ### R1.6 packages/tree-viz (phả đồ)
