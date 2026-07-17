@@ -2,50 +2,51 @@
 <style>
 /* ============ TOKENS v2 — cảm hứng hoa văn Việt phục / gấm cung đình ============ */
 :root{
-  --bg:#FAF5E9; --bg-raise:#FFFDF6; --bg-sunken:#F1E7D0;
-  --ink:#26190F; --muted:#77644E; --line:#E7DABC; --line-strong:#D3BF95;
-  --son:#7A2014; --son-hover:#8E2A1A; --son-deep:#571509; --son-ink:#F9EFD8; --son-soft:#F3DFCE;
-  --gold:#C9A227; --gold-deep:#8C6B1F; --gold-soft:#F0E3B2; --gold-line:#D8BC6A;
-  --foil:linear-gradient(105deg,#8C6B1F 0%,#C9A227 22%,#F3E3A6 50%,#C9A227 78%,#8C6B1F 100%);
-  --good:#3E7C4F; --warn:#A87415; --bad:#8E2A1A;
+  /* Palette v3 — Alabaster / Urobilin / Philippine Gold / Dark Bronze / Raisin Black */
+  --bg:#EBEBE6; --bg-raise:#F4F4F0; --bg-sunken:#DDDDD6;
+  --ink:#29241D; --muted:#6B6256; --line:#D8D6CF; --line-strong:#C4B8A0;
+  --son:#AE720C; --son-hover:#824807; --son-deep:#29241D; --son-ink:#EBEBE6; --son-soft:#E8E0D0;
+  --gold:#E2AF1D; --gold-deep:#AE720C; --gold-soft:#F3E6B8; --gold-line:#D4A31C;
+  --foil:linear-gradient(105deg,#824807 0%,#AE720C 22%,#E2AF1D 50%,#AE720C 78%,#824807 100%);
+  --good:#3E7C4F; --warn:#AE720C; --bad:#8B3A2A;
   --shadow:0 1px 2px rgba(38,25,15,.05),0 10px 30px rgba(38,25,15,.08);
   --shadow-lift:0 2px 6px rgba(38,25,15,.08),0 20px 48px rgba(38,25,15,.16);
   --serif:'Noto Serif',Georgia,'Times New Roman',serif;
   --sans:'Be Vietnam Pro',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   --r-sm:4px; --r-md:8px; --r-lg:14px;
-  --brocade:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2L70 36 36 70 2 36Z' fill='none' stroke='rgba(176,138,56,.12)'/%3E%3Cpath d='M36 26v20M26 36h20' stroke='rgba(176,138,56,.08)'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='none' stroke='rgba(176,138,56,.14)'/%3E%3C/svg%3E");
-  --meander:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M3.5 19V6.5h12v8h-8v-4h4' fill='none' stroke='%23C9A227' stroke-width='1.8'/%3E%3C/svg%3E");
+  --brocade:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2L70 36 36 70 2 36Z' fill='none' stroke='rgba(226,175,29,.14)'/%3E%3Cpath d='M36 26v20M26 36h20' stroke='rgba(174,114,12,.10)'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='none' stroke='rgba(226,175,29,.16)'/%3E%3C/svg%3E");
+  --meander:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M3.5 19V6.5h12v8h-8v-4h4' fill='none' stroke='%23E2AF1D' stroke-width='1.8'/%3E%3C/svg%3E");
   --tho:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='62' fill='none' stroke='rgba(176,138,56,.13)' stroke-width='1.5'/%3E%3Ccircle cx='75' cy='75' r='52' fill='none' stroke='rgba(176,138,56,.09)'/%3E%3Ctext x='75' y='97' text-anchor='middle' font-family='Georgia,serif' font-size='64' fill='rgba(176,138,56,.13)'%3E%E5%A3%BD%3C/text%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#1A120B; --bg-raise:#251A11; --bg-sunken:#120C07;
-    --ink:#F2E8D3; --muted:#A99374; --line:#3B2C1E; --line-strong:#54402A;
-    --son:#C05237; --son-hover:#D2644A; --son-deep:#451006; --son-ink:#FBEED6; --son-soft:#3B211A;
-    --gold:#D9B45C; --gold-deep:#A98836; --gold-soft:#3D2F16; --gold-line:#8C6B1F;
-    --foil:linear-gradient(105deg,#A98836 0%,#D9B45C 22%,#F6E5AC 50%,#D9B45C 78%,#A98836 100%);
-    --good:#7FBF8E; --warn:#D9A94E; --bad:#D2644A;
+    --bg:#29241D; --bg-raise:#322C24; --bg-sunken:#1A1712;
+    --ink:#EBEBE6; --muted:#A89E90; --line:#3F3830; --line-strong:#524A40;
+    --son:#E2AF1D; --son-hover:#F0C040; --son-deep:#1A1712; --son-ink:#EBEBE6; --son-soft:#3A3228;
+    --gold:#E2AF1D; --gold-deep:#C9961A; --gold-soft:#3D3420; --gold-line:#AE720C;
+    --foil:linear-gradient(105deg,#AE720C 0%,#E2AF1D 22%,#F3E6B8 50%,#E2AF1D 78%,#AE720C 100%);
+    --good:#7FBF8E; --warn:#E2AF1D; --bad:#D2644A;
     --shadow:0 1px 2px rgba(0,0,0,.45),0 10px 30px rgba(0,0,0,.5);
     --shadow-lift:0 2px 6px rgba(0,0,0,.5),0 20px 52px rgba(0,0,0,.62);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#1A120B; --bg-raise:#251A11; --bg-sunken:#120C07;
-  --ink:#F2E8D3; --muted:#A99374; --line:#3B2C1E; --line-strong:#54402A;
-  --son:#C05237; --son-hover:#D2644A; --son-deep:#451006; --son-ink:#FBEED6; --son-soft:#3B211A;
-  --gold:#D9B45C; --gold-deep:#A98836; --gold-soft:#3D2F16; --gold-line:#8C6B1F;
-  --foil:linear-gradient(105deg,#A98836 0%,#D9B45C 22%,#F6E5AC 50%,#D9B45C 78%,#A98836 100%);
-  --good:#7FBF8E; --warn:#D9A94E; --bad:#D2644A;
+  --bg:#29241D; --bg-raise:#322C24; --bg-sunken:#1A1712;
+  --ink:#EBEBE6; --muted:#A89E90; --line:#3F3830; --line-strong:#524A40;
+  --son:#E2AF1D; --son-hover:#F0C040; --son-deep:#1A1712; --son-ink:#EBEBE6; --son-soft:#3A3228;
+  --gold:#E2AF1D; --gold-deep:#C9961A; --gold-soft:#3D3420; --gold-line:#AE720C;
+  --foil:linear-gradient(105deg,#AE720C 0%,#E2AF1D 22%,#F3E6B8 50%,#E2AF1D 78%,#AE720C 100%);
+  --good:#7FBF8E; --warn:#E2AF1D; --bad:#D2644A;
   --shadow:0 1px 2px rgba(0,0,0,.45),0 10px 30px rgba(0,0,0,.5);
   --shadow-lift:0 2px 6px rgba(0,0,0,.5),0 20px 52px rgba(0,0,0,.62);
 }
 :root[data-theme="light"]{
-  --bg:#FAF5E9; --bg-raise:#FFFDF6; --bg-sunken:#F1E7D0;
-  --ink:#26190F; --muted:#77644E; --line:#E7DABC; --line-strong:#D3BF95;
-  --son:#7A2014; --son-hover:#8E2A1A; --son-deep:#571509; --son-ink:#F9EFD8; --son-soft:#F3DFCE;
-  --gold:#C9A227; --gold-deep:#8C6B1F; --gold-soft:#F0E3B2; --gold-line:#D8BC6A;
-  --foil:linear-gradient(105deg,#8C6B1F 0%,#C9A227 22%,#F3E3A6 50%,#C9A227 78%,#8C6B1F 100%);
-  --good:#3E7C4F; --warn:#A87415; --bad:#8E2A1A;
+  --bg:#EBEBE6; --bg-raise:#F4F4F0; --bg-sunken:#DDDDD6;
+  --ink:#29241D; --muted:#6B6256; --line:#D8D6CF; --line-strong:#C4B8A0;
+  --son:#AE720C; --son-hover:#824807; --son-deep:#29241D; --son-ink:#EBEBE6; --son-soft:#E8E0D0;
+  --gold:#E2AF1D; --gold-deep:#AE720C; --gold-soft:#F3E6B8; --gold-line:#D4A31C;
+  --foil:linear-gradient(105deg,#824807 0%,#AE720C 22%,#E2AF1D 50%,#AE720C 78%,#824807 100%);
+  --good:#3E7C4F; --warn:#AE720C; --bad:#8B3A2A;
   --shadow:0 1px 2px rgba(38,25,15,.05),0 10px 30px rgba(38,25,15,.08);
   --shadow-lift:0 2px 6px rgba(38,25,15,.08),0 20px 48px rgba(38,25,15,.16);
 }
@@ -175,7 +176,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .sacphong{max-width:920px;margin:0 auto;text-align:center;color:#F9EFD8;position:relative;padding:12px 20px}
 .sacphong .kicker{color:#F3E3A6;letter-spacing:.34em;font-size:10.5px;text-transform:uppercase;font-weight:700}
 .sacphong h3{font-family:var(--serif);font-size:34px;margin-top:12px;font-weight:700}
-.sacphong h3 .foil-text{background:linear-gradient(105deg,#C9A227,#F6E5AC 45%,#C9A227 80%);-webkit-background-clip:text;background-clip:text}
+.sacphong h3 .foil-text{background:var(--foil);-webkit-background-clip:text;background-clip:text}
 .sacphong .sub{font-size:13.5px;opacity:.75;margin-top:8px}
 .cd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:40px}
 .cd-item{border:1px solid rgba(216,188,106,.55);padding:30px 22px 26px;position:relative;background:rgba(255,244,214,.045);backdrop-filter:blur(2px)}
@@ -504,7 +505,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
         </article>
         <div class="news-list">
           <article class="news-item">
-            <div class="thumb"><div class="ph-grad" style="background:linear-gradient(140deg,#C9A227,#7A5A18)"></div></div>
+            <div class="thumb"><div class="ph-grad" style="background:linear-gradient(140deg,var(--gold),var(--gold-deep))"></div></div>
             <div><h5>Trùng tu lăng mộ Cụ Thượng thư Huỳnh Côn: tâm hương hướng về cội nguồn</h5><div class="meta">04/12/2025 · 252 lượt xem</div></div>
           </article>
           <article class="news-item">

@@ -1,8 +1,8 @@
 {
   "color": {
     "action": {
-      "primary-bg":       { "$type": "color", "$value": "{color.son.400}" },
-      "primary-bg-hover": { "$type": "color", "$value": "{color.son.500}" },
+      "primary-bg":       { "$type": "color", "$value": "{color.gold.500}" },
+      "primary-bg-hover": { "$type": "color", "$value": "{color.son.400}" },
       "primary-bg-deep":  { "$type": "color", "$value": "{color.son.700}" },
       "primary-fg":       { "$type": "color", "$value": "{color.son.ink}" }
     },
