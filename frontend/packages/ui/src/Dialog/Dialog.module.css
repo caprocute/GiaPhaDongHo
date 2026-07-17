@@ -61,12 +61,13 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  /* Lề trái = lề phải; nút × căn cùng mép phải này */
   padding: var(--spacing-lg);
 }
 
 .ceremonialHead {
-  /* Chỉ phần tiêu đề tránh đè nút × — form giữ lề trái/phải bằng nhau */
-  padding-right: 36px;
+  /* Chỉ tiêu đề/mô tả tránh đè chữ lên × */
+  padding-right: 40px;
 }
 
 .eyebrow {
@@ -127,7 +128,7 @@
 .close {
   position: absolute;
   top: var(--spacing-sm);
-  right: var(--spacing-sm);
+  right: var(--spacing-lg);
   z-index: 2;
   display: inline-grid;
   place-items: center;
@@ -151,9 +152,10 @@
   background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
 }
 
+/* Cùng lề phải với ceremonialMain / footer (10px khung + spacing-lg) */
 .ceremonial .close {
   top: calc(10px + var(--spacing-sm));
-  right: calc(10px + var(--spacing-sm));
+  right: calc(10px + var(--spacing-lg));
 }
 
 @keyframes dialogFade {
