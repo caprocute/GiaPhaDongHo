@@ -2,7 +2,15 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useAuth } from "@giapha/auth";
-import { Alert, Button, EmptyState, FormField, Input, Textarea } from "@giapha/ui";
+import {
+  Alert,
+  Button,
+  EmptyState,
+  FormField,
+  HonorBoardCard,
+  Input,
+  Textarea,
+} from "@giapha/ui";
 import { PageShell } from "../../src/chrome/PageShell";
 import { API_BASE, TREE_SLUG } from "../../src/lib/config";
 
@@ -80,14 +88,25 @@ export function KhuyenHocClient() {
         {board.length === 0 ? (
           <EmptyState title="Chưa có thành tích công bố" description="Đề cử sẽ hiện sau khi được duyệt." />
         ) : (
-          <ol style={{ fontFamily: "var(--font-body)" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: "var(--spacing-md)",
+              marginTop: "var(--spacing-md)",
+            }}
+          >
             {board.map((b) => (
-              <li key={b.id}>
-                <strong>{b.personName}</strong>
-                {b.year ? ` (${b.year})` : ""} — {b.achievement}
-              </li>
+              <HonorBoardCard
+                key={b.id}
+                name={b.personName || "—"}
+                detail={[b.achievement, b.year != null ? `Năm ${b.year}` : null]
+                  .filter(Boolean)
+                  .join(" · ")}
+                emblem="學"
+              />
             ))}
-          </ol>
+          </div>
         )}
       </section>
 

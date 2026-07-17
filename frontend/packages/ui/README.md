@@ -41,6 +41,8 @@ Figma DS: **Gia phả họ Hoàng** — [`ETrlAF4vsj0uHiJd69jcnD`](https://www.f
 | LunarDateBadge | ✅ | ✅ |
 | PersonNameDisplay | ✅ | ✅ |
 | MediaLightbox | ✅ | ✅ |
+| HonorBoardCard | ✅ | ✅ |
+| ClanSeal | ✅ | ✅ |
 
 ## Scripts
 

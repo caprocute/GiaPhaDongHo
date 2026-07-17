@@ -397,51 +397,7 @@
   margin-top: 40px;
 }
 
-.cdItem {
-  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 70%, transparent);
-  padding: 30px 22px 26px;
-  position: relative;
-  background: color-mix(in srgb, var(--color-heritage-soft) 6%, transparent);
-}
-
-.cdItem::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 35%, transparent);
-  pointer-events: none;
-}
-
-.medal {
-  width: 58px;
-  height: 58px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  background: var(--gradient-foil);
-  display: grid;
-  place-items: center;
-  color: var(--color-heritage-frame);
-  font-family: var(--font-display);
-  font-size: 23px;
-  box-shadow:
-    0 3px 10px color-mix(in srgb, var(--color-ink-900) 35%, transparent),
-    inset 0 0 0 2px color-mix(in srgb, var(--color-heritage-frame) 25%, transparent);
-}
-
-.cdNm {
-  font-family: var(--font-display);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-text-on-brand);
-}
-
-.cdDs {
-  font-size: 13px;
-  color: color-mix(in srgb, var(--color-text-on-brand) 75%, transparent);
-  margin-top: 6px;
-  line-height: 1.6;
-  font-family: var(--font-body);
-}
+/* Thẻ bảng vàng: HonorBoardCard (packages/ui) */
 
 @media (max-width: 960px) {
   .wrap {
@@ -545,7 +501,7 @@
   }
 
   .cdGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 
   .sacphong {

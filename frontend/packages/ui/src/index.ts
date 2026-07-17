@@ -87,3 +87,6 @@ export type { SideNavItemProps } from "./SideNavItem/SideNavItem";
 
 export { Panel } from "./Panel/Panel";
 export type { PanelProps } from "./Panel/Panel";
+
+export { HonorBoardCard } from "./HonorBoardCard/HonorBoardCard";
+export type { HonorBoardCardProps } from "./HonorBoardCard/HonorBoardCard";

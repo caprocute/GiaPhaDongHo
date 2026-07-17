@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GioCard, StatCard } from "@giapha/ui";
+import { GioCard, HonorBoardCard, StatCard } from "@giapha/ui";
 import { convertSolarToLunar } from "@giapha/lunar";
 import { HomeSearch } from "./HomeSearch";
 import { HeroConstellation } from "./HeroConstellation";
@@ -141,11 +141,13 @@ export default async function HomePage() {
             <p className={styles.sacSub}>Khắc ghi tấm lòng của con cháu hướng về tông tộc</p>
             <div className={styles.cdGrid}>
               {DEMO_CONG_DUC.map((item) => (
-                <div key={item.name} className={styles.cdItem}>
-                  <div className={styles.medal}>{item.medal}</div>
-                  <div className={styles.cdNm}>{item.name}</div>
-                  <div className={styles.cdDs}>{item.desc}</div>
-                </div>
+                <HonorBoardCard
+                  key={item.name}
+                  onDark
+                  name={item.name}
+                  detail={item.desc}
+                  emblem={item.medal}
+                />
               ))}
             </div>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Alert, EmptyState, FormField, Input } from "@giapha/ui";
+import { Alert, EmptyState, FormField, HonorBoardCard, Input } from "@giapha/ui";
 import { PageShell } from "../../src/chrome/PageShell";
 import { API_BASE, TREE_SLUG } from "../../src/lib/config";
 
@@ -164,16 +164,29 @@ export function CongDucClient() {
                 Chưa có đóng góp được công bố.
               </p>
             ) : (
-              <ol style={{ fontFamily: "var(--font-body)", paddingLeft: "1.2rem" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                  gap: "var(--spacing-md)",
+                  marginTop: "var(--spacing-md)",
+                }}
+              >
                 {honor.slice(0, 50).map((h) => (
-                  <li key={h.id}>
-                    <strong>{h.donorName}</strong>
-                    {h.amount != null ? ` — ${String(h.amount)}` : ""}
-                    {h.kind ? ` (${h.kind})` : ""}
-                    {h.note ? ` · ${h.note}` : ""}
-                  </li>
+                  <HonorBoardCard
+                    key={h.id}
+                    name={h.donorName || "Ẩn danh"}
+                    detail={[
+                      h.amount != null ? String(h.amount) : null,
+                      h.kind,
+                      h.note,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    emblem="德"
+                  />
                 ))}
-              </ol>
+              </div>
             )}
           </section>
         </div>
