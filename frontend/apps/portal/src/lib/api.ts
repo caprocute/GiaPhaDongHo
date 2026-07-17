@@ -45,3 +45,18 @@ export async function fetchAnniversaries(lunarMonth?: number): Promise<ApiAnnive
     )) ?? []
   );
 }
+
+export type GalleryPhoto = {
+  id?: number;
+  caption?: string | null;
+  url?: string | null;
+  thumbUrl?: string | null;
+  albumId?: number | null;
+};
+
+/** Ảnh từ thư viện quản trị (MinIO) — đồng bộ portal ↔ admin. */
+export async function fetchGalleryPhotos(size = 60): Promise<GalleryPhoto[]> {
+  return (
+    (await getJson<GalleryPhoto[]>(`/api/v1/media/gallery/photos?size=${size}&sort=id,desc`)) ?? []
+  );
+}

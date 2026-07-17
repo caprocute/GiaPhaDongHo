@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
 import { Alert, Button, DataTable, EmptyState, FormField, Input, Select } from "@giapha/ui";
 import {
@@ -19,6 +18,7 @@ import {
   type UnionMemberDto,
 } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 
 type UnionRow = FamilyUnionDto & Record<string, unknown>;
 
@@ -43,14 +43,14 @@ export function TreeEditorPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      const [u, p, m, c] = await Promise.all([
+      const [u, personPage, m, c] = await Promise.all([
         listTreeUnions(slug, token),
-        listTreePersons(slug, token),
+        listTreePersons(slug, token, undefined, 0, 500),
         listUnionMembers(token),
         listUnionChildren(token),
       ]);
       setUnions(u);
-      setPersons(p);
+      setPersons(personPage.content);
       setMembers(m);
       setChildren(c);
       setSelectedUnionId((prev) => (prev || (u[0]?.id != null ? String(u[0].id) : "")));
@@ -82,7 +82,7 @@ export function TreeEditorPage() {
         .filter((u) => u.id != null)
         .map((u) => ({
           value: String(u.id),
-          label: `Union #${u.id}${u.orderNo != null ? ` (thứ tự ${u.orderNo})` : ""}`,
+          label: `Hôn phối #${u.id}${u.orderNo != null ? ` (thứ tự ${u.orderNo})` : ""}`,
         })),
     [unions],
   );
@@ -113,7 +113,7 @@ export function TreeEditorPage() {
       const token2 = await getAccessToken();
       setUnions(await listTreeUnions(slug, token2));
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Tạo union thất bại.");
+      setError(e instanceof ApiError ? e.message : "Tạo hôn phối thất bại.");
     } finally {
       setBusy(false);
     }
@@ -135,7 +135,7 @@ export function TreeEditorPage() {
       );
       setMembers(await listUnionMembers(token));
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Thêm thành viên union thất bại.");
+      setError(e instanceof ApiError ? e.message : "Thêm thành viên hôn phối thất bại.");
     } finally {
       setBusy(false);
     }
@@ -196,21 +196,11 @@ export function TreeEditorPage() {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          gap: "var(--spacing-md)",
-          flexWrap: "wrap",
-        }}
-      >
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Tree editor</h1>
-        <p style={{ margin: 0, fontFamily: "var(--font-body)", color: "var(--color-text-muted)" }}>
-          Cây: <code>{slug}</code> · đổi ở <Link to="/settings">Cài đặt</Link>
-        </p>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Soạn phả đồ"
+        description="Gắn hôn phối, vợ/chồng và con trong phả hệ. Đổi cây mặc định tại mục Cài đặt."
+      />
 
       {error ? (
         <Alert title="Lỗi" variant="error">
@@ -236,7 +226,7 @@ export function TreeEditorPage() {
           }}
         >
           <h2 style={{ fontFamily: "var(--font-display)", margin: 0, fontSize: "var(--font-size-lg)" }}>
-            Tạo hôn phối (union)
+            Tạo hôn phối
           </h2>
           <FormField label="Thứ tự (tuỳ chọn)">
             <Input
@@ -247,7 +237,7 @@ export function TreeEditorPage() {
             />
           </FormField>
           <Button type="button" disabled={busy} onClick={() => void onCreateUnion()}>
-            Tạo union
+            Tạo hôn phối
           </Button>
         </div>
 
@@ -264,7 +254,7 @@ export function TreeEditorPage() {
           <h2 style={{ fontFamily: "var(--font-display)", margin: 0, fontSize: "var(--font-size-lg)" }}>
             Gắn vợ/chồng
           </h2>
-          <FormField label="Union">
+          <FormField label="Hôn phối">
             <Select
               options={[{ value: "", label: "— Chọn —" }, ...unionOptions]}
               value={selectedUnionId}
@@ -311,7 +301,7 @@ export function TreeEditorPage() {
           <h2 style={{ fontFamily: "var(--font-display)", margin: 0, fontSize: "var(--font-size-lg)" }}>
             Gắn con
           </h2>
-          <FormField label="Union">
+          <FormField label="Hôn phối">
             <Select
               options={[{ value: "", label: "— Chọn —" }, ...unionOptions]}
               value={selectedUnionId}
@@ -340,9 +330,9 @@ export function TreeEditorPage() {
       ) : (
         <>
           <section style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}>
-            <h2 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Danh sách union</h2>
+            <h2 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Danh sách hôn phối</h2>
             {unions.length === 0 ? (
-              <EmptyState title="Chưa có union" description="Tạo hôn phối để gắn vợ/chồng và con." />
+              <EmptyState title="Chưa có hôn phối" description="Tạo hôn phối để gắn vợ/chồng và con." />
             ) : (
               <DataTable columns={unionColumns} rows={unions as UnionRow[]} />
             )}
@@ -357,7 +347,7 @@ export function TreeEditorPage() {
               }}
             >
               <div>
-                <h3 style={{ fontFamily: "var(--font-display)" }}>Thành viên union #{selectedId}</h3>
+                <h3 style={{ fontFamily: "var(--font-display)" }}>Thành viên hôn phối #{selectedId}</h3>
                 {membersOfUnion.length === 0 ? (
                   <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
                     Chưa có thành viên.
@@ -392,7 +382,7 @@ export function TreeEditorPage() {
                 )}
               </div>
               <div>
-                <h3 style={{ fontFamily: "var(--font-display)" }}>Con của union #{selectedId}</h3>
+                <h3 style={{ fontFamily: "var(--font-display)" }}>Con của hôn phối #{selectedId}</h3>
                 {childrenOfUnion.length === 0 ? (
                   <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
                     Chưa gắn con.

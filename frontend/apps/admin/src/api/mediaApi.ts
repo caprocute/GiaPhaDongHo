@@ -1,4 +1,4 @@
-import { apiFetch } from "./http";
+import { apiFetch, apiFetchPage, type PageResult } from "./http";
 
 export type MediaAlbumDto = {
   id?: number;
@@ -23,8 +23,16 @@ export type UploadResponse = {
   imgproxyUrl: string;
 };
 
-export async function listMediaAlbums(token: string | null): Promise<MediaAlbumDto[]> {
-  return apiFetch<MediaAlbumDto[]>("/api/media-albums?eagerload=true", { token });
+export async function listMediaAlbums(
+  token: string | null,
+  page = 0,
+  size = 50,
+): Promise<PageResult<MediaAlbumDto>> {
+  return apiFetchPage<MediaAlbumDto>("/api/media-albums?eagerload=true&sort=title,asc", {
+    token,
+    page,
+    size,
+  });
 }
 
 export async function createMediaAlbum(
@@ -38,8 +46,16 @@ export async function deleteMediaAlbum(id: number, token: string | null): Promis
   await apiFetch<void>(`/api/media-albums/${id}`, { method: "DELETE", token });
 }
 
-export async function listMediaPhotos(token: string | null): Promise<MediaPhotoDto[]> {
-  return apiFetch<MediaPhotoDto[]>("/api/media-photos?eagerload=true", { token });
+export async function listMediaPhotos(
+  token: string | null,
+  page = 0,
+  size = 20,
+): Promise<PageResult<MediaPhotoDto>> {
+  return apiFetchPage<MediaPhotoDto>("/api/media-photos?eagerload=true&sort=id,desc", {
+    token,
+    page,
+    size,
+  });
 }
 
 export async function deleteMediaPhoto(id: number, token: string | null): Promise<void> {

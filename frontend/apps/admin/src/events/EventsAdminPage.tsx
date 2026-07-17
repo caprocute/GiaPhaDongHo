@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@giapha/auth";
-import { Alert, Button, DataTable, EmptyState, FormField, Input, Textarea } from "@giapha/ui";
+import {
+  Alert,
+  Button,
+  DataTable,
+  EmptyState,
+  FormField,
+  Input,
+  Pagination,
+  Textarea,
+} from "@giapha/ui";
 import {
   assignEventRsvp,
   defaultTreeSlug,
@@ -11,15 +20,24 @@ import {
   type EventRsvpDto,
 } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 
 type Row = ClanEventView & Record<string, unknown>;
+const EVENT_PAGE_SIZE = 20;
+const RSVP_PAGE_SIZE = 50;
 
 export function EventsAdminPage() {
   const { getAccessToken } = useAuth();
   const slug = defaultTreeSlug();
+  const [eventPage, setEventPage] = useState(0);
   const [rows, setRows] = useState<ClanEventView[]>([]);
+  const [eventTotal, setEventTotal] = useState(0);
+  const [eventTotalPages, setEventTotalPages] = useState(1);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [rsvpPage, setRsvpPage] = useState(0);
   const [rsvps, setRsvps] = useState<EventRsvpDto[]>([]);
+  const [rsvpTotal, setRsvpTotal] = useState(0);
+  const [rsvpTotalPages, setRsvpTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -29,35 +47,49 @@ export function EventsAdminPage() {
   const [location, setLocation] = useState("");
   const [checklist, setChecklist] = useState('{"albumId":null,"tasks":["Ban tế","Hậu cần","Khánh tiết"]}');
 
-  const reload = useCallback(async () => {
+  const reloadEvents = useCallback(async () => {
     setError(null);
     try {
       const token = await getAccessToken();
-      setRows(await listClanEvents(slug, token));
+      const result = await listClanEvents(slug, token, eventPage, EVENT_PAGE_SIZE);
+      setRows(result.content);
+      setEventTotal(result.totalElements);
+      setEventTotalPages(result.totalPages);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được sự kiện.");
       setRows([]);
     }
-  }, [getAccessToken, slug]);
+  }, [eventPage, getAccessToken, slug]);
 
   useEffect(() => {
-    void reload();
-  }, [reload]);
+    void reloadEvents();
+  }, [reloadEvents]);
 
   useEffect(() => {
+    setRsvpPage(0);
+  }, [selectedId]);
+
+  const reloadRsvps = useCallback(async () => {
     if (selectedId == null) {
       setRsvps([]);
+      setRsvpTotal(0);
+      setRsvpTotalPages(1);
       return;
     }
-    void (async () => {
-      try {
-        const token = await getAccessToken();
-        setRsvps(await listEventRsvps(slug, selectedId, token));
-      } catch {
-        setRsvps([]);
-      }
-    })();
-  }, [getAccessToken, selectedId, slug]);
+    try {
+      const token = await getAccessToken();
+      const result = await listEventRsvps(slug, selectedId, token, rsvpPage, RSVP_PAGE_SIZE);
+      setRsvps(result.content);
+      setRsvpTotal(result.totalElements);
+      setRsvpTotalPages(result.totalPages);
+    } catch {
+      setRsvps([]);
+    }
+  }, [getAccessToken, rsvpPage, selectedId, slug]);
+
+  useEffect(() => {
+    void reloadRsvps();
+  }, [reloadRsvps]);
 
   async function saveEvent(e: React.FormEvent) {
     e.preventDefault();
@@ -79,7 +111,7 @@ export function EventsAdminPage() {
       setMsg("Đã lưu sự kiện.");
       setTitle("");
       setLocation("");
-      await reload();
+      await reloadEvents();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Lưu thất bại.");
     } finally {
@@ -91,7 +123,7 @@ export function EventsAdminPage() {
     try {
       const token = await getAccessToken();
       await assignEventRsvp(slug, rsvpId, assignment, token);
-      setRsvps(await listEventRsvps(slug, selectedId!, token));
+      await reloadRsvps();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Phân công thất bại.");
     }
@@ -137,13 +169,11 @@ export function EventsAdminPage() {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-lg)" }}>
-      <div>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Sự kiện dòng họ</h1>
-        <p style={{ margin: 0, color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
-          Họp họ / giỗ tổ · RSVP · phân công — F6 / R2.3 · <code>{slug}</code>
-        </p>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Sự kiện dòng họ"
+        description="Tổ chức họp họ, giỗ tổ — theo dõi đăng ký tham dự và phân công ban tổ chức."
+      />
 
       {error ? (
         <Alert title="Lỗi" variant="error">
@@ -151,7 +181,7 @@ export function EventsAdminPage() {
         </Alert>
       ) : null}
       {msg ? (
-        <Alert title="OK" variant="success">
+        <Alert title="Thành công" variant="success">
           {msg}
         </Alert>
       ) : null}
@@ -170,13 +200,13 @@ export function EventsAdminPage() {
         <FormField label="Tiêu đề" required>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </FormField>
-        <FormField label="Bắt đầu (dương lịch)" hint="Browser local → ISO; BE tự điền lunarJson">
+        <FormField label="Bắt đầu (dương lịch)" hint="Thời gian địa phương — hệ thống tự điền âm lịch">
           <Input type="datetime-local" value={startSolar} onChange={(e) => setStartSolar(e.target.value)} />
         </FormField>
         <FormField label="Địa điểm">
           <Input value={location} onChange={(e) => setLocation(e.target.value)} />
         </FormField>
-        <FormField label="Checklist / album JSON" hint='{"albumId":1,"tasks":[...]}'>
+        <FormField label="Danh mục công việc (JSON)" hint='{"albumId":1,"tasks":[...]}'>
           <Textarea rows={3} value={checklist} onChange={(e) => setChecklist(e.target.value)} />
         </FormField>
         <Button type="submit" disabled={busy || !title.trim()}>
@@ -187,47 +217,69 @@ export function EventsAdminPage() {
       {rows.length === 0 ? (
         <EmptyState title="Chưa có sự kiện" description="Tạo họp họ / giỗ tổ ở form trên." />
       ) : (
-        <DataTable columns={columns} rows={rows as Row[]} />
+        <>
+          <div className="admin-table-wrap">
+            <DataTable columns={columns} rows={rows as Row[]} />
+          </div>
+          <div className="admin-table-footer">
+            <Pagination
+              page={eventPage + 1}
+              totalPages={eventTotalPages}
+              totalItems={eventTotal}
+              onPageChange={(p) => setEventPage(p - 1)}
+            />
+          </div>
+        </>
       )}
 
       {selectedId != null ? (
         <div style={{ display: "grid", gap: "var(--spacing-sm)" }}>
-          <strong style={{ fontFamily: "var(--font-display)" }}>RSVP — sự kiện #{selectedId}</strong>
+          <strong style={{ fontFamily: "var(--font-display)" }}>
+            Đăng ký tham dự — sự kiện #{selectedId}
+          </strong>
           {rsvps.length === 0 ? (
             <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
               Chưa có hộ đăng ký.
             </p>
           ) : (
-            <ul style={{ margin: 0, paddingLeft: "1.2rem", fontFamily: "var(--font-body)" }}>
-              {rsvps.map((r) => (
-                <li key={r.id} style={{ marginBottom: "var(--spacing-xs)" }}>
-                  <strong>{r.householdName}</strong> — {r.headcount ?? 0} người, {r.vehicles ?? 0} xe
-                  {r.assignment ? ` · ${r.assignment}` : ""}{" "}
-                  <button
-                    type="button"
-                    onClick={() => void setAssignment(r.id!, "Ban tế")}
-                    style={{
-                      marginLeft: "var(--spacing-xs)",
-                      fontFamily: "var(--font-body)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    → Ban tế
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void setAssignment(r.id!, "Hậu cần")}
-                    style={{
-                      marginLeft: "var(--spacing-xs)",
-                      fontFamily: "var(--font-body)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    → Hậu cần
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul style={{ margin: 0, paddingLeft: "1.2rem", fontFamily: "var(--font-body)" }}>
+                {rsvps.map((r) => (
+                  <li key={r.id} style={{ marginBottom: "var(--spacing-xs)" }}>
+                    <strong>{r.householdName}</strong> — {r.headcount ?? 0} người, {r.vehicles ?? 0} xe
+                    {r.assignment ? ` · ${r.assignment}` : ""}{" "}
+                    <button
+                      type="button"
+                      onClick={() => void setAssignment(r.id!, "Ban tế")}
+                      style={{
+                        marginLeft: "var(--spacing-xs)",
+                        fontFamily: "var(--font-body)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      → Ban tế
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void setAssignment(r.id!, "Hậu cần")}
+                      style={{
+                        marginLeft: "var(--spacing-xs)",
+                        fontFamily: "var(--font-body)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      → Hậu cần
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              <Pagination
+                page={rsvpPage + 1}
+                totalPages={rsvpTotalPages}
+                totalItems={rsvpTotal}
+                onPageChange={(p) => setRsvpPage(p - 1)}
+              />
+            </>
           )}
         </div>
       ) : null}

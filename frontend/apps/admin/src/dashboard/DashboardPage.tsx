@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@giapha/auth";
 import { Alert, Button, KPICard } from "@giapha/ui";
 import {
@@ -43,6 +43,19 @@ const sectionHead: React.CSSProperties = {
   marginBottom: 4,
 };
 
+function greetingName(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "quản trị viên";
+  return trimmed;
+}
+
+function timeGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Chào buổi sáng";
+  if (hour < 18) return "Chào buổi chiều";
+  return "Chào buổi tối";
+}
+
 export function DashboardPage() {
   const { getAccessToken, user } = useAuth();
   const slug = defaultTreeSlug();
@@ -50,7 +63,10 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
 
-  const name = user?.profile?.preferred_username ?? user?.profile?.name ?? "quản trị viên";
+  const name = useMemo(
+    () => greetingName(String(user?.profile?.name ?? user?.profile?.preferred_username ?? "")),
+    [user],
+  );
 
   useEffect(() => {
     void (async () => {
@@ -75,7 +91,7 @@ export function DashboardPage() {
         `/api/v1/trees/${encodeURIComponent(slug)}/book/export`,
         { method: "POST", body: {}, token },
       );
-      setExportMsg(`PDF sẵn sàng${r.bytes ? ` (${Math.round(r.bytes / 1024)} KB)` : ""}`);
+      setExportMsg(`Sách gia phả sẵn sàng${r.bytes ? ` (${Math.round(r.bytes / 1024)} KB)` : ""}.`);
       if (r.downloadUrl) window.open(r.downloadUrl, "_blank", "noopener,noreferrer");
     } catch (e) {
       setExportMsg(e instanceof ApiError ? e.message : "Xuất PDF thất bại.");
@@ -92,17 +108,39 @@ export function DashboardPage() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-xl)" }}>
       <div>
-        <div style={sectionHead}>Quản trị tộc sự</div>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0, fontSize: "clamp(1.4rem, 2.5vw, 2rem)", fontWeight: 700 }}>
-          Xin chào, {name}
+        <div style={sectionHead}>Bàn quản trị tộc sự</div>
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            margin: 0,
+            fontSize: "clamp(1.4rem, 2.5vw, 2rem)",
+            fontWeight: 700,
+          }}
+        >
+          {timeGreeting()}, {name}
         </h1>
+        <p
+          style={{
+            margin: "8px 0 0",
+            fontFamily: "var(--font-body)",
+            color: "var(--color-text-muted)",
+            fontSize: 14,
+            maxWidth: "48ch",
+          }}
+        >
+          Tổng quan hoạt động gia phả, tộc sự và nội dung — cập nhật theo dữ liệu hiện tại.
+        </p>
       </div>
 
       {error ? (
-        <Alert title="Lỗi tải số liệu" variant="error">{error}</Alert>
+        <Alert title="Lỗi tải số liệu" variant="error">
+          {error}
+        </Alert>
       ) : null}
       {exportMsg ? (
-        <Alert title="Xuất sách gia phả" variant="info">{exportMsg}</Alert>
+        <Alert title="Xuất sách gia phả" variant="info">
+          {exportMsg}
+        </Alert>
       ) : null}
 
       <div style={section}>
@@ -113,18 +151,9 @@ export function DashboardPage() {
             value={(stats?.persons ?? "—").toLocaleString("vi-VN")}
             delta={stats ? undefined : "Đang tải…"}
           />
-          <KPICard
-            label="Chiến dịch công đức"
-            value={stats?.donationCampaigns ?? "—"}
-          />
-          <KPICard
-            label="Sự kiện"
-            value={stats?.events ?? "—"}
-          />
-          <KPICard
-            label="Khuyến học được duyệt"
-            value={stats?.scholarshipApproved ?? "—"}
-          />
+          <KPICard label="Chiến dịch công đức" value={stats?.donationCampaigns ?? "—"} />
+          <KPICard label="Sự kiện" value={stats?.events ?? "—"} />
+          <KPICard label="Khuyến học được duyệt" value={stats?.scholarshipApproved ?? "—"} />
         </div>
       </div>
 
@@ -151,7 +180,14 @@ export function DashboardPage() {
           </Button>
         </div>
         {stats?.modulesEnabled != null ? (
-          <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)", fontSize: 13, margin: 0 }}>
+          <p
+            style={{
+              fontFamily: "var(--font-body)",
+              color: "var(--color-text-muted)",
+              fontSize: 13,
+              margin: 0,
+            }}
+          >
             {stats.modulesEnabled} module đang bật
           </p>
         ) : null}

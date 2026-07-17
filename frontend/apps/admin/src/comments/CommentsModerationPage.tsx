@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@giapha/auth";
-import { Alert, Badge, Button, DataTable, EmptyState, Select } from "@giapha/ui";
+import { Alert, Badge, Button, DataTable, EmptyState, Pagination, Select } from "@giapha/ui";
 import { deleteCmsComment, listCmsComments, patchCmsComment } from "../api/cmsApi";
 import type { CmsCommentDto } from "../api/cmsTypes";
 import { ApiError } from "../api/http";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 
 type Filter = "all" | "pending" | "approved" | "rejected";
 
 type Row = CmsCommentDto & Record<string, unknown>;
+const PAGE_SIZE = 20;
 
 const statusLabel: Record<string, string> = {
   pending: "Chờ duyệt",
@@ -22,7 +24,10 @@ function normalizeStatus(raw: string | null | undefined): string {
 export function CommentsModerationPage() {
   const { getAccessToken } = useAuth();
   const [filter, setFilter] = useState<Filter>("pending");
+  const [page, setPage] = useState(0);
   const [rows, setRows] = useState<CmsCommentDto[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -32,18 +37,25 @@ export function CommentsModerationPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      setRows(await listCmsComments(token));
+      const result = await listCmsComments(token, page, PAGE_SIZE);
+      setRows(result.content);
+      setTotalElements(result.totalElements);
+      setTotalPages(result.totalPages);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được bình luận.");
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }, [getAccessToken]);
+  }, [getAccessToken, page]);
 
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [filter]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return rows as Row[];
@@ -157,34 +169,29 @@ export function CommentsModerationPage() {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--spacing-md)",
-          flexWrap: "wrap",
-        }}
-      >
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Duyệt bình luận</h1>
-        <div style={{ minWidth: 200 }}>
-          <Select
-            aria-label="Lọc trạng thái"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as Filter)}
-            options={[
-              { value: "pending", label: "Chờ duyệt" },
-              { value: "approved", label: "Đã duyệt" },
-              { value: "rejected", label: "Từ chối" },
-              { value: "all", label: "Tất cả" },
-            ]}
-          />
-        </div>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Duyệt bình luận"
+        description="Kiểm duyệt bình luận trên bài viết trước khi hiển thị công khai."
+        actions={
+          <div style={{ minWidth: 200 }}>
+            <Select
+              aria-label="Lọc trạng thái"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as Filter)}
+              options={[
+                { value: "pending", label: "Chờ duyệt" },
+                { value: "approved", label: "Đã duyệt" },
+                { value: "rejected", label: "Từ chối" },
+                { value: "all", label: "Tất cả" },
+              ]}
+            />
+          </div>
+        }
+      />
 
       {error ? (
-        <Alert title="Lỗi API" variant="error">
+        <Alert title="Lỗi" variant="error">
           {error}
         </Alert>
       ) : null}
@@ -194,10 +201,22 @@ export function CommentsModerationPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           title="Không có bình luận"
-          description="Không có mục khớp bộ lọc hiện tại."
+          description="Không có mục khớp bộ lọc trên trang hiện tại."
         />
       ) : (
-        <DataTable columns={columns} rows={filtered} />
+        <>
+          <div className="admin-table-wrap">
+            <DataTable columns={columns} rows={filtered} />
+          </div>
+          <div className="admin-table-footer">
+            <Pagination
+              page={page + 1}
+              totalPages={totalPages}
+              totalItems={totalElements}
+              onPageChange={(p) => setPage(p - 1)}
+            />
+          </div>
+        </>
       )}
     </div>
   );

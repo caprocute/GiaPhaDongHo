@@ -1,45 +1,41 @@
 import { useState } from "react";
 import { Alert, Button, FormField, Input } from "@giapha/ui";
 import { defaultTreeSlug, setStoredTreeSlug } from "../api/genealogyApi";
+import { AdminPageHeader } from "../components/AdminPageHeader";
+import { adminSiteTitle } from "../lib/siteTitle";
 
 export function SettingsPage() {
   const [treeSlug, setTreeSlug] = useState(() => defaultTreeSlug());
-  const [siteTitle, setSiteTitle] = useState(() => {
-    try {
-      return localStorage.getItem("giapha.admin.siteTitle") ?? "GiaPhaHub";
-    } catch {
-      return "GiaPhaHub";
-    }
-  });
+  const [siteTitle, setSiteTitle] = useState(() => adminSiteTitle());
   const [saved, setSaved] = useState(false);
 
   function onSave() {
     const slug = treeSlug.trim() || "ho-hoang";
     setStoredTreeSlug(slug);
     setTreeSlug(slug);
-    localStorage.setItem("giapha.admin.siteTitle", siteTitle.trim() || "GiaPhaHub");
+    localStorage.setItem("giapha.admin.siteTitle", siteTitle.trim() || "Họ Hoàng Trung Bính");
     setSaved(true);
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)", maxWidth: 520 }}>
-      <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Cài đặt site</h1>
-      <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)", margin: 0 }}>
-        Lưu local trên trình duyệt admin (R1.8 cơ bản). API cấu hình site toàn cục sẽ bổ sung sau.
-      </p>
+    <div className="admin-stack" style={{ maxWidth: 520 }}>
+      <AdminPageHeader
+        title="Cài đặt"
+        description="Tùy chỉnh tên hiển thị và cây phả hệ mặc định trên trình duyệt này."
+      />
 
       {saved ? (
         <Alert title="Đã lưu" variant="success">
-          Tree slug dùng cho Tree editor / CRM.
+          Cài đặt đã được lưu trên trình duyệt. Tải lại trang để cập nhật tiêu đề trên thanh điều hướng.
         </Alert>
       ) : null}
 
-      <FormField label="Tên hiển thị site" hint="Chỉ lưu local admin">
+      <FormField label="Tên dòng họ hiển thị" hint="Dùng trên thanh điều hướng quản trị">
         <Input value={siteTitle} onChange={(e) => setSiteTitle(e.target.value)} />
       </FormField>
       <FormField
-        label="Slug cây mặc định"
-        hint="Khớp FamilyTree.slug (vd. ho-hoang). Có thể ghi đè bằng VITE_DEFAULT_TREE_SLUG."
+        label="Mã cây phả hệ mặc định"
+        hint="Liên kết tới cây phả hệ trên hệ thống. Có thể ghi đè bằng biến môi trường VITE_DEFAULT_TREE_SLUG."
         required
       >
         <Input value={treeSlug} onChange={(e) => setTreeSlug(e.target.value)} />

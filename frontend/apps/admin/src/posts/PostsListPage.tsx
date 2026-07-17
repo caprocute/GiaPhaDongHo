@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
-import { Alert, Badge, Button, DataTable, EmptyState, Input } from "@giapha/ui";
+import { Alert, Badge, Button, DataTable, EmptyState, Input, Pagination } from "@giapha/ui";
 import { deleteCmsPost, listCmsPosts } from "../api/cmsApi";
 import { ApiError } from "../api/http";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 import { fromCmsPost } from "./postMappers";
 import type { PostRecord } from "./types";
 
 type Row = PostRecord & Record<string, unknown>;
+const PAGE_SIZE = 20;
 
 const statusLabel: Record<PostRecord["status"], string> = {
   draft: "Nháp",
@@ -18,7 +20,10 @@ const statusLabel: Record<PostRecord["status"], string> = {
 export function PostsListPage() {
   const { getAccessToken } = useAuth();
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
   const [rows, setRows] = useState<PostRecord[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,16 +32,17 @@ export function PostsListPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      const posts = await listCmsPosts(token);
-      setRows(posts.map(fromCmsPost));
+      const result = await listCmsPosts(token, page, PAGE_SIZE);
+      setRows(result.content.map(fromCmsPost));
+      setTotalElements(result.totalElements);
+      setTotalPages(result.totalPages);
     } catch (e) {
-      const msg = e instanceof ApiError ? e.message : "Không tải được danh sách bài viết.";
-      setError(msg);
+      setError(e instanceof ApiError ? e.message : "Không tải được danh sách bài viết.");
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }, [getAccessToken]);
+  }, [getAccessToken, page]);
 
   useEffect(() => {
     void reload();
@@ -61,7 +67,7 @@ export function PostsListPage() {
     },
     {
       key: "slug",
-      header: "Slug",
+      header: "Đường dẫn",
       render: (row: Row) => <code>{row.slug}</code>,
     },
     {
@@ -114,28 +120,23 @@ export function PostsListPage() {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--spacing-md)",
-          flexWrap: "wrap",
-        }}
-      >
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Bài viết</h1>
-        <Link to="/posts/new">
-          <Button type="button">Viết bài</Button>
-        </Link>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Bài viết"
+        description="Tin tức và thông báo hiển thị trên trang công khai khi đã xuất bản."
+        actions={
+          <Link to="/posts/new">
+            <Button type="button">Viết bài</Button>
+          </Link>
+        }
+      />
       {error ? (
-        <Alert title="Lỗi API" variant="error">
+        <Alert title="Lỗi" variant="error">
           {error}
         </Alert>
       ) : null}
       <Input
-        placeholder="Tìm theo tiêu đề / slug…"
+        placeholder="Lọc trên trang hiện tại theo tiêu đề…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         aria-label="Tìm bài viết"
@@ -145,7 +146,7 @@ export function PostsListPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           title="Chưa có bài viết"
-          description="Tạo bài mới hoặc kiểm tra quyền cms:post:read / API."
+          description="Tạo bài mới — bài đã xuất bản sẽ hiện trên mục Tin tức của cổng thông tin."
           action={
             <Link to="/posts/new">
               <Button>Viết bài</Button>
@@ -153,7 +154,19 @@ export function PostsListPage() {
           }
         />
       ) : (
-        <DataTable columns={columns} rows={filtered} />
+        <>
+          <div className="admin-table-wrap">
+            <DataTable columns={columns} rows={filtered} />
+          </div>
+          <div className="admin-table-footer">
+            <Pagination
+              page={page + 1}
+              totalPages={totalPages}
+              totalItems={totalElements}
+              onPageChange={(p) => setPage(p - 1)}
+            />
+          </div>
+        </>
       )}
     </div>
   );

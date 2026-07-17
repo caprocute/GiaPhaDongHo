@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useAuth } from "@giapha/auth";
-import { Alert, Button, DataTable, EmptyState, FormField, Input, Select, Textarea } from "@giapha/ui";
+import {
+  Alert,
+  Button,
+  DataTable,
+  EmptyState,
+  FormField,
+  Input,
+  Pagination,
+  Select,
+  Textarea,
+} from "@giapha/ui";
 import { ApiError } from "../api/http";
 import {
   createMediaAlbum,
@@ -13,9 +23,13 @@ import {
   type MediaPhotoDto,
   type UploadResponse,
 } from "../api/mediaApi";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 
 type PhotoRow = MediaPhotoDto & Record<string, unknown>;
 type AlbumRow = MediaAlbumDto & Record<string, unknown>;
+
+const ALBUM_PAGE_SIZE = 20;
+const PHOTO_PAGE_SIZE = 20;
 
 const grid: CSSProperties = {
   display: "grid",
@@ -25,8 +39,15 @@ const grid: CSSProperties = {
 
 export function MediaLibraryPage() {
   const { getAccessToken } = useAuth();
+  const [albumPage, setAlbumPage] = useState(0);
   const [albums, setAlbums] = useState<MediaAlbumDto[]>([]);
+  const [albumTotal, setAlbumTotal] = useState(0);
+  const [albumTotalPages, setAlbumTotalPages] = useState(1);
+  const [allAlbums, setAllAlbums] = useState<MediaAlbumDto[]>([]);
+  const [photoPage, setPhotoPage] = useState(0);
   const [photos, setPhotos] = useState<MediaPhotoDto[]>([]);
+  const [photoTotal, setPhotoTotal] = useState(0);
+  const [photoTotalPages, setPhotoTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [albumTitle, setAlbumTitle] = useState("");
@@ -36,22 +57,40 @@ export function MediaLibraryPage() {
   const [lastUpload, setLastUpload] = useState<UploadResponse | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const reloadAlbumOptions = useCallback(async () => {
+    try {
+      const token = await getAccessToken();
+      const result = await listMediaAlbums(token, 0, 200);
+      setAllAlbums(result.content);
+    } catch {
+      setAllAlbums([]);
+    }
+  }, [getAccessToken]);
+
   const reload = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const token = await getAccessToken();
-      const [a, p] = await Promise.all([listMediaAlbums(token), listMediaPhotos(token)]);
-      setAlbums(a);
-      setPhotos(p);
+      const [albumResult, photoResult] = await Promise.all([
+        listMediaAlbums(token, albumPage, ALBUM_PAGE_SIZE),
+        listMediaPhotos(token, photoPage, PHOTO_PAGE_SIZE),
+      ]);
+      setAlbums(albumResult.content);
+      setAlbumTotal(albumResult.totalElements);
+      setAlbumTotalPages(albumResult.totalPages);
+      setPhotos(photoResult.content);
+      setPhotoTotal(photoResult.totalElements);
+      setPhotoTotalPages(photoResult.totalPages);
+      await reloadAlbumOptions();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Không tải được thư viện media.");
+      setError(e instanceof ApiError ? e.message : "Không tải được thư viện ảnh.");
       setAlbums([]);
       setPhotos([]);
     } finally {
       setLoading(false);
     }
-  }, [getAccessToken]);
+  }, [albumPage, getAccessToken, photoPage, reloadAlbumOptions]);
 
   useEffect(() => {
     void reload();
@@ -60,12 +99,12 @@ export function MediaLibraryPage() {
   const albumOptions = useMemo(
     () => [
       { value: "", label: "— Không gắn album —" },
-      ...albums.map((a) => ({
+      ...allAlbums.map((a) => ({
         value: String(a.id),
         label: a.title,
       })),
     ],
-    [albums],
+    [allAlbums],
   );
 
   async function onCreateAlbum() {
@@ -102,7 +141,7 @@ export function MediaLibraryPage() {
       setCaption("");
       await reload();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Upload thất bại (MinIO / quyền?).");
+      setError(e instanceof ApiError ? e.message : "Tải ảnh lên thất bại.");
     } finally {
       setBusy(false);
     }
@@ -116,7 +155,7 @@ export function MediaLibraryPage() {
     },
     {
       key: "objectKey",
-      header: "Object key",
+      header: "Mã lưu trữ",
       render: (row: PhotoRow) => <code style={{ fontSize: "var(--font-size-sm)" }}>{row.objectKey}</code>,
     },
     {
@@ -205,8 +244,11 @@ export function MediaLibraryPage() {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-lg)" }}>
-      <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Thư viện media</h1>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Thư viện ảnh"
+        description="Quản lý album và ảnh tư liệu dòng họ trên cổng thông tin."
+      />
 
       {error ? (
         <Alert title="Lỗi" variant="error">
@@ -250,7 +292,7 @@ export function MediaLibraryPage() {
           }}
         >
           <h2 style={{ fontFamily: "var(--font-display)", margin: 0, fontSize: "var(--font-size-lg)" }}>
-            Upload ảnh
+            Tải ảnh lên
           </h2>
           <FormField label="Album (tuỳ chọn)">
             <Select
@@ -272,10 +314,10 @@ export function MediaLibraryPage() {
             />
           </FormField>
           {lastUpload ? (
-            <Alert title="Upload thành công" variant="success">
+            <Alert title="Tải lên thành công" variant="success">
               ID {lastUpload.photoId} ·{" "}
               <a href={lastUpload.presignedGetUrl} target="_blank" rel="noreferrer">
-                Xem (presigned)
+                Xem ảnh
               </a>
             </Alert>
           ) : null}
@@ -291,15 +333,39 @@ export function MediaLibraryPage() {
             {albums.length === 0 ? (
               <EmptyState title="Chưa có album" description="Tạo album ở panel bên trái." />
             ) : (
-              <DataTable columns={albumColumns} rows={albums as AlbumRow[]} />
+              <>
+                <div className="admin-table-wrap">
+                  <DataTable columns={albumColumns} rows={albums as AlbumRow[]} />
+                </div>
+                <div className="admin-table-footer">
+                  <Pagination
+                    page={albumPage + 1}
+                    totalPages={albumTotalPages}
+                    totalItems={albumTotal}
+                    onPageChange={(p) => setAlbumPage(p - 1)}
+                  />
+                </div>
+              </>
             )}
           </section>
           <section style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}>
             <h2 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Ảnh</h2>
             {photos.length === 0 ? (
-              <EmptyState title="Chưa có ảnh" description="Upload ảnh (cần MinIO + quyền media:photo:upload)." />
+              <EmptyState title="Chưa có ảnh" description="Tải ảnh lên để bổ sung thư viện." />
             ) : (
-              <DataTable columns={photoColumns} rows={photos as PhotoRow[]} />
+              <>
+                <div className="admin-table-wrap">
+                  <DataTable columns={photoColumns} rows={photos as PhotoRow[]} />
+                </div>
+                <div className="admin-table-footer">
+                  <Pagination
+                    page={photoPage + 1}
+                    totalPages={photoTotalPages}
+                    totalItems={photoTotal}
+                    onPageChange={(p) => setPhotoPage(p - 1)}
+                  />
+                </div>
+              </>
             )}
           </section>
         </>

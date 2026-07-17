@@ -1,10 +1,16 @@
-import { apiFetch } from "./http";
+import { apiFetch, apiFetchPage, type PageResult } from "./http";
 import type { CmsCategoryDto, CmsCommentDto, CmsPostDto } from "./cmsTypes";
 
-const PAGE = "page=0&size=200&eagerload=true";
-
-export async function listCmsPosts(token: string | null): Promise<CmsPostDto[]> {
-  return apiFetch<CmsPostDto[]>(`/api/cms-posts?${PAGE}&sort=id,desc`, { token });
+export async function listCmsPosts(
+  token: string | null,
+  page = 0,
+  size = 20,
+): Promise<PageResult<CmsPostDto>> {
+  return apiFetchPage<CmsPostDto>(`/api/cms-posts?eagerload=true&sort=id,desc`, {
+    token,
+    page,
+    size,
+  });
 }
 
 export async function getCmsPost(id: number, token: string | null): Promise<CmsPostDto> {
@@ -28,11 +34,24 @@ export async function deleteCmsPost(id: number, token: string | null): Promise<v
 }
 
 export async function listCmsCategories(token: string | null): Promise<CmsCategoryDto[]> {
-  return apiFetch<CmsCategoryDto[]>(`/api/cms-categories?page=0&size=200&sort=name,asc`, { token });
+  const page = await apiFetchPage<CmsCategoryDto>(`/api/cms-categories?sort=name,asc`, {
+    token,
+    page: 0,
+    size: 200,
+  });
+  return page.content;
 }
 
-export async function listCmsComments(token: string | null): Promise<CmsCommentDto[]> {
-  return apiFetch<CmsCommentDto[]>(`/api/cms-comments?${PAGE}&sort=id,desc`, { token });
+export async function listCmsComments(
+  token: string | null,
+  page = 0,
+  size = 20,
+): Promise<PageResult<CmsCommentDto>> {
+  return apiFetchPage<CmsCommentDto>(`/api/cms-comments?eagerload=true&sort=id,desc`, {
+    token,
+    page,
+    size,
+  });
 }
 
 export async function patchCmsComment(

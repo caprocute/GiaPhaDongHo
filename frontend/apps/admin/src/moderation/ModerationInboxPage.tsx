@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
-import { Alert, Badge, Button, DataTable, EmptyState, Select, Textarea } from "@giapha/ui";
+import {
+  Alert,
+  Badge,
+  Button,
+  DataTable,
+  EmptyState,
+  Pagination,
+  Select,
+  Textarea,
+} from "@giapha/ui";
 import {
   defaultTreeSlug,
   listChangeRequests,
@@ -9,8 +18,10 @@ import {
   type ChangeRequestDto,
 } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 
 type Row = ChangeRequestDto & Record<string, unknown>;
+const PAGE_SIZE = 20;
 
 const statusLabel: Record<string, string> = {
   pending: "Chờ duyệt",
@@ -22,7 +33,10 @@ export function ModerationInboxPage() {
   const { getAccessToken } = useAuth();
   const slug = defaultTreeSlug();
   const [filter, setFilter] = useState("pending");
+  const [page, setPage] = useState(0);
   const [rows, setRows] = useState<ChangeRequestDto[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
@@ -33,18 +47,31 @@ export function ModerationInboxPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      setRows(await listChangeRequests(slug, filter === "all" ? undefined : filter, token));
+      const result = await listChangeRequests(
+        slug,
+        filter === "all" ? undefined : filter,
+        token,
+        page,
+        PAGE_SIZE,
+      );
+      setRows(result.content);
+      setTotalElements(result.totalElements);
+      setTotalPages(result.totalPages);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được hàng đợi tự khai.");
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }, [filter, getAccessToken, slug]);
+  }, [filter, getAccessToken, page, slug]);
 
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [filter]);
 
   async function review(id: number, action: "approve" | "reject") {
     setBusyId(id);
@@ -89,7 +116,7 @@ export function ModerationInboxPage() {
     },
     {
       key: "status",
-      header: "TT",
+      header: "Trạng thái",
       render: (row: Row) => {
         const s = (row.status ?? "pending").toLowerCase();
         return (
@@ -101,7 +128,7 @@ export function ModerationInboxPage() {
     },
     {
       key: "diff",
-      header: "Diff",
+      header: "Thay đổi",
       render: (row: Row) => (
         <pre
           style={{
@@ -143,36 +170,26 @@ export function ModerationInboxPage() {
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--spacing-md)",
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Duyệt tự khai</h1>
-          <p style={{ margin: 0, color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
-            Cây <code>{slug}</code> — F3 / R2.1
-          </p>
-        </div>
-        <div style={{ minWidth: 180 }}>
-          <Select
-            aria-label="Lọc trạng thái"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            options={[
-              { value: "pending", label: "Chờ duyệt" },
-              { value: "approved", label: "Đã duyệt" },
-              { value: "rejected", label: "Từ chối" },
-              { value: "all", label: "Tất cả" },
-            ]}
-          />
-        </div>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Duyệt tự khai"
+        description="Xem và phê duyệt thông tin con cháu tự khai bổ sung hoặc chỉnh sửa."
+        actions={
+          <div style={{ minWidth: 180 }}>
+            <Select
+              aria-label="Lọc trạng thái"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              options={[
+                { value: "pending", label: "Chờ duyệt" },
+                { value: "approved", label: "Đã duyệt" },
+                { value: "rejected", label: "Từ chối" },
+                { value: "all", label: "Tất cả" },
+              ]}
+            />
+          </div>
+        }
+      />
 
       {error ? (
         <Alert title="Lỗi" variant="error">
@@ -193,7 +210,19 @@ export function ModerationInboxPage() {
       ) : rows.length === 0 ? (
         <EmptyState title="Không có yêu cầu" description="Chưa có tự khai khớp bộ lọc." />
       ) : (
-        <DataTable columns={columns} rows={rows as Row[]} />
+        <>
+          <div className="admin-table-wrap">
+            <DataTable columns={columns} rows={rows as Row[]} />
+          </div>
+          <div className="admin-table-footer">
+            <Pagination
+              page={page + 1}
+              totalPages={totalPages}
+              totalItems={totalElements}
+              onPageChange={(p) => setPage(p - 1)}
+            />
+          </div>
+        </>
       )}
     </div>
   );

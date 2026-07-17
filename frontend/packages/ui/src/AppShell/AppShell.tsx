@@ -26,21 +26,22 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
       <style>{`
         .app-shell-body {
           display: grid;
-          grid-template-columns: ${sidebar ? "220px 1fr" : "1fr"};
+          grid-template-columns: ${sidebar ? "236px 1fr" : "1fr"};
           min-height: 0;
+          background: var(--color-surface-muted, var(--color-surface-page));
         }
         .app-shell-aside {
-          padding: var(--spacing-sm) 0;
+          padding: 18px 10px;
           border-right: 1px solid var(--color-border-subtle);
           background: var(--color-surface-card);
           overflow-y: auto;
         }
         .app-shell-main {
-          padding: var(--spacing-lg);
+          padding: 26px 30px;
           overflow-y: auto;
           min-width: 0;
         }
-        @media (max-width: 768px) {
+        @media (max-width: 960px) {
           .app-shell-body {
             grid-template-columns: 1fr;
           }
@@ -55,6 +56,7 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
             flex-direction: row !important;
             flex-wrap: nowrap;
             overflow-x: auto;
+            gap: 0;
           }
           .app-shell-aside nav > div {
             display: contents;

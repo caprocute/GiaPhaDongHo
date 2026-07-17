@@ -1,23 +1,33 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
-import { Alert, Badge, Button, DataTable, EmptyState, Input, PersonNameDisplay } from "@giapha/ui";
 import {
-  defaultTreeSlug,
-  deletePersonById,
-  listTreePersons,
-} from "../api/genealogyApi";
+  Alert,
+  Badge,
+  Button,
+  DataTable,
+  EmptyState,
+  Input,
+  Pagination,
+  PersonNameDisplay,
+} from "@giapha/ui";
+import { defaultTreeSlug, deletePersonById, listTreePersons } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 import { fromPersonDto } from "./personMappers";
 import type { PersonRecord } from "./types";
 
 type Row = PersonRecord & Record<string, unknown>;
+const PAGE_SIZE = 20;
 
 export function PersonsListPage() {
   const { getAccessToken } = useAuth();
   const slug = defaultTreeSlug();
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
   const [rows, setRows] = useState<PersonRecord[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,20 +36,26 @@ export function PersonsListPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      const list = await listTreePersons(slug, token, query);
-      setRows(list.map(fromPersonDto));
+      const result = await listTreePersons(slug, token, query, page, PAGE_SIZE);
+      setRows(result.content.map(fromPersonDto));
+      setTotalElements(result.totalElements);
+      setTotalPages(result.totalPages);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được danh sách thành viên.");
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }, [getAccessToken, query, slug]);
+  }, [getAccessToken, page, query, slug]);
 
   useEffect(() => {
     const t = window.setTimeout(() => void reload(), 200);
     return () => window.clearTimeout(t);
   }, [reload]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [query]);
 
   const columns = useMemo(
     () => [
@@ -107,28 +123,18 @@ export function PersonsListPage() {
   );
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--spacing-md)",
-          flexWrap: "wrap",
-        }}
-      >
-        <div>
-          <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Thành viên</h1>
-          <p style={{ margin: 0, fontFamily: "var(--font-body)", color: "var(--color-text-muted)" }}>
-            Cây <code>{slug}</code>
-          </p>
-        </div>
-        <Link to="/persons/new">
-          <Button type="button">Thêm người</Button>
-        </Link>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Thành viên"
+        description="Hồ sơ người trong phả hệ — tra cứu, bổ sung và chỉnh sửa thông tin."
+        actions={
+          <Link to="/persons/new">
+            <Button type="button">Thêm người</Button>
+          </Link>
+        }
+      />
       {error ? (
-        <Alert title="Lỗi API" variant="error">
+        <Alert title="Lỗi" variant="error">
           {error}
         </Alert>
       ) : null}
@@ -143,7 +149,7 @@ export function PersonsListPage() {
       ) : rows.length === 0 ? (
         <EmptyState
           title="Chưa có thành viên"
-          description="Thêm hồ sơ hoặc kiểm tra slug cây / quyền genealogy:person:read."
+          description="Thêm hồ sơ mới hoặc kiểm tra quyền xem thành viên."
           action={
             <Link to="/persons/new">
               <Button>Thêm người</Button>
@@ -151,7 +157,19 @@ export function PersonsListPage() {
           }
         />
       ) : (
-        <DataTable columns={columns} rows={rows as Row[]} />
+        <>
+          <div className="admin-table-wrap">
+            <DataTable columns={columns} rows={rows as Row[]} />
+          </div>
+          <div className="admin-table-footer">
+            <Pagination
+              page={page + 1}
+              totalPages={totalPages}
+              totalItems={totalElements}
+              onPageChange={(p) => setPage(p - 1)}
+            />
+          </div>
+        </>
       )}
     </div>
   );

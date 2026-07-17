@@ -1,6 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@giapha/auth";
-import { Alert, Button, DataTable, EmptyState, FormField, Input, Select, Textarea } from "@giapha/ui";
+import {
+  Alert,
+  Button,
+  DataTable,
+  EmptyState,
+  FormField,
+  Input,
+  Pagination,
+  Select,
+  Textarea,
+} from "@giapha/ui";
 import {
   defaultTreeSlug,
   listCampaignContributions,
@@ -11,15 +21,24 @@ import {
   type DonationContributionDto,
 } from "../api/genealogyApi";
 import { apiBase, ApiError } from "../api/http";
+import { AdminPageHeader } from "../components/AdminPageHeader";
 
 type Row = DonationCampaignView & Record<string, unknown>;
+const CAMPAIGN_PAGE_SIZE = 20;
+const CONTRIBUTION_PAGE_SIZE = 20;
 
 export function DonationAdminPage() {
   const { getAccessToken } = useAuth();
   const slug = defaultTreeSlug();
+  const [campaignPage, setCampaignPage] = useState(0);
   const [rows, setRows] = useState<DonationCampaignView[]>([]);
+  const [campaignTotal, setCampaignTotal] = useState(0);
+  const [campaignTotalPages, setCampaignTotalPages] = useState(1);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [contributionPage, setContributionPage] = useState(0);
   const [contributions, setContributions] = useState<DonationContributionDto[]>([]);
+  const [contributionTotal, setContributionTotal] = useState(0);
+  const [contributionTotalPages, setContributionTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -36,35 +55,55 @@ export function DonationAdminPage() {
   const [kind, setKind] = useState("money");
   const [note, setNote] = useState("");
 
-  const reload = useCallback(async () => {
+  const reloadCampaigns = useCallback(async () => {
     setError(null);
     try {
       const token = await getAccessToken();
-      setRows(await listDonationCampaignsAdmin(slug, token));
+      const result = await listDonationCampaignsAdmin(slug, token, campaignPage, CAMPAIGN_PAGE_SIZE);
+      setRows(result.content);
+      setCampaignTotal(result.totalElements);
+      setCampaignTotalPages(result.totalPages);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được chiến dịch.");
       setRows([]);
     }
-  }, [getAccessToken, slug]);
+  }, [campaignPage, getAccessToken, slug]);
 
   useEffect(() => {
-    void reload();
-  }, [reload]);
+    void reloadCampaigns();
+  }, [reloadCampaigns]);
 
   useEffect(() => {
+    setContributionPage(0);
+  }, [selectedId]);
+
+  const reloadContributions = useCallback(async () => {
     if (selectedId == null) {
       setContributions([]);
+      setContributionTotal(0);
+      setContributionTotalPages(1);
       return;
     }
-    void (async () => {
-      try {
-        const token = await getAccessToken();
-        setContributions(await listCampaignContributions(slug, selectedId, token));
-      } catch {
-        setContributions([]);
-      }
-    })();
-  }, [getAccessToken, selectedId, slug]);
+    try {
+      const token = await getAccessToken();
+      const result = await listCampaignContributions(
+        slug,
+        selectedId,
+        token,
+        contributionPage,
+        CONTRIBUTION_PAGE_SIZE,
+      );
+      setContributions(result.content);
+      setContributionTotal(result.totalElements);
+      setContributionTotalPages(result.totalPages);
+    } catch {
+      setContributions([]);
+    }
+  }, [contributionPage, getAccessToken, selectedId, slug]);
+
+  useEffect(() => {
+    void reloadContributions();
+  }, [reloadContributions]);
 
   async function saveCampaign(e: React.FormEvent) {
     e.preventDefault();
@@ -86,7 +125,7 @@ export function DonationAdminPage() {
       setMsg("Đã lưu chiến dịch.");
       setTitle("");
       setGoal("");
-      await reload();
+      await reloadCampaigns();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Lưu thất bại.");
     } finally {
@@ -137,9 +176,8 @@ export function DonationAdminPage() {
       setDonorName("");
       setAmount("");
       setNote("");
-      const list = await listCampaignContributions(slug, selectedId, token);
-      setContributions(list);
-      await reload();
+      await reloadContributions();
+      await reloadCampaigns();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Ghi nhận thất bại.");
     } finally {
@@ -182,19 +220,17 @@ export function DonationAdminPage() {
     },
     {
       key: "status",
-      header: "TT",
+      header: "Trạng thái",
       render: (row: Row) => row.campaign?.status ?? "—",
     },
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-lg)" }}>
-      <div>
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Quỹ công đức</h1>
-        <p style={{ margin: 0, color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
-          Chiến dịch · đối soát · biên nhận — F4 / R2.2 · cây <code>{slug}</code>
-        </p>
-      </div>
+    <div className="admin-stack">
+      <AdminPageHeader
+        title="Quỹ công đức"
+        description="Tạo chiến dịch gây quỹ, ghi nhận đóng góp và in biên nhận."
+      />
 
       {error ? (
         <Alert title="Lỗi" variant="error">
@@ -202,7 +238,7 @@ export function DonationAdminPage() {
         </Alert>
       ) : null}
       {msg ? (
-        <Alert title="OK" variant="success">
+        <Alert title="Thành công" variant="success">
           {msg}
         </Alert>
       ) : null}
@@ -235,7 +271,7 @@ export function DonationAdminPage() {
             ]}
           />
         </FormField>
-        <FormField label="VietQR JSON" hint='{"bankBin","accountNo","accountName"}'>
+        <FormField label="Thông tin chuyển khoản (JSON)" hint='{"bankBin","accountNo","accountName"}'>
           <Textarea rows={3} value={vietqr} onChange={(e) => setVietqr(e.target.value)} />
         </FormField>
         <Button type="submit" disabled={busy || !title.trim()}>
@@ -246,7 +282,19 @@ export function DonationAdminPage() {
       {rows.length === 0 ? (
         <EmptyState title="Chưa có chiến dịch" description="Tạo chiến dịch đầu tiên ở form trên." />
       ) : (
-        <DataTable columns={columns} rows={rows as Row[]} />
+        <>
+          <div className="admin-table-wrap">
+            <DataTable columns={columns} rows={rows as Row[]} />
+          </div>
+          <div className="admin-table-footer">
+            <Pagination
+              page={campaignPage + 1}
+              totalPages={campaignTotalPages}
+              totalItems={campaignTotal}
+              onPageChange={(p) => setCampaignPage(p - 1)}
+            />
+          </div>
+        </>
       )}
 
       {selectedId != null ? (
@@ -289,29 +337,37 @@ export function DonationAdminPage() {
           </Button>
 
           {contributions.length ? (
-            <ul style={{ margin: 0, paddingLeft: "1.2rem", fontFamily: "var(--font-body)" }}>
-              {contributions.map((c) => (
-                <li key={c.id}>
-                  #{c.id} {c.donorName} — {String(c.amount ?? 0)} ({c.kind}){" "}
-                  {c.id != null ? (
-                    <button
-                      type="button"
-                      onClick={() => void openReceipt(c.id!)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "var(--color-action-primary-bg)",
-                        cursor: "pointer",
-                        fontFamily: "var(--font-body)",
-                        padding: 0,
-                      }}
-                    >
-                      Biên nhận
-                    </button>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul style={{ margin: 0, paddingLeft: "1.2rem", fontFamily: "var(--font-body)" }}>
+                {contributions.map((c) => (
+                  <li key={c.id}>
+                    #{c.id} {c.donorName} — {String(c.amount ?? 0)} ({c.kind}){" "}
+                    {c.id != null ? (
+                      <button
+                        type="button"
+                        onClick={() => void openReceipt(c.id!)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "var(--color-action-primary-bg)",
+                          cursor: "pointer",
+                          fontFamily: "var(--font-body)",
+                          padding: 0,
+                        }}
+                      >
+                        Biên nhận
+                      </button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+              <Pagination
+                page={contributionPage + 1}
+                totalPages={contributionTotalPages}
+                totalItems={contributionTotal}
+                onPageChange={(p) => setContributionPage(p - 1)}
+              />
+            </>
           ) : (
             <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
               Chưa có đóng góp công khai trên chiến dịch này.

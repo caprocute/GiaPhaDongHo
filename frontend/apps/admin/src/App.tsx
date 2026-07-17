@@ -20,6 +20,7 @@ import { ScholarshipAdminPage } from "./scholarship/ScholarshipAdminPage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { SystemModulesPage } from "./system/SystemModulesPage";
 import { TreeEditorPage } from "./tree/TreeEditorPage";
+import { adminSiteTitle } from "./lib/siteTitle";
 
 const NAV_GROUPS = [
   {
@@ -128,7 +129,7 @@ function AdminHeader() {
         }}
       >
         <span style={{ fontWeight: 700, letterSpacing: "0.04em", fontSize: 15 }}>
-          GiaPhaHub · Quản trị
+          {adminSiteTitle()} · Quản trị
         </span>
         {user ? (
           <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-sm)", fontFamily: "var(--font-body)", fontSize: 13 }}>

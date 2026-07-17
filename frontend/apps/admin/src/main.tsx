@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@giapha/auth";
 import "@giapha/tokens/tokens.css";
+import "./admin.css";
 import { App } from "./App";
 import { adminOidcConfig } from "./auth/oidcConfig";
 

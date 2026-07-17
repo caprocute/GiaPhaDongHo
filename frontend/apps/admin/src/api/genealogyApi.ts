@@ -1,4 +1,4 @@
-import { apiFetch } from "./http";
+import { apiFetch, apiFetchPage, type PageResult } from "./http";
 
 export type PersonDto = {
   id?: number;
@@ -54,11 +54,13 @@ export async function listTreePersons(
   slug: string,
   token: string | null,
   query?: string,
-): Promise<PersonDto[]> {
+  page = 0,
+  size = 20,
+): Promise<PageResult<PersonDto>> {
   const q = query?.trim() ? `&query=${encodeURIComponent(query.trim())}` : "";
-  return apiFetch<PersonDto[]>(
-    `/api/v1/trees/${encodeURIComponent(slug)}/persons?size=200&sort=code,asc${q}`,
-    { token },
+  return apiFetchPage<PersonDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/persons?sort=code,asc${q}`,
+    { token, page, size },
   );
 }
 
@@ -127,11 +129,13 @@ export async function listChangeRequests(
   slug: string,
   status: string | undefined,
   token: string | null,
-): Promise<ChangeRequestDto[]> {
-  const q = status ? `?status=${encodeURIComponent(status)}` : "";
-  return apiFetch<ChangeRequestDto[]>(
-    `/api/v1/trees/${encodeURIComponent(slug)}/change-requests${q}`,
-    { token },
+  page = 0,
+  size = 20,
+): Promise<PageResult<ChangeRequestDto>> {
+  const q = status ? `status=${encodeURIComponent(status)}&` : "";
+  return apiFetchPage<ChangeRequestDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/change-requests?${q}sort=id,desc`,
+    { token, page, size },
   );
 }
 
@@ -175,10 +179,12 @@ export type DonationContributionDto = {
 export async function listDonationCampaignsAdmin(
   slug: string,
   token: string | null,
-): Promise<DonationCampaignView[]> {
-  return apiFetch<DonationCampaignView[]>(
+  page = 0,
+  size = 20,
+): Promise<PageResult<DonationCampaignView>> {
+  return apiFetchPage<DonationCampaignView>(
     `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/admin`,
-    { token },
+    { token, page, size },
   );
 }
 
@@ -203,10 +209,12 @@ export async function listCampaignContributions(
   slug: string,
   campaignId: number,
   token: string | null,
-): Promise<DonationContributionDto[]> {
-  return apiFetch<DonationContributionDto[]>(
+  page = 0,
+  size = 20,
+): Promise<PageResult<DonationContributionDto>> {
+  return apiFetchPage<DonationContributionDto>(
     `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/contributions/admin`,
-    { token },
+    { token, page, size },
   );
 }
 
@@ -250,8 +258,14 @@ export type EventRsvpDto = {
 export async function listClanEvents(
   slug: string,
   token: string | null,
-): Promise<ClanEventView[]> {
-  return apiFetch<ClanEventView[]>(`/api/v1/trees/${encodeURIComponent(slug)}/events`, { token });
+  page = 0,
+  size = 20,
+): Promise<PageResult<ClanEventView>> {
+  return apiFetchPage<ClanEventView>(`/api/v1/trees/${encodeURIComponent(slug)}/events`, {
+    token,
+    page,
+    size,
+  });
 }
 
 export async function upsertClanEvent(
@@ -276,10 +290,12 @@ export async function listEventRsvps(
   slug: string,
   eventId: number,
   token: string | null,
-): Promise<EventRsvpDto[]> {
-  return apiFetch<EventRsvpDto[]>(
+  page = 0,
+  size = 50,
+): Promise<PageResult<EventRsvpDto>> {
+  return apiFetchPage<EventRsvpDto>(
     `/api/v1/trees/${encodeURIComponent(slug)}/events/${eventId}/rsvps`,
-    { token },
+    { token, page, size },
   );
 }
 
@@ -308,11 +324,13 @@ export async function listNotificationOutbox(
   slug: string,
   status: string | undefined,
   token: string | null,
-): Promise<NotificationOutboxDto[]> {
-  const q = status ? `?status=${encodeURIComponent(status)}` : "";
-  return apiFetch<NotificationOutboxDto[]>(
-    `/api/v1/trees/${encodeURIComponent(slug)}/notification-outbox${q}`,
-    { token },
+  page = 0,
+  size = 20,
+): Promise<PageResult<NotificationOutboxDto>> {
+  const q = status ? `status=${encodeURIComponent(status)}&` : "";
+  return apiFetchPage<NotificationOutboxDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/notification-outbox?${q}`,
+    { token, page, size },
   );
 }
 
