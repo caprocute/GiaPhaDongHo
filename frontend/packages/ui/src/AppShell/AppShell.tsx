@@ -44,13 +44,7 @@ export function AppShell({ header, sidebar, footer, children }: AppShellProps) {
           min-width: 0;
         }
         .app-shell-footer {
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          gap: var(--spacing-md);
-          padding: 10px 24px;
-          border-top: 1px solid var(--color-border-default);
-          background: var(--color-surface-card);
+          min-width: 0;
         }
         @media (max-width: 960px) {
           .app-shell-body {
@@ -86,10 +80,6 @@ export function AppShell({ header, sidebar, footer, children }: AppShellProps) {
           }
           .app-shell-main {
             padding: var(--spacing-md);
-          }
-          .app-shell-footer {
-            justify-content: center;
-            padding: 10px 16px;
           }
         }
       `}</style>

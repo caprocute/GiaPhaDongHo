@@ -1,12 +1,11 @@
-import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from "react";
-import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect, useState, type ComponentType, type SVGProps } from "react";
+import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
 import {
-  AppearanceControl,
   AppShell,
   ClanSeal,
+  PublicFooter,
   PublicHeader,
-  type PublicNavItem,
 } from "@giapha/ui";
 import {
   BookOpen,
@@ -140,49 +139,36 @@ function Sidebar({ pendingCount }: { pendingCount: number | null }) {
 
 function AdminHeader() {
   const { user, logout } = useAuth();
-  const location = useLocation();
   const portal = portalBase();
-
-  const navItems: PublicNavItem[] = useMemo(() => [], []);
-
   const displayName = String(user?.profile?.name ?? user?.profile?.preferred_username ?? "Quản trị");
 
   return (
     <PublicHeader
-      brand={adminSiteTitle()}
-      subtitle="Bàn quản trị tộc sự · GiaPhaHub"
       brandHref="/"
-      activeHref={location.pathname}
       fluid
       sticky={false}
-      navItems={navItems}
+      navItems={[]}
       cta={{ href: portal, label: "Về cổng thông tin" }}
-      utilityLeft={
-        <>
-          <b>GiaPhaHub</b>
-          <span aria-hidden>·</span>
-          <span>Di sản sống × hoa văn Việt phục</span>
-        </>
-      }
-      utilityRight={<span style={{ opacity: 0.95 }}>{displayName}</span>}
       endSlot={
         user ? (
-          <button
-            type="button"
-            onClick={() => void logout()}
-            style={{
-              font: "inherit",
-              border: "1px solid color-mix(in srgb, var(--color-heritage-line) 70%, transparent)",
-              background: "transparent",
-              color: "var(--color-text-on-brand)",
-              padding: "4px 12px",
-              cursor: "pointer",
-              fontSize: "var(--font-size-sm)",
-              letterSpacing: "0.04em",
-            }}
-          >
-            Đăng xuất
-          </button>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--spacing-sm)" }}>
+            <span style={{ opacity: 0.9 }}>{displayName}</span>
+            <button
+              type="button"
+              onClick={() => void logout()}
+              style={{
+                font: "inherit",
+                border: 0,
+                background: "transparent",
+                color: "var(--color-heritage-soft)",
+                cursor: "pointer",
+                textDecoration: "underline",
+                fontSize: "var(--font-size-sm)",
+              }}
+            >
+              Đăng xuất
+            </button>
+          </span>
         ) : null
       }
     />
@@ -210,7 +196,7 @@ function CrmRoutes() {
     <AppShell
       header={<AdminHeader />}
       sidebar={<Sidebar pendingCount={pendingCount} />}
-      footer={<AppearanceControl onBrandBar={false} />}
+      footer={<PublicFooter />}
     >
       <Routes>
         <Route path="/" element={<DashboardPage onPendingChange={setPendingCount} />} />

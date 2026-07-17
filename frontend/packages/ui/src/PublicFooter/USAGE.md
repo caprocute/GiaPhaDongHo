@@ -1,6 +1,6 @@
 # PublicFooter
 
-Footer cổng công khai (nền son sâu, cột chuyên mục, QR minh họa) — mockup Di sản sống.
+Footer dùng chung portal + admin (nền son sâu, cột chuyên mục, QR minh họa).
 
 Thanh bản quyền có `AppearanceControl` (icon palette × mode). Ghi đè bằng prop `tools` nếu cần.
 

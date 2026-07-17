@@ -19,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 import { ClanSeal } from "../ClanSeal/ClanSeal";
+import { LunarUtilityLabel } from "./LunarUtilityLabel";
 import styles from "./PublicHeader.module.css";
 
 export type PublicHeaderIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number | string }>;
@@ -39,8 +40,9 @@ export interface PublicHeaderProps {
   endSlot?: ReactNode;
   activeHref?: string;
   utilityLeft?: ReactNode;
-  utilityRight?: ReactNode;
-  /** Menu hàng 2 — mặc định menu portal */
+  /** Mặc định: ngày dương/âm. Truyền `null` để ẩn. */
+  utilityRight?: ReactNode | null;
+  /** Menu hàng 2 — mặc định menu portal; `[]` ẩn hàng tab (admin) */
   navItems?: PublicNavItem[];
   /** CTA brand row; `null` để ẩn */
   cta?: { href: string; label: string } | null;
@@ -101,6 +103,8 @@ export function PublicHeader({
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const wrapClass = fluid ? `${styles.wrap} ${styles.wrapFluid}` : styles.wrap;
+  const showNav = navItems.length > 0;
+  const rightSlot = utilityRight === undefined ? <LunarUtilityLabel /> : utilityRight;
 
   useEffect(() => {
     setOpen(false);
@@ -133,7 +137,7 @@ export function PublicHeader({
             )}
           </span>
           <span className={styles.utilityRight}>
-            {utilityRight}
+            {rightSlot}
             {endSlot}
           </span>
         </div>
@@ -159,70 +163,76 @@ export function PublicHeader({
             </div>
           ) : null}
 
-          <button
-            type="button"
-            className={styles.menuBtn}
-            aria-expanded={open}
-            aria-controls={panelId}
-            aria-label={open ? "Đóng menu" : "Mở menu"}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <span className={open ? styles.menuIconOpen : styles.menuIcon} aria-hidden />
-          </button>
+          {showNav ? (
+            <button
+              type="button"
+              className={styles.menuBtn}
+              aria-expanded={open}
+              aria-controls={panelId}
+              aria-label={open ? "Đóng menu" : "Mở menu"}
+              onClick={() => setOpen((v) => !v)}
+            >
+              <span className={open ? styles.menuIconOpen : styles.menuIcon} aria-hidden />
+            </button>
+          ) : null}
         </div>
 
-        <div className={styles.navRow}>
-          <div className={wrapClass}>
-            <nav className={styles.navStrip} aria-label="Menu chính">
+        {showNav ? (
+          <div className={styles.navRow}>
+            <div className={wrapClass}>
+              <nav className={styles.navStrip} aria-label="Menu chính">
+                {navItems.map((item) => {
+                  const cur = isNavActive(item, activeHref);
+                  const Icon = item.icon;
+                  return (
+                    <a
+                      key={`${item.href}-${item.label}`}
+                      href={item.href}
+                      className={cur ? `${styles.navItem} ${styles.navItemCur}` : styles.navItem}
+                    >
+                      {Icon ? <Icon className={styles.navIcon} size={14} strokeWidth={2.25} aria-hidden /> : null}
+                      {item.label}
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
+          </div>
+        ) : null}
+
+        {showNav ? (
+          <div
+            id={panelId}
+            className={open ? `${styles.drawer} ${styles.drawerOpen}` : styles.drawer}
+            hidden={!open}
+          >
+            <nav className={styles.drawerNav} aria-label="Menu di động">
               {navItems.map((item) => {
                 const cur = isNavActive(item, activeHref);
                 const Icon = item.icon;
                 return (
                   <a
-                    key={`${item.href}-${item.label}`}
+                    key={`d-${item.href}-${item.label}`}
                     href={item.href}
-                    className={cur ? `${styles.navItem} ${styles.navItemCur}` : styles.navItem}
+                    className={cur ? styles.cur : undefined}
+                    onClick={() => setOpen(false)}
                   >
-                    {Icon ? <Icon className={styles.navIcon} size={14} strokeWidth={2.25} aria-hidden /> : null}
+                    {Icon ? <Icon className={styles.navIcon} size={16} strokeWidth={2.25} aria-hidden /> : null}
                     {item.label}
                   </a>
                 );
               })}
+              {cta ? (
+                <a href={cta.href} className={`${styles.cta} ${styles.drawerCta}`} onClick={() => setOpen(false)}>
+                  {cta.label}
+                </a>
+              ) : null}
             </nav>
           </div>
-        </div>
-
-        <div
-          id={panelId}
-          className={open ? `${styles.drawer} ${styles.drawerOpen}` : styles.drawer}
-          hidden={!open}
-        >
-          <nav className={styles.drawerNav} aria-label="Menu di động">
-            {navItems.map((item) => {
-              const cur = isNavActive(item, activeHref);
-              const Icon = item.icon;
-              return (
-                <a
-                  key={`d-${item.href}-${item.label}`}
-                  href={item.href}
-                  className={cur ? styles.cur : undefined}
-                  onClick={() => setOpen(false)}
-                >
-                  {Icon ? <Icon className={styles.navIcon} size={16} strokeWidth={2.25} aria-hidden /> : null}
-                  {item.label}
-                </a>
-              );
-            })}
-            {cta ? (
-              <a href={cta.href} className={`${styles.cta} ${styles.drawerCta}`} onClick={() => setOpen(false)}>
-                {cta.label}
-              </a>
-            ) : null}
-          </nav>
-        </div>
+        ) : null}
       </header>
 
-      {open ? (
+      {showNav && open ? (
         <button
           type="button"
           className={styles.backdrop}

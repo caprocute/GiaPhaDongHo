@@ -51,6 +51,7 @@ export type { AppShellProps } from "./AppShell/AppShell";
 
 export { PublicHeader, ADMIN_SURFACE_NAV_ICONS } from "./PublicHeader/PublicHeader";
 export type { PublicHeaderProps, PublicNavItem, PublicHeaderIcon } from "./PublicHeader/PublicHeader";
+export { LunarUtilityLabel } from "./PublicHeader/LunarUtilityLabel";
 
 export { ClanSeal } from "./ClanSeal/ClanSeal";
 export type { ClanSealProps } from "./ClanSeal/ClanSeal";

@@ -1,28 +1,31 @@
 # PublicHeader
 
-Masthead chuẩn (portal + admin): utility bar + băng hồi văn + ấn triện + brand + nav strip có icon Lucide.
+Masthead chuẩn (portal + admin): utility bar + băng hồi văn + ấn triện + brand · cùng component.
 
 ## Props
 
 | Prop | Mô tả |
 |------|--------|
-| `brand` / `subtitle` | Tên dòng họ + phụ đề |
+| `brand` / `subtitle` | Mặc định «Họ Hoàng – Huỳnh» + địa danh |
 | `brandHref` | Link ấn/brand |
 | `activeHref` | Path hiện tại để highlight menu |
-| `navItems` | Menu hàng 2 (`href`, `label`, `icon?`, `forceActive?`) — mặc định menu portal |
+| `navItems` | Menu hàng 2 — mặc định menu portal; **`[]` ẩn tab** (admin) |
 | `cta` | CTA brand row; `null` để ẩn |
-| `fluid` | Bỏ max-width 1280 (admin) |
+| `fluid` | Bỏ max-width 1280 (admin full-bleed) |
 | `sticky` | Sticky (portal) / tắt khi trong AppShell |
-| `utilityLeft` / `utilityRight` / `endSlot` | Slot thanh tiện ích + auth |
+| `utilityLeft` | Mặc định SĐT · email |
+| `utilityRight` | Mặc định `LunarUtilityLabel`; `null` để ẩn |
+| `endSlot` | Auth (Đăng nhập / Đăng xuất) |
 
-Icon: **lucide-react** (`currentColor` → token màu text/active). Ấn tổ: `ClanSeal`.
+## Admin vs Portal
 
-## Mobile (≤960px)
-
-- Nav desktop ẩn; hamburger → drawer + backdrop
-- `Escape` / chọn link / backdrop → đóng
+| | Portal | Admin |
+|--|--------|-------|
+| Nav tabs | Menu tính năng | `navItems={[]}` |
+| CTA | Tra cứu phả đồ | Về cổng thông tin |
+| Footer | `PublicFooter` | Cùng `PublicFooter` |
 
 ## Mapping
 
 - Mockup: `instruction/mockups/giapha-ui-mockup.html` → `.utility` / `.masthead` / `.nav`
-- TK-02: lucide-react + SVG hoa văn riêng
+- TK-02: lucide-react + `ClanSeal`
