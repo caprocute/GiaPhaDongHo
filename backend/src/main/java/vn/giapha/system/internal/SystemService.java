@@ -1,13 +1,18 @@
 package vn.giapha.system.internal;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.giapha.core.lunar.LunarCalendar;
+import vn.giapha.core.lunar.LunarDate;
 import vn.giapha.domain.FamilyTree;
 import vn.giapha.repository.ClanEventRepository;
+import vn.giapha.repository.DeathAnniversaryRepository;
 import vn.giapha.repository.DonationCampaignRepository;
 import vn.giapha.repository.FamilyTreeRepository;
 import vn.giapha.repository.PersonRepository;
@@ -19,6 +24,8 @@ import vn.giapha.system.api.ModuleCodes;
 @Transactional
 public class SystemService {
 
+    private static final ZoneId VN = ZoneId.of("Asia/Ho_Chi_Minh");
+
     private final ModuleRegistryRepository moduleRegistryRepository;
     private final AuditLogRepository auditLogRepository;
     private final FamilyTreeRepository familyTreeRepository;
@@ -26,6 +33,7 @@ public class SystemService {
     private final DonationCampaignRepository donationCampaignRepository;
     private final ClanEventRepository clanEventRepository;
     private final ScholarshipEntryRepository scholarshipEntryRepository;
+    private final DeathAnniversaryRepository deathAnniversaryRepository;
 
     public SystemService(
         ModuleRegistryRepository moduleRegistryRepository,
@@ -34,7 +42,8 @@ public class SystemService {
         PersonRepository personRepository,
         DonationCampaignRepository donationCampaignRepository,
         ClanEventRepository clanEventRepository,
-        ScholarshipEntryRepository scholarshipEntryRepository
+        ScholarshipEntryRepository scholarshipEntryRepository,
+        DeathAnniversaryRepository deathAnniversaryRepository
     ) {
         this.moduleRegistryRepository = moduleRegistryRepository;
         this.auditLogRepository = auditLogRepository;
@@ -43,6 +52,7 @@ public class SystemService {
         this.donationCampaignRepository = donationCampaignRepository;
         this.clanEventRepository = clanEventRepository;
         this.scholarshipEntryRepository = scholarshipEntryRepository;
+        this.deathAnniversaryRepository = deathAnniversaryRepository;
     }
 
     @Transactional(readOnly = true)
@@ -89,6 +99,12 @@ public class SystemService {
         m.put("events", clanEventRepository.findByTreeIdOrderByStartSolarDesc(tree.getId()).size());
         m.put("scholarshipApproved", scholarshipEntryRepository.findByTreeSlugAndStatus(treeSlug, "approved").size());
         m.put("modulesEnabled", listModules().stream().filter(ModuleRegistry::isEnabled).count());
+        LocalDate today = LocalDate.now(VN);
+        LunarDate lunar = LunarCalendar.convertSolarToLunar(today.getDayOfMonth(), today.getMonthValue(), today.getYear());
+        int anniThisMonth = deathAnniversaryRepository.findByTreeSlugAndOptionalMonth(treeSlug, lunar.month()).size();
+        m.put("anniversariesThisLunarMonth", anniThisMonth);
+        m.put("currentLunarMonth", lunar.month());
+        m.put("currentLunarDay", lunar.day());
         return m;
     }
 

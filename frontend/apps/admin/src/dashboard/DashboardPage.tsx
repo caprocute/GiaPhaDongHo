@@ -19,6 +19,9 @@ type Stats = {
   events?: number;
   scholarshipApproved?: number;
   modulesEnabled?: number;
+  anniversariesThisLunarMonth?: number;
+  currentLunarMonth?: number;
+  currentLunarDay?: number;
 };
 
 type Anniversary = {
@@ -250,12 +253,20 @@ export function DashboardPage({ onPendingChange }: Props) {
           trend={overdue > 0 ? "neutral" : "up"}
         />
         <KPICard
-          label="Giỗ trong danh sách"
-          value={anniversaries.length > 0 ? anniversaries.length : "—"}
+          label="Giỗ tháng này (âm lịch)"
+          value={
+            stats?.anniversariesThisLunarMonth != null
+              ? stats.anniversariesThisLunarMonth.toLocaleString("vi-VN")
+              : anniversaries.length > 0
+                ? anniversaries.length
+                : "—"
+          }
           delta={
             nearest
-              ? `Gần nhất: ${String(nearest.lunarDay).padStart(2, "0")}/${nearest.lunarMonth} ÂL`
-              : "Chưa có ngày giỗ"
+              ? `Gần nhất trong danh sách: ${String(nearest.lunarDay).padStart(2, "0")}/${nearest.lunarMonth} ÂL`
+              : stats?.currentLunarMonth != null
+                ? `Đang ở tháng ${stats.currentLunarMonth} ÂL`
+                : "Chưa có ngày giỗ"
           }
         />
         <KPICard

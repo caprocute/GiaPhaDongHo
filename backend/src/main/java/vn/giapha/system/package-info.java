@@ -3,6 +3,6 @@
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "system",
-    allowedDependencies = { "core :: security" }
+    allowedDependencies = { "core :: security", "core :: lunar" }
 )
 package vn.giapha.system;
