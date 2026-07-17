@@ -45,9 +45,27 @@ public interface DonationCampaignRepository extends JpaRepository<DonationCampai
         select c from DonationCampaign c
         left join fetch c.tree t
         where t.id = :treeId
-          and (:status is null or lower(c.status) = lower(:status))
         order by c.id desc
         """
     )
-    List<DonationCampaign> findByTreeIdAndOptionalStatus(@Param("treeId") Long treeId, @Param("status") String status);
+    List<DonationCampaign> findByTreeId(@Param("treeId") Long treeId);
+
+    @Query(
+        """
+        select c from DonationCampaign c
+        left join fetch c.tree t
+        where t.id = :treeId
+          and lower(c.status) = lower(:status)
+        order by c.id desc
+        """
+    )
+    List<DonationCampaign> findByTreeIdAndStatus(@Param("treeId") Long treeId, @Param("status") String status);
+
+    /** Tránh bind null vào lower(:status) (Postgres: lower(bytea)). */
+    default List<DonationCampaign> findByTreeIdAndOptionalStatus(Long treeId, String status) {
+        if (status == null || status.isBlank()) {
+            return findByTreeId(treeId);
+        }
+        return findByTreeIdAndStatus(treeId, status.trim());
+    }
 }
