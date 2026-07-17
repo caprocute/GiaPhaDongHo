@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ import vn.giapha.moderation.internal.ModerationService;
 import vn.giapha.security.SecurityUtils;
 import vn.giapha.service.dto.ChangeRequestDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 /**
  * Tự khai theo cây — TK-08 {@code /api/v1/trees/{slug}/change-requests}.
@@ -58,12 +60,13 @@ public class TreeChangeRequestResource {
 
     @GetMapping("")
     @RequiresPermission("moderation:request:read")
-    public List<ChangeRequestDTO> list(
+    public ResponseEntity<List<ChangeRequestDTO>> list(
         @PathVariable String slug,
-        @RequestParam(name = "status", required = false) String status
+        @RequestParam(name = "status", required = false) String status,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("GET change-requests tree={} status={}", slug, status);
-        return moderationService.list(slug, status);
+        return PagedResponses.ok(moderationService.list(slug, status), pageable);
     }
 
     @PostMapping("/{id}/approve")

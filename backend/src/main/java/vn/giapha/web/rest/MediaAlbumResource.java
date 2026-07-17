@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
@@ -19,6 +20,7 @@ import vn.giapha.repository.MediaAlbumRepository;
 import vn.giapha.service.MediaAlbumService;
 import vn.giapha.service.dto.MediaAlbumDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 /**
  * REST controller for managing {@link vn.giapha.domain.MediaAlbum}.
@@ -140,9 +142,11 @@ public class MediaAlbumResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of Media Albums in body.
      */
     @GetMapping("")
-    public List<MediaAlbumDTO> getAllMediaAlbums() {
+    public ResponseEntity<List<MediaAlbumDTO>> getAllMediaAlbums(
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
         LOG.debug("REST request to get all MediaAlbums");
-        return mediaAlbumService.findAll();
+        return PagedResponses.ok(mediaAlbumService.findAll(), pageable);
     }
 
     /**

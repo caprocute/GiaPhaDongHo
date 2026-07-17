@@ -2,6 +2,8 @@ package vn.giapha.system.internal.web;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +16,7 @@ import vn.giapha.system.internal.AuditLog;
 import vn.giapha.system.internal.ModuleRegistry;
 import vn.giapha.system.internal.SystemService;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 @RestController
 @RequestMapping("/api/v1/system")
@@ -44,8 +47,8 @@ public class SystemResource {
 
     @GetMapping("/audit-logs")
     @RequiresPermission("system:audit:read")
-    public List<AuditLog> audit() {
-        return systemService.recentAudit();
+    public ResponseEntity<List<AuditLog>> audit(@org.springdoc.core.annotations.ParameterObject Pageable pageable) {
+        return PagedResponses.ok(systemService.recentAudit(), pageable);
     }
 
     @GetMapping("/dashboard")

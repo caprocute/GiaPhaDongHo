@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import vn.giapha.event.internal.EventService;
 import vn.giapha.service.dto.ClanEventDTO;
 import vn.giapha.service.dto.EventRsvpDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 /**
  * Sự kiện dòng họ theo cây — F6 / R2.3.
@@ -34,9 +37,12 @@ public class TreeEventResource {
     }
 
     @GetMapping("/events")
-    public List<Map<String, Object>> list(@PathVariable String slug) {
+    public ResponseEntity<List<Map<String, Object>>> list(
+        @PathVariable String slug,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
         LOG.debug("GET events tree={}", slug);
-        return eventService.listEvents(slug);
+        return PagedResponses.ok(eventService.listEvents(slug), pageable);
     }
 
     @GetMapping("/events/{id}")
@@ -72,9 +78,13 @@ public class TreeEventResource {
 
     @GetMapping("/events/{id}/rsvps")
     @RequiresPermission("event:rsvp:read")
-    public List<EventRsvpDTO> listRsvps(@PathVariable String slug, @PathVariable Long id) {
+    public ResponseEntity<List<EventRsvpDTO>> listRsvps(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
         try {
-            return eventService.listRsvps(slug, id);
+            return PagedResponses.ok(eventService.listRsvps(slug, id), pageable);
         } catch (IllegalArgumentException e) {
             throw new BadRequestAlertException(e.getMessage(), "eventRsvp", "invalid");
         }

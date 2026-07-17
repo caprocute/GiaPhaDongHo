@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * A DonationCampaign.
@@ -33,7 +35,7 @@ public class DonationCampaign implements Serializable {
     @Column(name = "raised_amount", precision = 21, scale = 2)
     private BigDecimal raisedAmount;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "vietqr_payload")
     private String vietqrPayload;
 

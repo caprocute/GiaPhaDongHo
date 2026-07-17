@@ -2,12 +2,14 @@ package vn.giapha.scholarship.internal.web;
 
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.giapha.core.security.RequiresPermission;
 import vn.giapha.scholarship.internal.ScholarshipService;
 import vn.giapha.service.dto.ScholarshipEntryDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 @RestController
 @RequestMapping("/api/v1/trees/{slug}")
@@ -20,14 +22,21 @@ public class TreeScholarshipResource {
     }
 
     @GetMapping("/scholarship-board")
-    public List<ScholarshipEntryDTO> board(@PathVariable String slug) {
-        return scholarshipService.honorBoard(slug);
+    public ResponseEntity<List<ScholarshipEntryDTO>> board(
+        @PathVariable String slug,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
+        return PagedResponses.ok(scholarshipService.honorBoard(slug), pageable);
     }
 
     @GetMapping("/scholarship-entries/admin")
     @RequiresPermission("scholarship:entry:read")
-    public List<ScholarshipEntryDTO> admin(@PathVariable String slug, @RequestParam(required = false) String status) {
-        return scholarshipService.listAdmin(slug, status);
+    public ResponseEntity<List<ScholarshipEntryDTO>> admin(
+        @PathVariable String slug,
+        @RequestParam(required = false) String status,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
+        return PagedResponses.ok(scholarshipService.listAdmin(slug, status), pageable);
     }
 
     @PostMapping("/scholarship-entries")

@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tech.jhipster.web.util.HeaderUtil;
@@ -19,6 +20,7 @@ import vn.giapha.repository.MediaPhotoRepository;
 import vn.giapha.service.MediaPhotoService;
 import vn.giapha.service.dto.MediaPhotoDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 /**
  * REST controller for managing {@link vn.giapha.domain.MediaPhoto}.
@@ -141,11 +143,12 @@ public class MediaPhotoResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of Media Photos in body.
      */
     @GetMapping("")
-    public List<MediaPhotoDTO> getAllMediaPhotos(
-        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload
+    public ResponseEntity<List<MediaPhotoDTO>> getAllMediaPhotos(
+        @RequestParam(name = "eagerload", required = false, defaultValue = "true") boolean eagerload,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("REST request to get all MediaPhotos");
-        return mediaPhotoService.findAll();
+        return PagedResponses.ok(mediaPhotoService.findAll(), pageable);
     }
 
     /**

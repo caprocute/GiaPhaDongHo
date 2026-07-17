@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import vn.giapha.security.SecurityUtils;
 import vn.giapha.service.dto.AnniversarySubscriptionDTO;
 import vn.giapha.service.dto.NotificationOutboxDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 /**
  * Đăng ký nhắc giỗ + iCal + outbox admin — F1 / R2.4.
@@ -104,12 +106,13 @@ public class TreeNotificationResource {
 
     @GetMapping("/notification-outbox")
     @RequiresPermission("notify:outbox:read")
-    public List<NotificationOutboxDTO> outbox(
+    public ResponseEntity<List<NotificationOutboxDTO>> outbox(
         @PathVariable String slug,
-        @RequestParam(name = "status", required = false) String status
+        @RequestParam(name = "status", required = false) String status,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("GET outbox tree={} status={}", slug, status);
-        return notificationService.listOutbox(status);
+        return PagedResponses.ok(notificationService.listOutbox(status), pageable);
     }
 
     @PostMapping("/notification-outbox/dispatch")

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ import vn.giapha.donation.internal.DonationService;
 import vn.giapha.service.dto.DonationCampaignDTO;
 import vn.giapha.service.dto.DonationContributionDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
+import vn.giapha.web.util.PagedResponses;
 
 /**
  * Quỹ công đức theo cây — TK-08 / F4.
@@ -38,21 +40,23 @@ public class TreeDonationResource {
     }
 
     @GetMapping("/donation-campaigns")
-    public List<Map<String, Object>> listPublic(
+    public ResponseEntity<List<Map<String, Object>>> listPublic(
         @PathVariable String slug,
-        @RequestParam(name = "status", required = false) String status
+        @RequestParam(name = "status", required = false) String status,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
         LOG.debug("GET donation-campaigns tree={}", slug);
-        return donationService.listCampaigns(slug, status, true);
+        return PagedResponses.ok(donationService.listCampaigns(slug, status, true), pageable);
     }
 
     @GetMapping("/donation-campaigns/admin")
     @RequiresPermission("donation:campaign:read")
-    public List<Map<String, Object>> listAdmin(
+    public ResponseEntity<List<Map<String, Object>>> listAdmin(
         @PathVariable String slug,
-        @RequestParam(name = "status", required = false) String status
+        @RequestParam(name = "status", required = false) String status,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
-        return donationService.listCampaigns(slug, status, false);
+        return PagedResponses.ok(donationService.listCampaigns(slug, status, false), pageable);
     }
 
     @GetMapping("/donation-campaigns/{id}")
@@ -96,9 +100,13 @@ public class TreeDonationResource {
 
     /** Sao kê công khai — chỉ đóng góp đã xác nhận (không lộ pending). */
     @GetMapping("/donation-campaigns/{id}/contributions")
-    public List<DonationContributionDTO> listByCampaignPublic(@PathVariable String slug, @PathVariable Long id) {
+    public ResponseEntity<List<DonationContributionDTO>> listByCampaignPublic(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
         try {
-            return donationService.listContributions(slug, id, true);
+            return PagedResponses.ok(donationService.listContributions(slug, id, true), pageable);
         } catch (IllegalArgumentException e) {
             throw new BadRequestAlertException(e.getMessage(), "donationContribution", "invalid");
         }
@@ -107,17 +115,24 @@ public class TreeDonationResource {
     /** Sao kê nội bộ (kèm pending) — thủ quỹ / genealogy admin. */
     @GetMapping("/donation-campaigns/{id}/contributions/admin")
     @RequiresPermission("donation:contribution:read")
-    public List<DonationContributionDTO> listByCampaignAdmin(@PathVariable String slug, @PathVariable Long id) {
+    public ResponseEntity<List<DonationContributionDTO>> listByCampaignAdmin(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
         try {
-            return donationService.listContributions(slug, id, false);
+            return PagedResponses.ok(donationService.listContributions(slug, id, false), pageable);
         } catch (IllegalArgumentException e) {
             throw new BadRequestAlertException(e.getMessage(), "donationContribution", "invalid");
         }
     }
 
     @GetMapping("/honor-board")
-    public List<DonationContributionDTO> honorBoard(@PathVariable String slug) {
-        return donationService.listContributions(slug, null, true);
+    public ResponseEntity<List<DonationContributionDTO>> honorBoard(
+        @PathVariable String slug,
+        @org.springdoc.core.annotations.ParameterObject Pageable pageable
+    ) {
+        return PagedResponses.ok(donationService.listContributions(slug, null, true), pageable);
     }
 
     @PostMapping("/donation-campaigns/{id}/contributions")
