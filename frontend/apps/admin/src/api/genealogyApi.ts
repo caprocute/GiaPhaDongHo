@@ -148,6 +148,82 @@ export async function reviewChangeRequest(
   );
 }
 
+export type DonationCampaignDto = {
+  id?: number;
+  title: string;
+  goalAmount?: number | string | null;
+  raisedAmount?: number | string | null;
+  vietqrPayload?: string | null;
+  status?: string | null;
+};
+
+export type DonationCampaignView = {
+  campaign: DonationCampaignDto;
+  qrImageUrl?: string | null;
+  transferContent?: string | null;
+};
+
+export type DonationContributionDto = {
+  id?: number;
+  donorName: string;
+  amount?: number | string | null;
+  kind?: string | null;
+  note?: string | null;
+  createdAt?: string | null;
+};
+
+export async function listDonationCampaignsAdmin(
+  slug: string,
+  token: string | null,
+): Promise<DonationCampaignView[]> {
+  return apiFetch<DonationCampaignView[]>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/admin`,
+    { token },
+  );
+}
+
+export async function upsertDonationCampaign(
+  slug: string,
+  dto: DonationCampaignDto,
+  token: string | null,
+): Promise<DonationCampaignDto> {
+  if (dto.id != null) {
+    return apiFetch<DonationCampaignDto>(
+      `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${dto.id}`,
+      { method: "PUT", body: dto, token },
+    );
+  }
+  return apiFetch<DonationCampaignDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns`,
+    { method: "POST", body: dto, token },
+  );
+}
+
+export async function listCampaignContributions(
+  slug: string,
+  campaignId: number,
+  token: string | null,
+): Promise<DonationContributionDto[]> {
+  return apiFetch<DonationContributionDto[]>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/contributions/admin`,
+    { token },
+  );
+}
+
+export async function recordDonationContribution(
+  slug: string,
+  campaignId: number,
+  dto: DonationContributionDto,
+  token: string | null,
+  confirm = true,
+): Promise<DonationContributionDto> {
+  const q = confirm ? "?confirm=true" : "?confirm=false";
+  return apiFetch<DonationContributionDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/contributions${q}`,
+    { method: "POST", body: dto, token },
+  );
+}
+
 export async function listTreeUnions(
   slug: string,
   token: string | null,

@@ -39,4 +39,25 @@ public interface DonationContributionRepository extends JpaRepository<DonationCo
         "select donationContribution from DonationContribution donationContribution left join fetch donationContribution.campaign where donationContribution.id =:id"
     )
     Optional<DonationContribution> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        """
+        select c from DonationContribution c
+        left join fetch c.campaign camp
+        where camp.id = :campaignId
+        order by c.createdAt desc, c.id desc
+        """
+    )
+    List<DonationContribution> findByCampaignIdOrderByCreatedAtDesc(@Param("campaignId") Long campaignId);
+
+    @Query(
+        """
+        select c from DonationContribution c
+        left join fetch c.campaign camp
+        left join camp.tree t
+        where t.slug = :slug
+        order by c.createdAt desc, c.id desc
+        """
+    )
+    List<DonationContribution> findByTreeSlugOrderByCreatedAtDesc(@Param("slug") String slug);
 }

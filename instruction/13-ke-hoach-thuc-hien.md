@@ -199,9 +199,9 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] UI portal “tự khai” + UI admin inbox
 
 ### R2.2 Donation — quỹ / VietQR (F4)  **[SS với R2.1]**
-- [ ] Campaign, contribution, honor board
-- [ ] VietQR động + sao kê công khai
-- [ ] Admin đối soát; biên nhận PDF đơn giản
+- [x] Campaign, contribution, honor board
+- [x] VietQR động + sao kê công khai
+- [x] Admin đối soát; biên nhận PDF đơn giản
 
 ### R2.3 Event — họp họ / điểm danh (F6)  **[SS với R2.1]**
 - [ ] Sự kiện âm/dương, RSVP theo hộ, phân công

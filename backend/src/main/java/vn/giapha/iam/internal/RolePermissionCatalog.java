@@ -29,7 +29,11 @@ public class RolePermissionCatalog implements PermissionService {
             "cms:post:read",
             "moderation:request:read",
             "moderation:request:review",
-            "moderation:request:write"
+            "moderation:request:write",
+            "donation:campaign:read",
+            "donation:campaign:write",
+            "donation:contribution:read",
+            "donation:contribution:write"
         ),
         RealmRoles.EDITOR,
         Set.of(

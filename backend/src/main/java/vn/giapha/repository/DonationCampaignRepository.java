@@ -39,4 +39,15 @@ public interface DonationCampaignRepository extends JpaRepository<DonationCampai
         "select donationCampaign from DonationCampaign donationCampaign left join fetch donationCampaign.tree where donationCampaign.id =:id"
     )
     Optional<DonationCampaign> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        """
+        select c from DonationCampaign c
+        left join fetch c.tree t
+        where t.id = :treeId
+          and (:status is null or lower(c.status) = lower(:status))
+        order by c.id desc
+        """
+    )
+    List<DonationCampaign> findByTreeIdAndOptionalStatus(@Param("treeId") Long treeId, @Param("status") String status);
 }
