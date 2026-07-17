@@ -80,6 +80,7 @@ dependencies {
     implementation "com.zaxxer:HikariCP"
     implementation "io.micrometer:micrometer-registry-prometheus"
     implementation "org.apache.commons:commons-lang3"
+    implementation "com.github.librepdf:openpdf:2.0.3"
     implementation "org.hibernate.orm:hibernate-core"
     implementation "org.hibernate.validator:hibernate-validator"
     implementation "org.postgresql:postgresql"

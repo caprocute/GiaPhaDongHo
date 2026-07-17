@@ -247,3 +247,6 @@ giapha:
     # Webhook Zalo OA / proxy — rỗng = dry-run (log). Prod: URL + secret qua env, không commit.
     zalo-webhook-url: ${ZALO_OA_WEBHOOK_URL:}
     from-name: GiaPhaHub
+  book:
+    pdf-render-url: ${PDF_RENDER_URL:}
+    export-prefix: exports

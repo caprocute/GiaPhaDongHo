@@ -28,7 +28,7 @@
 | IAM | **Keycloak** | 26.x | OIDC chuẩn, TOTP 2FA + backup codes (parity bản cũ), social login, quản trị user tách khỏi app | Spring Authorization Server (nhẹ hơn, tự code 2FA) |
 | FE OIDC | **oidc-client-ts** (`packages/auth`) | 3.x | PKCE + silent renew cho Admin (Vite) & Portal (Next); không nhúng secret | next-auth (nặng hơn cho SPA admin) |
 | Mã hóa cấu hình | **Jasypt** (`jasypt-spring-boot-starter`) | 3.x | Secret dạng `ENC(...)`; master key `JASYPT_ENCRYPTOR_PASSWORD` — bắt buộc (CLAUDE.md) | Spring Cloud Config encrypt |
-| Xuất PDF | **pdf-render service** (Node + Playwright) | — | Render đúng CSS in của phả đồ/sách gia phả — fidelity 100% với web | OpenPDF/JasperReports (khó giữ giao diện) |
+| Xuất PDF | **pdf-render service** (Node + Playwright) + fallback **OpenPDF** trong BE | Playwright 1.51 / OpenPDF 2.0 | `services/pdf-render` khi `PDF_RENDER_URL` set; không có thì OpenPDF (R2.7) | JasperReports |
 | Xuất Excel | Apache POI | — | Xuất danh sách thành viên/phả đồ dạng bảng | — |
 | Âm lịch | Thuật toán **amlich (Hồ Ngọc Đức)** port Java + TS, chung bộ test vector | — | Chuẩn âm lịch VN (UTC+7, tháng nhuận); 2 bản đồng bộ bằng golden tests | lib `lunar-javascript` (lịch TQ — không dùng) |
 | Thông báo | SMTP (Jakarta Mail) + **Zalo OA API** + Web Push (VAPID) | — | Zalo là kênh quốc dân VN | Telegram bot (phụ) |

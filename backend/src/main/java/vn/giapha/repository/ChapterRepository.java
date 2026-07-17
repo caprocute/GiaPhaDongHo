@@ -37,4 +37,6 @@ public interface ChapterRepository extends JpaRepository<Chapter, Long> {
 
     @Query("select chapter from Chapter chapter left join fetch chapter.tree where chapter.id =:id")
     Optional<Chapter> findOneWithToOneRelationships(@Param("id") Long id);
+
+    List<Chapter> findByTree_SlugOrderByIdAsc(String slug);
 }
