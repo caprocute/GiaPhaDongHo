@@ -4,8 +4,6 @@ import { Alert, Button, EmptyState, FormField, Input, Select } from "@giapha/ui"
 import {
   GitBranch,
   Maximize2,
-  Minus,
-  Plus,
   RefreshCw,
   UserPlus,
   Users,
@@ -67,7 +65,7 @@ type LayoutResult = {
 // ── Layout algorithm ─────────────────────────────────────────────────
 function buildLayout(
   persons: PersonDto[],
-  unions: FamilyUnionDto[],
+  _unions: FamilyUnionDto[],
   members: UnionMemberDto[],
   children: UnionChildDto[],
 ): LayoutResult {
@@ -346,7 +344,7 @@ function UnionConnectors({
 // ── Right detail panel ────────────────────────────────────────────────
 function UnionPanel({
   unionId,
-  union,
+  union: _union,
   members,
   children,
   persons,
@@ -358,7 +356,7 @@ function UnionPanel({
   busy,
 }: {
   unionId: number;
-  union: FamilyUnionDto;
+  union: FamilyUnionDto; // reserved for future display
   members: UnionMemberDto[];
   children: UnionChildDto[];
   persons: PersonDto[];

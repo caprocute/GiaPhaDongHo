@@ -160,29 +160,28 @@ export function DashboardPage({ onPendingChange }: Props) {
 
   const reload = useCallback(async () => {
     setError(null);
-    try {
-      const token = await getAccessToken();
-      const [dash, reqPage, anniPage, auditPage, campaigns] = await Promise.all([
-        apiFetch<Stats>(`/api/v1/system/dashboard?tree=${encodeURIComponent(slug)}`, { token }),
-        listChangeRequests(slug, "pending", token, 0, 5),
-        apiFetchPage<Anniversary>(
-          `/api/v1/trees/${encodeURIComponent(slug)}/anniversaries?sort=lunarMonth,asc&sort=lunarDay,asc`,
-          { token, page: 0, size: 8 },
-        ),
-        apiFetchPage<Audit>("/api/v1/system/audit-logs", { token, page: 0, size: 6 }),
-        listDonationCampaignsAdmin(slug, token, 0, 5).catch(() => null),
-      ]);
-      setStats(dash);
-      setPending(reqPage.content);
-      setPendingTotal(reqPage.totalElements);
-      onPendingChange?.(reqPage.totalElements);
-      setAnniversaries(anniPage.content);
-      setAudit(auditPage.content);
-      const firstCampaign = campaigns?.content?.[0] ?? null;
-      setFund(firstCampaign);
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Không tải được bảng điều khiển.");
+    const token = await getAccessToken().catch(() => null);
+    const [dashR, reqR, anniR, auditR, campaignR] = await Promise.allSettled([
+      apiFetch<Stats>(`/api/v1/system/dashboard?tree=${encodeURIComponent(slug)}`, { token }),
+      listChangeRequests(slug, "pending", token, 0, 5),
+      apiFetchPage<Anniversary>(
+        `/api/v1/trees/${encodeURIComponent(slug)}/anniversaries?sort=lunarMonth,asc&sort=lunarDay,asc`,
+        { token, page: 0, size: 8 },
+      ),
+      apiFetchPage<Audit>("/api/v1/system/audit-logs", { token, page: 0, size: 6 }),
+      listDonationCampaignsAdmin(slug, token, 0, 5),
+    ]);
+    if (dashR.status === "fulfilled") setStats(dashR.value);
+    if (reqR.status === "fulfilled") {
+      setPending(reqR.value.content);
+      setPendingTotal(reqR.value.totalElements);
+      onPendingChange?.(reqR.value.totalElements);
     }
+    if (anniR.status === "fulfilled") setAnniversaries(anniR.value.content);
+    if (auditR.status === "fulfilled") setAudit(auditR.value.content);
+    if (campaignR.status === "fulfilled") setFund(campaignR.value.content[0] ?? null);
+    const allFailed = [dashR, reqR, anniR, auditR].every((r) => r.status === "rejected");
+    if (allFailed) setError("Không kết nối được máy chủ. Kiểm tra API đang chạy.");
   }, [getAccessToken, onPendingChange, slug]);
 
   useEffect(() => {

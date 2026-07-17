@@ -16,7 +16,6 @@ import {
   GitBranch,
   GraduationCap,
   HandCoins,
-  Home,
   Images,
   LayoutDashboard,
   MessageSquare,
@@ -65,8 +64,8 @@ const SIDE_NAV: NavGroup[] = [
     items: [
       { path: "/tree", label: "Cây phả hệ", icon: GitBranch },
       { path: "/persons", label: "Thành viên", icon: Users },
-      { path: "/posts", label: "Chương sách", icon: BookOpen },
-      { path: "/notifications", label: "Ngày giỗ", icon: Flame },
+      { path: "/posts", label: "Bài viết", icon: BookOpen },
+      { path: "/notifications", label: "Nhắc giỗ", icon: Flame },
     ],
   },
   {
@@ -143,20 +142,7 @@ function AdminHeader() {
   const location = useLocation();
   const portal = portalBase();
 
-  const navItems: PublicNavItem[] = useMemo(
-    () => [
-      { href: `${portal}/`, label: "Trang chủ", icon: Home },
-      { href: `${portal}/tree`, label: "Phả đồ", icon: GitBranch },
-      { href: `${portal}/persons`, label: "Hồ sơ", icon: Users },
-      {
-        href: "/",
-        label: "CRM quản trị",
-        icon: LayoutDashboard,
-        forceActive: true,
-      },
-    ],
-    [portal],
-  );
+  const navItems: PublicNavItem[] = useMemo(() => [], []);
 
   const displayName = String(user?.profile?.name ?? user?.profile?.preferred_username ?? "Quản trị");
 
