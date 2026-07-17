@@ -15,17 +15,23 @@ export interface PublicHeaderProps {
   utilityRight?: ReactNode;
 }
 
-const NAV = [
-  { href: "/", label: "Trang nhất" },
+/** Hiển thị trên thanh nav desktop — tối đa 7 mục để vừa 1280px */
+const NAV_PRIMARY = [
   { href: "/persons", label: "Dòng họ" },
   { href: "/tree", label: "Gia phả" },
   { href: "/tu-khai", label: "Tự khai" },
   { href: "/cong-duc", label: "Công đức" },
   { href: "/su-kien", label: "Sự kiện" },
   { href: "/nhac-gio", label: "Nhắc giỗ" },
+  { href: "/news", label: "Tin tức" },
+] as const;
+
+/** Hiển thị đầy đủ trong drawer mobile */
+const NAV_ALL = [
+  { href: "/", label: "Trang nhất" },
+  ...NAV_PRIMARY,
   { href: "/xung-ho", label: "Xưng hô" },
   { href: "/khuyen-hoc", label: "Khuyến học" },
-  { href: "/news", label: "Tin tức" },
   { href: "/album", label: "Thư viện" },
 ] as const;
 
@@ -63,14 +69,16 @@ function NavLinks({
   activeHref,
   onNavigate,
   ctaClassName,
+  items,
 }: {
   activeHref: string;
   onNavigate?: () => void;
   ctaClassName: string;
+  items: ReadonlyArray<{ href: string; label: string }>;
 }) {
   return (
     <>
-      {NAV.map((item) => {
+      {items.map((item) => {
         const cur =
           item.href === "/"
             ? activeHref === "/"
@@ -151,7 +159,7 @@ export function PublicHeader({
           </a>
 
           <nav className={styles.nav} aria-label="Menu chính">
-            <NavLinks activeHref={activeHref} ctaClassName={styles.cta} />
+            <NavLinks activeHref={activeHref} ctaClassName={styles.cta} items={NAV_PRIMARY} />
           </nav>
 
           <button
@@ -176,6 +184,7 @@ export function PublicHeader({
               activeHref={activeHref}
               onNavigate={() => setOpen(false)}
               ctaClassName={`${styles.cta} ${styles.drawerCta}`}
+              items={NAV_ALL}
             />
           </nav>
         </div>
