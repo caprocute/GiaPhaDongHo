@@ -208,9 +208,9 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Gallery đổ album (reuse media)
 
 ### R2.4 Notification (F1)  **[sau có anniversary + user link]**
-- [ ] Outbox email + Web Push
-- [ ] Zalo OA adapter
-- [ ] Đăng ký nhắc giỗ + iCal
+- [x] Outbox email + Web Push
+- [x] Zalo OA adapter
+- [x] Đăng ký nhắc giỗ + iCal
 
 ### R2.5 Xưng hô (F2)  **[SS với R2.4 — pure genealogy graph]**
 - [ ] LCA + bảng luật xưng hô

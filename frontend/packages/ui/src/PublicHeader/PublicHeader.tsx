@@ -22,6 +22,7 @@ const NAV = [
   { href: "/tu-khai", label: "Tự khai" },
   { href: "/cong-duc", label: "Công đức" },
   { href: "/su-kien", label: "Sự kiện" },
+  { href: "/nhac-gio", label: "Nhắc giỗ" },
   { href: "/news", label: "Tin tức" },
   { href: "/album", label: "Thư viện" },
 ] as const;

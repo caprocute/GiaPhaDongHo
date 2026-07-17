@@ -14,6 +14,7 @@ import { PostsListPage } from "./posts/PostsListPage";
 import { DonationAdminPage } from "./donation/DonationAdminPage";
 import { EventsAdminPage } from "./events/EventsAdminPage";
 import { ModerationInboxPage } from "./moderation/ModerationInboxPage";
+import { NotifyOutboxPage } from "./notifications/NotifyOutboxPage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { TreeEditorPage } from "./tree/TreeEditorPage";
 
@@ -39,6 +40,7 @@ function Sidebar() {
     ["/moderation", "Duyệt tự khai"],
     ["/donation", "Quỹ công đức"],
     ["/events", "Sự kiện"],
+    ["/notifications", "Nhắc giỗ"],
     ["/posts", "Bài viết"],
     ["/comments", "Bình luận"],
     ["/media", "Thư viện"],
@@ -109,6 +111,7 @@ function CrmRoutes() {
         <Route path="/moderation" element={<ModerationInboxPage />} />
         <Route path="/donation" element={<DonationAdminPage />} />
         <Route path="/events" element={<EventsAdminPage />} />
+        <Route path="/notifications" element={<NotifyOutboxPage />} />
         <Route path="/posts" element={<PostsListPage />} />
         <Route path="/posts/new" element={<PostFormPage />} />
         <Route path="/posts/:id" element={<PostFormPage />} />

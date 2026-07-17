@@ -295,6 +295,37 @@ export async function assignEventRsvp(
   );
 }
 
+export type NotificationOutboxDto = {
+  id?: number;
+  channel?: string;
+  payloadJson?: string;
+  status?: string | null;
+  createdAt?: string | null;
+  sentAt?: string | null;
+};
+
+export async function listNotificationOutbox(
+  slug: string,
+  status: string | undefined,
+  token: string | null,
+): Promise<NotificationOutboxDto[]> {
+  const q = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiFetch<NotificationOutboxDto[]>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/notification-outbox${q}`,
+    { token },
+  );
+}
+
+export async function dispatchNotificationOutbox(
+  slug: string,
+  token: string | null,
+): Promise<{ processed: number }> {
+  return apiFetch<{ processed: number }>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/notification-outbox/dispatch`,
+    { method: "POST", body: {}, token },
+  );
+}
+
 export async function listTreeUnions(
   slug: string,
   token: string | null,

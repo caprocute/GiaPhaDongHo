@@ -30,14 +30,15 @@ class TechnicalStructureTest {
         .optionalLayer("Moderation").definedBy("..moderation..")
         .optionalLayer("Donation").definedBy("..donation..")
         .optionalLayer("Event").definedBy("..event..")
+        .optionalLayer("Notification").definedBy("..notification..")
 
         .whereLayer("Config").mayNotBeAccessedByAnyLayer()
         .whereLayer("Web").mayOnlyBeAccessedByLayers("Config")
-        .whereLayer("Service").mayOnlyBeAccessedByLayers("Web", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event")
-        .whereLayer("Security").mayOnlyBeAccessedByLayers("Config", "Service", "Web", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event")
-        .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service", "Security", "Web", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event")
-        .whereLayer("Domain").mayOnlyBeAccessedByLayers("Persistence", "Service", "Security", "Web", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event")
-        .whereLayer("Core").mayOnlyBeAccessedByLayers("Web", "Service", "Security", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event", "Core")
+        .whereLayer("Service").mayOnlyBeAccessedByLayers("Web", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event", "Notification")
+        .whereLayer("Security").mayOnlyBeAccessedByLayers("Config", "Service", "Web", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event", "Notification")
+        .whereLayer("Persistence").mayOnlyBeAccessedByLayers("Service", "Security", "Web", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event", "Notification")
+        .whereLayer("Domain").mayOnlyBeAccessedByLayers("Persistence", "Service", "Security", "Web", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event", "Notification")
+        .whereLayer("Core").mayOnlyBeAccessedByLayers("Web", "Service", "Security", "Config", "Genealogy", "Cms", "Iam", "Search", "Moderation", "Donation", "Event", "Notification", "Core")
         .whereLayer("Genealogy").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Genealogy", "Search", "Moderation")
         .whereLayer("Cms").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Cms")
         .whereLayer("Iam").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Security", "Iam")
@@ -45,6 +46,7 @@ class TechnicalStructureTest {
         .whereLayer("Moderation").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Moderation")
         .whereLayer("Donation").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Donation")
         .whereLayer("Event").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Event")
+        .whereLayer("Notification").mayOnlyBeAccessedByLayers("Web", "Service", "Config", "Notification")
 
         .ignoreDependency(belongToAnyOf(GiaphaApp.class), alwaysTrue())
         .ignoreDependency(alwaysTrue(), belongToAnyOf(

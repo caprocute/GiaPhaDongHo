@@ -41,4 +41,18 @@ public interface AnniversarySubscriptionRepository extends JpaRepository<Anniver
         "select anniversarySubscription from AnniversarySubscription anniversarySubscription left join fetch anniversarySubscription.person where anniversarySubscription.id =:id"
     )
     Optional<AnniversarySubscription> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Optional<AnniversarySubscription> findByUserIdAndPerson_Id(String userId, Long personId);
+
+    @Query(
+        """
+        select s from AnniversarySubscription s
+        left join fetch s.person p
+        left join fetch p.tree t
+        where s.userId = :userId
+          and t.slug = :slug
+        order by s.id desc
+        """
+    )
+    List<AnniversarySubscription> findByUserIdAndTreeSlug(@Param("userId") String userId, @Param("slug") String slug);
 }

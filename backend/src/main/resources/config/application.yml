@@ -241,3 +241,9 @@ giapha:
     key: ${IMGPROXY_KEY:0000000000000000000000000000000000000000000000000000000000000000}
     salt: ${IMGPROXY_SALT:0000000000000000000000000000000000000000000000000000000000000000}
     signing-enabled: ${IMGPROXY_SIGNING_ENABLED:false}
+  notification:
+    scheduler-enabled: ${NOTIFY_SCHEDULER_ENABLED:true}
+    default-email-to: ${NOTIFY_DEFAULT_EMAIL_TO:}
+    # Webhook Zalo OA / proxy — rỗng = dry-run (log). Prod: URL + secret qua env, không commit.
+    zalo-webhook-url: ${ZALO_OA_WEBHOOK_URL:}
+    from-name: GiaPhaHub
