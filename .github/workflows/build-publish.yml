@@ -9,13 +9,14 @@ permissions:
   packages: write
 env:
   REGISTRY: ghcr.io
-  NS: ghcr.io/${{ github.repository }}
 
 jobs:
   api:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Image namespace (lowercase)
+        run: echo "NS=${REGISTRY}/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
@@ -41,6 +42,8 @@ jobs:
         app: [portal, admin]
     steps:
       - uses: actions/checkout@v4
+      - name: Image namespace (lowercase)
+        run: echo "NS=${REGISTRY}/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:

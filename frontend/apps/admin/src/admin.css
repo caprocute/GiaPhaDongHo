@@ -904,7 +904,7 @@ code {
   flex: none;
   object-fit: contain;
   border: 1px solid var(--color-border-subtle);
-  background: #fff;
+  background: var(--color-surface-card);
 }
 
 .fund-qr-img-placeholder {
@@ -1406,7 +1406,7 @@ code {
 .rsvp-assign-btn-on {
   background: var(--color-heritage-accent);
   border-color: var(--color-heritage-accent);
-  color: var(--color-text-on-accent, #fff);
+  color: var(--color-text-on-brand);
 }
 
 .checklist-builder {
