@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@giapha/tokens/tokens.css";
+import { ThemeProvider, ThemeScript } from "@giapha/ui";
 import { PortalAuthProvider } from "../src/auth/PortalAuthProvider";
 import { PortalChrome } from "../src/chrome/PortalChrome";
 
@@ -11,8 +12,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="vi">
+    <html lang="vi" suppressHydrationWarning>
       <head>
+        <ThemeScript />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -32,9 +34,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           WebkitFontSmoothing: "antialiased",
         }}
       >
-        <PortalAuthProvider>
-          <PortalChrome>{children}</PortalChrome>
-        </PortalAuthProvider>
+        <ThemeProvider>
+          <PortalAuthProvider>
+            <PortalChrome>{children}</PortalChrome>
+          </PortalAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

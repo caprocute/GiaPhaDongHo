@@ -62,7 +62,7 @@ flowchart TB
 - [x] Script `seed-dev.sh` khung + `tunnel-infra.sh`
 
 ### R0.3 Design tokens  **[SS với R0.2, R0.4]**
-- [x] `design-tokens/` DTCG JSON (heritage / light; dark/tet phase sau)
+- [x] `design-tokens/` DTCG JSON (heritage; light/dark + palette bang-vang/co; tet phase sau)
 - [x] Style Dictionary → `frontend/packages/tokens`
 - [x] CI/local: `pnpm lint:tokens` / `npm run lint:tokens` (Gate B) xanh
 

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ComponentType, type SVGProps } from 
 import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
 import {
+  AppearanceControl,
   AppShell,
   ClanSeal,
   PublicHeader,
@@ -163,7 +164,12 @@ function AdminHeader() {
           <span>Di sản sống × hoa văn Việt phục</span>
         </>
       }
-      utilityRight={<span style={{ opacity: 0.95 }}>{displayName}</span>}
+      utilityRight={
+        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
+          <AppearanceControl />
+          <span style={{ opacity: 0.95 }}>{displayName}</span>
+        </span>
+      }
       endSlot={
         user ? (
           <button

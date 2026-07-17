@@ -43,6 +43,7 @@ Figma DS: **Gia phả họ Hoàng** — [`ETrlAF4vsj0uHiJd69jcnD`](https://www.f
 | MediaLightbox | ✅ | ✅ |
 | HonorBoardCard | ✅ | ✅ |
 | ClanSeal | ✅ | ✅ |
+| Theme / AppearanceControl | ✅ | ✅ |
 
 ## Scripts
 

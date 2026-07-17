@@ -90,3 +90,19 @@ export type { PanelProps } from "./Panel/Panel";
 
 export { HonorBoardCard } from "./HonorBoardCard/HonorBoardCard";
 export type { HonorBoardCardProps } from "./HonorBoardCard/HonorBoardCard";
+
+export { ThemeProvider, useTheme } from "./Theme/ThemeProvider";
+export type { ThemeContextValue } from "./Theme/ThemeProvider";
+export { ThemeScript, getThemeInitScript } from "./Theme/ThemeScript";
+export { AppearanceControl } from "./Theme/AppearanceControl";
+export type { AppearanceControlProps } from "./Theme/AppearanceControl";
+export type { PaletteId, ColorMode, ResolvedMode, AppearanceState } from "./Theme/themeTypes";
+export {
+  PALETTE_IDS,
+  COLOR_MODES,
+  PALETTE_LABELS,
+  MODE_LABELS,
+  THEME_STORAGE_KEY,
+  DEFAULT_APPEARANCE,
+} from "./Theme/themeTypes";
+

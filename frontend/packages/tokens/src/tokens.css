@@ -1,9 +1,13 @@
 /* AUTO — pnpm tokens:build từ design-tokens/ */
 /**
- * Do not edit directly, this file was auto-generated.
+ * Theme API:
+ *   data-palette="bang-vang" | "co"
+ *   data-mode="light" | "dark"   (resolved; system → light|dark trên <html>)
  */
 
-:root {
+/* —— Primitives: palette Bảng vàng (mặc định) —— */
+:root,
+[data-palette="bang-vang"] {
   --color-son-400: #824807;
   --color-son-500: #ae720c;
   --color-son-600: #6b3a06;
@@ -43,6 +47,61 @@
   --color-status-warn-d: #e2af1d;
   --color-status-bad-l: #8b3a2a;
   --color-status-bad-d: #d2644a;
+
+  --pattern-brocade: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2L70 36 36 70 2 36Z' fill='none' stroke='rgba(226,175,29,.14)'/%3E%3Cpath d='M36 26v20M26 36h20' stroke='rgba(174,114,12,.10)'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='none' stroke='rgba(226,175,29,.16)'/%3E%3C/svg%3E");
+  --pattern-meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M3.5 19V6.5h12v8h-8v-4h4' fill='none' stroke='%23E2AF1D' stroke-width='1.8'/%3E%3C/svg%3E");
+  --pattern-tho: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='62' fill='none' stroke='rgba(226,175,29,.14)' stroke-width='1.5'/%3E%3Ccircle cx='75' cy='75' r='52' fill='none' stroke='rgba(174,114,12,.10)'/%3E%3Ctext x='75' y='97' text-anchor='middle' font-family='Georgia,serif' font-size='64' fill='rgba(226,175,29,.14)'%3E%E5%A3%BD%3C/text%3E%3C/svg%3E");
+}
+
+/* —— Primitives: palette Cổ (son đỏ / kem) —— */
+[data-palette="co"] {
+  --color-son-400: #7a2014;
+  --color-son-500: #8e2a1a;
+  --color-son-600: #6f241a;
+  --color-son-700: #571509;
+  --color-son-ink: #f9efd8;
+  --color-son-soft: #f3dfce;
+  --color-son-d400: #c05237;
+  --color-son-d500: #d2644a;
+  --color-son-d700: #451006;
+  --color-son-d-ink: #fbeed6;
+  --color-son-d-soft: #3b211a;
+  --color-gold-400: #c9a227;
+  --color-gold-500: #8c6b1f;
+  --color-gold-soft: #f0e3b2;
+  --color-gold-line: #d8bc6a;
+  --color-gold-d400: #d9b45c;
+  --color-gold-d500: #a98836;
+  --color-gold-d-soft: #3d2f16;
+  --color-gold-d-line: #8c6b1f;
+  --color-bg-l0: #fffdf6;
+  --color-bg-l1: #faf5e9;
+  --color-bg-l2: #f1e7d0;
+  --color-bg-d0: #251a11;
+  --color-bg-d1: #1a120b;
+  --color-bg-d2: #120c07;
+  --color-ink-700: #77644e;
+  --color-ink-900: #26190f;
+  --color-ink-d900: #f2e8d3;
+  --color-ink-d700: #a99374;
+  --color-line-l: #e7dabc;
+  --color-line-l-strong: #d3bf95;
+  --color-line-d: #3b2c1e;
+  --color-line-d-strong: #54402a;
+  --color-status-good-l: #3e7c4f;
+  --color-status-good-d: #7fbf8e;
+  --color-status-warn-l: #a87415;
+  --color-status-warn-d: #d9a94e;
+  --color-status-bad-l: #8e2a1a;
+  --color-status-bad-d: #d2644a;
+
+  --pattern-brocade: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2L70 36 36 70 2 36Z' fill='none' stroke='rgba(201,162,39,.14)'/%3E%3Cpath d='M36 26v20M26 36h20' stroke='rgba(142,42,26,.10)'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='none' stroke='rgba(201,162,39,.16)'/%3E%3C/svg%3E");
+  --pattern-meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M3.5 19V6.5h12v8h-8v-4h4' fill='none' stroke='%23C9A227' stroke-width='1.8'/%3E%3C/svg%3E");
+  --pattern-tho: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='62' fill='none' stroke='rgba(201,162,39,.14)' stroke-width='1.5'/%3E%3Ccircle cx='75' cy='75' r='52' fill='none' stroke='rgba(142,42,26,.10)'/%3E%3Ctext x='75' y='97' text-anchor='middle' font-family='Georgia,serif' font-size='64' fill='rgba(201,162,39,.14)'%3E%E5%A3%BD%3C/text%3E%3C/svg%3E");
+}
+
+/* —— Non-color foundations (spacing, radius, font) —— */
+:root {
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -53,6 +112,40 @@
   --radius-lg: 16px;
   --font-display: 'Noto Serif', Georgia, serif;
   --font-body: 'Be Vietnam Pro', system-ui, sans-serif;
+
+  --color-border-subtle: color-mix(in srgb, var(--color-border-default) 55%, transparent);
+  --color-status-success-bg: color-mix(in srgb, var(--color-status-success) 22%, var(--color-surface-card));
+  --color-status-success-fg: var(--color-text-primary);
+  --color-status-error-bg: color-mix(in srgb, var(--color-status-danger) 14%, var(--color-surface-card));
+  --color-status-error-fg: var(--color-action-primary-bg);
+  --color-status-info-bg: color-mix(in srgb, var(--color-heritage-accent) 18%, var(--color-surface-card));
+  --color-status-info-fg: var(--color-text-primary);
+  --color-focus-ring: var(--color-heritage-accent);
+  --font-heading: var(--font-display);
+  --font-size-xs: 0.6875rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-display: clamp(1.75rem, 3vw, 2.5rem);
+  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 5%, transparent),
+    0 10px 30px color-mix(in srgb, var(--color-text-primary) 8%, transparent);
+  --shadow-md: 0 2px 6px color-mix(in srgb, var(--color-text-primary) 8%, transparent),
+    0 20px 48px color-mix(in srgb, var(--color-text-primary) 16%, transparent);
+  --gradient-foil: linear-gradient(
+    105deg,
+    var(--color-heritage-deep) 0%,
+    var(--color-heritage-accent) 22%,
+    var(--color-heritage-soft) 50%,
+    var(--color-heritage-accent) 78%,
+    var(--color-heritage-deep) 100%
+  );
+}
+
+/* —— Semantic: light (mặc định) —— */
+:root,
+[data-mode="light"] {
+
   --color-status-success: var(--color-status-good-l);
   --color-status-warning: var(--color-status-warn-l);
   --color-status-danger: var(--color-status-bad-l);
@@ -75,37 +168,27 @@
   --color-heritage-frame: var(--color-son-700);
 }
 
+/* —— Semantic: dark —— */
+[data-mode="dark"] {
 
-/* semantic extensions (Gate B: UI chỉ dùng var) — Di sản sống / mockup */
-:root {
-  --color-border-subtle: color-mix(in srgb, var(--color-border-default) 55%, transparent);
-  --color-status-success-bg: color-mix(in srgb, var(--color-status-success) 22%, var(--color-surface-card));
-  --color-status-success-fg: var(--color-text-primary);
-  --color-status-error-bg: color-mix(in srgb, var(--color-status-danger) 14%, var(--color-surface-card));
-  --color-status-error-fg: var(--color-action-primary-bg);
-  --color-status-info-bg: color-mix(in srgb, var(--color-heritage-accent) 18%, var(--color-surface-card));
-  --color-status-info-fg: var(--color-text-primary);
-  --color-focus-ring: var(--color-heritage-accent);
-  --font-heading: var(--font-display);
-  --font-size-xs: 0.6875rem;
-  --font-size-sm: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-display: clamp(1.75rem, 3vw, 2.5rem);
-  --shadow-sm: 0 1px 2px color-mix(in srgb, var(--color-ink-900) 5%, transparent),
-    0 10px 30px color-mix(in srgb, var(--color-ink-900) 8%, transparent);
-  --shadow-md: 0 2px 6px color-mix(in srgb, var(--color-ink-900) 8%, transparent),
-    0 20px 48px color-mix(in srgb, var(--color-ink-900) 16%, transparent);
-  --gradient-foil: linear-gradient(
-    105deg,
-    var(--color-heritage-deep) 0%,
-    var(--color-heritage-accent) 22%,
-    var(--color-heritage-soft) 50%,
-    var(--color-heritage-accent) 78%,
-    var(--color-heritage-deep) 100%
-  );
-  --pattern-brocade: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2L70 36 36 70 2 36Z' fill='none' stroke='rgba(226,175,29,.14)'/%3E%3Cpath d='M36 26v20M26 36h20' stroke='rgba(174,114,12,.10)'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='none' stroke='rgba(226,175,29,.16)'/%3E%3C/svg%3E");
-  --pattern-meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M3.5 19V6.5h12v8h-8v-4h4' fill='none' stroke='%23E2AF1D' stroke-width='1.8'/%3E%3C/svg%3E");
-  --pattern-tho: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Ccircle cx='75' cy='75' r='62' fill='none' stroke='rgba(226,175,29,.14)' stroke-width='1.5'/%3E%3Ccircle cx='75' cy='75' r='52' fill='none' stroke='rgba(174,114,12,.10)'/%3E%3Ctext x='75' y='97' text-anchor='middle' font-family='Georgia,serif' font-size='64' fill='rgba(226,175,29,.14)'%3E%E5%A3%BD%3C/text%3E%3C/svg%3E");
+  --color-status-success: var(--color-status-good-d);
+  --color-status-warning: var(--color-status-warn-d);
+  --color-status-danger: var(--color-status-bad-d);
+  --color-action-primary-bg: var(--color-gold-d500);
+  --color-action-primary-bg-hover: var(--color-gold-d400);
+  --color-action-primary-bg-deep: var(--color-son-d700);
+  --color-action-primary-fg: var(--color-son-d-ink);
+  --color-text-primary: var(--color-ink-d900);
+  --color-text-muted: var(--color-ink-d700);
+  --color-text-on-brand: var(--color-son-d-ink);
+  --color-surface-page: var(--color-bg-d1);
+  --color-surface-card: var(--color-bg-d0);
+  --color-surface-sunken: var(--color-bg-d2);
+  --color-border-default: var(--color-line-d);
+  --color-border-strong: var(--color-line-d-strong);
+  --color-heritage-accent: var(--color-gold-d400);
+  --color-heritage-deep: var(--color-gold-d500);
+  --color-heritage-soft: var(--color-gold-d-soft);
+  --color-heritage-line: var(--color-gold-d-line);
+  --color-heritage-frame: var(--color-son-d700);
 }
