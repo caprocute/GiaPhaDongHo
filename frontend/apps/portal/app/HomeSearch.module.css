@@ -55,17 +55,19 @@
 
 @media (max-width: 640px) {
   .search {
-    flex-direction: column;
     max-width: none;
+    width: 100%;
   }
 
   .search input {
-    padding: 14px 16px;
+    padding: 14px 14px;
     font-size: 16px; /* tránh zoom iOS */
   }
 
   .search button {
-    padding: 14px 20px;
+    flex: none;
+    padding: 0 18px;
     min-height: 48px;
+    letter-spacing: 0.06em;
   }
 }

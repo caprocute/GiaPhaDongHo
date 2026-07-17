@@ -287,6 +287,9 @@
 @media (max-width: 960px) {
   .navRow { display: none; }
 
+  /* CTA desktop chiếm chỗ → chỉ giữ trong drawer */
+  .brandEnd { display: none; }
+
   .menuBtn { display: inline-flex; }
 
   .drawer {
@@ -319,7 +322,15 @@
     cursor: pointer;
   }
 
-  .brand h1 { font-size: 20px; }
+  .brand h1 {
+    font-size: 20px;
+    white-space: normal;
+  }
+
+  .sub {
+    white-space: normal;
+    letter-spacing: 0.12em;
+  }
 
   .seal {
     width: 52px;
@@ -331,11 +342,7 @@
   .brandRow {
     padding-top: 14px;
     padding-bottom: 12px;
-  }
-
-  .cta {
-    padding: 8px 16px;
-    font-size: 11px;
+    gap: 12px;
   }
 }
 
@@ -354,13 +361,15 @@
     gap: 10px;
   }
 
-  .brand h1 { font-size: 1.1rem; }
+  .brand h1 {
+    font-size: 1.15rem;
+    line-height: 1.2;
+  }
 
   .sub {
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     font-size: 9.5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.35;
   }
 
   .seal {
@@ -371,5 +380,10 @@
   .band {
     height: 12px;
     background-size: auto 10px;
+  }
+
+  .menuBtn {
+    width: 40px;
+    height: 40px;
   }
 }
