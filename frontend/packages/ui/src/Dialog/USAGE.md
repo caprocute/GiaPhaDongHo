@@ -1,38 +1,48 @@
 # Dialog — Hộp thoại modal
 
-> **Done 4 mảnh (TK-04):** ① Spec (file này) · ② Code `Dialog.tsx` · ③ Story `Dialog.stories.tsx` · ④ Usage/mapping (file này).
+> **Done 4 mảnh (TK-04):** ① Spec · ② Code · ③ Story · ④ Usage.
 
 ## ① Spec
 
 | | |
 |--|--|
-| **Khi dùng** | Xác nhận xóa, form ngắn overlay. |
+| **Khi dùng** | Xác nhận ngắn; form đề cử / nghi thức (overlay). |
 | **Khi không** | Không nhồi cả trang settings vào Dialog. |
-| **Variants / API** | open, title, onClose |
-| **A11y** | Focus trap; Escape đóng; aria-modal. |
+| **Variants** | `default` · `ceremonial` (khung đôi, nền kem, eyebrow) |
+| **API** | `open`, `title`, `description?`, `eyebrow?`, `footer?`, `variant?`, `size?`, `onClose` |
+| **A11y** | `aria-modal`; Escape đóng; bấm nền đóng; focus phần tử tương tác đầu tiên. |
 
 ## ④ Usage
 
 ```tsx
-import { Dialog } from "@giapha/ui";
+import { Dialog, Button } from "@giapha/ui";
 
-<Dialog open={open} title="Xác nhận" onClose={…}>…</Dialog>
+<Dialog
+  open={open}
+  variant="ceremonial"
+  eyebrow="Nghi thức dòng họ"
+  title="Đề cử thành tích"
+  description="…"
+  onClose={() => setOpen(false)}
+  footer={
+    <>
+      <Button variant="secondary" onClick={() => setOpen(false)}>Để sau</Button>
+      <Button type="submit" form="nominate-form">Gửi đề cử</Button>
+    </>
+  }
+>
+  <form id="nominate-form">…</form>
+</Dialog>
 ```
 
-### Tokens (chỉ semantic)
+### Tokens
 
-`--color-surface-card`, `--radius-lg`
+`--color-surface-*`, `--color-heritage-*`, `--radius-lg`, `--shadow-md`, `--font-display`
 
 ### Mapping
 
 | Nguồn | Liên kết |
 |-------|----------|
-| Storybook | `Dialog` |
-| Figma DS | Gia phả họ Hoàng (`ETrlAF4vsj0uHiJd69jcnD`) — Components/Dialog (Code Connect phase sau) |
+| Storybook | `GiaPha/Dialog` |
+| F8 Khuyến học | Form đề cử chỉ trong popup ceremonial |
 | Import | `@giapha/ui` → `Dialog` |
-
-### Do / Don't
-
-- ✅ Compose trong Portal/Admin; không styled-div trùng pattern.
-- ✅ Màu/spacing qua `var(--…)` từ `@giapha/tokens`.
-- ❌ Hardcode hex/px/font ngoài token.

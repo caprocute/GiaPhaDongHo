@@ -1,0 +1,154 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  background: color-mix(in srgb, var(--color-ink-900) 48%, transparent);
+  backdrop-filter: blur(3px);
+  animation: dialogFade 180ms ease-out;
+}
+
+.panel {
+  position: relative;
+  width: min(480px, 100%);
+  max-height: min(90vh, 720px);
+  overflow: auto;
+  padding: var(--spacing-lg);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  animation: dialogRise 220ms ease-out;
+}
+
+.panelLg {
+  width: min(560px, 100%);
+}
+
+/* Biến thể trang trọng — đề cử / nghi thức */
+.ceremonial {
+  width: min(520px, 100%);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border-strong);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      color-mix(in srgb, var(--color-heritage-soft) 55%, white) 0%,
+      var(--color-surface-page) 42%,
+      var(--color-surface-sunken) 100%
+    );
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 1px color-mix(in srgb, var(--color-heritage-line) 40%, transparent);
+}
+
+.ceremonialFrame {
+  margin: 10px;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 70%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-heritage-deep) 12%, transparent);
+}
+
+.eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-heritage-deep);
+  margin-bottom: var(--spacing-sm);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: 700;
+  color: var(--color-heritage-frame);
+  margin: 0 0 var(--spacing-sm);
+  line-height: 1.25;
+}
+
+.description {
+  margin: 0 0 var(--spacing-md);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.body {
+  margin-bottom: var(--spacing-md);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  align-items: center;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid color-mix(in srgb, var(--color-heritage-line) 35%, transparent);
+}
+
+.footerDefault {
+  border-top-color: var(--color-border-default);
+}
+
+.close {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  z-index: 2;
+  min-height: 40px;
+  min-width: 40px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.close:hover {
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-ink-900) 6%, transparent);
+}
+
+.ceremonial .close {
+  top: calc(10px + var(--spacing-sm));
+  right: calc(10px + var(--spacing-sm));
+}
+
+@keyframes dialogFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialogRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .panel {
+    animation: none;
+  }
+}
