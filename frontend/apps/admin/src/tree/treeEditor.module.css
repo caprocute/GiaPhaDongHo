@@ -412,6 +412,11 @@
   padding: var(--spacing-sm) var(--spacing-md);
 }
 
+.legendHint {
+  color: var(--color-text-muted);
+  width: 100%;
+}
+
 .zoomBtn {
   width: var(--te-control-h);
   height: var(--te-control-h);

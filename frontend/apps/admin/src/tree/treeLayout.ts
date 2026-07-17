@@ -12,6 +12,8 @@ export type NodeData = {
   personId: number;
   person: PersonDto;
   pos: Pos;
+  /** generation = null — hàng «Chưa phân đời» */
+  warnOrphan?: boolean;
 };
 
 export type UnionLine = {
@@ -29,6 +31,8 @@ export type LayoutResult = {
   svgWidth: number;
   svgHeight: number;
   generations: number[];
+  /** Index hàng nhãn «Chưa phân đời»; -1 nếu không có */
+  orphanGenerationIndex: number;
 };
 
 function codeSortKey(code: string | null | undefined): string {
@@ -79,7 +83,14 @@ export function buildLayout(
   children: UnionChildDto[],
 ): LayoutResult {
   if (persons.length === 0) {
-    return { nodes: new Map(), unionLines: [], svgWidth: 400, svgHeight: 200, generations: [] };
+    return {
+      nodes: new Map(),
+      unionLines: [],
+      svgWidth: 400,
+      svgHeight: 200,
+      generations: [],
+      orphanGenerationIndex: -1,
+    };
   }
 
   const membersByUnion = new Map<number, number[]>();
@@ -179,13 +190,42 @@ export function buildLayout(
         childIds: childrenByUnion.get(uid) ?? [],
       });
     }
+
+    // FR-12a.7 — hôn phối 1 người (hoặc chưa có vợ/chồng trên cùng đời): đường cha-con từ node cha/mẹ
+    for (const [uid, mateIds] of membersByUnion) {
+      if (genUnionMid.has(uid)) continue;
+      const childIds = childrenByUnion.get(uid) ?? [];
+      if (childIds.length === 0) continue;
+      const parentOnRow = mateIds
+        .map((id) => nodes.get(id))
+        .filter((n): n is NodeData => n != null && (n.person.generation ?? 1) === gen);
+      if (parentOnRow.length === 0) continue;
+      const parent = parentOnRow[0]!;
+      const midX = parent.pos.x + NW / 2;
+      unionLines.push({
+        unionId: uid,
+        leftX: midX,
+        rightX: midX,
+        midX,
+        y: parent.pos.y + NH / 2,
+        childIds,
+      });
+    }
   });
 
   const orphans = persons.filter((p) => p.id != null && p.generation == null && !nodes.has(p.id!));
+  const orphanGenerationIndex = orphans.length > 0 ? gens.length : -1;
   if (orphans.length > 0) {
     const y = 24 + gens.length * ROW_H;
     orphans.forEach((p, i) => {
-      if (p.id != null) nodes.set(p.id, { personId: p.id, person: p, pos: { x: 80 + i * (NW + FAMILY_GAP), y } });
+      if (p.id != null) {
+        nodes.set(p.id, {
+          personId: p.id,
+          person: p,
+          pos: { x: 80 + i * (NW + FAMILY_GAP), y },
+          warnOrphan: true,
+        });
+      }
     });
   }
 
@@ -196,5 +236,12 @@ export function buildLayout(
     maxY = Math.max(maxY, n.pos.y + NH + 48);
   }
 
-  return { nodes, unionLines, svgWidth: maxX, svgHeight: maxY, generations: gens };
+  return {
+    nodes,
+    unionLines,
+    svgWidth: maxX,
+    svgHeight: maxY,
+    generations: gens,
+    orphanGenerationIndex,
+  };
 }

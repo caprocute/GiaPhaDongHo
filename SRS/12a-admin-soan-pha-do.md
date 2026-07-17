@@ -1,6 +1,6 @@
 # SRS-12a — Màn hình Soạn phả đồ (Admin Tree Editor)
 
-**Phiên bản:** 1.0 · **Ngày:** 2026-07-17
+**Phiên bản:** 1.1 · **Ngày:** 2026-07-17
 **Tham chiếu:** TK-04, FR-12.4, FR-12.5, FR-12.6
 **Mockup:** `instruction/mockups/admin-tree-editor.html`
 
@@ -297,7 +297,50 @@ Hiển thị khi click node thành viên. Các phần:
 
 ---
 
-## 12. Trạng thái chưa xử lý (Out of Scope — v1)
+## 12. Bổ sung theo mockup (v1.1)
+
+Các FR dưới đây ghi nhận chi tiết mockup / triển khai thực tế chưa đủ rõ ở v1.0:
+
+**FR-12a.26** Màn hình mở **fullscreen overlay** (che shell admin): nút đóng + phím Esc thoát về màn trước / trang chủ.
+
+**FR-12a.27** Responsive: ≤960px xếp sidebar trên / panel dưới; ẩn thống kê topbar khi hẹp.
+
+**FR-12a.28** Toast sau tải dữ liệu lần đầu («Đã tải N thành viên»); toast thao tác thành công thống nhất góc trên phải canvas.
+
+**FR-12a.29** Sidebar hai lớp highlight: người đang chọn + vợ/chồng cùng hôn phối đang mở trên panel.
+
+**FR-12a.30** Cây lớn: node mờ / chỉ báo tiếp tục khi một đời quá đông (gợi ý mockup gen 5+).
+
+**FR-12a.31** Vai trò hôn phối: Chồng / Vợ / Bạn đời (partner).
+
+**FR-12a.32** Topbar hiển thị **tên dòng họ** từ cấu hình site (`GET …/settings` → `displayName`), không hardcode.
+
+**FR-12a.33** Endpoint union: ưu tiên tree-scoped; khi dùng resource JHipster global (`/api/family-unions`, `/api/union-members`) phải ghi rõ trong tài liệu tích hợp và vẫn `@RequiresPermission`.
+
+**FR-12a.34** Form **Thêm thành viên** hỗ trợ chọn cha/mẹ (`parentCode`) để BE sinh mã + `lineage_path` và gợi ý đời = đời cha + 1.
+
+**FR-12a.35** Form thêm thành viên và tạo/sửa hôn phối dùng **DualDatePicker** (ngày sinh / ngày cưới dương–âm) — khớp FR-12.5.
+
+**FR-12a.36** Union Panel: chỉnh sửa và **Lưu** loại hôn nhân, ngày cưới, trạng thái (không chỉ hiển thị JSON thô).
+
+**FR-12a.37** Person Panel: nút **Xóa khỏi cây** với confirm 2 bước (xóa hồ sơ khỏi cây hiện tại).
+
+**FR-12a.38** Khi tạo thành viên **không gửi mã tạm** từ FE — để BE sinh theo `codePrefix` cấu hình (FR-12.4).
+
+### Gap checklist (so với mockup — cập nhật khi làm)
+
+| Hạng mục | Trạng thái mục tiêu v1.1 |
+|----------|-------------------------|
+| Layout 3 cột + pan/zoom + union CRUD | Đã có khung |
+| Mã hiệu tự sinh + DualDate + sửa hôn nhân + xóa khỏi cây | Bắt buộc |
+| Đường cha-con đơn thân (FR-12a.7) + hàng «Chưa phân đời» | Bắt buộc |
+| Person/Union panel đầy đủ quan hệ | Nên có |
+| Skeleton, nhãn đời đúng zoom, legend đầy đủ | Nên có |
+| GEDCOM / undo / collab / drag | Out of scope |
+
+---
+
+## 13. Trạng thái chưa xử lý (Out of Scope — v1)
 
 - Import/Export GEDCOM
 - Undo/Redo thao tác

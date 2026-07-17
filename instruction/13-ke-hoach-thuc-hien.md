@@ -170,7 +170,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] AppShell + menu CRM + OIDC login (RBAC BE R1.5; menu theo role tinh chỉnh sau)
 - [x] Danh sách / form hồ sơ người + DualDatePicker + Zod → API `/api/v1/trees/{slug}/persons` (+ ngày mất → giỗ)
 - [x] Tree editor tối thiểu (CRUD union + member/child — `/tree`)
-- [x] Soạn phả đồ fullscreen SRS-12a — layout 3 cột + canvas SVG + Person/Union panel + `?root=` (`/tree`)
+- [x] Soạn phả đồ fullscreen SRS-12a — layout 3 cột + canvas SVG + Person/Union panel + `?root=` (`/tree`); v1.1: DualDate, mã hiệu BE, sửa hôn nhân, xóa khỏi cây, cha-con đơn thân (FR-12a.26–38)
 - [x] Quản lý bài viết + duyệt comment (`/posts`, `/comments` → `/api/cms-posts` / `/api/cms-comments`)
 - [x] Media library (album CRUD + upload `/api/v1/media/upload` + list/xóa photos)
 - [x] Cài đặt site động — `GET/PUT /api/v1/trees/{slug}/settings` (metaJson) + admin `/settings` + portal header/footer/meta/tree/tự khai/nhắc giỗ (FR-12.18)

@@ -6,11 +6,13 @@ import {
   Alert,
   Button,
   Dialog,
+  DualDatePicker,
   EmptyState,
   FormField,
   Input,
   Select,
   Textarea,
+  type DualDateValue,
 } from "@giapha/ui";
 import {
   GitBranch,
@@ -29,19 +31,22 @@ import {
   createUnionMember,
   defaultTreeSlug,
   deleteFamilyUnion,
+  deletePersonById,
   deleteUnionChild,
   deleteUnionMember,
+  getTreeSettings,
   listTreePersons,
   listTreeUnions,
   listUnionChildren,
   listUnionMembers,
+  updateFamilyUnion,
   type FamilyUnionDto,
   type PersonDto,
   type UnionChildDto,
   type UnionMemberDto,
 } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
-import { adminSiteTitle } from "../lib/siteTitle";
+import { adminSiteTitle, persistAdminSiteTitle } from "../lib/siteTitle";
 import {
   NH,
   NW,
@@ -54,6 +59,34 @@ import {
 import styles from "./treeEditor.module.css";
 
 type GenderFilter = "all" | "M" | "F";
+
+type MarriageInfo = {
+  type?: string;
+  marriageSolar?: string;
+  status?: string;
+};
+
+function parseMarriageInfo(raw: string | null | undefined): MarriageInfo {
+  if (!raw?.trim()) return {};
+  try {
+    return JSON.parse(raw) as MarriageInfo;
+  } catch {
+    return { type: raw };
+  }
+}
+
+function dualFromIso(iso: string | null | undefined): DualDateValue | null {
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const [y, m, d] = iso.split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return { solar: { year: y, month: m, day: d } };
+}
+
+function isoFromDual(v: DualDateValue | null): string | undefined {
+  if (!v?.solar) return undefined;
+  const { year, month, day } = v.solar;
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
 
 /** Control compact trong rail/panel — đồng bộ với --te-control-h */
 const compactControl = {
@@ -80,8 +113,11 @@ function PersonNodeSvg({
 }) {
   const { person, pos } = data;
   const g = person.gender;
-  const stroke =
-    g === "M"
+  const mark = g === "M" ? "♂" : g === "F" ? "♀" : "?";
+  const warn = data.warnOrphan === true;
+  const stroke = warn
+    ? "var(--color-heritage-accent)"
+    : g === "M"
       ? "var(--color-heritage-deep)"
       : g === "F"
         ? "var(--color-action-primary-bg)"
@@ -93,13 +129,13 @@ function PersonNodeSvg({
         ? "color-mix(in srgb, var(--color-action-primary-bg) 18%, var(--color-surface-card))"
         : "var(--color-surface-sunken)"
     : "var(--color-surface-card)";
-  const accent =
-    g === "M"
+  const accent = warn
+    ? "var(--color-heritage-accent)"
+    : g === "M"
       ? "var(--color-heritage-deep)"
       : g === "F"
         ? "var(--color-action-primary-bg)"
         : "var(--color-heritage-line)";
-  const mark = g === "M" ? "♂" : g === "F" ? "♀" : "?";
 
   return (
     <g
@@ -112,35 +148,44 @@ function PersonNodeSvg({
       role="button"
       aria-label={person.fullName ?? person.code ?? "Thành viên"}
     >
-      <rect width={NW} height={NH} rx={8} fill={fill} stroke={stroke} strokeWidth={selected ? 2.5 : 1.5} />
+      <rect
+        width={NW}
+        height={NH}
+        rx={8}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={selected || warn ? 2.5 : 1.5}
+      />
       <rect x={0} y={0} width={8} height={NH} rx={0} fill={accent} />
       <text
-        x={NW / 2 + 2}
+        x={16}
         y={20}
-        textAnchor="middle"
+        textAnchor="start"
         fill="var(--color-text-primary)"
         style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 700 }}
       >
-        {(person.fullName ?? "—").slice(0, 18)}
+        {(person.fullName ?? "—").slice(0, 16)}
       </text>
       <text
-        x={NW / 2 + 2}
+        x={16}
         y={36}
-        textAnchor="middle"
+        textAnchor="start"
         fill="var(--color-text-muted)"
         style={{ fontFamily: "var(--font-body)", fontSize: 10 }}
       >
         {person.code ?? "—"}
-        {person.generation != null ? ` · Đời ${person.generation}` : ""}
+        {person.generation != null ? ` · Đời ${person.generation}` : warn ? " · Chưa phân đời" : ""}
       </text>
       <text
-        x={NW / 2 + 2}
+        x={16}
         y={50}
-        textAnchor="middle"
+        textAnchor="start"
         fill="var(--color-text-secondary)"
         style={{ fontFamily: "var(--font-body)", fontSize: 9 }}
       >
-        {mark} · {person.lifeStatus === "deceased" ? "đã mất" : "còn sống"}
+        {mark}
+        {person.generation != null ? ` Đời ${person.generation}` : ""}
+        {person.lifeStatus === "deceased" ? " · đã mất" : ""}
       </text>
     </g>
   );
@@ -162,15 +207,17 @@ function UnionConnectors({
 
   return (
     <g>
-      <line
-        x1={ul.leftX}
-        y1={ul.y}
-        x2={ul.rightX}
-        y2={ul.y}
-        stroke="var(--color-heritage-frame)"
-        strokeWidth={1.5}
-        strokeDasharray="5 3"
-      />
+      {ul.leftX !== ul.rightX ? (
+        <line
+          x1={ul.leftX}
+          y1={ul.y}
+          x2={ul.rightX}
+          y2={ul.y}
+          stroke="var(--color-heritage-frame)"
+          strokeWidth={1.5}
+          strokeDasharray="5 3"
+        />
+      ) : null}
       <polygon
         points={`${ul.midX},${ul.y - 6} ${ul.midX + 6},${ul.y} ${ul.midX},${ul.y + 6} ${ul.midX - 6},${ul.y}`}
         fill="var(--color-heritage-accent)"
@@ -182,6 +229,16 @@ function UnionConnectors({
           onDiamondClick();
         }}
       />
+      <text
+        x={ul.midX}
+        y={ul.y + 1}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="var(--color-text-on-brand)"
+        style={{ fontSize: 9, fontWeight: 800, pointerEvents: "none" }}
+      >
+        ♥
+      </text>
       {childNodes.length > 0 ? (
         <>
           <line
@@ -225,6 +282,7 @@ export function TreeEditorPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const slug = defaultTreeSlug();
   const rootCode = searchParams.get("root");
+  const [clanTitle, setClanTitle] = useState(() => adminSiteTitle());
 
   const [unions, setUnions] = useState<FamilyUnionDto[]>([]);
   const [persons, setPersons] = useState<PersonDto[]>([]);
@@ -245,21 +303,29 @@ export function TreeEditorPage() {
   const dragRef = useRef<{ startX: number; startY: number; tx: number; ty: number } | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const didFitRef = useRef(false);
+  const didLoadToastRef = useRef(false);
 
   const [showCreateUnion, setShowCreateUnion] = useState(false);
   const [showCreatePerson, setShowCreatePerson] = useState(false);
   const [husbandId, setHusbandId] = useState("");
   const [wifeId, setWifeId] = useState("");
   const [marriageType, setMarriageType] = useState("chinh_that");
+  const [marriageDate, setMarriageDate] = useState<DualDateValue | null>(null);
   const [newName, setNewName] = useState("");
   const [newGender, setNewGender] = useState("M");
   const [newGen, setNewGen] = useState("1");
-  const [newLife, setNewLife] = useState("living");
+  const [newLife, setNewLife] = useState("alive");
   const [newNotes, setNewNotes] = useState("");
+  const [newBirth, setNewBirth] = useState<DualDateValue | null>(null);
+  const [newParentCode, setNewParentCode] = useState("");
 
   const [memberPersonId, setMemberPersonId] = useState("");
   const [memberRole, setMemberRole] = useState("husband");
   const [childPersonId, setChildPersonId] = useState("");
+
+  const [editMarriageType, setEditMarriageType] = useState("chinh_that");
+  const [editMarriageDate, setEditMarriageDate] = useState<DualDateValue | null>(null);
+  const [editMarriageStatus, setEditMarriageStatus] = useState("married");
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -271,11 +337,12 @@ export function TreeEditorPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      const [u, personPage, m, c] = await Promise.all([
+      const [u, personPage, m, c, settings] = await Promise.all([
         listTreeUnions(slug, token),
         listTreePersons(slug, token, undefined, 0, 500),
         listUnionMembers(token),
         listUnionChildren(token),
+        getTreeSettings(slug, token).catch(() => null),
       ]);
       const list = personPage.content;
       const ids = new Set(list.map((p) => p.id).filter((id): id is number => id != null));
@@ -283,12 +350,20 @@ export function TreeEditorPage() {
       setPersons(list);
       setMembers(m.filter((x) => x.person?.id != null && ids.has(x.person.id)));
       setChildren(c.filter((x) => x.child?.id != null && ids.has(x.child.id)));
+      if (settings?.displayName) {
+        setClanTitle(settings.displayName);
+        persistAdminSiteTitle(settings.displayName);
+      }
+      if (!didLoadToastRef.current) {
+        didLoadToastRef.current = true;
+        showToast(`✓ Đã tải ${list.length} thành viên`);
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được dữ liệu phả hệ.");
     } finally {
       setLoading(false);
     }
-  }, [getAccessToken, slug]);
+  }, [getAccessToken, slug, showToast]);
 
   useEffect(() => {
     void reload();
@@ -460,7 +535,11 @@ export function TreeEditorPage() {
       const created = await createTreeUnion(
         slug,
         {
-          marriageInfoJson: JSON.stringify({ type: marriageType }),
+          marriageInfoJson: JSON.stringify({
+            type: marriageType,
+            marriageSolar: isoFromDual(marriageDate),
+            status: "married",
+          }),
         },
         token,
       );
@@ -483,6 +562,7 @@ export function TreeEditorPage() {
       setShowCreateUnion(false);
       setHusbandId("");
       setWifeId("");
+      setMarriageDate(null);
       await reload();
       showToast(`✓ Đã tạo hôn phối #${created.id ?? "—"}`);
     } catch (e) {
@@ -501,28 +581,37 @@ export function TreeEditorPage() {
     setError(null);
     try {
       const token = await getAccessToken();
+      const parent = newParentCode
+        ? persons.find((p) => String(p.id) === newParentCode)
+        : null;
+      const gen =
+        Number(newGen) ||
+        (parent?.generation != null ? parent.generation + 1 : 1);
       const created = await createTreePerson(
         slug,
         {
           fullName: newName.trim(),
           gender: newGender,
-          generation: Number(newGen) || 1,
+          generation: gen,
           lifeStatus: newLife,
           notes: newNotes.trim() || undefined,
-          code: `T${Date.now().toString(36).toUpperCase()}`,
+          birthSolar: isoFromDual(newBirth),
         },
         token,
+        parent?.code ? { parentCode: parent.code } : undefined,
       );
       setShowCreatePerson(false);
       setNewName("");
       setNewNotes("");
+      setNewBirth(null);
+      setNewParentCode("");
       await reload();
       if (created.id != null) {
         setSelectedPersonId(created.id);
         setSelectedUnionId(null);
         window.setTimeout(() => focusPerson(created.id!), 100);
       }
-      showToast(`✓ Đã thêm ${created.fullName ?? "thành viên"}`);
+      showToast(`✓ Đã thêm ${created.fullName ?? "thành viên"} (${created.code ?? ""})`);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Thêm thành viên thất bại.");
     } finally {
@@ -617,6 +706,66 @@ export function TreeEditorPage() {
     }
   }
 
+  async function saveMarriageInfo() {
+    if (!selectedUnionId || !selectedUnion) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      await updateFamilyUnion(
+        selectedUnionId,
+        {
+          ...selectedUnion,
+          marriageInfoJson: JSON.stringify({
+            type: editMarriageType,
+            marriageSolar: isoFromDual(editMarriageDate),
+            status: editMarriageStatus,
+          }),
+        },
+        token,
+      );
+      await reload();
+      showToast("✓ Đã lưu thông tin hôn nhân");
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Lưu hôn nhân thất bại.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removePersonFromTree() {
+    if (!selectedPerson?.id) return;
+    if (
+      !window.confirm(
+        `Xóa «${selectedPerson.fullName ?? selectedPerson.code}» khỏi cây? Hồ sơ sẽ bị xóa khỏi hệ thống.`,
+      )
+    ) {
+      return;
+    }
+    if (!window.confirm("Xác nhận lần 2: xóa thành viên này?")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      await deletePersonById(selectedPerson.id, token);
+      setSelectedPersonId(null);
+      await reload();
+      showToast("✓ Đã xóa thành viên khỏi cây");
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Xóa thành viên thất bại.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!selectedUnion) return;
+    const info = parseMarriageInfo(selectedUnion.marriageInfoJson);
+    setEditMarriageType(info.type ?? "chinh_that");
+    setEditMarriageDate(dualFromIso(info.marriageSolar));
+    setEditMarriageStatus(info.status ?? "married");
+  }, [selectedUnion]);
+
   function onWheel(e: React.WheelEvent) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -653,7 +802,7 @@ export function TreeEditorPage() {
         <span className={styles.brand}>GiaPhaHub</span>
         <span className={styles.sep} aria-hidden />
         <div className={styles.titleBlock}>
-          <h1 className={styles.title}>Soạn phả đồ · {adminSiteTitle()}</h1>
+          <h1 className={styles.title}>Soạn phả đồ · {clanTitle}</h1>
           <p className={styles.sub}>Ban quản trị tộc sự</p>
         </div>
         <div className={styles.stats}>
@@ -854,6 +1003,7 @@ export function TreeEditorPage() {
             <span>
               <i className={`${styles.dot} ${styles.dotU}`} /> Hôn phối
             </span>
+            <span className={styles.legendHint}>— — Hôn nhân · —— Cha-con</span>
           </div>
 
           {loading ? (
@@ -869,12 +1019,22 @@ export function TreeEditorPage() {
                 <div
                   key={gen}
                   className={styles.genLabel}
-                  style={{ top: transform.y + (24 + idx * ROW_H + NH / 2 - 10) * transform.scale }}
+                  style={{ top: 24 + idx * ROW_H + NH / 2 - 10 + transform.y }}
                 >
                   Đời {gen}
                   {gen === 1 ? " · Thủy tổ" : ""}
                 </div>
               ))}
+              {layout.orphanGenerationIndex >= 0 ? (
+                <div
+                  className={styles.genLabel}
+                  style={{
+                    top: 24 + layout.orphanGenerationIndex * ROW_H + NH / 2 - 10 + transform.y,
+                  }}
+                >
+                  Chưa phân đời
+                </div>
+              ) : null}
               <svg width="100%" height="100%" style={{ display: "block" }}>
                 <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
                   {layout.unionLines.map((ul) => (
@@ -1024,16 +1184,47 @@ export function TreeEditorPage() {
 
               <div className={styles.section}>
                 <p className={styles.sectionTitle}>Thông tin hôn nhân</p>
-                <p className={styles.rowMeta}>
-                  {selectedUnion.marriageInfoJson
-                    ? selectedUnion.marriageInfoJson
-                    : "Chưa có thông tin hôn nhân."}
-                </p>
+                <FormField label="Loại hôn nhân">
+                  <Select
+                    options={[
+                      { value: "chinh_that", label: "Chính thất" },
+                      { value: "thu_that", label: "Thứ thất" },
+                      { value: "nguoi_yeu", label: "Người yêu" },
+                      { value: "chua_ro", label: "Chưa rõ" },
+                    ]}
+                    value={editMarriageType}
+                    onChange={(e) => setEditMarriageType(e.target.value)}
+                    style={compactControl}
+                  />
+                </FormField>
+                <DualDatePicker
+                  label="Ngày cưới (dương / âm)"
+                  optional
+                  value={editMarriageDate}
+                  onChange={setEditMarriageDate}
+                />
+                <FormField label="Trạng thái">
+                  <Select
+                    options={[
+                      { value: "married", label: "Đang hôn nhân" },
+                      { value: "divorced", label: "Ly hôn" },
+                      { value: "widowed", label: "Góa" },
+                      { value: "unknown", label: "Chưa rõ" },
+                    ]}
+                    value={editMarriageStatus}
+                    onChange={(e) => setEditMarriageStatus(e.target.value)}
+                    style={compactControl}
+                  />
+                </FormField>
+                <div className={styles.miniFormRow}>
+                  <Button type="button" disabled={busy} onClick={() => void saveMarriageInfo()}>
+                    Lưu thay đổi
+                  </Button>
+                  <Button type="button" variant="secondary" disabled={busy} onClick={() => void removeUnion()}>
+                    Xóa hôn phối
+                  </Button>
+                </div>
               </div>
-
-              <Button type="button" variant="secondary" disabled={busy} onClick={() => void removeUnion()}>
-                Xóa hôn phối
-              </Button>
             </div>
           </aside>
         ) : null}
@@ -1082,10 +1273,26 @@ export function TreeEditorPage() {
                       }}
                     >
                       #{parentUnionId}
+                      {(() => {
+                        const parents = members
+                          .filter((m) => m.union?.id === parentUnionId)
+                          .map((m) => m.person?.fullName)
+                          .filter(Boolean);
+                        return parents.length ? ` (${parents.join(" · ")})` : "";
+                      })()}
                     </button>
                   ) : (
                     "—"
                   )}
+                </div>
+                <div className={styles.rowMeta}>
+                  Con: {children.filter((c) => {
+                    const uid = c.union?.id;
+                    if (uid == null || !selectedPerson?.id) return false;
+                    return members.some(
+                      (m) => m.union?.id === uid && m.person?.id === selectedPerson.id,
+                    );
+                  }).length}
                 </div>
                 <div className={styles.rowMeta}>
                   Hôn phối ({personUnions.length}):
@@ -1141,6 +1348,19 @@ export function TreeEditorPage() {
                 >
                   Thêm thành viên mới
                 </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={busy}
+                  style={{
+                    minHeight: 36,
+                    fontSize: "var(--font-size-sm)",
+                    color: "var(--color-status-error-fg)",
+                  }}
+                  onClick={() => void removePersonFromTree()}
+                >
+                  Xóa khỏi cây
+                </Button>
               </div>
             </div>
           </aside>
@@ -1181,12 +1401,18 @@ export function TreeEditorPage() {
             onChange={(e) => setMarriageType(e.target.value)}
           />
         </FormField>
+        <DualDatePicker
+          label="Ngày cưới (dương / âm)"
+          optional
+          value={marriageDate}
+          onChange={setMarriageDate}
+        />
       </Dialog>
 
       <Dialog
         open={showCreatePerson}
         title="Thêm thành viên"
-        description="Tạo người mới trên cây này. Hồ sơ dùng chung với cổng thông tin."
+        description="Mã hiệu do hệ thống sinh theo cấu hình dòng họ. Hồ sơ dùng chung với cổng thông tin."
         onClose={() => setShowCreatePerson(false)}
         footer={
           <>
@@ -1213,13 +1439,31 @@ export function TreeEditorPage() {
             onChange={(e) => setNewGender(e.target.value)}
           />
         </FormField>
+        <FormField label="Cha/mẹ (tuỳ chọn)" hint="Gắn nhánh và gợi ý đời = đời cha + 1">
+          <Select
+            options={[{ value: "", label: "— Không chọn —" }, ...personOptions]}
+            value={newParentCode}
+            onChange={(e) => {
+              const v = e.target.value;
+              setNewParentCode(v);
+              const p = persons.find((x) => String(x.id) === v);
+              if (p?.generation != null) setNewGen(String(p.generation + 1));
+            }}
+          />
+        </FormField>
         <FormField label="Đời" required>
           <Input value={newGen} onChange={(e) => setNewGen(e.target.value)} inputMode="numeric" />
         </FormField>
+        <DualDatePicker
+          label="Ngày sinh (dương / âm)"
+          optional
+          value={newBirth}
+          onChange={setNewBirth}
+        />
         <FormField label="Tình trạng" required>
           <Select
             options={[
-              { value: "living", label: "Còn sống" },
+              { value: "alive", label: "Còn sống" },
               { value: "deceased", label: "Đã mất" },
             ]}
             value={newLife}
