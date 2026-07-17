@@ -40,12 +40,12 @@ function mapPasswordGrantError(err: unknown): string {
     return "Sai tên đăng nhập hoặc mật khẩu.";
   }
   if (lower.includes("unauthorized_client") || lower.includes("unauthorized")) {
-    return "Client chưa bật Direct Access Grants — đồng bộ realm Keycloak.";
+    return "Hệ thống xác thực chưa sẵn sàng. Liên hệ quản trị viên kỹ thuật.";
   }
   if (lower.includes("failed to fetch") || lower.includes("network")) {
-    return "Không kết nối được máy chủ xác thực. Kiểm tra tunnel Keycloak.";
+    return "Không kết nối được máy chủ xác thực. Thử lại sau.";
   }
-  return msg || "Đăng nhập thất bại.";
+  return "Đăng nhập thất bại. Thử lại hoặc liên hệ quản trị viên.";
 }
 
 export function AuthProvider({
@@ -81,7 +81,7 @@ export function AuthProvider({
       })
       .catch((e: unknown) => {
         if (!cancelled) {
-          setError(e instanceof Error ? e.message : "OIDC lỗi");
+          setError(e instanceof Error ? e.message : "Lỗi xác thực");
           setLoading(false);
         }
       });

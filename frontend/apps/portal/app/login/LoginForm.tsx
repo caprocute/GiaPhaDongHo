@@ -100,11 +100,6 @@ export function LoginForm() {
       <div className={styles.meta}>
         <a href="/">← Về trang nhất</a>
       </div>
-
-      <p className={styles.hint}>
-        Tài khoản mẫu DEV: <strong>user</strong> / <strong>user</strong> · quản trị{" "}
-        <strong>admin</strong> / <strong>admin</strong> (sau khi đã sync realm Keycloak).
-      </p>
     </form>
   );
 }

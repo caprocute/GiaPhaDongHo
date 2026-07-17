@@ -51,6 +51,7 @@ Dự án: nền tảng gia phả số dòng họ Việt Nam. Spring Boot 4.x/Jav
 
 ## Quy ước khác
 - Giao tiếp và commit message tiếng Việt; format commit: `[module] hành động — tham chiếu TK/FR`.
+- **Không ghi kỹ thuật xử lý lên UI** (OIDC, Keycloak, client id, path API, JSON…). Chi tiết: `.cursor/rules/no-tech-jargon-on-ui.mdc`.
 - **Xong đơn vị việc → commit + push ngay** (không chờ nhắc, không dồn nhiều milestone). Chi tiết: `.cursor/rules/commit-push-when-done.mdc`. Cấm commit secret (`.env.local`, `.env.tunnel.local`…).
 - Thêm dependency mới: ghi vào `instruction/02-lua-chon-cong-nghe.md` + kiểm tra license.
 - Learn loop: nếu người dùng sửa tay output của bạn, đề xuất cập nhật rule/token/story tương ứng.

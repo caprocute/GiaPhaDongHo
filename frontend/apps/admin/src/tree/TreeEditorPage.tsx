@@ -522,7 +522,7 @@ export function TreeEditorPage() {
         setSelectedUnionId(null);
         window.setTimeout(() => focusPerson(created.id!), 100);
       }
-      showToast(`✓ Đã thêm ${created.fullName ?? "thành viên"} — hiện trên portal sau khi công bố`);
+      showToast(`✓ Đã thêm ${created.fullName ?? "thành viên"}`);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Thêm thành viên thất bại.");
     } finally {
@@ -573,7 +573,7 @@ export function TreeEditorPage() {
         token,
       );
       await reload();
-      showToast("✓ Đã liên kết con — portal/phả đồ công khai cập nhật theo dữ liệu cây");
+      showToast("✓ Đã liên kết con");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Thêm con thất bại.");
     } finally {
@@ -654,7 +654,7 @@ export function TreeEditorPage() {
         <span className={styles.sep} aria-hidden />
         <div className={styles.titleBlock}>
           <h1 className={styles.title}>Soạn phả đồ · {adminSiteTitle()}</h1>
-          <p className={styles.sub}>Ban quản trị tộc sự · dữ liệu đồng bộ portal /persons · /tree</p>
+          <p className={styles.sub}>Ban quản trị tộc sự</p>
         </div>
         <div className={styles.stats}>
           <b>{persons.length}</b> thành viên · <b>{unions.length}</b> hôn phối ·{" "}
@@ -861,7 +861,7 @@ export function TreeEditorPage() {
           ) : visiblePersons.length === 0 ? (
             <EmptyState
               title="Chưa có thành viên"
-              description="Thêm thành viên để dựng phả đồ. Dữ liệu dùng chung với portal."
+              description="Thêm thành viên để dựng phả đồ."
             />
           ) : (
             <>
@@ -1027,7 +1027,7 @@ export function TreeEditorPage() {
                 <p className={styles.rowMeta}>
                   {selectedUnion.marriageInfoJson
                     ? selectedUnion.marriageInfoJson
-                    : "Chưa có JSON hôn nhân — cập nhật khi cần."}
+                    : "Chưa có thông tin hôn nhân."}
                 </p>
               </div>
 
@@ -1186,7 +1186,7 @@ export function TreeEditorPage() {
       <Dialog
         open={showCreatePerson}
         title="Thêm thành viên"
-        description="Tạo người mới trên cây này — hồ sơ dùng chung portal (danh bạ / phả đồ công khai)."
+        description="Tạo người mới trên cây này. Hồ sơ dùng chung với cổng thông tin."
         onClose={() => setShowCreatePerson(false)}
         footer={
           <>

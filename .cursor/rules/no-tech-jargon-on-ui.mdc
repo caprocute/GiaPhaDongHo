@@ -1,0 +1,22 @@
+---
+description: Cấm ghi kỹ thuật xử lý lên giao diện người dùng
+alwaysApply: true
+---
+
+# Không lộ kỹ thuật trên UI
+
+Mọi chữ trên giao diện (nhãn, mô tả, footer, toast, Alert, placeholder, empty state, dialog) phải viết cho **người dùng nghiệp vụ** — tộc trưởng, thư ký, thành viên dòng họ.
+
+## Cấm hiện trên UI
+- Tên công nghệ / giao thức: OIDC, OAuth, PKCE, ROPC, JWT, Keycloak, Direct Access Grants, Bearer, REST, GraphQL…
+- Tên client / env / đường dẫn kỹ thuật: `giapha_admin`, `giapha_portal`, `VITE_*`, `/api/...`, endpoint thô
+- Chi tiết triển khai: sync realm, tunnel, JSON payload, schema, MapStruct, Liquibase, Modulith…
+- Hint DEV kiểu `admin/admin` kèm “sau khi sync Keycloak” trên màn production-facing
+
+## Được phép
+- Ngôn ngữ nghiệp vụ: «Đăng nhập quản trị», «Không kết nối được máy chủ», «Sai tên đăng nhập hoặc mật khẩu»
+- Liên kết chức năng có nhãn người đọc: «Cổng thông tin», «Hồ sơ thành viên», «Phả đồ»
+- Ghi chú kỹ thuật chỉ trong: comment code, README, SRS, `instruction/`, log dev, Storybook docs nội bộ
+
+## Khi map lỗi từ hệ thống
+Chuyển thông báo kỹ thuật → câu tiếng Việt ngắn, không nhắc tên stack. Chi tiết đầy đủ ghi `console` / log nếu cần debug.

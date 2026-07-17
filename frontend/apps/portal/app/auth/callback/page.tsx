@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
 
   if (error) {
     return (
-      <Alert title="OIDC callback lỗi" variant="error">
+      <Alert title="Không hoàn tất đăng nhập" variant="error">
         {error}
       </Alert>
     );

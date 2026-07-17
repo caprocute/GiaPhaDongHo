@@ -181,7 +181,7 @@ export function DashboardPage({ onPendingChange }: Props) {
     if (auditR.status === "fulfilled") setAudit(auditR.value.content);
     if (campaignR.status === "fulfilled") setFund(campaignR.value.content[0] ?? null);
     const allFailed = [dashR, reqR, anniR, auditR].every((r) => r.status === "rejected");
-    if (allFailed) setError("Không kết nối được máy chủ. Kiểm tra API đang chạy.");
+    if (allFailed) setError("Không kết nối được máy chủ. Thử lại sau.");
   }, [getAccessToken, onPendingChange, slug]);
 
   useEffect(() => {

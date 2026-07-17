@@ -70,9 +70,11 @@ export function AdminLoginPage() {
     <div className={styles.page}>
       <div className={styles.topStrip}>
         <span>
-          <strong>GiaPhaHub</strong> · CRM tộc sự
+          <strong>GiaPhaHub</strong>
+          {" · "}
+          Quản trị tộc sự
         </span>
-        <span>Khu vực nội bộ · không công khai</span>
+        <span>Chỉ dành cho ban quản trị</span>
       </div>
 
       <main className={styles.main}>
@@ -112,7 +114,7 @@ export function AdminLoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={pending}
-                  placeholder="admin / genealogy / editor"
+                  placeholder="Tên đăng nhập"
                 />
               </FormField>
 
@@ -130,13 +132,13 @@ export function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={pending}
-                  placeholder="••••••••"
+                  placeholder="Mật khẩu"
                 />
               </FormField>
             </div>
 
             <Button type="submit" style={{ width: "100%", marginTop: "var(--spacing-xs)" }} disabled={pending}>
-              {pending ? "Đang xác thực…" : "Vào bảng điều khiển"}
+              {pending ? "Đang đăng nhập…" : "Vào bảng điều khiển"}
             </Button>
 
             <div className={styles.metaRow}>
@@ -147,9 +149,7 @@ export function AdminLoginPage() {
         </div>
       </main>
 
-      <footer className={styles.foot}>
-        Xác thực qua API OIDC · client <code>giapha_admin</code> · không dùng Hosted Login Keycloak
-      </footer>
+      <footer className={styles.foot}>GiaPhaHub · Quản trị tộc sự</footer>
     </div>
   );
 }
