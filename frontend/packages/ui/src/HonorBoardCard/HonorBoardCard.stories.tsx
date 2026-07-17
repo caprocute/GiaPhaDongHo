@@ -17,7 +17,7 @@ export const Default: Story = {
   },
 };
 
-export const BangVangPoster: Story = {
+export const BangVangKem: Story = {
   render: () => (
     <div
       style={{
@@ -26,7 +26,7 @@ export const BangVangPoster: Story = {
         gap: 20,
         padding: 40,
         background:
-          "radial-gradient(ellipse 55% 50% at 50% 42%, color-mix(in srgb, var(--color-heritage-soft) 55%, transparent) 0%, transparent 70%), var(--color-surface-page)",
+          "radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--color-surface-card) 95%, white), var(--color-surface-page))",
       }}
     >
       <HonorBoardCard name="Ông Hoàng Văn A" detail="Hiến 200m² đất xây nhà thờ họ" emblem="壽" />
@@ -49,6 +49,7 @@ export const OnDark: Story = {
     >
       <HonorBoardCard onDark name="Ông Hoàng Văn A" detail="Hiến 200m² đất xây nhà thờ họ" emblem="壽" />
       <HonorBoardCard onDark name="Bà Hoàng Thị B" detail="Tài trợ quỹ khuyến học dòng họ" emblem="德" />
+      <HonorBoardCard onDark name="Ông Hoàng Văn C" detail="Sưu tầm, biên soạn gia phả 13 đời" emblem="心" />
     </div>
   ),
 };

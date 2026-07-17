@@ -4,80 +4,88 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 22px 12px 18px;
+  padding: 28px 14px 20px;
   overflow: hidden;
   isolation: isolate;
-  background: color-mix(in srgb, var(--color-surface-card) 92%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 55%, transparent);
-  box-shadow: var(--shadow-md);
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in srgb, var(--color-surface-card) 92%, white) 0%,
+      var(--color-surface-page) 48%,
+      var(--color-surface-sunken) 100%
+    );
+  border: 1px solid var(--color-border-strong);
+  box-shadow: var(--shadow-sm);
   font-family: var(--font-body);
 }
 
-.root::after {
-  content: "";
+.sceneArt {
   position: absolute;
-  inset: 5px;
-  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 28%, transparent);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  z-index: 4;
+  z-index: 0;
+  opacity: 0.9;
 }
 
-/* Halo mềm — ánh sáng chuẩn */
 .glow {
   position: absolute;
   left: 50%;
-  top: 38%;
+  top: 42%;
   transform: translate(-50%, -50%);
-  width: 140%;
+  width: 120%;
   aspect-ratio: 1;
+  border-radius: 50%;
   z-index: 0;
   pointer-events: none;
   background: radial-gradient(
-    circle at 50% 50%,
-    color-mix(in srgb, var(--color-heritage-soft) 88%, white) 0%,
-    color-mix(in srgb, var(--color-heritage-accent) 26%, transparent) 30%,
-    color-mix(in srgb, var(--color-heritage-deep) 8%, transparent) 50%,
-    transparent 70%
+    circle,
+    color-mix(in srgb, var(--color-heritage-soft) 90%, white) 0%,
+    color-mix(in srgb, var(--color-heritage-accent) 26%, transparent) 40%,
+    transparent 68%
   );
+  filter: blur(1.5px);
 }
 
-/* Tia sáng tròn — mask circle */
+/* Tia sáng — mask hình tròn chuẩn */
 .rays {
   position: absolute;
   left: 50%;
-  top: 38%;
+  top: 42%;
   transform: translate(-50%, -50%);
-  width: 118%;
+  width: 130%;
   aspect-ratio: 1;
+  border-radius: 50%;
   z-index: 0;
   pointer-events: none;
-  border-radius: 50%;
   background: repeating-conic-gradient(
     from 0deg at 50% 50%,
-    color-mix(in srgb, var(--color-heritage-soft) 70%, white) 0deg 3deg,
+    color-mix(in srgb, var(--color-heritage-soft) 75%, white) 0deg 3deg,
     color-mix(in srgb, var(--color-heritage-accent) 20%, transparent) 3deg 6deg,
     transparent 6deg 9deg
   );
-  mask-image: radial-gradient(circle at 50% 50%, var(--color-ink-900) 8%, transparent 62%);
-  opacity: 0.9;
+  -webkit-mask-image: radial-gradient(
+    circle,
+    var(--color-ink-900) 8%,
+    color-mix(in srgb, var(--color-ink-900) 55%, transparent) 42%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(
+    circle,
+    var(--color-ink-900) 8%,
+    color-mix(in srgb, var(--color-ink-900) 55%, transparent) 42%,
+    transparent 70%
+  );
+  opacity: 0.88;
 }
 
 .stage {
   position: relative;
-  width: min(100%, 220px);
+  width: min(100%, 210px);
   aspect-ratio: 1;
   margin: 0 auto 2px;
   z-index: 1;
-}
-
-.drum {
-  position: absolute;
-  inset: 2%;
-  width: 96%;
-  height: 96%;
-  z-index: 1;
-  pointer-events: none;
-  filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--color-ink-900) 12%, transparent));
 }
 
 .avatarRing {
@@ -88,17 +96,17 @@
   width: 42%;
   aspect-ratio: 1;
   border-radius: 50%;
-  z-index: 2;
   background: var(--color-surface-sunken);
+  box-shadow:
+    0 0 0 2.5px var(--color-heritage-line),
+    0 0 0 6px color-mix(in srgb, var(--color-heritage-deep) 20%, transparent),
+    0 0 28px color-mix(in srgb, var(--color-heritage-accent) 32%, transparent),
+    0 8px 18px color-mix(in srgb, var(--color-ink-900) 14%, transparent),
+    inset 0 1px 0 color-mix(in srgb, var(--color-heritage-soft) 70%, white);
   overflow: hidden;
   display: grid;
   place-items: center;
-  box-shadow:
-    0 0 0 2px var(--color-heritage-line),
-    0 0 0 5px color-mix(in srgb, var(--color-heritage-deep) 28%, transparent),
-    0 0 28px color-mix(in srgb, var(--color-heritage-accent) 32%, transparent),
-    0 10px 22px color-mix(in srgb, var(--color-ink-900) 14%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 40%, transparent);
+  z-index: 2;
 }
 
 .avatarImg {
@@ -116,13 +124,23 @@
   line-height: 1;
 }
 
+.lacRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--color-ink-900) 12%, transparent));
+}
+
 .ribbon {
   position: absolute;
   left: 50%;
   bottom: 9%;
   transform: translateX(-50%);
   z-index: 3;
-  width: 112%;
+  width: 116%;
   max-width: 240px;
   min-height: 36px;
   display: grid;
@@ -136,17 +154,17 @@
   );
   color: var(--color-heritage-frame);
   box-shadow:
-    0 3px 0 color-mix(in srgb, var(--color-heritage-frame) 35%, transparent),
-    0 6px 14px color-mix(in srgb, var(--color-ink-900) 22%, transparent),
+    0 3px 0 color-mix(in srgb, var(--color-heritage-frame) 30%, transparent),
+    0 6px 14px color-mix(in srgb, var(--color-ink-900) 20%, transparent),
     inset 0 1px 0 color-mix(in srgb, var(--color-heritage-soft) 80%, white);
   clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
 }
 
 .ribbonName {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   line-height: 1.25;
   text-align: center;
@@ -161,36 +179,49 @@
   position: relative;
   z-index: 1;
   margin: 8px 8px 0;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   line-height: 1.45;
-  text-transform: uppercase;
   color: var(--color-text-primary);
-  max-width: 24ch;
+  max-width: 22ch;
 }
 
-/* Thẻ trên nền tối (tuỳ chọn) */
+/* Biến thể trên nền tối — giữ glow vàng, scene mờ hơn */
 .onDark {
-  background: color-mix(in srgb, var(--color-heritage-soft) 10%, transparent);
-  border-color: color-mix(in srgb, var(--color-heritage-line) 65%, transparent);
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      color-mix(in srgb, var(--color-heritage-soft) 18%, transparent) 0%,
+      color-mix(in srgb, var(--color-heritage-frame) 40%, transparent) 100%
+    );
+  border-color: color-mix(in srgb, var(--color-heritage-line) 70%, transparent);
   box-shadow: none;
+}
+
+.onDark::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 35%, transparent);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .onDark .detail {
   color: color-mix(in srgb, var(--color-text-on-brand) 90%, transparent);
 }
 
-.onDark .avatarFallback {
-  color: var(--color-heritage-soft);
-}
-
 .onDark .avatarRing {
   background: color-mix(in srgb, var(--color-heritage-frame) 50%, var(--color-surface-sunken));
 }
 
-.onDark .glow {
-  opacity: 0.65;
+.onDark .avatarFallback {
+  color: var(--color-heritage-soft);
+}
+
+.onDark .sceneArt {
+  opacity: 0.35;
 }
 
 .onDark .rays {
