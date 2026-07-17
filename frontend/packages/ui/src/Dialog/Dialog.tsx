@@ -129,7 +129,7 @@ export function Dialog({
         {isCeremonial ? (
           <div className={styles.ceremonialFrame}>
             <div className={styles.ceremonialMain}>
-              {head}
+              <div className={styles.ceremonialHead}>{head}</div>
               {body}
             </div>
             {foot}

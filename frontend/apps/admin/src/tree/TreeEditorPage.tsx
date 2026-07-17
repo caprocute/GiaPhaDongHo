@@ -1,6 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
-import { Alert, Button, EmptyState, FormField, Input, Select } from "@giapha/ui";
+import {
+  Alert,
+  Button,
+  Dialog,
+  EmptyState,
+  FormField,
+  Input,
+  Select,
+  Textarea,
+} from "@giapha/ui";
 import {
   GitBranch,
   Maximize2,
@@ -12,10 +23,12 @@ import {
   ZoomOut,
 } from "lucide-react";
 import {
+  createTreePerson,
   createTreeUnion,
   createUnionChild,
   createUnionMember,
   defaultTreeSlug,
+  deleteFamilyUnion,
   deleteUnionChild,
   deleteUnionMember,
   listTreePersons,
@@ -28,177 +41,28 @@ import {
   type UnionMemberDto,
 } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
-import { AdminPageHeader } from "../components/AdminPageHeader";
+import { adminSiteTitle } from "../lib/siteTitle";
+import {
+  NH,
+  NW,
+  ROW_H,
+  buildLayout,
+  collectDescendantIds,
+  type NodeData,
+  type UnionLine,
+} from "./treeLayout";
+import styles from "./treeEditor.module.css";
 
-// ── Layout constants ──────────────────────────────────────────────────
-const NW = 148;    // node width
-const NH = 58;     // node height
-const H_GAP = 28;  // gap between couples
-const FAMILY_GAP = 48; // gap between families
-const ROW_H = 148; // vertical distance between generations
+type GenderFilter = "all" | "M" | "F";
 
-// ── Types ─────────────────────────────────────────────────────────────
-type Pos = { x: number; y: number };
-
-type NodeData = {
-  personId: number;
-  person: PersonDto;
-  pos: Pos;
-};
-
-type UnionLine = {
-  unionId: number;
-  leftX: number;
-  rightX: number;
-  midX: number;
-  y: number;
-  childIds: number[];
-};
-
-type LayoutResult = {
-  nodes: Map<number, NodeData>;
-  unionLines: UnionLine[];
-  svgWidth: number;
-  svgHeight: number;
-};
-
-// ── Layout algorithm ─────────────────────────────────────────────────
-function buildLayout(
-  persons: PersonDto[],
-  _unions: FamilyUnionDto[],
-  members: UnionMemberDto[],
-  children: UnionChildDto[],
-): LayoutResult {
-  if (persons.length === 0) {
-    return { nodes: new Map(), unionLines: [], svgWidth: 400, svgHeight: 200 };
-  }
-
-  // Build indices
-  const membersByUnion = new Map<number, number[]>();
-  const unionsByPerson = new Map<number, number[]>();
-  for (const m of members) {
-    if (!m.union?.id || !m.person?.id) continue;
-    const a = membersByUnion.get(m.union.id) ?? [];
-    a.push(m.person.id);
-    membersByUnion.set(m.union.id, a);
-    const b = unionsByPerson.get(m.person.id) ?? [];
-    b.push(m.union.id);
-    unionsByPerson.set(m.person.id, b);
-  }
-
-  const childrenByUnion = new Map<number, number[]>();
-  const parentUnionByPerson = new Map<number, number>();
-  for (const c of children) {
-    if (!c.union?.id || !c.child?.id) continue;
-    const a = childrenByUnion.get(c.union.id) ?? [];
-    a.push(c.child.id);
-    childrenByUnion.set(c.union.id, a);
-    parentUnionByPerson.set(c.child.id, c.union.id);
-  }
-
-  // Group by generation
-  const byGen = new Map<number, PersonDto[]>();
-  for (const p of persons) {
-    if (p.id == null) continue;
-    const g = p.generation ?? 1;
-    const arr = byGen.get(g) ?? [];
-    arr.push(p);
-    byGen.set(g, arr);
-  }
-
-  const gens = [...byGen.keys()].sort((a, b) => a - b);
-  const nodes = new Map<number, NodeData>();
-  const unionLines: UnionLine[] = [];
-
-  // Layout each generation
-  gens.forEach((gen, genIdx) => {
-    const ps = [...(byGen.get(gen) ?? [])];
-    const placed = new Set<number>();
-    let curX = 24;
-    const y = 24 + genIdx * ROW_H;
-    const genUnionMid = new Map<number, number>(); // unionId → midX in this gen
-
-    for (const p of ps) {
-      if (!p.id || placed.has(p.id)) continue;
-      placed.add(p.id);
-
-      // Find partner in same generation for same union
-      const myUnions = unionsByPerson.get(p.id) ?? [];
-      let partnerId: number | null = null;
-      let partnerUnionId: number | null = null;
-      for (const uid of myUnions) {
-        const mates = (membersByUnion.get(uid) ?? []).filter((id) => id !== p.id);
-        for (const mate of mates) {
-          const matePerson = persons.find((x) => x.id === mate);
-          if (matePerson && (matePerson.generation ?? 1) === gen && !placed.has(mate)) {
-            partnerId = mate;
-            partnerUnionId = uid;
-            break;
-          }
-        }
-        if (partnerId) break;
-      }
-
-      nodes.set(p.id, { personId: p.id, person: p, pos: { x: curX, y } });
-
-      if (partnerId && partnerUnionId) {
-        placed.add(partnerId);
-        const partnerX = curX + NW + H_GAP;
-        const partnerPerson = persons.find((x) => x.id === partnerId)!;
-        nodes.set(partnerId, { personId: partnerId, person: partnerPerson, pos: { x: partnerX, y } });
-
-        const midX = curX + NW + H_GAP / 2;
-        genUnionMid.set(partnerUnionId, midX);
-        curX += NW + H_GAP + NW + FAMILY_GAP;
-      } else {
-        curX += NW + FAMILY_GAP;
-      }
-    }
-
-    // Build union lines for this generation
-    for (const [uid, midX] of genUnionMid) {
-      const mateIds = membersByUnion.get(uid) ?? [];
-      const leftId = mateIds[0];
-      const rightId = mateIds[1];
-      const leftNode = leftId != null ? nodes.get(leftId) : null;
-      const rightNode = rightId != null ? nodes.get(rightId) : null;
-      if (!leftNode || !rightNode) continue;
-      const childIds = childrenByUnion.get(uid) ?? [];
-      unionLines.push({
-        unionId: uid,
-        leftX: leftNode.pos.x + NW,
-        rightX: rightNode.pos.x,
-        midX,
-        y: y + NH / 2,
-        childIds,
-      });
-    }
-  });
-
-  // Place orphan persons (no generation): last row
-  const orphans = persons.filter(
-    (p) => p.id != null && p.generation == null && !nodes.has(p.id!),
-  );
-  if (orphans.length > 0) {
-    const y = 24 + gens.length * ROW_H;
-    orphans.forEach((p, i) => {
-      if (p.id != null) nodes.set(p.id, { personId: p.id, person: p, pos: { x: 24 + i * (NW + FAMILY_GAP), y } });
-    });
-  }
-
-  // Compute SVG bounds
-  let maxX = 400;
-  let maxY = 200;
-  for (const n of nodes.values()) {
-    maxX = Math.max(maxX, n.pos.x + NW + 24);
-    maxY = Math.max(maxY, n.pos.y + NH + 24);
-  }
-
-  return { nodes, unionLines, svgWidth: maxX, svgHeight: maxY };
+function initials(name: string | null | undefined): string {
+  const p = (name ?? "").trim().split(/\s+/).filter(Boolean);
+  if (p.length === 0) return "?";
+  if (p.length === 1) return p[0]!.slice(0, 2).toUpperCase();
+  return `${p[0]![0] ?? ""}${p[p.length - 1]![0] ?? ""}`.toUpperCase();
 }
 
-// ── Person node (SVG) ─────────────────────────────────────────────────
-function PersonNode({
+function PersonNodeSvg({
   data,
   selected,
   onClick,
@@ -208,122 +72,129 @@ function PersonNode({
   onClick: () => void;
 }) {
   const { person, pos } = data;
-  const isMale = person.gender === "M";
-  const isFemale = person.gender === "F";
-  const fill = isMale
-    ? "var(--color-heritage-deep)"
-    : isFemale
-      ? "var(--color-action-primary-bg)"
-      : "var(--color-surface-card)";
-  const textCol =
-    isMale || isFemale ? "var(--color-action-primary-fg)" : "var(--color-text-primary)";
-  const stroke = selected ? "var(--color-heritage-accent)" : "transparent";
+  const g = person.gender;
+  const stroke =
+    g === "M"
+      ? "var(--color-heritage-deep)"
+      : g === "F"
+        ? "var(--color-action-primary-bg)"
+        : "var(--color-border-strong)";
+  const fill = selected
+    ? g === "M"
+      ? "color-mix(in srgb, var(--color-heritage-deep) 18%, var(--color-surface-card))"
+      : g === "F"
+        ? "color-mix(in srgb, var(--color-action-primary-bg) 18%, var(--color-surface-card))"
+        : "var(--color-surface-sunken)"
+    : "var(--color-surface-card)";
+  const accent =
+    g === "M"
+      ? "var(--color-heritage-deep)"
+      : g === "F"
+        ? "var(--color-action-primary-bg)"
+        : "var(--color-heritage-line)";
+  const mark = g === "M" ? "♂" : g === "F" ? "♀" : "?";
 
   return (
     <g
       transform={`translate(${pos.x},${pos.y})`}
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
       style={{ cursor: "pointer" }}
       role="button"
       aria-label={person.fullName ?? person.code ?? "Thành viên"}
     >
-      <rect
-        width={NW}
-        height={NH}
-        rx={6}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth={selected ? 2.5 : 0}
-        style={{ transition: "stroke 0.15s" }}
-      />
+      <rect width={NW} height={NH} rx={8} fill={fill} stroke={stroke} strokeWidth={selected ? 2.5 : 1.5} />
+      <rect x={0} y={0} width={8} height={NH} rx={0} fill={accent} />
       <text
-        x={NW / 2}
-        y={22}
+        x={NW / 2 + 2}
+        y={20}
         textAnchor="middle"
-        fill={textCol}
-        style={{ fontFamily: "var(--font-display)", fontSize: 13, fontWeight: 700 }}
+        fill="var(--color-text-primary)"
+        style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 700 }}
       >
-        {(person.fullName ?? "—").slice(0, 20)}
+        {(person.fullName ?? "—").slice(0, 18)}
       </text>
       <text
-        x={NW / 2}
-        y={37}
+        x={NW / 2 + 2}
+        y={36}
         textAnchor="middle"
-        fill={textCol}
-        style={{ fontFamily: "var(--font-body)", fontSize: 10.5, opacity: 0.82 }}
+        fill="var(--color-text-muted)"
+        style={{ fontFamily: "var(--font-body)", fontSize: 10 }}
       >
-        {person.code ?? ""}
+        {person.code ?? "—"}
         {person.generation != null ? ` · Đời ${person.generation}` : ""}
       </text>
       <text
-        x={NW / 2}
-        y={51}
+        x={NW / 2 + 2}
+        y={50}
         textAnchor="middle"
-        fill={textCol}
-        style={{ fontFamily: "var(--font-body)", fontSize: 10, opacity: 0.65 }}
+        fill="var(--color-text-secondary)"
+        style={{ fontFamily: "var(--font-body)", fontSize: 9 }}
       >
-        {person.lifeStatus === "deceased" ? "✦ đã mất" : "còn sống"}
+        {mark} · {person.lifeStatus === "deceased" ? "đã mất" : "còn sống"}
       </text>
     </g>
   );
 }
 
-// ── Connector lines (SVG) ─────────────────────────────────────────────
 function UnionConnectors({
   ul,
   nodes,
+  selected,
+  onDiamondClick,
 }: {
   ul: UnionLine;
   nodes: Map<number, NodeData>;
+  selected: boolean;
+  onDiamondClick: () => void;
 }) {
-  const childNodes = ul.childIds
-    .map((id) => nodes.get(id))
-    .filter((n): n is NodeData => n != null);
-
-  const dropY = ul.y + 32;
-  const childBranchY = childNodes.length > 0
-    ? (childNodes[0]?.pos.y ?? dropY + 40) - 16
-    : dropY + 40;
+  const childNodes = ul.childIds.map((id) => nodes.get(id)).filter((n): n is NodeData => n != null);
+  const childBranchY = childNodes.length > 0 ? (childNodes[0]?.pos.y ?? ul.y) - 16 : ul.y + 40;
 
   return (
     <g>
-      {/* Spouse horizontal line */}
       <line
         x1={ul.leftX}
         y1={ul.y}
         x2={ul.rightX}
         y2={ul.y}
-        stroke="var(--color-heritage-line)"
-        strokeWidth={2}
+        stroke="var(--color-heritage-frame)"
+        strokeWidth={1.5}
+        strokeDasharray="5 3"
       />
-      {/* Diamond at union midpoint */}
       <polygon
-        points={`${ul.midX},${ul.y - 5} ${ul.midX + 5},${ul.y} ${ul.midX},${ul.y + 5} ${ul.midX - 5},${ul.y}`}
+        points={`${ul.midX},${ul.y - 6} ${ul.midX + 6},${ul.y} ${ul.midX},${ul.y + 6} ${ul.midX - 6},${ul.y}`}
         fill="var(--color-heritage-accent)"
+        stroke="var(--color-surface-card)"
+        strokeWidth={selected ? 2 : 1.5}
+        style={{ cursor: "pointer" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDiamondClick();
+        }}
       />
-      {/* Vertical drop from union */}
       {childNodes.length > 0 ? (
         <>
           <line
             x1={ul.midX}
-            y1={ul.y + 5}
+            y1={ul.y + 6}
             x2={ul.midX}
             y2={childBranchY}
-            stroke="var(--color-heritage-line)"
+            stroke="var(--color-border-strong)"
             strokeWidth={1.5}
           />
-          {/* Horizontal bar across children */}
           {childNodes.length > 1 ? (
             <line
-              x1={childNodes[0].pos.x + NW / 2}
+              x1={childNodes[0]!.pos.x + NW / 2}
               y1={childBranchY}
-              x2={childNodes[childNodes.length - 1].pos.x + NW / 2}
+              x2={childNodes[childNodes.length - 1]!.pos.x + NW / 2}
               y2={childBranchY}
-              stroke="var(--color-heritage-line)"
+              stroke="var(--color-border-strong)"
               strokeWidth={1.5}
             />
           ) : null}
-          {/* Vertical to each child */}
           {childNodes.map((cn) => (
             <line
               key={cn.personId}
@@ -331,7 +202,7 @@ function UnionConnectors({
               y1={childBranchY}
               x2={cn.pos.x + NW / 2}
               y2={cn.pos.y}
-              stroke="var(--color-heritage-line)"
+              stroke="var(--color-border-strong)"
               strokeWidth={1.5}
             />
           ))}
@@ -341,165 +212,12 @@ function UnionConnectors({
   );
 }
 
-// ── Right detail panel ────────────────────────────────────────────────
-function UnionPanel({
-  unionId,
-  union: _union,
-  members,
-  children,
-  persons,
-  onClose,
-  onAddMember,
-  onRemoveMember,
-  onAddChild,
-  onRemoveChild,
-  busy,
-}: {
-  unionId: number;
-  union: FamilyUnionDto; // reserved for future display
-  members: UnionMemberDto[];
-  children: UnionChildDto[];
-  persons: PersonDto[];
-  onClose: () => void;
-  onAddMember: (personId: number, role: string) => void;
-  onRemoveMember: (id: number) => void;
-  onAddChild: (personId: number) => void;
-  onRemoveChild: (id: number) => void;
-  busy: boolean;
-}) {
-  const [memberPersonId, setMemberPersonId] = useState("");
-  const [memberRole, setMemberRole] = useState("husband");
-  const [childPersonId, setChildPersonId] = useState("");
-
-  const myMembers = members.filter((m) => m.union?.id === unionId);
-  const myChildren = children.filter((c) => c.union?.id === unionId);
-
-  const personOptions = [
-    { value: "", label: "— Chọn người —" },
-    ...persons
-      .filter((p) => p.id != null)
-      .map((p) => ({
-        value: String(p.id),
-        label: `${p.fullName ?? "—"} (${p.code ?? "?"})`,
-      })),
-  ];
-
-  return (
-    <aside className="tree-panel">
-      <div className="tree-panel-head">
-        <h3>Hôn phối #{unionId}</h3>
-        <button type="button" className="tree-panel-close" onClick={onClose} aria-label="Đóng">
-          <X size={16} />
-        </button>
-      </div>
-
-      <div className="tree-panel-section">
-        <p className="tree-panel-label">Thành viên</p>
-        {myMembers.length === 0 ? (
-          <p className="tree-panel-empty">Chưa có vợ/chồng.</p>
-        ) : (
-          <ul className="tree-panel-list">
-            {myMembers.map((m) => (
-              <li key={m.id}>
-                <span>
-                  <b>{m.person?.fullName ?? m.person?.code ?? `ID ${m.person?.id}`}</b>
-                  <small> · {m.role === "husband" ? "Chồng" : m.role === "wife" ? "Vợ" : m.role}</small>
-                </span>
-                <button
-                  type="button"
-                  className="tree-del-btn"
-                  disabled={busy}
-                  onClick={() => m.id != null && onRemoveMember(m.id)}
-                >
-                  Xóa
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="tree-mini-form">
-          <Select
-            options={personOptions}
-            value={memberPersonId}
-            onChange={(e) => setMemberPersonId(e.target.value)}
-          />
-          <Select
-            options={[
-              { value: "husband", label: "Chồng" },
-              { value: "wife", label: "Vợ" },
-              { value: "partner", label: "Bạn đời" },
-            ]}
-            value={memberRole}
-            onChange={(e) => setMemberRole(e.target.value)}
-          />
-          <Button
-            type="button"
-            disabled={busy || !memberPersonId}
-            onClick={() => {
-              if (memberPersonId) {
-                onAddMember(Number(memberPersonId), memberRole);
-                setMemberPersonId("");
-              }
-            }}
-          >
-            <UserPlus size={14} /> Thêm
-          </Button>
-        </div>
-      </div>
-
-      <div className="tree-panel-section">
-        <p className="tree-panel-label">Con cái ({myChildren.length})</p>
-        {myChildren.length === 0 ? (
-          <p className="tree-panel-empty">Chưa có con.</p>
-        ) : (
-          <ul className="tree-panel-list">
-            {myChildren.map((c) => (
-              <li key={c.id}>
-                <span>
-                  <b>{c.child?.fullName ?? c.child?.code ?? `ID ${c.child?.id}`}</b>
-                </span>
-                <button
-                  type="button"
-                  className="tree-del-btn"
-                  disabled={busy}
-                  onClick={() => c.id != null && onRemoveChild(c.id)}
-                >
-                  Xóa
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        <div className="tree-mini-form">
-          <Select
-            options={personOptions}
-            value={childPersonId}
-            onChange={(e) => setChildPersonId(e.target.value)}
-          />
-          <Button
-            type="button"
-            disabled={busy || !childPersonId}
-            onClick={() => {
-              if (childPersonId) {
-                onAddChild(Number(childPersonId));
-                setChildPersonId("");
-              }
-            }}
-          >
-            <UserPlus size={14} /> Thêm con
-          </Button>
-        </div>
-      </div>
-    </aside>
-  );
-}
-
-// ── Main page ─────────────────────────────────────────────────────────
 export function TreeEditorPage() {
   const { getAccessToken } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const slug = defaultTreeSlug();
+  const rootCode = searchParams.get("root");
 
   const [unions, setUnions] = useState<FamilyUnionDto[]>([]);
   const [persons, setPersons] = useState<PersonDto[]>([]);
@@ -508,22 +226,38 @@ export function TreeEditorPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
-  // Selection / panel
   const [selectedUnionId, setSelectedUnionId] = useState<number | null>(null);
   const [selectedPersonId, setSelectedPersonId] = useState<number | null>(null);
-
-  // Pan/zoom
-  const [transform, setTransform] = useState({ x: 16, y: 16, scale: 1 });
-  const svgRef = useRef<SVGSVGElement>(null);
-  const dragRef = useRef<{ startX: number; startY: number; tx: number; ty: number } | null>(null);
-
-  // Create union form
-  const [showCreateUnion, setShowCreateUnion] = useState(false);
-  const [orderNo, setOrderNo] = useState("");
-
-  // Query / search
   const [query, setQuery] = useState("");
+  const [genderFilter, setGenderFilter] = useState<GenderFilter>("all");
+  const [genFilter, setGenFilter] = useState<string>("all");
+
+  const [transform, setTransform] = useState({ x: 16, y: 16, scale: 1 });
+  const dragRef = useRef<{ startX: number; startY: number; tx: number; ty: number } | null>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const didFitRef = useRef(false);
+
+  const [showCreateUnion, setShowCreateUnion] = useState(false);
+  const [showCreatePerson, setShowCreatePerson] = useState(false);
+  const [husbandId, setHusbandId] = useState("");
+  const [wifeId, setWifeId] = useState("");
+  const [marriageType, setMarriageType] = useState("chinh_that");
+  const [newName, setNewName] = useState("");
+  const [newGender, setNewGender] = useState("M");
+  const [newGen, setNewGen] = useState("1");
+  const [newLife, setNewLife] = useState("living");
+  const [newNotes, setNewNotes] = useState("");
+
+  const [memberPersonId, setMemberPersonId] = useState("");
+  const [memberRole, setMemberRole] = useState("husband");
+  const [childPersonId, setChildPersonId] = useState("");
+
+  const showToast = useCallback((msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -536,10 +270,12 @@ export function TreeEditorPage() {
         listUnionMembers(token),
         listUnionChildren(token),
       ]);
+      const list = personPage.content;
+      const ids = new Set(list.map((p) => p.id).filter((id): id is number => id != null));
       setUnions(u);
-      setPersons(personPage.content);
-      setMembers(m);
-      setChildren(c);
+      setPersons(list);
+      setMembers(m.filter((x) => x.person?.id != null && ids.has(x.person.id)));
+      setChildren(c.filter((x) => x.child?.id != null && ids.has(x.child.id)));
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được dữ liệu phả hệ.");
     } finally {
@@ -551,40 +287,237 @@ export function TreeEditorPage() {
     void reload();
   }, [reload]);
 
-  // Layout
-  const layout = useMemo(
-    () => buildLayout(persons, unions, members, children),
-    [persons, unions, members, children],
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (showCreateUnion || showCreatePerson) return;
+      if (selectedUnionId != null || selectedPersonId != null) {
+        setSelectedUnionId(null);
+        setSelectedPersonId(null);
+        return;
+      }
+      if (window.history.length > 1) navigate(-1);
+      else navigate("/");
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showCreateUnion, showCreatePerson, selectedUnionId, selectedPersonId, navigate]);
+
+  const rootPerson = useMemo(
+    () => (rootCode ? persons.find((p) => p.code === rootCode) : null),
+    [persons, rootCode],
   );
 
-  // Filtered person list
-  const filteredPersons = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return persons;
-    return persons.filter(
-      (p) =>
-        (p.fullName ?? "").toLowerCase().includes(q) ||
-        (p.code ?? "").toLowerCase().includes(q),
-    );
-  }, [persons, query]);
+  const visiblePersons = useMemo(() => {
+    if (!rootPerson?.id) return persons;
+    const keep = collectDescendantIds(rootPerson.id, members, children);
+    // include spouses of descendants
+    for (const m of members) {
+      if (m.person?.id != null && keep.has(m.person.id) && m.union?.id != null) {
+        for (const m2 of members) {
+          if (m2.union?.id === m.union.id && m2.person?.id != null) keep.add(m2.person.id);
+        }
+      }
+    }
+    return persons.filter((p) => p.id != null && keep.has(p.id));
+  }, [persons, members, children, rootPerson]);
 
-  // ── Mutations ──
+  const layout = useMemo(
+    () => buildLayout(visiblePersons, unions, members, children),
+    [visiblePersons, unions, members, children],
+  );
+
+  const generationOptions = useMemo(() => {
+    const gens = [...new Set(persons.map((p) => p.generation).filter((g): g is number => g != null))];
+    gens.sort((a, b) => a - b);
+    return [
+      { value: "all", label: "Mọi đời" },
+      ...gens.map((g) => ({ value: String(g), label: `Đời ${g}` })),
+    ];
+  }, [persons]);
+
+  const filteredSidebar = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return persons.filter((p) => {
+      if (genderFilter !== "all" && p.gender !== genderFilter) return false;
+      if (genFilter !== "all" && String(p.generation) !== genFilter) return false;
+      if (!q) return true;
+      return (
+        (p.fullName ?? "").toLowerCase().includes(q) || (p.code ?? "").toLowerCase().includes(q)
+      );
+    });
+  }, [persons, query, genderFilter, genFilter]);
+
+  const selectedUnion = selectedUnionId != null ? unions.find((u) => u.id === selectedUnionId) : null;
+  const selectedPerson =
+    selectedPersonId != null ? persons.find((p) => p.id === selectedPersonId) : null;
+
+  const personOptions = useMemo(
+    () => [
+      { value: "", label: "— Chọn người —" },
+      ...persons
+        .filter((p) => p.id != null)
+        .map((p) => ({
+          value: String(p.id),
+          label: `${p.fullName ?? "—"} (${p.code ?? "?"})`,
+        })),
+    ],
+    [persons],
+  );
+
+  function focusPerson(id: number) {
+    const node = layout.nodes.get(id);
+    const box = canvasRef.current?.getBoundingClientRect();
+    if (!node || !box) return;
+    setTransform((t) => ({
+      ...t,
+      x: box.width / 2 - (node.pos.x + NW / 2) * t.scale,
+      y: box.height / 2 - (node.pos.y + NH / 2) * t.scale,
+    }));
+  }
+
+  function fitView() {
+    const box = canvasRef.current?.getBoundingClientRect();
+    if (!box || layout.nodes.size === 0) {
+      setTransform({ x: 16, y: 16, scale: 1 });
+      return;
+    }
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const n of layout.nodes.values()) {
+      minX = Math.min(minX, n.pos.x);
+      minY = Math.min(minY, n.pos.y);
+      maxX = Math.max(maxX, n.pos.x + NW);
+      maxY = Math.max(maxY, n.pos.y + NH);
+    }
+    const w = maxX - minX + 80;
+    const h = maxY - minY + 80;
+    const scale = Math.min(2, Math.max(0.25, Math.min((box.width - 40) / w, (box.height - 40) / h)));
+    setTransform({
+      scale,
+      x: (box.width - w * scale) / 2 - minX * scale + 20,
+      y: (box.height - h * scale) / 2 - minY * scale + 20,
+    });
+  }
+
+  useEffect(() => {
+    if (loading || layout.nodes.size === 0 || didFitRef.current) return;
+    didFitRef.current = true;
+    window.requestAnimationFrame(() => fitView());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, layout.nodes.size, rootCode]);
+
+  useEffect(() => {
+    didFitRef.current = false;
+  }, [rootCode]);
+
   async function createUnion() {
+    if (!husbandId && !wifeId) {
+      setError("Chọn ít nhất một thành viên cho hôn phối.");
+      return;
+    }
+    const h = husbandId ? persons.find((p) => p.id === Number(husbandId)) : null;
+    const w = wifeId ? persons.find((p) => p.id === Number(wifeId)) : null;
+    if (
+      h?.generation != null &&
+      w?.generation != null &&
+      h.generation !== w.generation &&
+      !window.confirm(
+        `Hai người khác đời (Đời ${h.generation} và Đời ${w.generation}). Vẫn tạo hôn phối?`,
+      )
+    ) {
+      return;
+    }
+    if (h?.id != null && w?.id != null) {
+      const pairExists = unions.some((u) => {
+        if (u.id == null) return false;
+        const ids = members.filter((m) => m.union?.id === u.id).map((m) => m.person?.id);
+        return ids.includes(h.id) && ids.includes(w.id);
+      });
+      if (pairExists && !window.confirm("Đã có hôn phối giữa hai người này. Tạo thêm?")) return;
+    }
     setBusy(true);
     setError(null);
     try {
       const token = await getAccessToken();
       const created = await createTreeUnion(
         slug,
-        { orderNo: orderNo.trim() ? Number(orderNo) : undefined },
+        {
+          marriageInfoJson: JSON.stringify({ type: marriageType }),
+        },
         token,
       );
-      setOrderNo("");
+      if (created.id != null) {
+        if (husbandId) {
+          await createUnionMember(
+            { role: "husband", union: { id: created.id }, person: { id: Number(husbandId) } },
+            token,
+          );
+        }
+        if (wifeId) {
+          await createUnionMember(
+            { role: "wife", union: { id: created.id }, person: { id: Number(wifeId) } },
+            token,
+          );
+        }
+        setSelectedUnionId(created.id);
+        setSelectedPersonId(null);
+      }
       setShowCreateUnion(false);
-      if (created.id != null) setSelectedUnionId(created.id);
+      setHusbandId("");
+      setWifeId("");
       await reload();
+      showToast(`✓ Đã tạo hôn phối #${created.id ?? "—"}`);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Tạo hôn phối thất bại.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function createPerson() {
+    if (!newName.trim()) {
+      setError("Nhập họ tên thành viên.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      const created = await createTreePerson(
+        slug,
+        {
+          fullName: newName.trim(),
+          gender: newGender,
+          generation: Number(newGen) || 1,
+          lifeStatus: newLife,
+          notes: newNotes.trim() || undefined,
+          code: `T${Date.now().toString(36).toUpperCase()}`,
+        },
+        token,
+      );
+      setShowCreatePerson(false);
+      setNewName("");
+      setNewNotes("");
+      await reload();
+      if (created.id != null) {
+        setSelectedPersonId(created.id);
+        setSelectedUnionId(null);
+        window.setTimeout(() => focusPerson(created.id!), 100);
+      }
+      showToast(`✓ Đã thêm ${created.fullName ?? "thành viên"} — hiện trên portal sau khi công bố`);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Thêm thành viên thất bại.");
     } finally {
       setBusy(false);
     }
@@ -599,8 +532,8 @@ export function TreeEditorPage() {
         { role, union: { id: selectedUnionId }, person: { id: personId } },
         token,
       );
-      const token2 = await getAccessToken();
-      setMembers(await listUnionMembers(token2));
+      await reload();
+      showToast("✓ Đã thêm thành viên hôn phối");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Thêm thành viên thất bại.");
     } finally {
@@ -613,8 +546,8 @@ export function TreeEditorPage() {
     try {
       const token = await getAccessToken();
       await deleteUnionMember(id, token);
-      const token2 = await getAccessToken();
-      setMembers(await listUnionMembers(token2));
+      await reload();
+      showToast("✓ Đã gỡ thành viên khỏi hôn phối");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Xóa thành viên thất bại.");
     } finally {
@@ -624,20 +557,16 @@ export function TreeEditorPage() {
 
   async function addChild(personId: number) {
     if (!selectedUnionId) return;
-    const currentChildren = children.filter((c) => c.union?.id === selectedUnionId);
+    const n = children.filter((c) => c.union?.id === selectedUnionId).length;
     setBusy(true);
     try {
       const token = await getAccessToken();
       await createUnionChild(
-        {
-          orderNo: currentChildren.length + 1,
-          union: { id: selectedUnionId },
-          child: { id: personId },
-        },
+        { orderNo: n + 1, union: { id: selectedUnionId }, child: { id: personId } },
         token,
       );
-      const token2 = await getAccessToken();
-      setChildren(await listUnionChildren(token2));
+      await reload();
+      showToast("✓ Đã liên kết con — portal/phả đồ công khai cập nhật theo dữ liệu cây");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Thêm con thất bại.");
     } finally {
@@ -650,8 +579,8 @@ export function TreeEditorPage() {
     try {
       const token = await getAccessToken();
       await deleteUnionChild(id, token);
-      const token2 = await getAccessToken();
-      setChildren(await listUnionChildren(token2));
+      await reload();
+      showToast("✓ Đã gỡ liên kết con");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Xóa con thất bại.");
     } finally {
@@ -659,244 +588,622 @@ export function TreeEditorPage() {
     }
   }
 
-  // ── Pan/zoom handlers ──
+  async function removeUnion() {
+    if (!selectedUnionId) return;
+    if (!window.confirm("Xóa hôn phối này? Chỉ xóa liên kết, không xóa thành viên.")) return;
+    if (!window.confirm("Xác nhận lần 2: xóa hôn phối?")) return;
+    setBusy(true);
+    try {
+      const token = await getAccessToken();
+      const mid = members.filter((m) => m.union?.id === selectedUnionId);
+      const cid = children.filter((c) => c.union?.id === selectedUnionId);
+      for (const c of cid) if (c.id != null) await deleteUnionChild(c.id, token);
+      for (const m of mid) if (m.id != null) await deleteUnionMember(m.id, token);
+      await deleteFamilyUnion(selectedUnionId, token);
+      setSelectedUnionId(null);
+      await reload();
+      showToast("✓ Đã xóa hôn phối");
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Xóa hôn phối thất bại.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function onWheel(e: React.WheelEvent) {
     e.preventDefault();
     const delta = e.deltaY > 0 ? 0.9 : 1.1;
     setTransform((t) => ({
       ...t,
-      scale: Math.min(2.5, Math.max(0.25, t.scale * delta)),
+      scale: Math.min(2, Math.max(0.2, t.scale * delta)),
     }));
   }
 
-  function onMouseDown(e: React.MouseEvent) {
-    if (e.button !== 0) return;
-    dragRef.current = { startX: e.clientX, startY: e.clientY, tx: transform.x, ty: transform.y };
+  function closeEditor() {
+    if (window.history.length > 1) navigate(-1);
+    else navigate("/");
   }
 
-  function onMouseMove(e: React.MouseEvent) {
-    if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    setTransform((t) => ({ ...t, x: dragRef.current!.tx + dx, y: dragRef.current!.ty + dy }));
-  }
+  const personUnions = useMemo(() => {
+    if (!selectedPerson?.id) return [] as { unionId: number; role: string }[];
+    return members
+      .filter((m) => m.person?.id === selectedPerson.id && m.union?.id != null)
+      .map((m) => ({ unionId: m.union!.id!, role: m.role ?? "?" }));
+  }, [members, selectedPerson]);
 
-  function onMouseUp() {
-    dragRef.current = null;
-  }
+  const parentUnionId = useMemo(() => {
+    if (!selectedPerson?.id) return null;
+    return children.find((c) => c.child?.id === selectedPerson.id)?.union?.id ?? null;
+  }, [children, selectedPerson]);
 
-  function fitView() {
-    setTransform({ x: 16, y: 16, scale: 1 });
-  }
+  const panelOpen = selectedUnionId != null || selectedPersonId != null;
+  const myMembers = members.filter((m) => m.union?.id === selectedUnionId);
+  const myChildren = children.filter((c) => c.union?.id === selectedUnionId);
 
-  const selectedUnion = selectedUnionId != null ? unions.find((u) => u.id === selectedUnionId) : null;
-
-  return (
-    <div className="tree-page">
-      <AdminPageHeader
-        title="Soạn phả đồ"
-        description={`${persons.length} thành viên · ${unions.length} hôn phối · ${children.length} quan hệ cha-con`}
-        actions={
-          <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
-            <Button type="button" variant="secondary" onClick={() => void reload()} disabled={loading}>
-              <RefreshCw size={15} /> Tải lại
-            </Button>
-            <Button type="button" onClick={() => setShowCreateUnion(true)}>
-              <GitBranch size={15} /> Tạo hôn phối
-            </Button>
-          </div>
-        }
-      />
+  const ui = (
+    <div className={styles.fs} role="dialog" aria-modal="true" aria-label="Soạn phả đồ">
+      <header className={styles.topbar}>
+        <span className={styles.brand}>GiaPhaHub</span>
+        <span className={styles.sep} aria-hidden />
+        <div className={styles.titleBlock}>
+          <h1 className={styles.title}>Soạn phả đồ · {adminSiteTitle()}</h1>
+          <p className={styles.sub}>Ban quản trị tộc sự · dữ liệu đồng bộ portal /persons · /tree</p>
+        </div>
+        <div className={styles.stats}>
+          <b>{persons.length}</b> thành viên · <b>{unions.length}</b> hôn phối ·{" "}
+          <b>{children.length}</b> cha-con
+        </div>
+        <div className={styles.actions}>
+          <button type="button" className={styles.ghostBtn} onClick={() => void reload()} disabled={loading}>
+            <RefreshCw size={14} /> Tải lại
+          </button>
+          <Button type="button" onClick={() => setShowCreateUnion(true)}>
+            <GitBranch size={14} /> Tạo hôn phối
+          </Button>
+          <button type="button" className={styles.closeBtn} onClick={closeEditor} aria-label="Đóng">
+            <X size={18} />
+          </button>
+        </div>
+      </header>
 
       {error ? (
-        <Alert title="Lỗi" variant="error">
-          {error}
-        </Alert>
-      ) : null}
-
-      {/* Create union modal */}
-      {showCreateUnion ? (
-        <div className="tree-modal-overlay" onClick={() => setShowCreateUnion(false)}>
-          <div className="tree-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: "0 0 16px", fontFamily: "var(--font-display)" }}>Tạo hôn phối mới</h3>
-            <FormField label="Thứ tự (tùy chọn)">
-              <Input
-                type="number"
-                value={orderNo}
-                onChange={(e) => setOrderNo(e.target.value)}
-                placeholder="1, 2, 3…"
-              />
-            </FormField>
-            <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-              <Button type="button" disabled={busy} onClick={() => void createUnion()}>
-                {busy ? "Đang tạo…" : "Tạo"}
-              </Button>
-              <Button type="button" variant="secondary" onClick={() => setShowCreateUnion(false)}>
-                Hủy
-              </Button>
-            </div>
-          </div>
+        <div className={styles.banner}>
+          <Alert title="Lỗi" variant="error">
+            {error}{" "}
+            <Button type="button" variant="secondary" onClick={() => void reload()}>
+              Thử lại
+            </Button>
+          </Alert>
         </div>
       ) : null}
 
-      <div className="tree-workspace">
-        {/* Left: person list */}
-        <aside className="tree-sidebar">
-          <div className="tree-sidebar-head">
-            <Users size={14} />
-            <span>Thành viên ({persons.length})</span>
+      <div className={panelOpen ? `${styles.workspace} ${styles.workspaceWithPanel}` : styles.workspace}>
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarHead}>
+            <h3>
+              <Users size={13} style={{ marginRight: 6, verticalAlign: -1 }} />
+              Thành viên ({persons.length})
+            </h3>
+            <Input
+              placeholder="Tìm tên hoặc mã hiệu…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Tìm thành viên"
+            />
+            <div className={styles.filters}>
+              {(
+                [
+                  ["all", "Tất cả"],
+                  ["M", "Nam"],
+                  ["F", "Nữ"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={genderFilter === id ? `${styles.chip} ${styles.chipOn}` : styles.chip}
+                  onClick={() => setGenderFilter(id)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <Select
+              options={generationOptions}
+              value={genFilter}
+              onChange={(e) => setGenFilter(e.target.value)}
+              aria-label="Lọc theo đời"
+            />
           </div>
-          <Input
-            placeholder="Tìm tên, mã…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Tìm thành viên"
-          />
-          <div className="tree-person-list">
-            {filteredPersons.map((p) => (
+          <div className={styles.list}>
+            {filteredSidebar.map((p) => (
               <button
                 key={p.id}
                 type="button"
-                className={`tree-person-item${selectedPersonId === p.id ? " tree-person-item-on" : ""}`}
+                className={
+                  selectedPersonId === p.id ? `${styles.member} ${styles.memberOn}` : styles.member
+                }
                 onClick={() => {
-                  setSelectedPersonId(p.id ?? null);
+                  if (p.id == null) return;
+                  setSelectedPersonId(p.id);
                   setSelectedUnionId(null);
-                  // Scroll / center on person in canvas
-                  const node = p.id != null ? layout.nodes.get(p.id) : null;
-                  if (node) {
-                    setTransform((t) => ({
-                      ...t,
-                      x: -node.pos.x * t.scale + 200,
-                      y: -node.pos.y * t.scale + 200,
-                    }));
+                  if (rootCode && !visiblePersons.some((v) => v.id === p.id)) {
+                    if (window.confirm("Người này ngoài nhánh đang xem. Về toàn cây?")) {
+                      setSearchParams({});
+                    }
                   }
+                  window.setTimeout(() => focusPerson(p.id!), 50);
                 }}
               >
                 <span
-                  className={`tree-gender-dot ${p.gender === "M" ? "m" : p.gender === "F" ? "f" : "u"}`}
-                />
-                <div>
-                  <div className="tree-person-name">{p.fullName ?? "—"}</div>
-                  <div className="tree-person-sub">
-                    {p.code ?? ""}
+                  className={`${styles.avatar} ${
+                    p.gender === "M" ? styles.avatarM : p.gender === "F" ? styles.avatarF : styles.avatarU
+                  }`}
+                >
+                  {initials(p.fullName)}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <div className={styles.memberName}>{p.fullName ?? "—"}</div>
+                  <div className={styles.memberMeta}>
+                    {p.code ?? "—"}
                     {p.generation != null ? ` · Đời ${p.generation}` : ""}
                   </div>
+                  {p.generation === 1 ? <span className={styles.badge}>Thủy tổ</span> : null}
                 </div>
               </button>
             ))}
-            {filteredPersons.length === 0 ? (
-              <p className="tree-panel-empty">Không tìm thấy.</p>
+            {filteredSidebar.length === 0 ? (
+              <p className={styles.rowMeta} style={{ padding: 12 }}>
+                Không tìm thấy.
+              </p>
             ) : null}
+          </div>
+          <div className={styles.sidebarFoot}>
+            <Button type="button" style={{ width: "100%" }} onClick={() => setShowCreatePerson(true)}>
+              <UserPlus size={14} /> Thêm thành viên
+            </Button>
           </div>
         </aside>
 
-        {/* Center: SVG canvas */}
-        <div className="tree-canvas-wrap">
-          {/* Zoom controls */}
-          <div className="tree-zoom-bar">
+        <div
+          ref={canvasRef}
+          className={styles.canvasWrap}
+          onWheel={onWheel}
+          onMouseDown={(e) => {
+            if (e.button !== 0) return;
+            dragRef.current = {
+              startX: e.clientX,
+              startY: e.clientY,
+              tx: transform.x,
+              ty: transform.y,
+            };
+          }}
+          onMouseMove={(e) => {
+            if (!dragRef.current) return;
+            setTransform((t) => ({
+              ...t,
+              x: dragRef.current!.tx + (e.clientX - dragRef.current!.startX),
+              y: dragRef.current!.ty + (e.clientY - dragRef.current!.startY),
+            }));
+          }}
+          onMouseUp={() => {
+            dragRef.current = null;
+          }}
+          onMouseLeave={() => {
+            dragRef.current = null;
+          }}
+          onClick={() => {
+            setSelectedPersonId(null);
+            setSelectedUnionId(null);
+          }}
+        >
+          {rootPerson ? (
+            <div className={styles.rootBanner}>
+              Đang xem: <b>{rootPerson.fullName}</b> & hậu duệ
+              <Button type="button" variant="secondary" onClick={() => setSearchParams({})}>
+                Về toàn cây
+              </Button>
+            </div>
+          ) : null}
+
+          <div className={styles.zoomBar}>
             <button
               type="button"
-              className="tree-zoom-btn"
-              onClick={() => setTransform((t) => ({ ...t, scale: Math.min(2.5, t.scale * 1.2) }))}
+              className={styles.zoomBtn}
               title="Phóng to"
+              onClick={() => setTransform((t) => ({ ...t, scale: Math.min(2, t.scale * 1.2) }))}
             >
               <ZoomIn size={16} />
             </button>
-            <span className="tree-zoom-val">{Math.round(transform.scale * 100)}%</span>
+            <span className={styles.zoomVal}>{Math.round(transform.scale * 100)}%</span>
             <button
               type="button"
-              className="tree-zoom-btn"
-              onClick={() => setTransform((t) => ({ ...t, scale: Math.max(0.25, t.scale * 0.83) }))}
+              className={styles.zoomBtn}
               title="Thu nhỏ"
+              onClick={() => setTransform((t) => ({ ...t, scale: Math.max(0.2, t.scale * 0.83) }))}
             >
               <ZoomOut size={16} />
             </button>
-            <button type="button" className="tree-zoom-btn" onClick={fitView} title="Khớp màn hình">
+            <button type="button" className={styles.zoomBtn} title="Vừa màn hình" onClick={fitView}>
               <Maximize2 size={16} />
             </button>
           </div>
 
+          <div className={styles.legend}>
+            <span>
+              <i className={`${styles.dot} ${styles.dotM}`} /> Nam
+            </span>
+            <span>
+              <i className={`${styles.dot} ${styles.dotF}`} /> Nữ
+            </span>
+            <span>
+              <i className={`${styles.dot} ${styles.dotU}`} /> Hôn phối
+            </span>
+          </div>
+
           {loading ? (
-            <div className="tree-loading">Đang tải phả đồ…</div>
-          ) : persons.length === 0 ? (
+            <div className={styles.loading}>Đang tải phả đồ…</div>
+          ) : visiblePersons.length === 0 ? (
             <EmptyState
               title="Chưa có thành viên"
-              description="Thêm thành viên tại mục Thành viên, sau đó quay lại để tạo phả đồ."
+              description="Thêm thành viên để dựng phả đồ. Dữ liệu dùng chung với portal."
             />
           ) : (
-            <svg
-              ref={svgRef}
-              width="100%"
-              height="100%"
-              style={{ cursor: dragRef.current ? "grabbing" : "grab", display: "block" }}
-              onWheel={onWheel}
-              onMouseDown={onMouseDown}
-              onMouseMove={onMouseMove}
-              onMouseUp={onMouseUp}
-              onMouseLeave={onMouseUp}
-            >
-              <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
-                {/* Union connector lines (behind nodes) */}
-                {layout.unionLines.map((ul) => (
-                  <UnionConnectors key={ul.unionId} ul={ul} nodes={layout.nodes} />
-                ))}
-                {/* Person nodes */}
-                {[...layout.nodes.values()].map((n) => (
-                  <PersonNode
-                    key={n.personId}
-                    data={n}
-                    selected={
-                      selectedPersonId === n.personId ||
-                      // highlight members of selected union
-                      (selectedUnionId != null &&
-                        members.some(
-                          (m) => m.union?.id === selectedUnionId && m.person?.id === n.personId,
-                        ))
-                    }
-                    onClick={() => {
-                      setSelectedPersonId(n.personId);
-                      // If person belongs to a union, open that union's panel
-                      const myUnions = members
-                        .filter((m) => m.person?.id === n.personId)
-                        .map((m) => m.union?.id)
-                        .filter((id): id is number => id != null);
-                      if (myUnions.length > 0) setSelectedUnionId(myUnions[0]);
-                      else setSelectedUnionId(null);
-                    }}
-                  />
-                ))}
-              </g>
-            </svg>
+            <>
+              {layout.generations.map((gen, idx) => (
+                <div
+                  key={gen}
+                  className={styles.genLabel}
+                  style={{ top: transform.y + (24 + idx * ROW_H + NH / 2 - 10) * transform.scale }}
+                >
+                  Đời {gen}
+                  {gen === 1 ? " · Thủy tổ" : ""}
+                </div>
+              ))}
+              <svg width="100%" height="100%" style={{ display: "block" }}>
+                <g transform={`translate(${transform.x},${transform.y}) scale(${transform.scale})`}>
+                  {layout.unionLines.map((ul) => (
+                    <UnionConnectors
+                      key={ul.unionId}
+                      ul={ul}
+                      nodes={layout.nodes}
+                      selected={selectedUnionId === ul.unionId}
+                      onDiamondClick={() => {
+                        setSelectedUnionId(ul.unionId);
+                        setSelectedPersonId(null);
+                      }}
+                    />
+                  ))}
+                  {[...layout.nodes.values()].map((n) => (
+                    <PersonNodeSvg
+                      key={n.personId}
+                      data={n}
+                      selected={
+                        selectedPersonId === n.personId ||
+                        (selectedUnionId != null &&
+                          members.some(
+                            (m) => m.union?.id === selectedUnionId && m.person?.id === n.personId,
+                          ))
+                      }
+                      onClick={() => {
+                        setSelectedPersonId(n.personId);
+                        setSelectedUnionId(null);
+                      }}
+                    />
+                  ))}
+                </g>
+              </svg>
+            </>
           )}
+
+          {toast ? <div className={styles.toast}>{toast}</div> : null}
         </div>
 
-        {/* Right: union detail panel */}
-        {selectedUnionId != null && selectedUnion ? (
-          <UnionPanel
-            unionId={selectedUnionId}
-            union={selectedUnion}
-            members={members}
-            children={children}
-            persons={persons}
-            onClose={() => { setSelectedUnionId(null); setSelectedPersonId(null); }}
-            onAddMember={addMember}
-            onRemoveMember={removeMember}
-            onAddChild={addChild}
-            onRemoveChild={removeChild}
-            busy={busy}
-          />
+        {selectedUnion && selectedUnionId != null ? (
+          <aside className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h3>Hôn phối #{selectedUnionId}</h3>
+              <button
+                type="button"
+                className={styles.panelClose}
+                aria-label="Đóng"
+                onClick={() => setSelectedUnionId(null)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className={styles.panelBody}>
+              <div className={styles.section}>
+                <p className={styles.sectionTitle}>Thành viên hôn phối</p>
+                {myMembers.map((m) => (
+                  <div key={m.id} className={styles.row}>
+                    <div className={styles.rowInfo}>
+                      <div className={styles.rowName}>{m.person?.fullName ?? "—"}</div>
+                      <div className={styles.rowMeta}>
+                        {m.role === "husband" ? "Chồng" : m.role === "wife" ? "Vợ" : m.role}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.delLink}
+                      disabled={busy}
+                      onClick={() => m.id != null && void removeMember(m.id)}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                ))}
+                <div className={styles.miniForm}>
+                  <Select
+                    options={personOptions}
+                    value={memberPersonId}
+                    onChange={(e) => setMemberPersonId(e.target.value)}
+                  />
+                  <div className={styles.miniFormRow}>
+                    <Select
+                      options={[
+                        { value: "husband", label: "Chồng" },
+                        { value: "wife", label: "Vợ" },
+                        { value: "partner", label: "Bạn đời" },
+                      ]}
+                      value={memberRole}
+                      onChange={(e) => setMemberRole(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      disabled={busy || !memberPersonId}
+                      onClick={() => {
+                        void addMember(Number(memberPersonId), memberRole);
+                        setMemberPersonId("");
+                      }}
+                    >
+                      + Thêm
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className={styles.section}>
+                <p className={styles.sectionTitle}>Con cái ({myChildren.length})</p>
+                <p className={styles.rowMeta} style={{ marginBottom: 8 }}>
+                  Liên kết người đã có — không tạo mới tại đây.
+                </p>
+                {myChildren.map((c) => (
+                  <span key={c.id} className={styles.tag}>
+                    {c.child?.fullName ?? c.child?.code ?? "—"}
+                    <button
+                      type="button"
+                      className={styles.delLink}
+                      disabled={busy}
+                      onClick={() => c.id != null && void removeChild(c.id)}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+                <div className={styles.miniFormRow} style={{ marginTop: 8 }}>
+                  <Select
+                    options={personOptions}
+                    value={childPersonId}
+                    onChange={(e) => setChildPersonId(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    disabled={busy || !childPersonId}
+                    onClick={() => {
+                      void addChild(Number(childPersonId));
+                      setChildPersonId("");
+                    }}
+                  >
+                    + Thêm
+                  </Button>
+                </div>
+              </div>
+
+              <div className={styles.section}>
+                <p className={styles.sectionTitle}>Thông tin hôn nhân</p>
+                <p className={styles.rowMeta}>
+                  {selectedUnion.marriageInfoJson
+                    ? selectedUnion.marriageInfoJson
+                    : "Chưa có JSON hôn nhân — cập nhật khi cần."}
+                </p>
+              </div>
+
+              <Button type="button" variant="secondary" disabled={busy} onClick={() => void removeUnion()}>
+                Xóa hôn phối
+              </Button>
+            </div>
+          </aside>
+        ) : null}
+
+        {selectedPerson && selectedUnionId == null ? (
+          <aside className={styles.panel}>
+            <div className={styles.panelHead}>
+              <h3>{selectedPerson.fullName ?? "Thành viên"}</h3>
+              <button
+                type="button"
+                className={styles.panelClose}
+                aria-label="Đóng"
+                onClick={() => setSelectedPersonId(null)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className={styles.panelBody}>
+              <div className={styles.section}>
+                <p className={styles.sectionTitle}>Thông tin cơ bản</p>
+                <div className={styles.rowMeta}>Mã: {selectedPerson.code ?? "—"}</div>
+                <div className={styles.rowMeta}>
+                  Giới tính:{" "}
+                  {selectedPerson.gender === "M"
+                    ? "Nam"
+                    : selectedPerson.gender === "F"
+                      ? "Nữ"
+                      : "Chưa rõ"}
+                </div>
+                <div className={styles.rowMeta}>Đời: {selectedPerson.generation ?? "—"}</div>
+                <div className={styles.rowMeta}>
+                  Tình trạng: {selectedPerson.lifeStatus === "deceased" ? "Đã mất" : "Còn sống"}
+                </div>
+              </div>
+              <div className={styles.section}>
+                <p className={styles.sectionTitle}>Quan hệ</p>
+                <div className={styles.rowMeta}>
+                  Là con của hôn phối:{" "}
+                  {parentUnionId != null ? (
+                    <button
+                      type="button"
+                      className={styles.delLink}
+                      onClick={() => {
+                        setSelectedUnionId(parentUnionId);
+                        setSelectedPersonId(null);
+                      }}
+                    >
+                      #{parentUnionId}
+                    </button>
+                  ) : (
+                    "—"
+                  )}
+                </div>
+                <div className={styles.rowMeta} style={{ marginTop: 6 }}>
+                  Hôn phối ({personUnions.length}):
+                </div>
+                {personUnions.length === 0 ? (
+                  <div className={styles.rowMeta}>Chưa có</div>
+                ) : (
+                  personUnions.map((u) => (
+                    <button
+                      key={u.unionId}
+                      type="button"
+                      className={styles.member}
+                      style={{ width: "100%", marginTop: 4 }}
+                      onClick={() => {
+                        setSelectedUnionId(u.unionId);
+                        setSelectedPersonId(null);
+                      }}
+                    >
+                      <div className={styles.memberName}>Hôn phối #{u.unionId}</div>
+                      <div className={styles.memberMeta}>{u.role}</div>
+                    </button>
+                  ))
+                )}
+              </div>
+              <div className={styles.miniForm}>
+                {selectedPerson.code ? (
+                  <Button
+                    type="button"
+                    style={{ width: "100%" }}
+                    onClick={() => navigate(`/persons/${encodeURIComponent(selectedPerson.code!)}`)}
+                  >
+                    Xem / sửa hồ sơ đầy đủ
+                  </Button>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    if (selectedPerson.code) {
+                      setSearchParams({ root: selectedPerson.code });
+                      showToast(`Đang xem nhánh hậu duệ của ${selectedPerson.fullName}`);
+                    }
+                  }}
+                >
+                  Đặt làm gốc cây
+                </Button>
+                <Button type="button" variant="secondary" onClick={() => setShowCreatePerson(true)}>
+                  Thêm thành viên mới
+                </Button>
+              </div>
+            </div>
+          </aside>
         ) : null}
       </div>
 
-      {/* Legend */}
-      <div className="tree-legend">
-        <span className="tree-legend-dot m" /> Nam&ensp;
-        <span className="tree-legend-dot f" /> Nữ&ensp;
-        <span className="tree-legend-dot u" /> Không rõ&ensp;
-        <span style={{ marginLeft: 12, color: "var(--color-text-muted)", fontSize: 11 }}>
-          Kéo để di chuyển · Cuộn để phóng to/thu nhỏ · Click node để xem chi tiết hôn phối
-        </span>
-      </div>
+      <Dialog
+        open={showCreateUnion}
+        title="Tạo hôn phối"
+        description="Chọn vợ/chồng đã có trong cây. Có thể để trống một bên nếu chưa rõ tên."
+        onClose={() => setShowCreateUnion(false)}
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setShowCreateUnion(false)}>
+              Hủy
+            </Button>
+            <Button type="button" disabled={busy} onClick={() => void createUnion()}>
+              {busy ? "Đang tạo…" : "Tạo hôn phối"}
+            </Button>
+          </>
+        }
+      >
+        <FormField label="Thành viên 1 (chồng)">
+          <Select options={personOptions} value={husbandId} onChange={(e) => setHusbandId(e.target.value)} />
+        </FormField>
+        <FormField label="Thành viên 2 (vợ)">
+          <Select options={personOptions} value={wifeId} onChange={(e) => setWifeId(e.target.value)} />
+        </FormField>
+        <FormField label="Loại hôn nhân">
+          <Select
+            options={[
+              { value: "chinh_that", label: "Chính thất" },
+              { value: "thu_that", label: "Thứ thất" },
+              { value: "partner", label: "Người yêu / bạn đời" },
+              { value: "unknown", label: "Chưa rõ" },
+            ]}
+            value={marriageType}
+            onChange={(e) => setMarriageType(e.target.value)}
+          />
+        </FormField>
+      </Dialog>
+
+      <Dialog
+        open={showCreatePerson}
+        title="Thêm thành viên"
+        description="Tạo người mới trên cây này — hồ sơ dùng chung portal (danh bạ / phả đồ công khai)."
+        onClose={() => setShowCreatePerson(false)}
+        footer={
+          <>
+            <Button type="button" variant="secondary" onClick={() => setShowCreatePerson(false)}>
+              Hủy
+            </Button>
+            <Button type="button" disabled={busy} onClick={() => void createPerson()}>
+              {busy ? "Đang lưu…" : "Lưu thành viên"}
+            </Button>
+          </>
+        }
+      >
+        <FormField label="Họ tên" required>
+          <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Họ và tên" />
+        </FormField>
+        <FormField label="Giới tính" required>
+          <Select
+            options={[
+              { value: "M", label: "Nam" },
+              { value: "F", label: "Nữ" },
+              { value: "U", label: "Chưa rõ" },
+            ]}
+            value={newGender}
+            onChange={(e) => setNewGender(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Đời" required>
+          <Input value={newGen} onChange={(e) => setNewGen(e.target.value)} inputMode="numeric" />
+        </FormField>
+        <FormField label="Tình trạng" required>
+          <Select
+            options={[
+              { value: "living", label: "Còn sống" },
+              { value: "deceased", label: "Đã mất" },
+            ]}
+            value={newLife}
+            onChange={(e) => setNewLife(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Ghi chú">
+          <Textarea rows={2} value={newNotes} onChange={(e) => setNewNotes(e.target.value)} />
+        </FormField>
+      </Dialog>
     </div>
   );
+
+  return createPortal(ui, document.body);
 }

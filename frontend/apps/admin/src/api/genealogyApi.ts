@@ -20,6 +20,7 @@ export type FamilyUnionDto = {
   id?: number;
   orderNo?: number | null;
   marriageInfoJson?: string | null;
+  tree?: { id?: number } | null;
 };
 
 export type UnionMemberDto = {
@@ -364,6 +365,22 @@ export async function createTreeUnion(
     body: dto,
     token,
   });
+}
+
+export async function updateFamilyUnion(
+  id: number,
+  dto: FamilyUnionDto,
+  token: string | null,
+): Promise<FamilyUnionDto> {
+  return apiFetch<FamilyUnionDto>(`/api/family-unions/${id}`, {
+    method: "PUT",
+    body: { ...dto, id },
+    token,
+  });
+}
+
+export async function deleteFamilyUnion(id: number, token: string | null): Promise<void> {
+  await apiFetch<void>(`/api/family-unions/${id}`, { method: "DELETE", token });
 }
 
 export async function listUnionMembers(token: string | null): Promise<UnionMemberDto[]> {
