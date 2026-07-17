@@ -11,7 +11,7 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
     minHeight: "100vh",
     display: "grid",
     gridTemplateRows: "auto 1fr",
-    background: "var(--color-surface-page)",
+    background: "var(--color-surface-sunken)",
     color: "var(--color-text-primary)",
     fontFamily: "var(--font-body)",
   };
@@ -28,11 +28,11 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
           display: grid;
           grid-template-columns: ${sidebar ? "236px 1fr" : "1fr"};
           min-height: 0;
-          background: var(--color-surface-muted, var(--color-surface-page));
+          background: var(--color-surface-sunken);
         }
         .app-shell-aside {
-          padding: 18px 10px;
-          border-right: 1px solid var(--color-border-subtle);
+          padding: 22px 14px;
+          border-right: 1px solid var(--color-border-strong);
           background: var(--color-surface-card);
           overflow-y: auto;
         }
@@ -61,7 +61,9 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
           .app-shell-aside nav > div {
             display: contents;
           }
-          .app-shell-aside nav span {
+          .app-shell-aside .crm-org,
+          .app-shell-aside .crm-nav-group,
+          .app-shell-aside .crm-nav-ic {
             display: none !important;
           }
           .app-shell-aside nav a {

@@ -128,19 +128,13 @@ function Sidebar({ pendingCount }: { pendingCount: number | null }) {
 function AdminHeader() {
   const { user, logout } = useAuth();
   const portalUrl = import.meta.env.VITE_PORTAL_URL?.replace(/\/$/, "") || "http://localhost:3000";
-  const initials = String(user?.profile?.name ?? user?.profile?.preferred_username ?? "QT")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("") || "QT";
 
   return (
     <div>
       <div className="crm-chrome">
         <div className="crm-chrome-in">
           <span>
-            <b>GiaPhaHub</b> · Quản trị tộc sự — «Di sản sống»
+            <b>GiaPhaHub</b> · Bản mẫu — «Di sản sống» × hoa văn Việt phục
           </span>
           <nav className="crm-chrome-tabs" aria-label="Chuyển bề mặt">
             <a className="crm-chrome-tab" href={`${portalUrl}/`}>
@@ -149,6 +143,9 @@ function AdminHeader() {
             <a className="crm-chrome-tab" href={`${portalUrl}/tree`}>
               Phả đồ
             </a>
+            <a className="crm-chrome-tab" href={`${portalUrl}/persons`}>
+              Hồ sơ
+            </a>
             <span className="crm-chrome-tab crm-chrome-tab-on">CRM quản trị</span>
             {user ? (
               <button type="button" className="crm-chrome-tab" onClick={() => void logout()}>
@@ -156,9 +153,6 @@ function AdminHeader() {
               </button>
             ) : null}
           </nav>
-          <div className="crm-avatar" title={String(user?.profile?.name ?? "")} aria-hidden>
-            {initials}
-          </div>
         </div>
       </div>
       <div className="crm-band" aria-hidden />
