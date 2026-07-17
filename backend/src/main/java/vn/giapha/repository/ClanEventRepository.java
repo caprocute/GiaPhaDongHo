@@ -37,4 +37,14 @@ public interface ClanEventRepository extends JpaRepository<ClanEvent, Long> {
 
     @Query("select clanEvent from ClanEvent clanEvent left join fetch clanEvent.tree where clanEvent.id =:id")
     Optional<ClanEvent> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        """
+        select e from ClanEvent e
+        left join fetch e.tree t
+        where t.id = :treeId
+        order by e.startSolar desc nulls last, e.id desc
+        """
+    )
+    List<ClanEvent> findByTreeIdOrderByStartSolarDesc(@Param("treeId") Long treeId);
 }

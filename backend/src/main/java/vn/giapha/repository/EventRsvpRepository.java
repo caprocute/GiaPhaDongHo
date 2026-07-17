@@ -37,4 +37,18 @@ public interface EventRsvpRepository extends JpaRepository<EventRsvp, Long> {
 
     @Query("select eventRsvp from EventRsvp eventRsvp left join fetch eventRsvp.event where eventRsvp.id =:id")
     Optional<EventRsvp> findOneWithToOneRelationships(@Param("id") Long id);
+
+    List<EventRsvp> findByEventIdOrderByIdAsc(Long eventId);
+
+    @Query(
+        """
+        select r from EventRsvp r
+        where r.event.id = :eventId
+          and lower(r.householdName) = lower(:householdName)
+        """
+    )
+    Optional<EventRsvp> findByEventIdAndHouseholdNameIgnoreCase(
+        @Param("eventId") Long eventId,
+        @Param("householdName") String householdName
+    );
 }

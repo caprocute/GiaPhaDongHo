@@ -204,8 +204,8 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Admin đối soát; biên nhận PDF đơn giản
 
 ### R2.3 Event — họp họ / điểm danh (F6)  **[SS với R2.1]**
-- [ ] Sự kiện âm/dương, RSVP theo hộ, phân công
-- [ ] Gallery đổ album (reuse media)
+- [x] Sự kiện âm/dương, RSVP theo hộ, phân công
+- [x] Gallery đổ album (reuse media)
 
 ### R2.4 Notification (F1)  **[sau có anniversary + user link]**
 - [ ] Outbox email + Web Push

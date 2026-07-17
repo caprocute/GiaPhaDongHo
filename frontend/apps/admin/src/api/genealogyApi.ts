@@ -224,6 +224,77 @@ export async function recordDonationContribution(
   );
 }
 
+export type ClanEventDto = {
+  id?: number;
+  title: string;
+  startSolar?: string | null;
+  lunarJson?: string | null;
+  location?: string | null;
+  checklistJson?: string | null;
+};
+
+export type ClanEventView = {
+  event: ClanEventDto;
+  albumId?: number | null;
+  stats?: { households?: number; people?: number; vehicles?: number };
+};
+
+export type EventRsvpDto = {
+  id?: number;
+  householdName: string;
+  headcount?: number | null;
+  vehicles?: number | null;
+  assignment?: string | null;
+};
+
+export async function listClanEvents(
+  slug: string,
+  token: string | null,
+): Promise<ClanEventView[]> {
+  return apiFetch<ClanEventView[]>(`/api/v1/trees/${encodeURIComponent(slug)}/events`, { token });
+}
+
+export async function upsertClanEvent(
+  slug: string,
+  dto: ClanEventDto,
+  token: string | null,
+): Promise<ClanEventDto> {
+  if (dto.id != null) {
+    return apiFetch<ClanEventDto>(
+      `/api/v1/trees/${encodeURIComponent(slug)}/events/${dto.id}`,
+      { method: "PUT", body: dto, token },
+    );
+  }
+  return apiFetch<ClanEventDto>(`/api/v1/trees/${encodeURIComponent(slug)}/events`, {
+    method: "POST",
+    body: dto,
+    token,
+  });
+}
+
+export async function listEventRsvps(
+  slug: string,
+  eventId: number,
+  token: string | null,
+): Promise<EventRsvpDto[]> {
+  return apiFetch<EventRsvpDto[]>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/events/${eventId}/rsvps`,
+    { token },
+  );
+}
+
+export async function assignEventRsvp(
+  slug: string,
+  rsvpId: number,
+  assignment: string,
+  token: string | null,
+): Promise<EventRsvpDto> {
+  return apiFetch<EventRsvpDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/event-rsvps/${rsvpId}/assignment`,
+    { method: "PUT", body: { assignment }, token },
+  );
+}
+
 export async function listTreeUnions(
   slug: string,
   token: string | null,

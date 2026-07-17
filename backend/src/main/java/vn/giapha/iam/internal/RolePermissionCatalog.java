@@ -33,7 +33,11 @@ public class RolePermissionCatalog implements PermissionService {
             "donation:campaign:read",
             "donation:campaign:write",
             "donation:contribution:read",
-            "donation:contribution:write"
+            "donation:contribution:write",
+            "event:clan:read",
+            "event:clan:write",
+            "event:rsvp:read",
+            "event:rsvp:write"
         ),
         RealmRoles.EDITOR,
         Set.of(
@@ -43,17 +47,28 @@ public class RolePermissionCatalog implements PermissionService {
             "media:asset:write",
             "genealogy:person:read",
             "moderation:request:read",
-            "moderation:request:review"
+            "moderation:request:review",
+            "event:clan:read",
+            "event:rsvp:read"
         ),
         RealmRoles.MEMBER,
         Set.of(
             "cms:post:read",
             "genealogy:person:read",
             "moderation:request:write",
-            "moderation:request:read"
+            "moderation:request:read",
+            "event:rsvp:write",
+            "event:rsvp:read",
+            "event:clan:read"
         ),
         RealmRoles.USER,
-        Set.of("cms:post:read", "genealogy:person:read", "moderation:request:write")
+        Set.of(
+            "cms:post:read",
+            "genealogy:person:read",
+            "moderation:request:write",
+            "event:rsvp:write",
+            "event:clan:read"
+        )
     );
 
     @Override
