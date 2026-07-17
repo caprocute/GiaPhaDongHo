@@ -173,8 +173,12 @@ export type DonationContributionDto = {
   donorName: string;
   amount?: number | string | null;
   kind?: string | null;
+  status?: string | null;
+  isPublic?: boolean | null;
   note?: string | null;
   createdAt?: string | null;
+  confirmedAt?: string | null;
+  confirmedBy?: string | null;
 };
 
 export async function listDonationCampaignsAdmin(
@@ -212,10 +216,40 @@ export async function listCampaignContributions(
   token: string | null,
   page = 0,
   size = 20,
+  filter?: { status?: string; kind?: string; search?: string },
 ): Promise<PageResult<DonationContributionDto>> {
+  const q = new URLSearchParams();
+  if (filter?.status) q.set("status", filter.status);
+  if (filter?.kind) q.set("kind", filter.kind);
+  if (filter?.search) q.set("search", filter.search);
+  const qs = q.toString() ? `?${q.toString()}` : "";
   return apiFetchPage<DonationContributionDto>(
-    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/contributions/admin`,
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/contributions/admin${qs}`,
     { token, page, size },
+  );
+}
+
+export async function confirmContribution(
+  slug: string,
+  campaignId: number,
+  contribId: number,
+  token: string | null,
+): Promise<DonationContributionDto> {
+  return apiFetch<DonationContributionDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/contributions/${contribId}/confirm`,
+    { method: "PATCH", token },
+  );
+}
+
+export async function rejectContribution(
+  slug: string,
+  campaignId: number,
+  contribId: number,
+  token: string | null,
+): Promise<DonationContributionDto> {
+  return apiFetch<DonationContributionDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/contributions/${contribId}/reject`,
+    { method: "PATCH", token },
   );
 }
 
@@ -398,6 +432,58 @@ export type NotifySettings = {
   channelZalo?: boolean;
 };
 
+export type CalendarSettings = {
+  timezone?: string;
+  showLeapMonthLabel?: boolean;
+};
+
+export type AuthSettings = {
+  publicRegistration?: boolean;
+  autoActivate?: boolean;
+  captchaEnabled?: boolean;
+  requireTerms?: boolean;
+};
+
+export type PrivacySettings = {
+  /** members | public | private */
+  defaultLivingPrivacy?: string;
+};
+
+export type SmtpSettings = {
+  configured?: boolean;
+  host?: string | null;
+  port?: number;
+  tls?: boolean;
+  username?: string | null;
+  fromEmail?: string | null;
+  fromName?: string | null;
+  /** Chỉ gửi khi đổi; để trống = giữ mật khẩu cũ. */
+  password?: string | null;
+};
+
+export type ZaloSettings = {
+  configured?: boolean;
+  /** off | dry_run | live */
+  mode?: string;
+  oaId?: string | null;
+  appId?: string | null;
+  accessToken?: string | null;
+};
+
+export type WebhookSettings = {
+  enabled?: boolean;
+  url?: string | null;
+  secret?: string | null;
+  secretConfigured?: boolean;
+};
+
+export type BackupSettings = {
+  enabled?: boolean;
+  /** daily | weekly */
+  schedule?: string;
+  runAt?: string;
+};
+
 export type TreeSettingsDto = {
   slug?: string;
   displayName?: string;
@@ -420,6 +506,13 @@ export type TreeSettingsDto = {
   faviconUrl?: string | null;
   tree?: TreeFeatureSettings;
   notify?: NotifySettings;
+  calendar?: CalendarSettings;
+  auth?: AuthSettings;
+  privacy?: PrivacySettings;
+  smtp?: SmtpSettings;
+  zalo?: ZaloSettings;
+  webhook?: WebhookSettings;
+  backup?: BackupSettings;
 };
 
 export async function getTreeSettings(
@@ -441,6 +534,21 @@ export async function updateTreeSettings(
     body: dto,
     token,
   });
+}
+
+export async function testTreeSmtp(
+  slug: string,
+  to: string | undefined,
+  token: string | null,
+): Promise<{ message: string }> {
+  return apiFetch<{ message: string }>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/settings/smtp/test`,
+    {
+      method: "POST",
+      body: to ? { to } : {},
+      token,
+    },
+  );
 }
 
 export async function listUnionMembers(token: string | null): Promise<UnionMemberDto[]> {

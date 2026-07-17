@@ -80,6 +80,27 @@ public class TreeSettingsDTO implements Serializable {
     @Valid
     private NotifySettings notify = new NotifySettings();
 
+    @Valid
+    private CalendarSettings calendar = new CalendarSettings();
+
+    @Valid
+    private AuthSettings auth = new AuthSettings();
+
+    @Valid
+    private PrivacySettings privacy = new PrivacySettings();
+
+    @Valid
+    private SmtpSettings smtp = new SmtpSettings();
+
+    @Valid
+    private ZaloSettings zalo = new ZaloSettings();
+
+    @Valid
+    private WebhookSettings webhook = new WebhookSettings();
+
+    @Valid
+    private BackupSettings backup = new BackupSettings();
+
     public String getSlug() {
         return slug;
     }
@@ -248,6 +269,62 @@ public class TreeSettingsDTO implements Serializable {
         this.notify = notify != null ? notify : new NotifySettings();
     }
 
+    public CalendarSettings getCalendar() {
+        return calendar;
+    }
+
+    public void setCalendar(CalendarSettings calendar) {
+        this.calendar = calendar != null ? calendar : new CalendarSettings();
+    }
+
+    public AuthSettings getAuth() {
+        return auth;
+    }
+
+    public void setAuth(AuthSettings auth) {
+        this.auth = auth != null ? auth : new AuthSettings();
+    }
+
+    public PrivacySettings getPrivacy() {
+        return privacy;
+    }
+
+    public void setPrivacy(PrivacySettings privacy) {
+        this.privacy = privacy != null ? privacy : new PrivacySettings();
+    }
+
+    public SmtpSettings getSmtp() {
+        return smtp;
+    }
+
+    public void setSmtp(SmtpSettings smtp) {
+        this.smtp = smtp != null ? smtp : new SmtpSettings();
+    }
+
+    public ZaloSettings getZalo() {
+        return zalo;
+    }
+
+    public void setZalo(ZaloSettings zalo) {
+        this.zalo = zalo != null ? zalo : new ZaloSettings();
+    }
+
+    public WebhookSettings getWebhook() {
+        return webhook;
+    }
+
+    public void setWebhook(WebhookSettings webhook) {
+        this.webhook = webhook != null ? webhook : new WebhookSettings();
+    }
+
+    public BackupSettings getBackup() {
+        return backup;
+    }
+
+    public void setBackup(BackupSettings backup) {
+        this.backup = backup != null ? backup : new BackupSettings();
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class TreeFeatureSettings implements Serializable {
 
@@ -344,6 +421,304 @@ public class TreeSettingsDTO implements Serializable {
 
         public void setChannelZalo(boolean channelZalo) {
             this.channelZalo = channelZalo;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class CalendarSettings implements Serializable {
+
+        @Size(max = 60)
+        private String timezone = "Asia/Ho_Chi_Minh";
+
+        private boolean showLeapMonthLabel = true;
+
+        public String getTimezone() {
+            return timezone;
+        }
+
+        public void setTimezone(String timezone) {
+            this.timezone = timezone;
+        }
+
+        public boolean isShowLeapMonthLabel() {
+            return showLeapMonthLabel;
+        }
+
+        public void setShowLeapMonthLabel(boolean showLeapMonthLabel) {
+            this.showLeapMonthLabel = showLeapMonthLabel;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AuthSettings implements Serializable {
+
+        private boolean publicRegistration = true;
+        private boolean autoActivate = true;
+        private boolean captchaEnabled = false;
+        private boolean requireTerms = true;
+
+        public boolean isPublicRegistration() {
+            return publicRegistration;
+        }
+
+        public void setPublicRegistration(boolean publicRegistration) {
+            this.publicRegistration = publicRegistration;
+        }
+
+        public boolean isAutoActivate() {
+            return autoActivate;
+        }
+
+        public void setAutoActivate(boolean autoActivate) {
+            this.autoActivate = autoActivate;
+        }
+
+        public boolean isCaptchaEnabled() {
+            return captchaEnabled;
+        }
+
+        public void setCaptchaEnabled(boolean captchaEnabled) {
+            this.captchaEnabled = captchaEnabled;
+        }
+
+        public boolean isRequireTerms() {
+            return requireTerms;
+        }
+
+        public void setRequireTerms(boolean requireTerms) {
+            this.requireTerms = requireTerms;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PrivacySettings implements Serializable {
+
+        /** members | public | private */
+        @Size(max = 20)
+        private String defaultLivingPrivacy = "members";
+
+        public String getDefaultLivingPrivacy() {
+            return defaultLivingPrivacy;
+        }
+
+        public void setDefaultLivingPrivacy(String defaultLivingPrivacy) {
+            this.defaultLivingPrivacy = defaultLivingPrivacy;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class SmtpSettings implements Serializable {
+
+        private boolean configured;
+        @Size(max = 200)
+        private String host;
+        private int port = 587;
+        private boolean tls = true;
+        @Size(max = 120)
+        private String username;
+        @Size(max = 120)
+        private String fromEmail;
+        @Size(max = 120)
+        private String fromName;
+        /** Chỉ nhận khi PUT; không trả về GET. */
+        @Size(max = 200)
+        private String password;
+
+        public boolean isConfigured() {
+            return configured;
+        }
+
+        public void setConfigured(boolean configured) {
+            this.configured = configured;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public boolean isTls() {
+            return tls;
+        }
+
+        public void setTls(boolean tls) {
+            this.tls = tls;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getFromEmail() {
+            return fromEmail;
+        }
+
+        public void setFromEmail(String fromEmail) {
+            this.fromEmail = fromEmail;
+        }
+
+        public String getFromName() {
+            return fromName;
+        }
+
+        public void setFromName(String fromName) {
+            this.fromName = fromName;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ZaloSettings implements Serializable {
+
+        private boolean configured;
+        /** off | dry_run | live */
+        @Size(max = 20)
+        private String mode = "off";
+        @Size(max = 120)
+        private String oaId;
+        @Size(max = 120)
+        private String appId;
+        @Size(max = 500)
+        private String accessToken;
+
+        public boolean isConfigured() {
+            return configured;
+        }
+
+        public void setConfigured(boolean configured) {
+            this.configured = configured;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+
+        public void setMode(String mode) {
+            this.mode = mode;
+        }
+
+        public String getOaId() {
+            return oaId;
+        }
+
+        public void setOaId(String oaId) {
+            this.oaId = oaId;
+        }
+
+        public String getAppId() {
+            return appId;
+        }
+
+        public void setAppId(String appId) {
+            this.appId = appId;
+        }
+
+        public String getAccessToken() {
+            return accessToken;
+        }
+
+        public void setAccessToken(String accessToken) {
+            this.accessToken = accessToken;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class WebhookSettings implements Serializable {
+
+        private boolean enabled;
+        @Size(max = 500)
+        private String url;
+        @Size(max = 200)
+        private String secret;
+        private boolean secretConfigured;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
+
+        public boolean isSecretConfigured() {
+            return secretConfigured;
+        }
+
+        public void setSecretConfigured(boolean secretConfigured) {
+            this.secretConfigured = secretConfigured;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class BackupSettings implements Serializable {
+
+        private boolean enabled;
+        /** daily | weekly */
+        @Size(max = 20)
+        private String schedule = "daily";
+        @Size(max = 10)
+        private String runAt = "02:00";
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public String getSchedule() {
+            return schedule;
+        }
+
+        public void setSchedule(String schedule) {
+            this.schedule = schedule;
+        }
+
+        public String getRunAt() {
+            return runAt;
+        }
+
+        public void setRunAt(String runAt) {
+            this.runAt = runAt;
         }
     }
 }

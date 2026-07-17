@@ -249,7 +249,7 @@ Chia từng route (1 PR / route nếu lớn):
 
 | Trục | Hiện trạng (sau R1/R2) | Tiêu chí production |
 |------|------------------------|---------------------|
-| **Cấu hình hệ thống** | 4 section thật (identity/brand/tree/notify); nav mockup còn 9 mục trống/link | Đủ 13 mục mockup `admin-settings.html` + lưu DB/secret Jasypt + ăn vào portal/CRM |
+| **Cấu hình hệ thống** | Nav 13 mục + form settings (metaJson); secret không trả GET; SMTP test dry-run | Jasypt ENC runtime + mail E2E thật (RP.4); backup job (RP.5); audit list API |
 | **Soạn phả đồ** | SRS-12a v1.1 cơ bản | Parity mockup còn lại (skeleton, nhãn đời, panel quan hệ đầy đủ, audit, role FE) |
 | **Portal** | Nhiều route còn demo/fallback khi API trống | Luồng chính 100% API; empty/error state nghiệp vụ; SEO/meta động |
 | **CMS / Media** | CRUD có; album public/lightbox chưa hoàn | Gallery công khai, hẹn giờ đăng, trang tĩnh, trình quản lý file |
@@ -273,18 +273,18 @@ Chia từng route (1 PR / route nếu lớn):
 
 > Mockup: `instruction/mockups/admin-settings.html` — 13 mục / 5 nhóm.
 
-- [ ] **Nav đầy đủ** khớp mockup; scroll/hash từng section; trạng thái “Sắp có” chỉ khi thật sự chưa làm (không để mục chết)
-- [ ] **Nhận diện:** logo/favicon upload MinIO + URL trong settings; ngân hàng/footer/social đầy đủ → portal footer
-- [ ] **Phả hệ:** tách section Âm–dương lịch (múi giờ, quy ước nhuận hiển thị) + Mã hiệu (prefix, mẫu preview) khỏi “cây”
-- [ ] **Đăng ký & xác thực:** bật/tắt tự kích hoạt, captcha, quy định thành viên — nối Keycloak/realm policy (FR-12.17)
-- [ ] **Quyền riêng tư & PII:** toggle mask ngày sinh, mức mặc định `privacy` người sống — ăn `PersonPrivacyFilter` (FR-12a.25 / NĐ13)
-- [ ] **Phân quyền vai trò:** UI xem ma trận role→permission (read-only hoặc sync catalog); không lộ tên kỹ thuật trên UI
-- [ ] **Email (SMTP):** host/port/from + mật khẩu `ENC(...)` Jasypt; gửi thử; dùng cho kích hoạt / quên MK / nhắc giỗ (FR-12.22)
-- [ ] **Zalo OA:** app id / OA id / token `ENC(...)`; dry-run vs gửi thật; tắt kênh nếu chưa cấu hình
-- [ ] **Nhắc nhở & giỗ:** đồng bộ với subscription mặc định (ngày trước, kênh) — đã có nền; hoàn thiện UX
-- [ ] **Sao lưu & khôi phục:** kích hoạt job backup, lịch, tải bản gần nhất, hướng dẫn restore (FR-12.20)
-- [ ] **Tích hợp & webhook:** endpoint đăng ký sự kiện (PersonUpdated, DonationReceived…) + secret
-- [ ] **Nhật ký audit:** lọc theo module/user/thời gian; deep-link từ CRM (FR-12.2 / R2.8 nâng cấp)
+- [x] **Nav đầy đủ** khớp mockup; scroll/hash từng section; trạng thái “Sắp có” chỉ khi thật sự chưa làm (không để mục chết)
+- [x] **Nhận diện:** logo/favicon upload MinIO + URL trong settings; ngân hàng/footer/social đầy đủ → portal footer
+- [x] **Phả hệ:** tách section Âm–dương lịch (múi giờ, quy ước nhuận hiển thị) + Mã hiệu (prefix, mẫu preview) khỏi “cây”
+- [x] **Đăng ký & xác thực:** bật/tắt tự kích hoạt, captcha, quy định thành viên — preference trong settings (nối IdP/portal ở RP.4)
+- [x] **Quyền riêng tư & PII:** toggle mask ngày sinh, mức mặc định `privacy` người sống — ăn `PersonPrivacyFilter` + createPerson (FR-12a.25 / NĐ13)
+- [x] **Phân quyền vai trò:** UI xem ma trận role→permission (read-only); không lộ tên kỹ thuật trên UI
+- [x] **Email (SMTP):** host/port/from + mật khẩu không trả GET; gửi thử endpoint; dùng cho nhắc giỗ khi bật kênh (FR-12.22) — *Jasypt ENC runtime: RP.4*
+- [x] **Zalo OA:** app id / OA id / token không trả GET; dry-run vs gửi thật; tắt kênh nếu mode=off
+- [x] **Nhắc nhở & giỗ:** đồng bộ với subscription mặc định (ngày trước, kênh) — portal lọc Zalo theo mode
+- [x] **Sao lưu & khôi phục:** lịch + giờ trong settings (job/restore runbook — RP.5)
+- [x] **Tích hợp & webhook:** URL + secret (không echo GET) trong settings
+- [~] **Nhật ký audit:** section + deep-link hệ thống; lọc nâng cao / list API — RP.4–RP.5 (FR-12.2)
 - [x] SRS chi tiết: [12b-admin-cau-hinh.md](../SRS/12b-admin-cau-hinh.md) (13 mục) + [15-production-go-live.md](../SRS/15-production-go-live.md) (RP.2–6)
 
 **Cổng RP.1:** lưu settings trên staging; đổi tên/logo/SMTP(test)/privacy → portal & mail phản ánh; secret không plaintext trong git.

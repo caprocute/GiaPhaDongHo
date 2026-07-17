@@ -7,6 +7,7 @@ import { PageShell } from "../../src/chrome/PageShell";
 import { useSiteSettings } from "../../src/chrome/SiteSettingsProvider";
 import { API_BASE, TREE_SLUG } from "../../src/lib/config";
 import { fetchPerson } from "../../src/lib/api";
+import { isZaloChannelSuggested } from "../../src/lib/treeSettings";
 
 type Sub = {
   id?: number;
@@ -19,7 +20,7 @@ export function NhacGioClient() {
   const settings = useSiteSettings();
   const defaultDays = String(settings.notify?.remindDaysBefore ?? 7);
   const allowEmail = settings.notify?.channelEmail !== false;
-  const allowZalo = settings.notify?.channelZalo === true;
+  const allowZalo = isZaloChannelSuggested(settings);
   const { user, loading: authLoading, getAccessToken, login } = useAuth();
   const [subs, setSubs] = useState<Sub[]>([]);
   const [code, setCode] = useState("");

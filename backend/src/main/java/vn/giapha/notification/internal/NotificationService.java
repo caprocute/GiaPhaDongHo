@@ -80,11 +80,12 @@ public class NotificationService {
         person = personRepository
             .findByTree_SlugAndCodeIgnoreCase(treeSlug, person.getCode())
             .orElseThrow(() -> new IllegalArgumentException("Người không thuộc cây " + treeSlug));
-        TreeSettingsDTO.NotifySettings notify = treeSettingsQuery
-            .findBySlug(treeSlug)
-            .map(TreeSettingsDTO::getNotify)
-            .orElse(new TreeSettingsDTO.NotifySettings());
-        String channels = filterChannelsBySettings(normalizeChannels(dto.getChannels()), notify);
+        TreeSettingsDTO settings = treeSettingsQuery.findBySlug(treeSlug).orElse(null);
+        TreeSettingsDTO.NotifySettings notify =
+            settings != null && settings.getNotify() != null
+                ? settings.getNotify()
+                : new TreeSettingsDTO.NotifySettings();
+        String channels = filterChannelsBySettings(normalizeChannels(dto.getChannels()), notify, settings);
         int defaultDays = notify.getRemindDaysBefore() > 0 ? notify.getRemindDaysBefore() : 7;
         AnniversarySubscription existing = subscriptionRepository
             .findByUserIdAndPerson_Id(userId, person.getId())
@@ -193,7 +194,18 @@ public class NotificationService {
         return String.join(",", ReminderPlanner.parseChannels(raw));
     }
 
-    private static String filterChannelsBySettings(String channels, TreeSettingsDTO.NotifySettings notify) {
+    private static String filterChannelsBySettings(
+        String channels,
+        TreeSettingsDTO.NotifySettings notify,
+        TreeSettingsDTO settings
+    ) {
+        boolean zaloLive =
+            notify.isChannelZalo() &&
+            settings != null &&
+            settings.getZalo() != null &&
+            !"off".equalsIgnoreCase(
+                settings.getZalo().getMode() == null ? "off" : settings.getZalo().getMode()
+            );
         List<String> allowed = ReminderPlanner.parseChannels(channels)
             .stream()
             .filter(ch -> {
@@ -201,7 +213,7 @@ public class NotificationService {
                     return notify.isChannelEmail();
                 }
                 if (NotifyChannels.ZALO.equals(ch)) {
-                    return notify.isChannelZalo();
+                    return zaloLive;
                 }
                 return true;
             })
@@ -210,7 +222,7 @@ public class NotificationService {
             if (notify.isChannelEmail()) {
                 return NotifyChannels.EMAIL;
             }
-            if (notify.isChannelZalo()) {
+            if (zaloLive) {
                 return NotifyChannels.ZALO;
             }
             throw new IllegalStateException("Dòng họ chưa bật kênh nhắc giỗ nào.");

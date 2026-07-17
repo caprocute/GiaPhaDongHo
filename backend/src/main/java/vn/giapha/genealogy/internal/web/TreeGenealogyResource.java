@@ -78,6 +78,23 @@ public class TreeGenealogyResource {
         }
     }
 
+    @PostMapping("/settings/smtp/test")
+    @RequiresPermission("genealogy:tree:write")
+    public ResponseEntity<java.util.Map<String, String>> testSmtp(
+        @PathVariable String slug,
+        @RequestBody(required = false) java.util.Map<String, String> body
+    ) {
+        try {
+            String to = body != null ? body.get("to") : null;
+            String msg = treeGenealogyService.testSmtp(slug, to);
+            return ResponseEntity.ok(java.util.Map.of("message", msg));
+        } catch (TreeNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            throw new BadRequestAlertException(e.getMessage(), "settings", "smtp");
+        }
+    }
+
     @GetMapping("/persons")
     public ResponseEntity<List<PersonDTO>> listPersons(
         @PathVariable String slug,

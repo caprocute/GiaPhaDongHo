@@ -105,9 +105,40 @@ public class TreeGenealogyService {
                 incoming.setBrandPalette("bang-vang");
             }
         }
+        if (incoming.getPrivacy() != null && incoming.getPrivacy().getDefaultLivingPrivacy() != null) {
+            String p = incoming.getPrivacy().getDefaultLivingPrivacy().trim().toLowerCase(Locale.ROOT);
+            if (!p.equals("members") && !p.equals("public") && !p.equals("private")) {
+                incoming.getPrivacy().setDefaultLivingPrivacy("members");
+            } else {
+                incoming.getPrivacy().setDefaultLivingPrivacy(p);
+            }
+        }
+        if (incoming.getZalo() != null && incoming.getZalo().getMode() != null) {
+            String m = incoming.getZalo().getMode().trim().toLowerCase(Locale.ROOT);
+            if (!m.equals("off") && !m.equals("dry_run") && !m.equals("live")) {
+                incoming.getZalo().setMode("off");
+            } else {
+                incoming.getZalo().setMode(m);
+            }
+        }
         treeSettingsCodec.write(tree, incoming);
         familyTreeRepository.save(tree);
         return treeSettingsCodec.read(tree);
+    }
+
+    /** Gửi thử email cấu hình — dry-run nếu chưa có mail sender. */
+    public String testSmtp(String slug, String toEmail) {
+        FamilyTree tree = familyTreeRepository.findBySlug(slug).orElseThrow(() -> new TreeNotFoundException(slug));
+        TreeSettingsDTO settings = treeSettingsCodec.readInternal(tree);
+        if (settings.getSmtp() == null || settings.getSmtp().getHost() == null || settings.getSmtp().getHost().isBlank()) {
+            throw new IllegalStateException("Chưa cấu hình máy chủ gửi thư.");
+        }
+        String to = toEmail != null && !toEmail.isBlank() ? toEmail : settings.getContactEmail();
+        if (to == null || to.isBlank()) {
+            throw new IllegalStateException("Thiếu địa chỉ nhận thử.");
+        }
+        // Runtime SMTP động từ settings sẽ gắn JavaMailSender riêng; v1 xác nhận cấu hình đã lưu.
+        return "Đã ghi nhận cấu hình gửi thư tới " + to + ". Kiểm tra hàng đợi nhắc giỗ sau khi bật kênh email.";
     }
 
     @Transactional(readOnly = true)
@@ -172,8 +203,18 @@ public class TreeGenealogyService {
         FamilyTreeDTO treeDto = familyTreeMapper.toDto(tree);
         personDTO.setTree(treeDto);
 
+        TreeSettingsDTO treeSettings = treeSettingsCodec.read(tree);
+        if (
+            (personDTO.getPrivacy() == null || personDTO.getPrivacy().isBlank()) &&
+            !isDeceasedLifeStatus(personDTO.getLifeStatus())
+        ) {
+            String def =
+                treeSettings.getPrivacy() != null ? treeSettings.getPrivacy().getDefaultLivingPrivacy() : "members";
+            personDTO.setPrivacy(def != null && !def.isBlank() ? def : "members");
+        }
+
         Set<String> codes = new HashSet<>(personRepository.findCodesByTreeSlug(slug));
-        String codePrefix = treeSettingsCodec.read(tree).getTree().getCodePrefix();
+        String codePrefix = treeSettings.getTree().getCodePrefix();
         String requestedCode = personDTO.getCode();
         final String code;
         if (requestedCode == null || requestedCode.isBlank()) {
@@ -340,6 +381,14 @@ public class TreeGenealogyService {
         }
         String t = value.trim();
         return t.isEmpty() ? null : t.toLowerCase(Locale.ROOT);
+    }
+
+    private static boolean isDeceasedLifeStatus(String lifeStatus) {
+        if (lifeStatus == null) {
+            return false;
+        }
+        String s = lifeStatus.trim().toLowerCase(Locale.ROOT);
+        return "deceased".equals(s) || "dead".equals(s) || "mat".equals(s) || "đã mất".equals(s);
     }
 
     public static class TreeNotFoundException extends RuntimeException {

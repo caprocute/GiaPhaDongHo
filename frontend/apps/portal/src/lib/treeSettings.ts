@@ -33,6 +33,23 @@ export type TreeSettings = {
     channelEmail?: boolean;
     channelZalo?: boolean;
   };
+  calendar?: {
+    timezone?: string;
+    showLeapMonthLabel?: boolean;
+  };
+  auth?: {
+    publicRegistration?: boolean;
+    autoActivate?: boolean;
+    captchaEnabled?: boolean;
+    requireTerms?: boolean;
+  };
+  privacy?: {
+    defaultLivingPrivacy?: string;
+  };
+  zalo?: {
+    configured?: boolean;
+    mode?: string;
+  };
 };
 
 const FALLBACK: TreeSettings = {
@@ -47,6 +64,15 @@ const FALLBACK: TreeSettings = {
     codePrefix: "A",
   },
   notify: { remindDaysBefore: 7, channelEmail: true, channelZalo: false },
+  calendar: { timezone: "Asia/Ho_Chi_Minh", showLeapMonthLabel: true },
+  auth: {
+    publicRegistration: true,
+    autoActivate: true,
+    captchaEnabled: false,
+    requireTerms: true,
+  },
+  privacy: { defaultLivingPrivacy: "members" },
+  zalo: { mode: "off" },
 };
 
 export function footerContactLines(s: TreeSettings): string {
@@ -58,6 +84,13 @@ export function footerContactLines(s: TreeSettings): string {
   const bankBits = [s.bankName, s.bankBranch, s.bankAccountNo, s.bankAccountName].filter(Boolean);
   if (bankBits.length) lines.push(`Quỹ công đức: ${bankBits.join(" · ")}`);
   return lines.join("\n") || "Liên hệ ban quản trị dòng họ";
+}
+
+/** Kênh Zalo chỉ hiện khi settings bật kênh và chế độ không phải Tắt. */
+export function isZaloChannelSuggested(s: TreeSettings): boolean {
+  if (s.notify?.channelZalo !== true) return false;
+  const mode = (s.zalo?.mode ?? "off").toLowerCase();
+  return mode !== "off";
 }
 
 export async function fetchTreeSettings(): Promise<TreeSettings> {
@@ -74,6 +107,10 @@ export async function fetchTreeSettings(): Promise<TreeSettings> {
       ...data,
       tree: { ...FALLBACK.tree, ...data.tree },
       notify: { ...FALLBACK.notify, ...data.notify },
+      calendar: { ...FALLBACK.calendar, ...data.calendar },
+      auth: { ...FALLBACK.auth, ...data.auth },
+      privacy: { ...FALLBACK.privacy, ...data.privacy },
+      zalo: { ...FALLBACK.zalo, ...data.zalo },
     };
   } catch {
     return FALLBACK;

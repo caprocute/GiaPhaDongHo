@@ -2,7 +2,6 @@ package vn.giapha.genealogy.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import org.springframework.stereotype.Component;
 import vn.giapha.domain.FamilyTree;
@@ -18,6 +17,36 @@ public class TreeSettingsCodec {
     }
 
     public TreeSettingsDTO read(FamilyTree tree) {
+        TreeSettingsDTO dto = parse(tree);
+        sanitizeForClient(dto);
+        return dto;
+    }
+
+    /** Bản đầy đủ (kể cả secret) — chỉ dùng nội bộ service. */
+    public TreeSettingsDTO readInternal(FamilyTree tree) {
+        return parse(tree);
+    }
+
+    public void write(FamilyTree tree, TreeSettingsDTO incoming) {
+        TreeSettingsDTO previous = parse(tree);
+        mergeSecrets(incoming, previous);
+        String display = incoming.getDisplayName() != null ? incoming.getDisplayName().trim() : "";
+        tree.setSurname(extractSurname(display, tree.getSurname()));
+        tree.setBranchName(extractBranch(display, tree.getBranchName()));
+        if (incoming.getProvinceCode() != null) {
+            String p = incoming.getProvinceCode().trim();
+            tree.setProvinceCode(p.isEmpty() ? null : p);
+        }
+        incoming.setSlug(tree.getSlug());
+        clearClientOnlyFlags(incoming);
+        try {
+            tree.setMetaJson(objectMapper.writeValueAsString(incoming));
+        } catch (Exception e) {
+            throw new IllegalStateException("Không ghi được cấu hình cây", e);
+        }
+    }
+
+    private TreeSettingsDTO parse(FamilyTree tree) {
         TreeSettingsDTO dto = new TreeSettingsDTO();
         dto.setSlug(tree.getSlug());
         if (tree.getMetaJson() != null && !tree.getMetaJson().isBlank()) {
@@ -28,6 +57,11 @@ public class TreeSettingsCodec {
             }
         }
         dto.setSlug(tree.getSlug());
+        ensureDefaults(dto, tree);
+        return dto;
+    }
+
+    private void ensureDefaults(TreeSettingsDTO dto, FamilyTree tree) {
         if (dto.getDisplayName() == null || dto.getDisplayName().isBlank()) {
             dto.setDisplayName(composeDisplayName(tree));
         }
@@ -39,6 +73,27 @@ public class TreeSettingsCodec {
         }
         if (dto.getNotify() == null) {
             dto.setNotify(new TreeSettingsDTO.NotifySettings());
+        }
+        if (dto.getCalendar() == null) {
+            dto.setCalendar(new TreeSettingsDTO.CalendarSettings());
+        }
+        if (dto.getAuth() == null) {
+            dto.setAuth(new TreeSettingsDTO.AuthSettings());
+        }
+        if (dto.getPrivacy() == null) {
+            dto.setPrivacy(new TreeSettingsDTO.PrivacySettings());
+        }
+        if (dto.getSmtp() == null) {
+            dto.setSmtp(new TreeSettingsDTO.SmtpSettings());
+        }
+        if (dto.getZalo() == null) {
+            dto.setZalo(new TreeSettingsDTO.ZaloSettings());
+        }
+        if (dto.getWebhook() == null) {
+            dto.setWebhook(new TreeSettingsDTO.WebhookSettings());
+        }
+        if (dto.getBackup() == null) {
+            dto.setBackup(new TreeSettingsDTO.BackupSettings());
         }
         if (dto.getSeoKeywords() == null) {
             dto.setSeoKeywords(new ArrayList<>());
@@ -52,28 +107,72 @@ public class TreeSettingsCodec {
         } else {
             dto.getTree().setCodePrefix(prefix.trim().toUpperCase(Locale.ROOT));
         }
-        return dto;
+        String priv = dto.getPrivacy().getDefaultLivingPrivacy();
+        if (priv == null || priv.isBlank()) {
+            dto.getPrivacy().setDefaultLivingPrivacy("members");
+        }
     }
 
-    public void write(FamilyTree tree, TreeSettingsDTO dto) {
-        String display = dto.getDisplayName() != null ? dto.getDisplayName().trim() : "";
-        tree.setSurname(extractSurname(display, tree.getSurname()));
-        tree.setBranchName(extractBranch(display, tree.getBranchName()));
-        if (dto.getProvinceCode() != null) {
-            String p = dto.getProvinceCode().trim();
-            tree.setProvinceCode(p.isEmpty() ? null : p);
+    private static void sanitizeForClient(TreeSettingsDTO dto) {
+        if (dto.getSmtp() != null) {
+            boolean hasPw = dto.getSmtp().getPassword() != null && !dto.getSmtp().getPassword().isBlank();
+            boolean hasHost = dto.getSmtp().getHost() != null && !dto.getSmtp().getHost().isBlank();
+            dto.getSmtp().setConfigured(hasPw || hasHost);
+            dto.getSmtp().setPassword(null);
         }
-        TreeSettingsDTO toStore = dto;
-        toStore.setSlug(tree.getSlug());
-        try {
-            tree.setMetaJson(objectMapper.writeValueAsString(toStore));
-        } catch (Exception e) {
-            throw new IllegalStateException("Không ghi được cấu hình cây", e);
+        if (dto.getZalo() != null) {
+            boolean hasTok = dto.getZalo().getAccessToken() != null && !dto.getZalo().getAccessToken().isBlank();
+            dto.getZalo().setConfigured(hasTok);
+            dto.getZalo().setAccessToken(null);
+        }
+        if (dto.getWebhook() != null) {
+            boolean hasSec = dto.getWebhook().getSecret() != null && !dto.getWebhook().getSecret().isBlank();
+            dto.getWebhook().setSecretConfigured(hasSec);
+            dto.getWebhook().setSecret(null);
+        }
+    }
+
+    private static void clearClientOnlyFlags(TreeSettingsDTO dto) {
+        if (dto.getSmtp() != null) {
+            dto.getSmtp().setConfigured(false);
+        }
+        if (dto.getZalo() != null) {
+            dto.getZalo().setConfigured(false);
+        }
+        if (dto.getWebhook() != null) {
+            dto.getWebhook().setSecretConfigured(false);
+        }
+    }
+
+    private static void mergeSecrets(TreeSettingsDTO incoming, TreeSettingsDTO previous) {
+        if (incoming.getSmtp() == null) {
+            incoming.setSmtp(previous.getSmtp());
+        } else if (
+            (incoming.getSmtp().getPassword() == null || incoming.getSmtp().getPassword().isBlank()) &&
+            previous.getSmtp() != null
+        ) {
+            incoming.getSmtp().setPassword(previous.getSmtp().getPassword());
+        }
+        if (incoming.getZalo() == null) {
+            incoming.setZalo(previous.getZalo());
+        } else if (
+            (incoming.getZalo().getAccessToken() == null || incoming.getZalo().getAccessToken().isBlank()) &&
+            previous.getZalo() != null
+        ) {
+            incoming.getZalo().setAccessToken(previous.getZalo().getAccessToken());
+        }
+        if (incoming.getWebhook() == null) {
+            incoming.setWebhook(previous.getWebhook());
+        } else if (
+            (incoming.getWebhook().getSecret() == null || incoming.getWebhook().getSecret().isBlank()) &&
+            previous.getWebhook() != null
+        ) {
+            incoming.getWebhook().setSecret(previous.getWebhook().getSecret());
         }
     }
 
     private static String composeDisplayName(FamilyTree tree) {
-        List<String> parts = new ArrayList<>();
+        java.util.List<String> parts = new ArrayList<>();
         if (tree.getSurname() != null && !tree.getSurname().isBlank()) {
             parts.add(tree.getSurname().trim());
         }
