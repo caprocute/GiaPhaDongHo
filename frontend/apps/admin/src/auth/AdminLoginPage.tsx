@@ -93,7 +93,7 @@ export function AdminLoginPage() {
         <div className={styles.panel}>
           <div className={styles.panelHead}>
             <div className={styles.iconWrap} aria-hidden>
-              <Shield size={22} strokeWidth={1.75} />
+              <Shield size={26} strokeWidth={1.75} />
             </div>
             <div>
               <p className={styles.eyebrow}>Quản trị hệ thống</p>
@@ -149,7 +149,11 @@ export function AdminLoginPage() {
               </FormField>
             </div>
 
-            <Button type="submit" style={{ width: "100%", marginTop: "var(--spacing-xs)" }} disabled={pending}>
+            <Button
+              type="submit"
+              style={{ width: "100%", minHeight: 48, fontSize: "var(--font-size-md)" }}
+              disabled={pending}
+            >
               {pending ? "Đang đăng nhập…" : "Vào bảng điều khiển"}
             </Button>
 
