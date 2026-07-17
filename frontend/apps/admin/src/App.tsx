@@ -11,11 +11,14 @@ import { CommentsModerationPage } from "./comments/CommentsModerationPage";
 import { MediaLibraryPage } from "./media/MediaLibraryPage";
 import { PostFormPage } from "./posts/PostFormPage";
 import { PostsListPage } from "./posts/PostsListPage";
+import { DashboardPage } from "./dashboard/DashboardPage";
 import { DonationAdminPage } from "./donation/DonationAdminPage";
 import { EventsAdminPage } from "./events/EventsAdminPage";
 import { ModerationInboxPage } from "./moderation/ModerationInboxPage";
 import { NotifyOutboxPage } from "./notifications/NotifyOutboxPage";
+import { ScholarshipAdminPage } from "./scholarship/ScholarshipAdminPage";
 import { SettingsPage } from "./settings/SettingsPage";
+import { SystemModulesPage } from "./system/SystemModulesPage";
 import { TreeEditorPage } from "./tree/TreeEditorPage";
 
 const navStyle = {
@@ -41,6 +44,8 @@ function Sidebar() {
     ["/donation", "Quỹ công đức"],
     ["/events", "Sự kiện"],
     ["/notifications", "Nhắc giỗ"],
+    ["/scholarship", "Khuyến học"],
+    ["/system", "Hệ thống"],
     ["/posts", "Bài viết"],
     ["/comments", "Bình luận"],
     ["/media", "Thư viện"],
@@ -55,17 +60,6 @@ function Sidebar() {
         </NavLink>
       ))}
     </nav>
-  );
-}
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div>
-      <h1 style={{ fontFamily: "var(--font-display)" }}>{title}</h1>
-      <p style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-body)" }}>
-        Khung menu R1.8 — màn này bổ sung ở phase sau.
-      </p>
-    </div>
   );
 }
 
@@ -103,7 +97,7 @@ function CrmRoutes() {
   return (
     <AppShell header={<AdminHeader />} sidebar={<Sidebar />}>
       <Routes>
-        <Route path="/" element={<Placeholder title="Bảng điều khiển" />} />
+        <Route path="/" element={<DashboardPage />} />
         <Route path="/persons" element={<PersonsListPage />} />
         <Route path="/persons/new" element={<PersonFormPage />} />
         <Route path="/persons/:id" element={<PersonFormPage />} />
@@ -112,6 +106,8 @@ function CrmRoutes() {
         <Route path="/donation" element={<DonationAdminPage />} />
         <Route path="/events" element={<EventsAdminPage />} />
         <Route path="/notifications" element={<NotifyOutboxPage />} />
+        <Route path="/scholarship" element={<ScholarshipAdminPage />} />
+        <Route path="/system" element={<SystemModulesPage />} />
         <Route path="/posts" element={<PostsListPage />} />
         <Route path="/posts/new" element={<PostFormPage />} />
         <Route path="/posts/:id" element={<PostFormPage />} />

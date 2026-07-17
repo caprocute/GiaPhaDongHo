@@ -213,21 +213,21 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Đăng ký nhắc giỗ + iCal
 
 ### R2.5 Xưng hô (F2)  **[SS với R2.4 — pure genealogy graph]**
-- [ ] LCA + bảng luật xưng hô
-- [ ] API + UI “quan hệ với tôi” trên phả đồ
+- [x] LCA + bảng luật xưng hô
+- [x] API + UI “quan hệ với tôi” trên phả đồ
 
 ### R2.6 Khuyến học (F8)  **[SS — chủ yếu CMS]**
-- [ ] Category/workflow đề cử → duyệt → bảng vàng
+- [x] Category/workflow đề cử → duyệt → bảng vàng
 
 ### R2.7 PDF sách gia phả (F10)  **[sau tree-viz ổn]**
-- [ ] Service `pdf-render` Playwright
-- [ ] Template bìa / chương / chia trang phả đồ
-- [ ] Job xuất + lưu MinIO
+- [x] Service `pdf-render` Playwright
+- [x] Template bìa / chương / chia trang phả đồ
+- [x] Job xuất + lưu MinIO
 
 ### R2.8 CRM nâng cao
-- [ ] Dashboard thống kê (Recharts token)
-- [ ] Audit log UI
-- [ ] Module on/off (`module_registry`)
+- [x] Dashboard thống kê (Recharts token)
+- [x] Audit log UI
+- [x] Module on/off (`module_registry`)
 
 **Cổng R2:** tự khai có duyệt; ít nhất 1 chiến dịch công đức; nhắc giỗ 1 kênh thật; xuất PDF 1 chương mẫu.
 
