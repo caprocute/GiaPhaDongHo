@@ -1,9 +1,15 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { AppearanceControl } from "../Theme/AppearanceControl";
 import styles from "./PublicFooter.module.css";
 
 export interface PublicFooterProps {
   title?: string;
   contact?: string;
   columns?: { heading: string; items: string[] }[];
+  /** Slot thay control giao diện (mặc định AppearanceControl) */
+  tools?: ReactNode;
 }
 
 export function PublicFooter({
@@ -15,6 +21,7 @@ export function PublicFooter({
       items: ["Thông tin dòng họ", "Gia phả · Phả đồ", "Ngày giỗ", "Công đức"],
     },
   ],
+  tools,
 }: PublicFooterProps) {
   return (
     <footer className={styles.foot}>
@@ -62,7 +69,10 @@ export function PublicFooter({
       </div>
       <div className={styles.bandThin} aria-hidden="true" />
       <div className={styles.base}>
-        © {new Date().getFullYear()} Họ Hoàng – Huỳnh thôn Trung Bính · Xây dựng trên nền tảng GiaPhaHub
+        <span className={styles.baseCopy}>
+          © {new Date().getFullYear()} Họ Hoàng – Huỳnh thôn Trung Bính · Xây dựng trên nền tảng GiaPhaHub
+        </span>
+        <div className={styles.baseTools}>{tools ?? <AppearanceControl />}</div>
       </div>
     </footer>
   );

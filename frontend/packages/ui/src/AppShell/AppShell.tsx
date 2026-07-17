@@ -3,14 +3,15 @@ import type { CSSProperties, ReactNode } from "react";
 export interface AppShellProps {
   header?: ReactNode;
   sidebar?: ReactNode;
+  footer?: ReactNode;
   children: ReactNode;
 }
 
-export function AppShell({ header, sidebar, children }: AppShellProps) {
+export function AppShell({ header, sidebar, footer, children }: AppShellProps) {
   const root: CSSProperties = {
     minHeight: "100vh",
     display: "grid",
-    gridTemplateRows: "auto 1fr",
+    gridTemplateRows: footer ? "auto 1fr auto" : "auto 1fr",
     background: "var(--color-surface-sunken)",
     color: "var(--color-text-primary)",
     fontFamily: "var(--font-body)",
@@ -23,6 +24,7 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
         {sidebar ? <aside className="app-shell-aside">{sidebar}</aside> : null}
         <main className="app-shell-main">{children}</main>
       </div>
+      {footer ? <div className="app-shell-footer">{footer}</div> : null}
       <style>{`
         .app-shell-body {
           display: grid;
@@ -40,6 +42,15 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
           padding: 26px 30px;
           overflow-y: auto;
           min-width: 0;
+        }
+        .app-shell-footer {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: var(--spacing-md);
+          padding: 10px 24px;
+          border-top: 1px solid var(--color-border-default);
+          background: var(--color-surface-card);
         }
         @media (max-width: 960px) {
           .app-shell-body {
@@ -75,6 +86,10 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
           }
           .app-shell-main {
             padding: var(--spacing-md);
+          }
+          .app-shell-footer {
+            justify-content: center;
+            padding: 10px 16px;
           }
         }
       `}</style>

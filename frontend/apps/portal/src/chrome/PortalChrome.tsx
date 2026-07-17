@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { AppearanceControl, PublicFooter, PublicHeader } from "@giapha/ui";
+import { PublicFooter, PublicHeader } from "@giapha/ui";
 import { convertSolarToLunar, getCanChiYear } from "@giapha/lunar";
 import { AuthNav } from "../auth/AuthNav";
 import styles from "./PortalChrome.module.css";
@@ -45,12 +45,7 @@ export function PortalChrome({ children }: { children: ReactNode }) {
         brand="Họ Hoàng – Huỳnh"
         subtitle="Thôn Trung Bính · Bảo Ninh · Đồng Hới"
         activeHref={pathname}
-        utilityRight={
-          <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-            <AppearanceControl />
-            <span style={{ opacity: 0.95 }}>{lunarUtilityLabel()}</span>
-          </span>
-        }
+        utilityRight={<span style={{ opacity: 0.95 }}>{lunarUtilityLabel()}</span>}
         endSlot={<AuthNav />}
       />
       <main className={isTree ? `${styles.mainGrow} ${styles.mainFill}` : styles.mainGrow}>

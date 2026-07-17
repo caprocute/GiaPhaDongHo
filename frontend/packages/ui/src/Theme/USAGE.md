@@ -6,7 +6,7 @@
 
 | | |
 |--|--|
-| **Khi dùng** | Bọc app (portal/admin); đặt `AppearanceControl` trên header; `ThemeScript` chống FOUC. |
+| **Khi dùng** | Bọc app; `AppearanceControl` mặc định ở `PublicFooter` (portal) / footer `AppShell` (admin); `ThemeScript` chống FOUC. |
 | **Control** | Icon: Sparkles/Flame (palette) · Sun/Moon/Monitor (mode); chữ chỉ ở `aria-label` / `title`. |
 | **API HTML** | `data-palette="bang-vang\|co"` · `data-mode="light\|dark"` (đã resolve) |
 | **Mode** | `light` · `dark` · `system` (mặc định system) |
@@ -24,8 +24,9 @@ import { ThemeProvider, ThemeScript, AppearanceControl } from "@giapha/ui";
   <head><ThemeScript /></head>
   <body>
     <ThemeProvider>
-      <PublicHeader utilityRight={<AppearanceControl />} … />
+      <PublicHeader … />
       {children}
+      <PublicFooter /> {/* sẵn AppearanceControl ở thanh bản quyền */}
     </ThemeProvider>
   </body>
 </html>

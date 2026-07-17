@@ -164,12 +164,7 @@ function AdminHeader() {
           <span>Di sản sống × hoa văn Việt phục</span>
         </>
       }
-      utilityRight={
-        <span style={{ display: "inline-flex", alignItems: "center", gap: "var(--spacing-md)", flexWrap: "wrap" }}>
-          <AppearanceControl />
-          <span style={{ opacity: 0.95 }}>{displayName}</span>
-        </span>
-      }
+      utilityRight={<span style={{ opacity: 0.95 }}>{displayName}</span>}
       endSlot={
         user ? (
           <button
@@ -212,7 +207,11 @@ function CrmRoutes() {
   }, [getAccessToken, slug]);
 
   return (
-    <AppShell header={<AdminHeader />} sidebar={<Sidebar pendingCount={pendingCount} />}>
+    <AppShell
+      header={<AdminHeader />}
+      sidebar={<Sidebar pendingCount={pendingCount} />}
+      footer={<AppearanceControl onBrandBar={false} />}
+    >
       <Routes>
         <Route path="/" element={<DashboardPage onPendingChange={setPendingCount} />} />
         <Route path="/persons" element={<PersonsListPage />} />
