@@ -3,6 +3,7 @@ import { GioCard, HonorBoardCard, StatCard } from "@giapha/ui";
 import { convertSolarToLunar } from "@giapha/lunar";
 import { HomeSearch } from "./HomeSearch";
 import { HeroConstellation } from "./HeroConstellation";
+import { DongSonBackdrop } from "./DongSonBackdrop";
 import styles from "./home.module.css";
 import {
   DEMO_CONG_DUC,
@@ -132,6 +133,7 @@ export default async function HomePage() {
       </section>
 
       <section className={styles.congduc} aria-labelledby="congduc-heading">
+        <DongSonBackdrop className={styles.congducArt} />
         <div className={styles.wrap}>
           <div className={styles.sacphong}>
             <span className={styles.kicker}>Uống nước nhớ nguồn</span>
@@ -143,7 +145,6 @@ export default async function HomePage() {
               {DEMO_CONG_DUC.map((item) => (
                 <HonorBoardCard
                   key={item.name}
-                  onDark
                   name={item.name}
                   detail={item.desc}
                   emblem={item.medal}

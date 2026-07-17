@@ -17,7 +17,26 @@ export const Default: Story = {
   },
 };
 
-export const CongDucOnDark: Story = {
+export const BangVangPoster: Story = {
+  render: () => (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 20,
+        padding: 40,
+        background:
+          "radial-gradient(ellipse 55% 50% at 50% 42%, color-mix(in srgb, var(--color-heritage-soft) 55%, transparent) 0%, transparent 70%), var(--color-surface-page)",
+      }}
+    >
+      <HonorBoardCard name="Ông Hoàng Văn A" detail="Hiến 200m² đất xây nhà thờ họ" emblem="壽" />
+      <HonorBoardCard name="Bà Hoàng Thị B" detail="Tài trợ quỹ khuyến học dòng họ" emblem="德" />
+      <HonorBoardCard name="Ông Hoàng Văn C" detail="Sưu tầm, biên soạn gia phả 13 đời" emblem="心" />
+    </div>
+  ),
+};
+
+export const OnDark: Story = {
   render: () => (
     <div
       style={{
@@ -30,7 +49,6 @@ export const CongDucOnDark: Story = {
     >
       <HonorBoardCard onDark name="Ông Hoàng Văn A" detail="Hiến 200m² đất xây nhà thờ họ" emblem="壽" />
       <HonorBoardCard onDark name="Bà Hoàng Thị B" detail="Tài trợ quỹ khuyến học dòng họ" emblem="德" />
-      <HonorBoardCard onDark name="Ông Hoàng Văn C" detail="Sưu tầm, biên soạn gia phả 13 đời" emblem="心" />
     </div>
   ),
 };

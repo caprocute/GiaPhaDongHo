@@ -6,11 +6,9 @@ import styles from "./HonorBoardCard.module.css";
 export interface HonorBoardCardProps {
   name: string;
   detail?: string;
-  /** URL ảnh chân dung — nếu trống dùng emblem/initials */
   imageUrl?: string | null;
-  /** Chữ Hán/ký hiệu trong avatar khi không có ảnh (壽, 德…) */
   emblem?: string;
-  /** Nền son thẫm (khối Bảng vàng công đức trang chủ) */
+  /** Biến thể trên nền tối */
   onDark?: boolean;
 }
 
@@ -21,56 +19,44 @@ function initialsFrom(name: string): string {
   return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
 }
 
-function LaurelWreath({ gradId }: { gradId: string }) {
+const BIRD =
+  "M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z";
+
+/** Vành trống đồng + chim lạc (thay nguyệt quế). */
+function DrumChimLac({ gradId }: { gradId: string }) {
+  const angles = [0, 60, 120, 180, 240, 300];
   return (
-    <svg className={styles.laurel} viewBox="0 0 200 200" aria-hidden="true">
+    <svg className={styles.drum} viewBox="0 0 320 320" aria-hidden="true">
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="var(--color-heritage-soft)" />
-          <stop offset="55%" stopColor="var(--color-heritage-accent)" />
+          <stop offset="45%" stopColor="var(--color-heritage-accent)" />
           <stop offset="100%" stopColor="var(--color-heritage-deep)" />
         </linearGradient>
       </defs>
-      <g fill="none" stroke={`url(#${gradId})`} strokeWidth="2.2" strokeLinecap="round">
-        <path d="M96 168 C70 150 48 120 42 88 C38 62 48 42 62 36" />
-        <path d="M58 48 C48 52 42 62 40 72" />
-        <path d="M52 78 C42 84 38 96 38 108" />
-        <path d="M48 118 C40 126 38 138 42 148" />
-        <path d="M62 156 C52 160 48 168 50 176" />
+      <g fill="none" stroke={`url(#${gradId})`} strokeWidth="1.6">
+        <circle cx="160" cy="148" r="128" />
+        <circle cx="160" cy="148" r="116" />
+        <circle cx="160" cy="148" r="104" />
+        <circle cx="160" cy="148" r="78" />
+      </g>
+      <g fill={`url(#${gradId})`} opacity={0.85}>
+        <polygon points="160,20 168,32 152,32" />
+        <polygon points="250,58 252,70 240,64" />
+        <polygon points="288,148 276,156 276,140" />
+        <polygon points="250,238 240,232 252,226" />
+        <polygon points="160,276 152,264 168,264" />
+        <polygon points="70,238 68,226 80,232" />
+        <polygon points="32,148 44,140 44,156" />
+        <polygon points="70,58 80,64 68,70" />
       </g>
       <g fill={`url(#${gradId})`}>
-        <ellipse cx="54" cy="44" rx="9" ry="4.5" transform="rotate(-55 54 44)" />
-        <ellipse cx="44" cy="66" rx="10" ry="4.8" transform="rotate(-40 44 66)" />
-        <ellipse cx="40" cy="92" rx="11" ry="5" transform="rotate(-18 40 92)" />
-        <ellipse cx="42" cy="118" rx="10" ry="4.8" transform="rotate(8 42 118)" />
-        <ellipse cx="52" cy="142" rx="10" ry="4.6" transform="rotate(28 52 142)" />
-        <ellipse cx="68" cy="160" rx="9" ry="4.2" transform="rotate(48 68 160)" />
-        <ellipse cx="84" cy="170" rx="8" ry="3.8" transform="rotate(62 84 170)" />
+        {angles.map((deg) => (
+          <g key={deg} transform={`translate(160 148) rotate(${deg}) translate(0 -110) scale(1.05)`}>
+            <path d={BIRD} />
+          </g>
+        ))}
       </g>
-      <g fill="none" stroke={`url(#${gradId})`} strokeWidth="2.2" strokeLinecap="round">
-        <path d="M104 168 C130 150 152 120 158 88 C162 62 152 42 138 36" />
-        <path d="M142 48 C152 52 158 62 160 72" />
-        <path d="M148 78 C158 84 162 96 162 108" />
-        <path d="M152 118 C160 126 162 138 158 148" />
-        <path d="M138 156 C148 160 152 168 150 176" />
-      </g>
-      <g fill={`url(#${gradId})`}>
-        <ellipse cx="146" cy="44" rx="9" ry="4.5" transform="rotate(55 146 44)" />
-        <ellipse cx="156" cy="66" rx="10" ry="4.8" transform="rotate(40 156 66)" />
-        <ellipse cx="160" cy="92" rx="11" ry="5" transform="rotate(18 160 92)" />
-        <ellipse cx="158" cy="118" rx="10" ry="4.8" transform="rotate(-8 158 118)" />
-        <ellipse cx="148" cy="142" rx="10" ry="4.6" transform="rotate(-28 148 142)" />
-        <ellipse cx="132" cy="160" rx="9" ry="4.2" transform="rotate(-48 132 160)" />
-        <ellipse cx="116" cy="170" rx="8" ry="3.8" transform="rotate(-62 116 170)" />
-      </g>
-      <path
-        d="M88 172 Q100 182 112 172 M92 176 L100 188 L108 176"
-        fill="none"
-        stroke={`url(#${gradId})`}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
     </svg>
   );
 }
@@ -83,14 +69,15 @@ export function HonorBoardCard({
   onDark = false,
 }: HonorBoardCardProps) {
   const uid = useId().replace(/:/g, "");
-  const gradId = `hb-leaf-${uid}`;
+  const gradId = `hb-drum-${uid}`;
   const fallback = emblem?.trim() || initialsFrom(name);
 
   return (
     <article className={onDark ? `${styles.root} ${styles.onDark}` : styles.root}>
+      <div className={styles.glow} aria-hidden />
       <div className={styles.rays} aria-hidden />
       <div className={styles.stage}>
-        <LaurelWreath gradId={gradId} />
+        <DrumChimLac gradId={gradId} />
         <div className={styles.avatarRing}>
           {imageUrl ? (
             <img className={styles.avatarImg} src={imageUrl} alt="" />

@@ -333,42 +333,52 @@
   font-family: var(--font-body);
 }
 
-/* —— Công đức —— */
+/* —— Công đức / Bảng vàng — nền kem + hoa văn trống đồng (poster di sản) —— */
 .congduc {
-  background: var(--color-heritage-frame) var(--pattern-brocade);
   position: relative;
+  overflow: hidden;
+  border-top: 1px solid var(--color-border-strong);
+  border-bottom: 1px solid var(--color-border-strong);
+  background:
+    radial-gradient(
+      ellipse 55% 50% at 50% 42%,
+      color-mix(in srgb, var(--color-heritage-soft) 55%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-page) 72%, white) 0%,
+      var(--color-surface-page) 45%,
+      color-mix(in srgb, var(--color-surface-page) 88%, var(--color-heritage-line)) 100%
+    );
 }
 
-.congduc::before,
-.congduc::after {
-  content: "";
+.congducArt {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 12px;
-  background: var(--pattern-meander) center / auto 9px repeat-x;
-  opacity: 0.9;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  z-index: 0;
 }
 
-.congduc::before {
-  top: 10px;
-}
-
-.congduc::after {
-  bottom: 10px;
+.congducArt svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .sacphong {
   max-width: 920px;
   margin: 0 auto;
   text-align: center;
-  color: var(--color-text-on-brand);
+  color: var(--color-text-primary);
   position: relative;
-  padding: 64px 20px;
+  z-index: 1;
+  padding: 52px 20px 60px;
 }
 
 .kicker {
-  color: var(--color-heritage-soft);
+  color: var(--color-heritage-deep);
   letter-spacing: 0.34em;
   font-size: 10.5px;
   text-transform: uppercase;
@@ -378,14 +388,14 @@
 
 .sacphong h3 {
   font-family: var(--font-display);
-  font-size: 34px;
+  font-size: clamp(1.6rem, 2.8vw, 2.15rem);
   margin: 12px 0 0;
   font-weight: 700;
 }
 
 .sacSub {
   font-size: 13.5px;
-  opacity: 0.75;
+  color: var(--color-text-muted);
   margin-top: 8px;
   font-family: var(--font-body);
 }
@@ -394,10 +404,10 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  margin-top: 40px;
+  margin-top: 36px;
 }
 
-/* Thẻ bảng vàng: HonorBoardCard (packages/ui) */
+/* Thẻ bảng vàng: HonorBoardCard (packages/ui) — trống đồng × chim lạc */
 
 @media (max-width: 960px) {
   .wrap {

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>GiaPhaHub — Mẫu Bảng vàng (Honor card)</title>
+<title>GiaPhaHub — Bảng vàng · Trống đồng / Chim lạc</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Noto+Serif:wght@600;700&display=swap" rel="stylesheet" />
@@ -17,7 +17,6 @@
   --line: #D8D6CF;
   --line-strong: #C4B8A0;
   --son: #AE720C;
-  --son-hover: #824807;
   --son-deep: #29241D;
   --son-ink: #EBEBE6;
   --gold: #E2AF1D;
@@ -25,238 +24,76 @@
   --gold-soft: #F3E6B8;
   --gold-line: #D4A31C;
   --foil: linear-gradient(105deg, #824807 0%, #AE720C 22%, #E2AF1D 50%, #AE720C 78%, #824807 100%);
-  --shadow: 0 1px 2px rgba(41, 36, 29, 0.05), 0 10px 30px rgba(41, 36, 29, 0.08);
-  --shadow-lift: 0 2px 6px rgba(41, 36, 29, 0.08), 0 20px 48px rgba(41, 36, 29, 0.16);
-  --serif: "Noto Serif", Georgia, "Times New Roman", serif;
+  --serif: "Noto Serif", Georgia, serif;
   --sans: "Be Vietnam Pro", system-ui, sans-serif;
-  --meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M3.5 19V6.5h12v8h-8v-4h4' fill='none' stroke='%23E2AF1D' stroke-width='1.8'/%3E%3C/svg%3E");
-  --brocade: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 2L70 36 36 70 2 36Z' fill='none' stroke='rgba(226,175,29,.14)'/%3E%3Ccircle cx='36' cy='36' r='3.5' fill='none' stroke='rgba(226,175,29,.16)'/%3E%3C/svg%3E");
+  --shadow-lift: 0 2px 6px rgba(41, 36, 29, 0.08), 0 20px 48px rgba(41, 36, 29, 0.14);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0 }
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--sans);
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-}
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.55; -webkit-font-smoothing: antialiased }
 a { color: inherit; text-decoration: none }
-button { font: inherit; border: 0; background: none; cursor: pointer; color: inherit }
 
 .chrome {
   position: sticky; top: 0; z-index: 40;
-  background: color-mix(in srgb, var(--bg-sunken) 92%, transparent);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
 .chrome-in {
   max-width: 1120px; margin: 0 auto; padding: 12px 20px;
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
   font-size: 12.5px; color: var(--muted);
 }
-.chrome b { color: var(--ink); font-weight: 600 }
-.pill {
-  margin-left: auto; display: flex; gap: 4px;
-  background: var(--bg-raise); border: 1px solid var(--line-strong);
-  border-radius: 999px; padding: 3px;
-}
-.pill span, .pill a {
-  padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 500;
-}
+.chrome b { color: var(--ink) }
+.pill { margin-left: auto; display: flex; gap: 4px; background: var(--bg-raise); border: 1px solid var(--line-strong); border-radius: 999px; padding: 3px }
+.pill a, .pill span { padding: 6px 14px; border-radius: 999px; font-size: 12.5px }
 .pill .on { background: var(--son); color: var(--son-ink); font-weight: 600 }
 
 .band {
   height: 12px;
-  background: var(--son-deep) var(--meander) center / auto 9px repeat-x;
+  background: var(--son-deep);
   border-top: 1px solid var(--gold-line);
   border-bottom: 1px solid var(--gold-line);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M3.5 19V6.5h12v8h-8v-4h4' fill='none' stroke='%23E2AF1D' stroke-width='1.8'/%3E%3C/svg%3E");
+  background-size: auto 9px; background-repeat: repeat-x; background-position: center;
 }
 
-.hero {
-  max-width: 1120px; margin: 0 auto; padding: 36px 20px 20px;
-  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 36px; align-items: center;
+.intro {
+  max-width: 1120px; margin: 0 auto; padding: 28px 20px 8px;
 }
-.hero h1 {
-  font-family: var(--serif); font-size: clamp(1.8rem, 3vw, 2.4rem);
-  font-weight: 700; line-height: 1.15; letter-spacing: 0.01em;
-}
-.hero .eyebrow {
-  font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase;
-  font-weight: 700; color: var(--gold-deep); margin-bottom: 10px;
-}
-.hero p { margin-top: 12px; color: var(--muted); font-size: 14.5px; max-width: 42ch }
-.hero ul { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 13px; color: var(--muted) }
-.hero li::before { content: "◆ "; color: var(--gold); font-size: 9px }
+.intro .eyebrow { font-size: 10.5px; letter-spacing: 0.28em; text-transform: uppercase; font-weight: 700; color: var(--gold-deep) }
+.intro h1 { font-family: var(--serif); font-size: clamp(1.7rem, 3vw, 2.3rem); margin-top: 8px; line-height: 1.15 }
+.intro p { margin-top: 10px; color: var(--muted); font-size: 14px; max-width: 56ch }
 
-.showcase {
-  display: grid; place-items: center;
-  padding: 28px 16px 32px;
-  background:
-    radial-gradient(ellipse 80% 70% at 50% 40%, color-mix(in srgb, var(--gold-soft) 70%, white), transparent 70%),
-    var(--bg-raise);
-  border: 1px solid var(--line-strong);
-  box-shadow: var(--shadow-lift);
+/* ========== SECTION BẢNG VÀNG — nền kiểu poster ========== */
+.sac {
   position: relative;
-}
-.showcase::before {
-  content: ""; position: absolute; inset: 8px;
-  border: 1px solid color-mix(in srgb, var(--gold-line) 55%, transparent);
-  pointer-events: none;
-}
-
-/* ========== HONOR CARD ========== */
-.honor {
-  --card-w: 280px;
-  width: var(--card-w);
-  position: relative;
-  isolation: isolate;
-}
-
-.honor-rays {
-  position: absolute;
-  inset: -8% -18% 18%;
-  z-index: 0;
-  background: repeating-conic-gradient(
-    from -2deg at 50% 46%,
-    color-mix(in srgb, var(--gold-soft) 90%, white) 0deg 4.5deg,
-    color-mix(in srgb, var(--gold) 28%, transparent) 4.5deg 9deg,
-    color-mix(in srgb, var(--bg-raise) 40%, transparent) 9deg 13.5deg
-  );
-  mask-image: radial-gradient(ellipse 68% 62% at 50% 48%, #000 12%, transparent 72%);
-  -webkit-mask-image: radial-gradient(ellipse 68% 62% at 50% 48%, #000 12%, transparent 72%);
-  opacity: 0.95;
-  animation: spin-slow 48s linear infinite;
-}
-@keyframes spin-slow { to { transform: rotate(360deg) } }
-@media (prefers-reduced-motion: reduce) {
-  .honor-rays { animation: none }
-}
-
-.honor-stage {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  aspect-ratio: 1;
-}
-
-.honor-avatar {
-  position: absolute;
-  left: 50%; top: 46%;
-  transform: translate(-50%, -50%);
-  width: 46%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  z-index: 2;
-  background:
-    radial-gradient(circle at 35% 28%, #efe6d4, #cfc0a4 55%, #b8a686);
-  border: 3px solid transparent;
-  background-clip: padding-box;
-  box-shadow:
-    0 0 0 2.5px var(--gold-line),
-    0 0 0 5px color-mix(in srgb, var(--gold-deep) 35%, transparent),
-    0 10px 24px rgba(38, 25, 15, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  margin-top: 20px;
   overflow: hidden;
-  display: grid;
-  place-items: center;
+  background:
+    radial-gradient(ellipse 55% 50% at 50% 42%, color-mix(in srgb, var(--gold-soft) 55%, transparent) 0%, transparent 70%),
+    linear-gradient(180deg, #F7F4EC 0%, var(--bg) 45%, #E8E4DA 100%);
+  border-top: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
 }
-.honor-avatar img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.honor-avatar .glyph {
-  font-family: var(--serif);
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: var(--son-deep);
-  line-height: 1;
-  text-shadow: 0 1px 0 color-mix(in srgb, var(--gold-soft) 80%, white);
-}
-
-.honor-laurel {
-  position: absolute;
-  inset: 2% 0 6%;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  filter: drop-shadow(0 3px 6px rgba(38, 25, 15, 0.2));
-}
-
-.honor-ribbon {
-  position: absolute;
-  left: 50%;
-  bottom: 11%;
-  transform: translateX(-50%);
-  z-index: 3;
-  width: 112%;
-  filter: drop-shadow(0 4px 8px rgba(38, 25, 15, 0.25));
-}
-.honor-ribbon svg { width: 100%; height: auto; display: block }
-.honor-ribbon-label {
+.sac-art {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 0 14% 1%;
-  font-size: 11.5px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink);
-  text-align: center;
-  line-height: 1.2;
+  pointer-events: none;
+  opacity: 0.55;
 }
-
-.honor-detail {
-  position: relative;
-  z-index: 2;
-  margin-top: 2px;
-  text-align: center;
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  text-transform: uppercase;
-}
-
-.honor-mark {
-  position: absolute;
-  top: -2px; left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  font-family: var(--serif);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--son-deep) 55%, transparent);
-  background: var(--foil);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Section sắc phong */
-.sac {
-  margin-top: 28px;
-  background: var(--son-deep) var(--brocade);
-  position: relative;
-  color: var(--son-ink);
-}
-.sac::before, .sac::after {
-  content: ""; position: absolute; left: 0; right: 0; height: 12px;
-  background: var(--meander) center / auto 9px repeat-x; opacity: 0.9;
-}
-.sac::before { top: 10px }
-.sac::after { bottom: 10px }
+.sac-art svg { width: 100%; height: 100%; display: block }
 .sac-in {
-  max-width: 1120px; margin: 0 auto;
-  padding: 56px 20px 64px; text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 52px 20px 60px;
+  text-align: center;
 }
 .sac .kicker {
   font-size: 10.5px; letter-spacing: 0.34em; text-transform: uppercase;
-  font-weight: 700; color: var(--gold-soft);
+  font-weight: 700; color: var(--gold-deep);
 }
 .sac h2 {
   font-family: var(--serif); font-size: clamp(1.6rem, 2.8vw, 2.15rem);
@@ -265,287 +102,376 @@ button { font: inherit; border: 0; background: none; cursor: pointer; color: inh
 .foil-text {
   background: var(--foil); -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.sac .sub { margin-top: 8px; font-size: 13.5px; opacity: 0.78 }
+.sac .sub { margin-top: 8px; font-size: 13.5px; color: var(--muted) }
 
 .grid {
   margin-top: 36px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+  gap: 20px;
+  align-items: stretch;
 }
-.grid-card {
-  background: color-mix(in srgb, var(--gold-soft) 7%, transparent);
-  border: 1px solid color-mix(in srgb, var(--gold-line) 65%, transparent);
-  padding: 22px 10px 18px;
+@media (max-width: 860px) { .grid { grid-template-columns: 1fr } }
+
+/* ========== HONOR CARD ========== */
+.honor {
+  --w: 260px;
   position: relative;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold-line) 18%, transparent);
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 22px 12px 18px;
+  isolation: isolate;
+  background: color-mix(in srgb, var(--bg-raise) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gold-line) 55%, transparent);
+  box-shadow: var(--shadow-lift);
+  backdrop-filter: blur(2px);
 }
-.grid-card::after {
-  content: ""; position: absolute; inset: 5px;
+.honor::after {
+  content: "";
+  position: absolute; inset: 5px;
   border: 1px solid color-mix(in srgb, var(--gold-line) 28%, transparent);
   pointer-events: none;
 }
-.grid-card .honor { --card-w: min(100%, 240px); margin: 0 auto }
-.grid-card .honor-detail { color: color-mix(in srgb, var(--son-ink) 90%, transparent) }
-.grid-card .honor-mark { opacity: 0.85 }
+
+/* Halo ánh sáng mềm (chuẩn poster) */
+.honor-glow {
+  position: absolute;
+  left: 50%; top: 38%;
+  transform: translate(-50%, -50%);
+  width: 140%;
+  aspect-ratio: 1;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%,
+      color-mix(in srgb, var(--gold-soft) 90%, white) 0%,
+      color-mix(in srgb, var(--gold) 28%, transparent) 28%,
+      color-mix(in srgb, var(--gold-deep) 8%, transparent) 48%,
+      transparent 68%);
+  filter: blur(0.5px);
+}
+
+/* Tia sáng TRÒN — mask hình tròn, tia đều */
+.honor-rays {
+  position: absolute;
+  left: 50%; top: 38%;
+  transform: translate(-50%, -50%);
+  width: 118%;
+  aspect-ratio: 1;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    color-mix(in srgb, var(--gold-soft) 75%, white) 0deg 3deg,
+    color-mix(in srgb, var(--gold) 22%, transparent) 3deg 6deg,
+    transparent 6deg 9deg
+  );
+  mask-image: radial-gradient(circle at 50% 50%, #000 8%, transparent 62%);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 8%, transparent 62%);
+  opacity: 0.9;
+  animation: ray-spin 90s linear infinite;
+}
+@keyframes ray-spin { to { transform: translate(-50%, -50%) rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) {
+  .honor-rays { animation: none }
+}
+
+.honor-stage {
+  position: relative;
+  z-index: 1;
+  width: var(--w);
+  max-width: 100%;
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+/* Vành trống đồng + chim lạc */
+.drum-ring {
+  position: absolute;
+  inset: 2%;
+  width: 96%;
+  height: 96%;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(41, 36, 29, 0.12));
+}
+
+.honor-avatar {
+  position: absolute;
+  left: 50%; top: 46%;
+  transform: translate(-50%, -50%);
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  z-index: 2;
+  background: radial-gradient(circle at 32% 28%, #f0ebe0, #cfc6b4 60%, #b8ae9a);
+  box-shadow:
+    0 0 0 2px var(--gold-line),
+    0 0 0 5px color-mix(in srgb, var(--gold-deep) 30%, transparent),
+    0 0 28px color-mix(in srgb, var(--gold) 35%, transparent),
+    0 10px 22px rgba(41, 36, 29, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.honor-avatar .glyph {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--son-deep);
+  line-height: 1;
+}
+
+.honor-ribbon {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  transform: translateX(-50%);
+  z-index: 3;
+  width: 112%;
+  filter: drop-shadow(0 4px 10px rgba(41, 36, 29, 0.22));
+}
+.honor-ribbon svg { width: 100%; height: auto; display: block }
+.honor-ribbon-label {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  padding: 0 13% 1%;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--ink); text-align: center; line-height: 1.2;
+}
+.honor-detail {
+  position: relative; z-index: 2;
+  margin-top: 6px;
+  text-align: center;
+  font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em;
+  color: var(--ink); text-transform: uppercase;
+}
 
 .note {
-  max-width: 1120px; margin: 0 auto; padding: 28px 20px 48px;
+  max-width: 1120px; margin: 0 auto; padding: 24px 20px 48px;
   font-size: 13px; color: var(--muted);
 }
 .note code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12px;
-  background: var(--bg-sunken);
-  padding: 2px 6px;
-  border: 1px solid var(--line);
-}
-
-@media (max-width: 860px) {
-  .hero { grid-template-columns: 1fr; gap: 24px }
-  .grid { grid-template-columns: 1fr }
+  font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+  background: var(--bg-sunken); padding: 2px 6px; border: 1px solid var(--line);
 }
 </style>
 </head>
 <body>
   <div class="chrome">
     <div class="chrome-in">
-      <span><b>GiaPhaHub</b> · Mẫu Bảng vàng — Di sản sống × nguyệt quế</span>
-      <nav class="pill" aria-label="Liên kết">
+      <span><b>GiaPhaHub</b> · Bảng vàng — trống đồng × chim lạc</span>
+      <nav class="pill">
         <a href="./giapha-ui-mockup.html">← Mockup tổng</a>
-        <span class="on">Bảng vàng</span>
+        <span class="on">Bảng vàng v2</span>
       </nav>
     </div>
   </div>
   <div class="band" aria-hidden="true"></div>
 
-  <section class="hero">
-    <div>
-      <div class="eyebrow">TK-04 · Component preview</div>
-      <h1>Thẻ bảng vàng:<br />vinh danh trang trọng</h1>
-      <p>
-        Bố cục theo mẫu nguyệt quế + ruy băng + chân dung, nhưng toàn bộ palette
-        son thẫm / vàng kim tuyến / kem gấm — cùng hệ «Di sản sống», không vàng neon.
-      </p>
-      <ul>
-        <li>Tia sáng radial cream–gold (quay chậm, tắt khi prefers-reduced-motion)</li>
-        <li>Vòng nguyệt quế SVG chi tiết, gradient foil</li>
-        <li>Ruy băng 3D (nếp gấp + bóng kim loại)</li>
-        <li>Avatar tròn viền kép vàng; fallback chữ Hán / initials</li>
-      </ul>
-    </div>
+  <div class="intro">
+    <div class="eyebrow">Tham chiếu thẩm mỹ di sản</div>
+    <h1>Nền kem + hoa văn trống đồng,<br />vành chim lạc, halo tròn</h1>
+    <p>Bỏ nguyệt quế. Tia sáng mask hình tròn; ánh sáng radial mềm như halo poster. Palette Alabaster / Urobilin / Philippine Gold.</p>
+  </div>
 
-    <div class="showcase" aria-label="Xem trước thẻ lớn">
-      <article class="honor">
-        <div class="honor-mark">GiaPhaHub</div>
-        <div class="honor-rays" aria-hidden="true"></div>
-        <div class="honor-stage">
-          <!-- Laurel -->
-          <svg class="honor-laurel" viewBox="0 0 320 320" aria-hidden="true">
-            <defs>
-              <linearGradient id="leafG" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#F3E6B8"/>
-                <stop offset="45%" stop-color="#E2AF1D"/>
-                <stop offset="100%" stop-color="#AE720C"/>
-              </linearGradient>
-              <linearGradient id="stemG" x1="0" y1="1" x2="0" y2="0">
-                <stop offset="0%" stop-color="#AE720C"/>
-                <stop offset="100%" stop-color="#D4A31C"/>
-              </linearGradient>
-            </defs>
-            <!-- Left branch -->
-            <path d="M152 278 C110 250 78 200 70 148 C64 108 78 72 102 58" fill="none" stroke="url(#stemG)" stroke-width="3.2" stroke-linecap="round"/>
-            <g fill="url(#leafG)">
-              <ellipse cx="96" cy="70" rx="16" ry="7" transform="rotate(-58 96 70)"/>
-              <ellipse cx="84" cy="92" rx="17" ry="7.5" transform="rotate(-48 84 92)"/>
-              <ellipse cx="74" cy="118" rx="18" ry="8" transform="rotate(-34 74 118)"/>
-              <ellipse cx="70" cy="146" rx="18" ry="8" transform="rotate(-18 70 146)"/>
-              <ellipse cx="72" cy="174" rx="17" ry="7.5" transform="rotate(-2 72 174)"/>
-              <ellipse cx="80" cy="200" rx="17" ry="7.5" transform="rotate(14 80 200)"/>
-              <ellipse cx="94" cy="224" rx="16" ry="7" transform="rotate(30 94 224)"/>
-              <ellipse cx="112" cy="246" rx="15" ry="6.5" transform="rotate(44 112 246)"/>
-              <ellipse cx="132" cy="264" rx="14" ry="6" transform="rotate(56 132 264)"/>
-            </g>
-            <!-- Right branch -->
-            <path d="M168 278 C210 250 242 200 250 148 C256 108 242 72 218 58" fill="none" stroke="url(#stemG)" stroke-width="3.2" stroke-linecap="round"/>
-            <g fill="url(#leafG)">
-              <ellipse cx="224" cy="70" rx="16" ry="7" transform="rotate(58 224 70)"/>
-              <ellipse cx="236" cy="92" rx="17" ry="7.5" transform="rotate(48 236 92)"/>
-              <ellipse cx="246" cy="118" rx="18" ry="8" transform="rotate(34 246 118)"/>
-              <ellipse cx="250" cy="146" rx="18" ry="8" transform="rotate(18 250 146)"/>
-              <ellipse cx="248" cy="174" rx="17" ry="7.5" transform="rotate(2 248 174)"/>
-              <ellipse cx="240" cy="200" rx="17" ry="7.5" transform="rotate(-14 240 200)"/>
-              <ellipse cx="226" cy="224" rx="16" ry="7" transform="rotate(-30 226 224)"/>
-              <ellipse cx="208" cy="246" rx="15" ry="6.5" transform="rotate(-44 208 246)"/>
-              <ellipse cx="188" cy="264" rx="14" ry="6" transform="rotate(-56 188 264)"/>
-            </g>
-            <!-- Bow -->
-            <path d="M138 276 C150 292 170 292 182 276 M148 284 L160 304 L172 284"
-              fill="none" stroke="url(#leafG)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <circle cx="160" cy="280" r="4.5" fill="url(#leafG)"/>
-          </svg>
-
-          <div class="honor-avatar" aria-hidden="true">
-            <span class="glyph">學</span>
-          </div>
-
-          <!-- Ribbon -->
-          <div class="honor-ribbon">
-            <svg viewBox="0 0 360 72" aria-hidden="true">
-              <defs>
-                <linearGradient id="rib" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#F6E7B0"/>
-                  <stop offset="38%" stop-color="#D4AF37"/>
-                  <stop offset="72%" stop-color="#A67C1A"/>
-                  <stop offset="100%" stop-color="#824807"/>
-                </linearGradient>
-                <linearGradient id="ribSide" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#824807"/>
-                  <stop offset="100%" stop-color="#A67C1A"/>
-                </linearGradient>
-                <filter id="ribShade" x="-10%" y="-20%" width="120%" height="140%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="1.2" flood-color="#26190F" flood-opacity="0.25"/>
-                </filter>
-              </defs>
-              <!-- left fold -->
-              <path d="M8 20 L46 8 L46 64 L8 52 Z" fill="url(#ribSide)" opacity="0.92"/>
-              <path d="M46 8 L62 22 L62 50 L46 64 Z" fill="#824807"/>
-              <!-- right fold -->
-              <path d="M352 20 L314 8 L314 64 L352 52 Z" fill="url(#ribSide)" opacity="0.92"/>
-              <path d="M314 8 L298 22 L298 50 L314 64 Z" fill="#824807"/>
-              <!-- center -->
-              <path d="M54 10 H306 C312 10 316 14 316 20 V52 C316 58 312 62 306 62 H54 C48 62 44 58 44 52 V20 C44 14 48 10 54 10 Z"
-                fill="url(#rib)" filter="url(#ribShade)"/>
-              <path d="M54 12 H306" stroke="#F8F0C8" stroke-width="1.2" opacity="0.55"/>
-              <path d="M54 60 H306" stroke="#824807" stroke-width="1" opacity="0.35"/>
-            </svg>
-            <div class="honor-ribbon-label">Lê Thị Thùy Vy</div>
-          </div>
-        </div>
-        <p class="honor-detail">Học viên lớp ID14 · ĐTH 9.2</p>
-      </article>
-    </div>
-  </section>
-
-  <!-- Context: sắc phong -->
   <section class="sac" aria-labelledby="sac-title">
+    <!-- Nền hoa văn toàn section -->
+    <div class="sac-art" aria-hidden="true">
+      <svg viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id="gStroke" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#AE720C" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#E2AF1D" stop-opacity="0.55"/>
+          </linearGradient>
+        </defs>
+        <!-- Trống đồng mờ trung tâm -->
+        <g transform="translate(600 300)" opacity="0.22" fill="none" stroke="#AE720C" stroke-width="1.2">
+          <circle r="210"/>
+          <circle r="188"/>
+          <circle r="165"/>
+          <circle r="142"/>
+          <circle r="118"/>
+          <circle r="72"/>
+          <circle r="36"/>
+          <!-- Sao tâm trống đồng -->
+          <g stroke="#E2AF1D" stroke-width="1.4">
+            <line x1="0" y1="-28" x2="0" y2="28"/><line x1="-28" y1="0" x2="28" y2="0"/>
+            <line x1="-20" y1="-20" x2="20" y2="20"/><line x1="20" y1="-20" x2="-20" y2="20"/>
+          </g>
+          <!-- Vành răng cưa -->
+          <path d="M0-118 L8-128 L0-138 L-8-128 Z M83-83 L96-86 L99-72 L90-78 Z M118 0 L128-8 L138 0 L128 8 Z M83 83 L86 96 L72 99 L78 90 Z M0 118 L-8 128 L0 138 L8 128 Z M-83 83 L-96 86 L-99 72 L-90 78 Z M-118 0 L-128 8 L-138 0 L-128-8 Z M-83-83 L-86-96 L-72-99 L-78-90 Z" fill="#E2AF1D" stroke="none" opacity="0.7"/>
+          <!-- Chim lạc bay quanh -->
+          <g fill="#AE720C" stroke="none" opacity="0.85">
+            <g transform="rotate(0) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+            <g transform="rotate(45) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+            <g transform="rotate(90) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+            <g transform="rotate(135) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+            <g transform="rotate(180) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+            <g transform="rotate(225) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+            <g transform="rotate(270) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+            <g transform="rotate(315) translate(0,-155) scale(0.9)"><path d="M0 0 C6-4 14-2 18 4 C12 2 8 6 4 10 C2 4-2 2 0 0 Z M-2 2 C-10-6-22-4-28 4 C-18 0-10 4-4 8 Z"/></g>
+          </g>
+        </g>
+        <!-- Mây / núi line-art -->
+        <g fill="none" stroke="url(#gStroke)" stroke-width="1.35" stroke-linecap="round">
+          <path d="M40 520 C90 480 140 500 180 470 C220 500 280 460 340 490 C400 460 460 500 520 475"/>
+          <path d="M680 500 C740 460 800 490 860 455 C920 490 980 450 1140 480"/>
+          <path d="M60 580 L140 500 L220 560 L300 470 L400 550 L520 490 L620 560"/>
+          <path d="M700 570 L780 500 L860 555 L940 475 L1040 540 L1160 500"/>
+          <path d="M80 160 C120 140 150 155 190 130 C230 150 260 125 310 145"/>
+          <path d="M900 140 C940 120 980 145 1020 118 C1060 140 1100 115 1150 135"/>
+          <path d="M200 220 C240 200 270 230 320 205"/>
+          <path d="M850 210 C900 185 940 220 990 195"/>
+        </g>
+        <!-- Chim lạc tự do -->
+        <g fill="#AE720C" opacity="0.4">
+          <path transform="translate(160 240) scale(1.4)" d="M0 0 C8-5 18-3 24 5 C16 3 10 8 5 14 C3 6-3 3 0 0 Z M-3 3 C-14-8-30-5-38 6 C-24 1-14 6-5 11 Z"/>
+          <path transform="translate(980 250) scale(1.3) rotate(-20)" d="M0 0 C8-5 18-3 24 5 C16 3 10 8 5 14 C3 6-3 3 0 0 Z M-3 3 C-14-8-30-5-38 6 C-24 1-14 6-5 11 Z"/>
+          <path transform="translate(1050 180) scale(1.1) rotate(15)" d="M0 0 C8-5 18-3 24 5 C16 3 10 8 5 14 C3 6-3 3 0 0 Z M-3 3 C-14-8-30-5-38 6 C-24 1-14 6-5 11 Z"/>
+        </g>
+      </svg>
+    </div>
+
     <div class="sac-in">
       <div class="kicker">Uống nước nhớ nguồn</div>
       <h2 id="sac-title"><span class="foil-text">Bảng vàng công đức</span></h2>
       <p class="sub">Khắc ghi tấm lòng của con cháu hướng về tông tộc</p>
 
       <div class="grid">
-        <div class="grid-card">
-          <article class="honor">
-            <div class="honor-rays" aria-hidden="true"></div>
-            <div class="honor-stage">
-              <svg class="honor-laurel" viewBox="0 0 320 320" aria-hidden="true">
-                <path d="M152 278 C110 250 78 200 70 148 C64 108 78 72 102 58" fill="none" stroke="#E2AF1D" stroke-width="3" stroke-linecap="round"/>
-                <path d="M168 278 C210 250 242 200 250 148 C256 108 242 72 218 58" fill="none" stroke="#E2AF1D" stroke-width="3" stroke-linecap="round"/>
-                <g fill="#D4A31C">
-                  <ellipse cx="96" cy="70" rx="14" ry="6" transform="rotate(-58 96 70)"/>
-                  <ellipse cx="78" cy="120" rx="15" ry="6.5" transform="rotate(-30 78 120)"/>
-                  <ellipse cx="86" cy="190" rx="14" ry="6" transform="rotate(12 86 190)"/>
-                  <ellipse cx="118" cy="250" rx="13" ry="5.5" transform="rotate(42 118 250)"/>
-                  <ellipse cx="224" cy="70" rx="14" ry="6" transform="rotate(58 224 70)"/>
-                  <ellipse cx="242" cy="120" rx="15" ry="6.5" transform="rotate(30 242 120)"/>
-                  <ellipse cx="234" cy="190" rx="14" ry="6" transform="rotate(-12 234 190)"/>
-                  <ellipse cx="202" cy="250" rx="13" ry="5.5" transform="rotate(-42 202 250)"/>
-                </g>
-                <path d="M140 276 C160 294 180 294 200 276" fill="none" stroke="#E2AF1D" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Card 1 -->
+        <article class="honor">
+          <div class="honor-glow" aria-hidden="true"></div>
+          <div class="honor-rays" aria-hidden="true"></div>
+          <div class="honor-stage">
+            <svg class="drum-ring" viewBox="0 0 320 320" aria-hidden="true">
+              <defs>
+                <linearGradient id="dg1" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#F3E6B8"/>
+                  <stop offset="45%" stop-color="#E2AF1D"/>
+                  <stop offset="100%" stop-color="#824807"/>
+                </linearGradient>
+              </defs>
+              <g fill="none" stroke="url(#dg1)" stroke-width="1.6">
+                <circle cx="160" cy="148" r="128"/>
+                <circle cx="160" cy="148" r="116"/>
+                <circle cx="160" cy="148" r="104"/>
+                <circle cx="160" cy="148" r="78"/>
+              </g>
+              <!-- răng cưa -->
+              <g fill="url(#dg1)" opacity="0.85">
+                <polygon points="160,20 168,32 152,32"/>
+                <polygon points="250,58 252,70 240,64"/>
+                <polygon points="288,148 276,156 276,140"/>
+                <polygon points="250,238 240,232 252,226"/>
+                <polygon points="160,276 152,264 168,264"/>
+                <polygon points="70,238 68,226 80,232"/>
+                <polygon points="32,148 44,140 44,156"/>
+                <polygon points="70,58 80,64 68,70"/>
+              </g>
+              <!-- chim lạc vòng -->
+              <g fill="url(#dg1)">
+                <g transform="translate(160 148) rotate(0) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(60) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(120) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(180) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(240) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(300) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+              </g>
+            </svg>
+            <div class="honor-avatar"><span class="glyph">壽</span></div>
+            <div class="honor-ribbon">
+              <svg viewBox="0 0 360 72" aria-hidden="true">
+                <defs>
+                  <linearGradient id="rib1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#F3E6B8"/>
+                    <stop offset="40%" stop-color="#E2AF1D"/>
+                    <stop offset="100%" stop-color="#824807"/>
+                  </linearGradient>
+                </defs>
+                <path d="M8 20 L46 8 L46 64 L8 52 Z" fill="#824807"/>
+                <path d="M352 20 L314 8 L314 64 L352 52 Z" fill="#824807"/>
+                <path d="M54 10 H306 C312 10 316 14 316 20 V52 C316 58 312 62 306 62 H54 C48 62 44 58 44 52 V20 C44 14 48 10 54 10 Z" fill="url(#rib1)"/>
+                <path d="M54 12 H306" stroke="#F8F0C8" stroke-width="1.2" opacity="0.5"/>
               </svg>
-              <div class="honor-avatar"><span class="glyph">壽</span></div>
-              <div class="honor-ribbon">
-                <svg viewBox="0 0 360 72" aria-hidden="true">
-                  <path d="M8 20 L46 8 L46 64 L8 52 Z" fill="#824807"/>
-                  <path d="M352 20 L314 8 L314 64 L352 52 Z" fill="#824807"/>
-                  <path d="M54 10 H306 C312 10 316 14 316 20 V52 C316 58 312 62 306 62 H54 C48 62 44 58 44 52 V20 C44 14 48 10 54 10 Z" fill="#E2AF1D"/>
-                  <path d="M54 10 H306 C312 10 316 14 316 20 V36 H44 V20 C44 14 48 10 54 10 Z" fill="#F0E3B2" opacity="0.35"/>
-                </svg>
-                <div class="honor-ribbon-label">Ông Hoàng Văn A</div>
-              </div>
+              <div class="honor-ribbon-label">Ông Hoàng Văn A</div>
             </div>
-            <p class="honor-detail">Hiến 200m² đất xây nhà thờ họ</p>
-          </article>
-        </div>
+          </div>
+          <p class="honor-detail">Hiến 200m² đất xây nhà thờ họ</p>
+        </article>
 
-        <div class="grid-card">
-          <article class="honor">
-            <div class="honor-rays" aria-hidden="true"></div>
-            <div class="honor-stage">
-              <svg class="honor-laurel" viewBox="0 0 320 320" aria-hidden="true">
-                <path d="M152 278 C110 250 78 200 70 148 C64 108 78 72 102 58" fill="none" stroke="#E2AF1D" stroke-width="3" stroke-linecap="round"/>
-                <path d="M168 278 C210 250 242 200 250 148 C256 108 242 72 218 58" fill="none" stroke="#E2AF1D" stroke-width="3" stroke-linecap="round"/>
-                <g fill="#D4A31C">
-                  <ellipse cx="96" cy="70" rx="14" ry="6" transform="rotate(-58 96 70)"/>
-                  <ellipse cx="78" cy="120" rx="15" ry="6.5" transform="rotate(-30 78 120)"/>
-                  <ellipse cx="86" cy="190" rx="14" ry="6" transform="rotate(12 86 190)"/>
-                  <ellipse cx="118" cy="250" rx="13" ry="5.5" transform="rotate(42 118 250)"/>
-                  <ellipse cx="224" cy="70" rx="14" ry="6" transform="rotate(58 224 70)"/>
-                  <ellipse cx="242" cy="120" rx="15" ry="6.5" transform="rotate(30 242 120)"/>
-                  <ellipse cx="234" cy="190" rx="14" ry="6" transform="rotate(-12 234 190)"/>
-                  <ellipse cx="202" cy="250" rx="13" ry="5.5" transform="rotate(-42 202 250)"/>
-                </g>
-                <path d="M140 276 C160 294 180 294 200 276" fill="none" stroke="#E2AF1D" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Card 2 -->
+        <article class="honor">
+          <div class="honor-glow" aria-hidden="true"></div>
+          <div class="honor-rays" aria-hidden="true"></div>
+          <div class="honor-stage">
+            <svg class="drum-ring" viewBox="0 0 320 320" aria-hidden="true">
+              <g fill="none" stroke="url(#dg1)" stroke-width="1.6">
+                <circle cx="160" cy="148" r="128"/><circle cx="160" cy="148" r="116"/>
+                <circle cx="160" cy="148" r="104"/><circle cx="160" cy="148" r="78"/>
+              </g>
+              <g fill="url(#dg1)">
+                <g transform="translate(160 148) rotate(0) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(60) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(120) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(180) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(240) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(300) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+              </g>
+            </svg>
+            <div class="honor-avatar"><span class="glyph">德</span></div>
+            <div class="honor-ribbon">
+              <svg viewBox="0 0 360 72" aria-hidden="true">
+                <path d="M8 20 L46 8 L46 64 L8 52 Z" fill="#824807"/>
+                <path d="M352 20 L314 8 L314 64 L352 52 Z" fill="#824807"/>
+                <path d="M54 10 H306 C312 10 316 14 316 20 V52 C316 58 312 62 306 62 H54 C48 62 44 58 44 52 V20 C44 14 48 10 54 10 Z" fill="url(#rib1)"/>
               </svg>
-              <div class="honor-avatar"><span class="glyph">德</span></div>
-              <div class="honor-ribbon">
-                <svg viewBox="0 0 360 72" aria-hidden="true">
-                  <path d="M8 20 L46 8 L46 64 L8 52 Z" fill="#824807"/>
-                  <path d="M352 20 L314 8 L314 64 L352 52 Z" fill="#824807"/>
-                  <path d="M54 10 H306 C312 10 316 14 316 20 V52 C316 58 312 62 306 62 H54 C48 62 44 58 44 52 V20 C44 14 48 10 54 10 Z" fill="#E2AF1D"/>
-                  <path d="M54 10 H306 C312 10 316 14 316 20 V36 H44 V20 C44 14 48 10 54 10 Z" fill="#F0E3B2" opacity="0.35"/>
-                </svg>
-                <div class="honor-ribbon-label">Bà Hoàng Thị B</div>
-              </div>
+              <div class="honor-ribbon-label">Bà Hoàng Thị B</div>
             </div>
-            <p class="honor-detail">Tài trợ quỹ khuyến học dòng họ</p>
-          </article>
-        </div>
+          </div>
+          <p class="honor-detail">Tài trợ quỹ khuyến học dòng họ</p>
+        </article>
 
-        <div class="grid-card">
-          <article class="honor">
-            <div class="honor-rays" aria-hidden="true"></div>
-            <div class="honor-stage">
-              <svg class="honor-laurel" viewBox="0 0 320 320" aria-hidden="true">
-                <path d="M152 278 C110 250 78 200 70 148 C64 108 78 72 102 58" fill="none" stroke="#E2AF1D" stroke-width="3" stroke-linecap="round"/>
-                <path d="M168 278 C210 250 242 200 250 148 C256 108 242 72 218 58" fill="none" stroke="#E2AF1D" stroke-width="3" stroke-linecap="round"/>
-                <g fill="#D4A31C">
-                  <ellipse cx="96" cy="70" rx="14" ry="6" transform="rotate(-58 96 70)"/>
-                  <ellipse cx="78" cy="120" rx="15" ry="6.5" transform="rotate(-30 78 120)"/>
-                  <ellipse cx="86" cy="190" rx="14" ry="6" transform="rotate(12 86 190)"/>
-                  <ellipse cx="118" cy="250" rx="13" ry="5.5" transform="rotate(42 118 250)"/>
-                  <ellipse cx="224" cy="70" rx="14" ry="6" transform="rotate(58 224 70)"/>
-                  <ellipse cx="242" cy="120" rx="15" ry="6.5" transform="rotate(30 242 120)"/>
-                  <ellipse cx="234" cy="190" rx="14" ry="6" transform="rotate(-12 234 190)"/>
-                  <ellipse cx="202" cy="250" rx="13" ry="5.5" transform="rotate(-42 202 250)"/>
-                </g>
-                <path d="M140 276 C160 294 180 294 200 276" fill="none" stroke="#E2AF1D" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Card 3 -->
+        <article class="honor">
+          <div class="honor-glow" aria-hidden="true"></div>
+          <div class="honor-rays" aria-hidden="true"></div>
+          <div class="honor-stage">
+            <svg class="drum-ring" viewBox="0 0 320 320" aria-hidden="true">
+              <g fill="none" stroke="url(#dg1)" stroke-width="1.6">
+                <circle cx="160" cy="148" r="128"/><circle cx="160" cy="148" r="116"/>
+                <circle cx="160" cy="148" r="104"/><circle cx="160" cy="148" r="78"/>
+              </g>
+              <g fill="url(#dg1)">
+                <g transform="translate(160 148) rotate(0) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(60) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(120) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(180) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(240) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+                <g transform="translate(160 148) rotate(300) translate(0,-110) scale(1.05)"><path d="M0 0 C7-4 16-2 21 5 C14 3 9 8 5 12 C2 5-2 2 0 0ZM-2 2 C-12-7-26-4-32 5 C-22 0-12 5-4 9Z"/></g>
+              </g>
+            </svg>
+            <div class="honor-avatar"><span class="glyph">心</span></div>
+            <div class="honor-ribbon">
+              <svg viewBox="0 0 360 72" aria-hidden="true">
+                <path d="M8 20 L46 8 L46 64 L8 52 Z" fill="#824807"/>
+                <path d="M352 20 L314 8 L314 64 L352 52 Z" fill="#824807"/>
+                <path d="M54 10 H306 C312 10 316 14 316 20 V52 C316 58 312 62 306 62 H54 C48 62 44 58 44 52 V20 C44 14 48 10 54 10 Z" fill="url(#rib1)"/>
               </svg>
-              <div class="honor-avatar"><span class="glyph">心</span></div>
-              <div class="honor-ribbon">
-                <svg viewBox="0 0 360 72" aria-hidden="true">
-                  <path d="M8 20 L46 8 L46 64 L8 52 Z" fill="#824807"/>
-                  <path d="M352 20 L314 8 L314 64 L352 52 Z" fill="#824807"/>
-                  <path d="M54 10 H306 C312 10 316 14 316 20 V52 C316 58 312 62 306 62 H54 C48 62 44 58 44 52 V20 C44 14 48 10 54 10 Z" fill="#E2AF1D"/>
-                  <path d="M54 10 H306 C312 10 316 14 316 20 V36 H44 V20 C44 14 48 10 54 10 Z" fill="#F0E3B2" opacity="0.35"/>
-                </svg>
-                <div class="honor-ribbon-label">Ông Hoàng Văn C</div>
-              </div>
+              <div class="honor-ribbon-label">Ông Hoàng Văn C</div>
             </div>
-            <p class="honor-detail">Sưu tầm, biên soạn gia phả 13 đời</p>
-          </article>
-        </div>
+          </div>
+          <p class="honor-detail">Sưu tầm, biên soạn gia phả 13 đời</p>
+        </article>
       </div>
     </div>
   </section>
 
   <div class="note">
-    <p>
-      File mẫu: <code>instruction/mockups/bang-vang-honor-card.html</code> —
-      mở trực tiếp trong trình duyệt để duyệt. Khi chốt, port sang
-      <code>HonorBoardCard</code> trong <code>@giapha/ui</code> (chỉ token, không hex trong production CSS).
-    </p>
+    <p>Mẫu: <code>instruction/mockups/bang-vang-honor-card.html</code> — chốt rồi port sang <code>HonorBoardCard</code> + section trang chủ.</p>
   </div>
 </body>
 </html>
