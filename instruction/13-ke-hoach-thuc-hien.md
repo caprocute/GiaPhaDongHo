@@ -1,7 +1,8 @@
 # TK-13 — Kế hoạch thực hiện GiaPhaHub (checklist + song song)
 
 > Nguồn: [00-tong-quan.md](00-tong-quan.md), TK-01…TK-12, [SRS/00-tong-hop.md](../SRS/00-tong-hop.md), [CLAUDE.md](../CLAUDE.md).  
-> Quy ước: mỗi mục `- [ ]` đánh dấu khi xong. **[SS]** = được phép làm song song với mục được nêu. Không ước lượng ngày.
+> Quy ước: mỗi mục `- [ ]` đánh dấu khi xong. **[SS]** = được phép làm song song với mục được nêu. Không ước lượng ngày.  
+> **Giai đoạn hiện tại:** sau R0–R2 (khung MVP/mở rộng đã đánh dấu), trọng tâm chuyển sang **RP — Hoàn thiện sản phẩm production** (không còn tư duy “MVP chạy được là đủ”).
 
 ```mermaid
 flowchart TB
@@ -10,17 +11,19 @@ flowchart TB
     B[Tokens_UI_kit]
     C[JHipster_Boot4]
   end
-  subgraph r1 [R1 MVP]
+  subgraph r1 [R1 Loi]
     D[Genealogy_core]
     E[CMS_Search_IAM]
     F[Portal_Admin_CRM]
   end
-  subgraph r2 [R2]
+  subgraph r2 [R2 Mo rong]
     G[Donation_Event_Moderation]
     H[Notify_PDF]
   end
-  subgraph r3 [R3]
-    I[Geo_Heritage_AI_SaaS]
+  subgraph rp [RP Production]
+    P1[Parity_mockup_SRS]
+    P2[Ops_Security_Quality]
+    P3[UX_polish_Go_live]
   end
   A --> D
   B --> F
@@ -29,7 +32,9 @@ flowchart TB
   E --> F
   F --> G
   G --> H
-  H --> I
+  H --> P1
+  P1 --> P2
+  P2 --> P3
   A -.SS.-> B
   A -.SS.-> C
   B -.SS.-> C
@@ -44,6 +49,7 @@ flowchart TB
 3. UI: token + `packages/ui` trước khi làm màn hình thật (TK-11).
 4. Không claim xong khi thiếu bằng chứng gate A/B/D (và C/S khi đụng UI/auth).
 5. **[SS]** chỉ mở khi không phụ thuộc artifact của nhánh kia (API contract / token / image compose).
+6. **RP:** mỗi mục phải *hoạt động end-to-end trên staging* (DB thật, kênh thật khi có, không stub/demo giả làm chính).
 
 ---
 
@@ -117,7 +123,7 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 
 ---
 
-## R1 — MVP (parity lõi)
+## R1 — Lõi nghiệp vụ (parity nền — trước đây gọi MVP)
 
 ### R1.1 Genealogy schema & JDL (BE)
 - [x] JDL: Tree, Person, Union, Chapter (phả ký/tộc ước/hương hỏa), DeathAnniversary
@@ -165,7 +171,6 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Album (MediaLightbox demo — chờ public album API)
 - [x] Tìm kiếm (suggest + deep-link `?q=` → hồ sơ)
 
-
 ### R1.8 Admin CRM lõi  **[SS với R1.7 — cùng API]**
 - [x] AppShell + menu CRM + OIDC login (RBAC BE R1.5; menu theo role tinh chỉnh sau)
 - [x] Danh sách / form hồ sơ người + DualDatePicker + Zod → API `/api/v1/trees/{slug}/persons` (+ ngày mất → giỗ)
@@ -173,7 +178,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Soạn phả đồ fullscreen SRS-12a — layout 3 cột + canvas SVG + Person/Union panel + `?root=` (`/tree`); v1.1: DualDate, mã hiệu BE, sửa hôn nhân, xóa khỏi cây, cha-con đơn thân (FR-12a.26–38)
 - [x] Quản lý bài viết + duyệt comment (`/posts`, `/comments` → `/api/cms-posts` / `/api/cms-comments`)
 - [x] Media library (album CRUD + upload `/api/v1/media/upload` + list/xóa photos)
-- [x] Cài đặt site động — `GET/PUT /api/v1/trees/{slug}/settings` (metaJson) + admin `/settings` + portal header/footer/meta/tree/tự khai/nhắc giỗ (FR-12.18)
+- [x] Cài đặt site động — `GET/PUT /api/v1/trees/{slug}/settings` (metaJson) + admin `/settings` + portal header/footer/meta/tree/tự khai/nhắc giỗ (FR-12.18) — *chưa đủ 13 mục nav mockup → RP.1*
 
 ### R1.9 Ngày giỗ & sự kiện domain
 - [x] Tự động upsert anniversary khi ghi người mất (`DeathAnniversarySync` + `DeathAnniversaryUpserted`; hook `TreeGenealogyService` / `PersonService`; unique `person_id`)
@@ -187,13 +192,13 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Gate C visual pilot (Button/Alert/Header/DataTable/GioCard) — `pnpm test:visual` + `visual.yml`
 - [x] Gate S: semgrep/trivy trên CI (`ci.yml` security; continue-on-error lần đầu)
 
-**Cổng R1 (MVP):** 1 cây mẫu seed; khách xem phả đồ/giỗ/tin; admin CRUD người + bài; login 2FA; compose/staging chạy được.
+**Cổng R1:** 1 cây mẫu seed; khách xem phả đồ/giỗ/tin; admin CRUD người + bài; login 2FA; compose/staging chạy được. *(Đây là nền — chưa đủ tiêu chuẩn production.)*
 
 ---
 
 ## R2 — Mở rộng văn hóa & vận hành
 
-> Bắt đầu sau cổng R1. Các nhóm R2.x **[SS với nhau]** nếu không dùng chung schema đang migrate cùng lúc — ưu tiên 1 migration train / tuần.
+> Các nhóm R2.x đã có khung UI/API (checklist [x]). **RP** sẽ nâng từ “có màn hình” → “đủ dùng thật cho tộc trưởng”.
 
 ### R2.1 Moderation — cổng tự khai (F3)
 - [x] JDL/change_request + diff + hàng đợi duyệt
@@ -231,27 +236,142 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] Audit log UI
 - [x] Module on/off (`module_registry`)
 
-**Cổng R2:** tự khai có duyệt; ít nhất 1 chiến dịch công đức; nhắc giỗ 1 kênh thật; xuất PDF 1 chương mẫu.
+**Cổng R2 (khung):** tự khai có duyệt; chiến dịch công đức; nhắc giỗ; PDF mẫu. *(Độ sâu production → RP.)*
 
 ---
 
-## R3 — Nâng cao
+## RP — Hoàn thiện sản phẩm (Production)
 
-### R3.1 Bản đồ mộ + QR bia (F5)
-- [ ] Geo fields + map UI + QR deep-link hồ sơ
+> **Mục tiêu:** một bản phát hành cho dòng họ dùng thật — ổn định, an toàn, đủ nghiệp vụ SRS/mockup, vận hành được, không còn “demo/fallback/stub” làm luồng chính.  
+> **Không thuộc RP:** F5 bản đồ mộ, F7 Hán-Nôm, F9 trợ lý AI, multi-tenant SaaS — giữ ở [Hàng đợi mở rộng](#hàng-đợi-mở-rộng-sau-go-live) sau go-live.
 
-### R3.2 Di sản Hán-Nôm (F7)  **[SS với R3.1]**
-- [ ] Viewer ảnh độ phân giải cao + phiên âm/dịch có duyệt
+### Phân tích khoảng trống (hiện trạng → production)
 
-### R3.3 Trợ lý AI (F9)  **[sau search + privacy vững]**
-- [ ] RAG giới hạn tree; guardrail PII; citation nguồn
+| Trục | Hiện trạng (sau R1/R2) | Tiêu chí production |
+|------|------------------------|---------------------|
+| **Cấu hình hệ thống** | 4 section thật (identity/brand/tree/notify); nav mockup còn 9 mục trống/link | Đủ 13 mục mockup `admin-settings.html` + lưu DB/secret Jasypt + ăn vào portal/CRM |
+| **Soạn phả đồ** | SRS-12a v1.1 cơ bản | Parity mockup còn lại (skeleton, nhãn đời, panel quan hệ đầy đủ, audit, role FE) |
+| **Portal** | Nhiều route còn demo/fallback khi API trống | Luồng chính 100% API; empty/error state nghiệp vụ; SEO/meta động |
+| **CMS / Media** | CRUD có; album public/lightbox chưa hoàn | Gallery công khai, hẹn giờ đăng, trang tĩnh, trình quản lý file |
+| **Công đức / Sự kiện / Tự khai / Nhắc giỗ** | Khung UI + API | Đối soát thật, SMTP/Zalo thật (hoặc tắt rõ), mockup admin parity, không lộ jargon UI |
+| **IAM / RBAC** | Role Keycloak + permission catalog | Menu theo role, thư ký nhánh (FR-12.10), đăng ký/duyệt thành viên (FR-12.16–17) |
+| **Riêng tư NĐ13** | Filter người sống cơ bản | Ma trận viewer đầy đủ; cấu hình PII trong settings; test + security-review |
+| **Chất lượng** | Gate A/B pilot; Gate S continue-on-error | Gate A/B/C/D/S bắt buộc; E2E smoke staging; perf phả đồ ≥200 node |
+| **Vận hành** | Script backup; deploy staging | Backup/restore có UI+cron; giám sát; runbook; prod env + HTTPS |
+| **Dữ liệu** | Seed mỏng | Seed họ mẫu đầy đủ; import Excel/GEDCOM tối thiểu (nếu SRS yêu cầu); migration an toàn |
 
-### R3.4 PWA portal + multi-tenant SaaS
-- [ ] PWA offline cache cây
-- [ ] RLS `tree_id`, Helm chart (TK-09 Profile B)
-- [ ] Custom domain / tenant admin
+### Nguyên tắc RP
 
-**Cổng R3:** 1 tenant thứ hai trên cùng codebase; AI trả lời có nguồn; map mộ demo.
+1. **Một usecase = một chuỗi liên kết:** admin đổi cấu hình → portal/CRM phản ánh trong ≤1 TTL (không hardcode).
+2. **Không stub trên đường chính:** adapter chưa sẵn → tắt feature + thông báo nghiệp vụ, không giả “đã gửi Zalo”.
+3. **Mockup là chuẩn bố cục; DS là chuẩn hoàn thiện UI** (`packages/ui` + tokens).
+4. **Go-live checklist** phải xanh trước khi tuyên bố “sản phẩm”.
+
+---
+
+### RP.1 — Cấu hình hệ thống đầy đủ (FR-12.17–12.23, mockup settings)
+
+> Mockup: `instruction/mockups/admin-settings.html` — 13 mục / 5 nhóm.
+
+- [ ] **Nav đầy đủ** khớp mockup; scroll/hash từng section; trạng thái “Sắp có” chỉ khi thật sự chưa làm (không để mục chết)
+- [ ] **Nhận diện:** logo/favicon upload MinIO + URL trong settings; ngân hàng/footer/social đầy đủ → portal footer
+- [ ] **Phả hệ:** tách section Âm–dương lịch (múi giờ, quy ước nhuận hiển thị) + Mã hiệu (prefix, mẫu preview) khỏi “cây”
+- [ ] **Đăng ký & xác thực:** bật/tắt tự kích hoạt, captcha, quy định thành viên — nối Keycloak/realm policy (FR-12.17)
+- [ ] **Quyền riêng tư & PII:** toggle mask ngày sinh, mức mặc định `privacy` người sống — ăn `PersonPrivacyFilter` (FR-12a.25 / NĐ13)
+- [ ] **Phân quyền vai trò:** UI xem ma trận role→permission (read-only hoặc sync catalog); không lộ tên kỹ thuật trên UI
+- [ ] **Email (SMTP):** host/port/from + mật khẩu `ENC(...)` Jasypt; gửi thử; dùng cho kích hoạt / quên MK / nhắc giỗ (FR-12.22)
+- [ ] **Zalo OA:** app id / OA id / token `ENC(...)`; dry-run vs gửi thật; tắt kênh nếu chưa cấu hình
+- [ ] **Nhắc nhở & giỗ:** đồng bộ với subscription mặc định (ngày trước, kênh) — đã có nền; hoàn thiện UX
+- [ ] **Sao lưu & khôi phục:** kích hoạt job backup, lịch, tải bản gần nhất, hướng dẫn restore (FR-12.20)
+- [ ] **Tích hợp & webhook:** endpoint đăng ký sự kiện (PersonUpdated, DonationReceived…) + secret
+- [ ] **Nhật ký audit:** lọc theo module/user/thời gian; deep-link từ CRM (FR-12.2 / R2.8 nâng cấp)
+- [ ] SRS cập nhật: mở rộng FR-12.18 thành ma trận section settings (file SRS riêng hoặc mục trong SRS-12)
+
+**Cổng RP.1:** lưu settings trên staging; đổi tên/logo/SMTP(test)/privacy → portal & mail phản ánh; secret không plaintext trong git.
+
+---
+
+### RP.2 — CRM & phả hệ “dùng hàng ngày”
+
+- [ ] Soạn phả đồ: còn lại SRS-12a (skeleton, nhãn đời FR-12a.10, badge sidebar, pan animated, FE role TREE_EDITOR)
+- [ ] Hồ sơ người: đủ field SRS-12.5 (ảnh chân dung, mộ, danh xưng); không hardcode lifeStatus lệch `alive`/`deceased`
+- [ ] Chương Phả ký / Tộc ước / Hương hỏa rich-text (FR-12.7) + portal đọc
+- [ ] Xuất PDF/Excel phả đồ theo cấu hình chương (FR-12.9 / F10 nâng độ tin cậy)
+- [ ] Import hàng loạt Excel tối thiểu (FR-12.9) hoặc GEDCOM subset — 1 trong 2 trước go-live
+- [ ] Admin donation / events / media / scholarship / moderation: **parity mockup** tương ứng (`admin-*.html`) + bỏ empty demo
+- [ ] Dashboard: số liệu thật (thành viên, giỗ tháng, CR pending, quỹ) — không số giả
+- [ ] Menu CRM theo permission thực; ẩn mục không được phép
+
+**Cổng RP.2:** tộc trưởng thêm người–hôn phối–duyệt tự khai–đăng tin–upload album trên staging không cần “biết API”.
+
+---
+
+### RP.3 — Portal công khai chuyên nghiệp
+
+- [ ] Loại bỏ fallback demo trên đường chính (phả đồ / tin / giỗ / album) khi API có dữ liệu; empty state rõ khi chưa có
+- [ ] Gallery album public API + lightbox thật
+- [ ] Trang tĩnh (Giới thiệu, Điều khoản) từ CMS (FR-12.12)
+- [ ] Block trang chủ cấu hình được (bật/tắt/thứ tự) — FR-02 / FR-12.19 tối thiểu
+- [ ] Hồ sơ + tìm kiếm + xưng hô + công đức + sự kiện: copy nghiệp vụ, a11y, mobile
+- [ ] PWA nhẹ (install + offline đọc hồ sơ/giỗ đã cache) — *không* multi-tenant
+- [ ] Performance: LCP trang chủ; phả đồ 200+ node mượt (SRS-12a §9)
+
+**Cổng RP.3:** khách vãng lai dùng portal staging như site họ thật; Lighthouse/a11y đạt ngưỡng nội bộ.
+
+---
+
+### RP.4 — Thông báo, bảo mật, tuân thủ
+
+- [ ] Reminder planner chạy cron staging; ít nhất **1 kênh thật** (email SMTP) end-to-end
+- [ ] Zalo: bật khi có OA; không thì UI “chưa kết nối Zalo”
+- [ ] Web Push: VAPID thật hoặc ẩn khỏi UI
+- [ ] Rate limit đăng nhập; HTTPS bắt buộc prod; không jargon trên UI (rule `no-tech-jargon-on-ui`)
+- [ ] Privacy regression tests + `/security-review` cho auth/donation/upload/settings secret
+- [ ] Gate S (semgrep/trivy) **bắt buộc xanh** (bỏ continue-on-error)
+- [ ] Audit mọi thao tác sửa cây / duyệt CR / đổi settings
+
+**Cổng RP.4:** checklist ATTT TK-10 go-live; không secret plaintext; PII người sống được chứng minh bằng test.
+
+---
+
+### RP.5 — Chất lượng kỹ thuật & vận hành
+
+- [ ] E2E smoke (Playwright): login admin, CRUD 1 người, xem portal hồ sơ, gửi tự khai
+- [ ] IT Testcontainers ổn định trên CI (Postgres) — giảm phụ thuộc “cần Docker tay”
+- [ ] OpenAPI → `api-types` sync trong CI; FE không gọi path lệch
+- [ ] Observability: health/metrics; log correlation; alert cơ bản (TK-09/12)
+- [ ] Backup tự động + thử restore 1 lần trên staging
+- [ ] Runbook vận hành (tunnel, seed, deploy, rollback) trong `deploy/` hoặc `instruction/`
+- [ ] Seed dữ liệu họ mẫu đủ demo go-live (không dữ liệu PII thật nếu chưa có thỏa thuận)
+- [ ] Môi trường **production** GitHub Environment + secrets; pipeline deploy prod có approval
+
+**Cổng RP.5:** staging = bản gold; một lần restore backup thành công; CI đỏ = không merge.
+
+---
+
+### RP.6 — Go-live & bàn giao
+
+- [ ] UAT với tộc trưởng / thư ký trên checklist nghiệp vụ (1–2 buổi)
+- [ ] Tài liệu người dùng ngắn (PDF/Markdown): đăng nhập, soạn phả, duyệt tự khai, cấu hình site
+- [ ] Soft-launch 1 dòng họ; theo dõi lỗi 2 tuần
+- [ ] Định nghĩa SLO nội bộ (uptime staging/prod, RPO/RTO backup)
+- [ ] Đóng cổng RP → chỉ nhận bugfix + hạng mục hàng đợi mở rộng
+
+**Cổng RP (sản phẩm):** UAT đạt; prod chạy HTTPS; backup/restore đã thử; không còn stub trên đường chính; cấu hình & CRM đủ dùng hàng ngày.
+
+---
+
+## Hàng đợi mở rộng (sau go-live)
+
+> Trước đây thuộc R3 — **không chặn** phát hành production. Làm sau khi cổng RP đạt.
+
+| Mã | Hạng mục | Ghi chú |
+|----|----------|---------|
+| F5 | Bản đồ mộ + QR bia | Geo + map UI + deep-link hồ sơ |
+| F7 | Di sản Hán-Nôm | Viewer độ phân giải cao + phiên âm/dịch có duyệt |
+| F9 | Trợ lý AI gia phả | RAG theo tree + guardrail PII + citation |
+| SaaS | Multi-tenant / custom domain | RLS `tree_id`, Helm Profile B (TK-09) |
+| DX | Collaborative edit / Undo phả đồ | Out of scope SRS-12a v1 |
 
 ---
 
@@ -259,15 +379,13 @@ Chia từng route (1 PR / route nếu lớn):
 
 | Cùng lúc | Điều kiện |
 |----------|-----------|
-| R0.2 Compose ∥ R0.3 Tokens ∥ R0.4 JHipster | Không chờ nhau |
-| R0b components ∥ R1.1 Genealogy JDL | UI chưa gọi API thật |
-| R1.1 Genealogy ∥ R1.3 CMS ∥ R1.4 Media | Sau R0.4; tránh đụng changelog cùng file — tách changeset |
-| R1.7 Portal ∥ R1.8 Admin | Cùng contract OpenAPI |
-| R2.1 ∥ R2.2 ∥ R2.3 | Module riêng; merge migration có thứ tự |
-| R2.5 Xưng hô ∥ R2.4 Notify | Độc lập sau khi có Person graph / user link |
-| R3.1 ∥ R3.2 | Độc lập |
+| R0.2 Compose ∥ R0.3 Tokens ∥ R0.4 JHipster | Không chờ nhau *(đã xong)* |
+| R1.7 Portal ∥ R1.8 Admin | Cùng contract OpenAPI *(đã xong khung)* |
+| **RP.1 Settings ∥ RP.2 CRM polish** | Không đụng cùng schema migration |
+| **RP.3 Portal ∥ RP.4 Notify/SMTP** | Settings SMTP xong trước khi E2E mail |
+| **RP.5 CI/E2E ∥ RP.2 mockup parity** | Sau khi API ổn định |
 
-**Không song song:** R1.7/R1.8 trước khi Person API + privacy filter xong; R2.4 trước anniversary; R3.3 trước search+privacy; R3.4 SaaS trước khi R1 ổn định vận hành.
+**Không song song:** RP.6 go-live trước khi RP.1–RP.5 cổng đạt; bật Zalo/SMTP prod trước khi secret Jasypt + security-review.
 
 ---
 
@@ -278,14 +396,16 @@ Chia từng route (1 PR / route nếu lớn):
 - [ ] Learn loop: sửa tay AI → cập nhật rule/token/story trong tuần
 - [ ] Dependency mới → ghi [02-lua-chon-cong-nghe.md](02-lua-chon-cong-nghe.md) + license
 - [ ] Drift audit tokens định kỳ (TK-11)
+- [ ] **RP:** mọi PR chạm UI phải `lint:tokens` + không jargon trên giao diện
 
 ---
 
-## Thứ tự ưu tiên nếu thiếu người
+## Thứ tự ưu tiên (giai đoạn RP)
 
-1. R0 đầy đủ → R0b.5 lunar + R0b.1 FormField/DualDatePicker  
-2. R1.1 → R1.6 → R1.8 (CRM) → R1.7 (portal)  
-3. R1.5 IAM sớm nếu block login  
-4. R1.10 staging trước khi mở R2  
-5. Trong R2: F3 → F1 → F4 → F10 → còn lại  
-6. R3 chỉ khi R2 cổng đạt
+1. **RP.1** Cấu hình đầy đủ (SMTP + privacy + settings mockup) — nền cho mọi usecase  
+2. **RP.4** Kênh thông báo thật + Gate S bắt buộc + PII  
+3. **RP.2** CRM/phả đồ/mockup admin parity — công cụ hàng ngày của thư ký  
+4. **RP.3** Portal bỏ demo, gallery, SEO, perf  
+5. **RP.5** E2E, backup/restore, prod pipeline  
+6. **RP.6** UAT → soft-launch → đóng cổng RP  
+7. Chỉ sau đó: hàng đợi F5 / F7 / F9 / SaaS

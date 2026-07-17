@@ -56,12 +56,13 @@ Xây dựng **nền tảng gia phả số** cho dòng họ Việt Nam:
 | TK-10 | 10-an-toan-thong-tin.md | Threat model, ASVS, NĐ13, security gates |
 | TK-11 | 11-quy-trinh-phat-trien-voi-ai.md | Áp dụng mô hình PDF: tokens→gates→learn loop, skills |
 | TK-12 | 12-cau-hinh-ha-tang-cicd.md | Cấu hình máy chủ dev/staging/prod, GitHub Actions CI/CD chi tiết |
-| TK-13 | 13-ke-hoach-thuc-hien.md | Kế hoạch thực hiện R0→R3: checklist tiến độ + ghi chú song song |
+| TK-13 | 13-ke-hoach-thuc-hien.md | Kế hoạch R0→R2 + **RP production**; hàng đợi F5/F7/F9/SaaS sau go-live |
 | TK-14 | 14-glossary.md | Thuật ngữ VN ↔ code |
 | TK-15 | 15-figma-ds-gia-pha-ho-hoang.md | File Figma DS «Gia phả họ Hoàng» — mẫu duyệt + Bridge |
 
 ## 5. Phạm vi phát hành (đề xuất)
 
-- **MVP (R1)**: Gia phả + phả đồ + ngày giỗ + CMS tin tức + tìm kiếm + tài khoản/2FA + CRM lõi + triển khai Compose.
-- **R2**: Công đức/quỹ, sự kiện & điểm danh, cổng tự khai + duyệt, thông báo Zalo/email, xuất PDF sách.
-- **R3**: Bản đồ mộ phần, di sản số hóa, trợ lý AI, mobile PWA nâng cao, multi-tenant SaaS.
+- **R1 (lõi):** Gia phả + phả đồ + ngày giỗ + CMS tin tức + tìm kiếm + tài khoản/2FA + CRM lõi + triển khai Compose.
+- **R2 (mở rộng):** Công đức/quỹ, sự kiện & điểm danh, cổng tự khai + duyệt, thông báo Zalo/email, xuất PDF sách.
+- **RP (production):** Hoàn thiện cấu hình đầy đủ, parity mockup/SRS, SMTP/PII thật, bỏ stub/demo đường chính, E2E + backup/restore + go-live — chi tiết [13-ke-hoach-thuc-hien.md](13-ke-hoach-thuc-hien.md) §RP.
+- **Hàng đợi sau go-live:** Bản đồ mộ (F5), di sản Hán-Nôm (F7), trợ lý AI (F9), multi-tenant SaaS — không chặn phát hành.
