@@ -2,51 +2,67 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-sm);
-  flex-wrap: wrap;
 }
 
-.group {
+.seg {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 55%, transparent);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-heritage-frame) 28%, transparent);
+}
+
+.btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-}
-
-.label {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--color-text-on-brand) 72%, transparent);
-  font-family: var(--font-body);
-  white-space: nowrap;
-}
-
-.select {
-  min-height: 32px;
-  width: auto;
-  max-width: 11.5rem;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  border: 1px solid color-mix(in srgb, var(--color-heritage-line) 55%, transparent);
-  background: color-mix(in srgb, var(--color-heritage-frame) 35%, transparent);
-  color: var(--color-text-on-brand);
-  font-family: var(--font-body);
-  font-size: 12px;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-right: 1px solid color-mix(in srgb, var(--color-heritage-line) 40%, transparent);
+  background: transparent;
+  color: color-mix(in srgb, var(--color-text-on-brand) 78%, transparent);
   cursor: pointer;
 }
 
-.select:focus-visible {
-  outline: 2px solid var(--color-focus-ring);
-  outline-offset: 2px;
+.btn:last-child {
+  border-right: none;
 }
 
-/* Biến thể trên nền sáng (Storybook / trang không dùng utility tối) */
-.onLight .label {
+.btn:hover {
+  color: var(--color-text-on-brand);
+  background: color-mix(in srgb, var(--color-text-on-brand) 10%, transparent);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.btnActive {
+  color: var(--color-text-on-brand);
+  background: color-mix(in srgb, var(--color-heritage-accent) 35%, transparent);
+}
+
+.onLight .seg {
+  border-color: var(--color-border-default);
+  background: var(--color-surface-card);
+}
+
+.onLight .btn {
+  border-right-color: var(--color-border-default);
   color: var(--color-text-muted);
 }
 
-.onLight .select {
-  border-color: var(--color-border-default);
-  background: var(--color-surface-card);
+.onLight .btn:hover {
   color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+
+.onLight .btnActive {
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-heritage-accent) 22%, transparent);
 }

@@ -7,6 +7,7 @@
 | | |
 |--|--|
 | **Khi dùng** | Bọc app (portal/admin); đặt `AppearanceControl` trên header; `ThemeScript` chống FOUC. |
+| **Control** | Icon: Sparkles/Flame (palette) · Sun/Moon/Monitor (mode); chữ chỉ ở `aria-label` / `title`. |
 | **API HTML** | `data-palette="bang-vang\|co"` · `data-mode="light\|dark"` (đã resolve) |
 | **Mode** | `light` · `dark` · `system` (mặc định system) |
 | **Lưu** | `localStorage` key `giapha.appearance` |
