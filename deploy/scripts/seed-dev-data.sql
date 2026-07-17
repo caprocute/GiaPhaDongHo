@@ -10,7 +10,10 @@ TRUNCATE TABLE
   media_photo, media_album,
   cms_comment, cms_post, cms_category,
   change_request,
+  event_rsvp, clan_event,
+  scholarship_entry,
   donation_contribution, donation_campaign,
+  notification_outbox,
   person, family_tree
 RESTART IDENTITY CASCADE;
 
@@ -366,28 +369,122 @@ INSERT INTO media_photo (id, object_key, caption, view_count, album_id) VALUES
 (16, 'albums/5/photo-002.jpg', 'Hoàng Giang Bảo Ngọc — Huy chương Vàng Olympic Toán 2023', 312, 5),
 (17, 'albums/5/photo-003.jpg', 'Hoàng Trung Bảo — Doanh nhân thành đạt tại TP.HCM', 178, 5);
 
+-- Thêm ảnh để đạt >100 bản ghi media (object_key sẽ được ghi đè khi chạy seed-media-minio.sh)
+INSERT INTO media_photo (id, object_key, caption, view_count, album_id)
+SELECT
+  17 + i,
+  'albums/' || (1 + ((i - 1) % 5)) || '/photo-seed-' || lpad(i::text, 3, '0') || '.jpg',
+  'Ảnh tư liệu số ' || i || ' — họ Hoàng Trung Bình',
+  10 + (i % 90),
+  1 + ((i - 1) % 5)
+FROM generate_series(1, 100) AS i;
+
 -- ============================================================
--- 9. RESET SEQUENCES
+-- 9. QUỸ CÔNG ĐỨC (≥100 đóng góp)
 -- ============================================================
-SELECT setval('family_tree_id_seq', (SELECT MAX(id) FROM family_tree));
-SELECT setval('person_id_seq', (SELECT MAX(id) FROM person));
-SELECT setval('family_union_id_seq', (SELECT MAX(id) FROM family_union));
-SELECT setval('union_member_id_seq', (SELECT MAX(id) FROM union_member));
-SELECT setval('union_child_id_seq', (SELECT MAX(id) FROM union_child));
-SELECT setval('death_anniversary_id_seq', (SELECT MAX(id) FROM death_anniversary));
-SELECT setval('cms_category_id_seq', (SELECT MAX(id) FROM cms_category));
-SELECT setval('cms_post_id_seq', (SELECT MAX(id) FROM cms_post));
-SELECT setval('media_album_id_seq', (SELECT MAX(id) FROM media_album));
-SELECT setval('media_photo_id_seq', (SELECT MAX(id) FROM media_photo));
+INSERT INTO donation_campaign (id, title, goal_amount, raised_amount, vietqr_payload, status, tree_id) VALUES
+(1, 'Tôn tạo lăng mộ Thủy tổ', 250000000, 182500000, 'BANK|970422|1234567890|Hoang Van To', 'open', 1),
+(2, 'Quỹ khuyến học năm học mới', 100000000, 45600000, 'BANK|970422|1234567891|Quy Khuyen Hoc', 'open', 1),
+(3, 'Sửa chữa nhà thờ họ', 180000000, 180000000, 'BANK|970422|1234567892|Nha Tho Ho', 'closed', 1);
+
+INSERT INTO donation_contribution (id, donor_name, amount, kind, note, created_at, campaign_id)
+SELECT
+  i,
+  (ARRAY['Hoàng Đức Trung','Hoàng Bình Minh','Nguyễn Thị Lan','Lê Văn Hùng','Phạm Thị Hoa',
+         'Hoàng Quang Nam','Trần Văn Tài','Hoàng Thị Mai','Võ Minh Tuấn','Đinh Thị Phương'])[1 + (i % 10)]
+    || ' #' || i,
+  (500000 + (i % 40) * 250000)::numeric,
+  CASE WHEN i % 7 = 0 THEN 'pending' ELSE 'money' END,
+  'Công đức đợt seed #' || i,
+  NOW() - (i * interval '6 hours'),
+  1 + ((i - 1) % 3)
+FROM generate_series(1, 120) AS i;
+
+UPDATE donation_campaign c SET raised_amount = (
+  SELECT COALESCE(SUM(amount), 0) FROM donation_contribution d
+  WHERE d.campaign_id = c.id AND d.kind <> 'pending'
+);
+
+-- ============================================================
+-- 10. SỰ KIỆN + ĐĂNG KÝ HỘ (≥100 RSVP)
+-- ============================================================
+INSERT INTO clan_event (id, title, start_solar, lunar_json, location, checklist_json, tree_id) VALUES
+(1, 'Giỗ Tổ thường niên', '2026-04-20 08:00:00', '{"lunarDay":3,"lunarMonth":3}', 'Nhà thờ họ — Hương Khê',
+ '["Dọn dẹp từ đường","Mâm cỗ","Phát loa"]', 1),
+(2, 'Họp mặt con cháu xa quê', '2026-08-15 09:00:00', NULL, 'Sân nhà thờ họ',
+ '["Đăng ký hộ","Phân công đón tiếp"]', 1),
+(3, 'Lễ khánh thành lăng mộ', '2026-10-01 07:30:00', NULL, 'Khu lăng mộ Thủy tổ',
+ '["Xe đưa đón","Lễ vật"]', 1);
+
+INSERT INTO event_rsvp (id, household_name, headcount, vehicles, assignment, event_id)
+SELECT
+  i,
+  'Hộ ' || (ARRAY['Hoàng','Nguyễn','Lê','Phạm','Trần'])[1 + (i % 5)] || ' ' || i,
+  2 + (i % 6),
+  i % 3,
+  (ARRAY['Đón tiếp','Ẩm thực','Trật tự','Hậu cần','Truyền thông',NULL])[1 + (i % 6)],
+  1 + ((i - 1) % 3)
+FROM generate_series(1, 110) AS i;
+
+-- ============================================================
+-- 11. KHUYẾN HỌC (≥100 hồ sơ)
+-- ============================================================
+INSERT INTO scholarship_entry (id, person_name, achievement, year, status, tree_id)
+SELECT
+  i,
+  'Hoàng ' || (ARRAY['An','Bình','Cường','Dũng','Em','Phúc','Giang','Hà','Khoa','Lan'])[1 + (i % 10)]
+    || ' ' || (ARRAY['Minh','Văn','Thị','Đức','Quang'])[1 + (i % 5)] || ' ' || i,
+  (ARRAY[
+    'Học sinh giỏi cấp tỉnh',
+    'Thủ khoa đầu vào đại học',
+    'Huy chương Olympic Toán',
+    'Giải nhất hội thi văn nghệ',
+    'Học bổng khuyến khích học tập'
+  ])[1 + (i % 5)],
+  2018 + (i % 8),
+  CASE WHEN i % 5 = 0 THEN 'nominated' WHEN i % 11 = 0 THEN 'rejected' ELSE 'approved' END,
+  1
+FROM generate_series(1, 120) AS i;
+
+-- ============================================================
+-- 12. BÌNH LUẬN CMS (≥100)
+-- ============================================================
+INSERT INTO cms_comment (id, author_name, body, status, created_at, post_id)
+SELECT
+  i,
+  (ARRAY['Bạn đọc A','Con cháu xa quê','Hoàng Văn B','Nguyễn Thị C','Khách thăm'])[1 + (i % 5)],
+  'Bình luận mẫu số ' || i || ' — cảm ơn Ban biên tập đã cập nhật tin tức dòng họ.',
+  CASE WHEN i % 4 = 0 THEN 'pending' WHEN i % 9 = 0 THEN 'rejected' ELSE 'approved' END,
+  NOW() - (i * interval '2 hours'),
+  1 + ((i - 1) % 5)
+FROM generate_series(1, 120) AS i;
+
+-- ============================================================
+-- 13. RESET SEQUENCE (JHipster dùng chung sequence_generator)
+-- ============================================================
+SELECT setval(
+  'sequence_generator',
+  GREATEST(
+    (SELECT COALESCE(MAX(id), 1) FROM person),
+    (SELECT COALESCE(MAX(id), 1) FROM cms_post),
+    (SELECT COALESCE(MAX(id), 1) FROM cms_comment),
+    (SELECT COALESCE(MAX(id), 1) FROM media_photo),
+    (SELECT COALESCE(MAX(id), 1) FROM donation_contribution),
+    (SELECT COALESCE(MAX(id), 1) FROM event_rsvp),
+    (SELECT COALESCE(MAX(id), 1) FROM scholarship_entry),
+    (SELECT COALESCE(MAX(id), 1) FROM clan_event),
+    (SELECT COALESCE(MAX(id), 1) FROM donation_campaign),
+    (SELECT COALESCE(MAX(id), 1) FROM family_tree)
+  )
+);
 
 -- Verify
 SELECT 'family_tree' AS t, COUNT(*) FROM family_tree
 UNION ALL SELECT 'person', COUNT(*) FROM person
 UNION ALL SELECT 'family_union', COUNT(*) FROM family_union
-UNION ALL SELECT 'union_member', COUNT(*) FROM union_member
-UNION ALL SELECT 'union_child', COUNT(*) FROM union_child
-UNION ALL SELECT 'death_anniversary', COUNT(*) FROM death_anniversary
-UNION ALL SELECT 'cms_category', COUNT(*) FROM cms_category
 UNION ALL SELECT 'cms_post', COUNT(*) FROM cms_post
-UNION ALL SELECT 'media_album', COUNT(*) FROM media_album
-UNION ALL SELECT 'media_photo', COUNT(*) FROM media_photo;
+UNION ALL SELECT 'cms_comment', COUNT(*) FROM cms_comment
+UNION ALL SELECT 'media_photo', COUNT(*) FROM media_photo
+UNION ALL SELECT 'donation_contribution', COUNT(*) FROM donation_contribution
+UNION ALL SELECT 'event_rsvp', COUNT(*) FROM event_rsvp
+UNION ALL SELECT 'scholarship_entry', COUNT(*) FROM scholarship_entry;
