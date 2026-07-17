@@ -62,8 +62,11 @@
   flex-direction: column;
   gap: 0;
   padding: var(--spacing-lg);
-  /* Chừa chỗ nút đóng — tránh lệch lề phải */
-  padding-right: calc(var(--spacing-lg) + 28px);
+}
+
+.ceremonialHead {
+  /* Chỉ phần tiêu đề tránh đè nút × — form giữ lề trái/phải bằng nhau */
+  padding-right: 36px;
 }
 
 .eyebrow {
