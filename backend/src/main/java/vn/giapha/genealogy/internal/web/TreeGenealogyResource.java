@@ -26,6 +26,8 @@ import vn.giapha.genealogy.internal.TreeGenealogyService;
 import vn.giapha.genealogy.internal.TreeGenealogyService.DuplicatePersonCodeException;
 import vn.giapha.genealogy.internal.TreeGenealogyService.PersonCodeNotFoundException;
 import vn.giapha.genealogy.internal.TreeGenealogyService.TreeNotFoundException;
+import vn.giapha.genealogy.internal.kinship.KinshipResult;
+import vn.giapha.genealogy.internal.kinship.KinshipService;
 import vn.giapha.service.dto.DeathAnniversaryDTO;
 import vn.giapha.service.dto.FamilyTreeDTO;
 import vn.giapha.service.dto.FamilyUnionDTO;
@@ -42,9 +44,11 @@ public class TreeGenealogyResource {
     private static final Logger LOG = LoggerFactory.getLogger(TreeGenealogyResource.class);
 
     private final TreeGenealogyService treeGenealogyService;
+    private final KinshipService kinshipService;
 
-    public TreeGenealogyResource(TreeGenealogyService treeGenealogyService) {
+    public TreeGenealogyResource(TreeGenealogyService treeGenealogyService, KinshipService kinshipService) {
         this.treeGenealogyService = treeGenealogyService;
+        this.kinshipService = kinshipService;
     }
 
     @GetMapping("")
@@ -159,6 +163,30 @@ public class TreeGenealogyResource {
             return ResponseEntity.created(new URI("/api/v1/trees/" + slug + "/unions/" + created.getId())).body(created);
         } catch (TreeNotFoundException e) {
             throw new BadRequestAlertException(e.getMessage(), "familyTree", "notfound");
+        }
+    }
+
+    /** Quan hệ / xưng hô giữa 2 mã hiệu — F2 / R2.5. */
+    @GetMapping("/kinship")
+    public KinshipResult kinship(
+        @PathVariable String slug,
+        @RequestParam("from") String from,
+        @RequestParam("to") String to
+    ) {
+        try {
+            return kinshipService.relate(slug, from, to);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "kinship", "invalid");
+        }
+    }
+
+    /** Quan hệ với hồ sơ đã liên kết tài khoản hiện tại. */
+    @GetMapping("/kinship/me")
+    public KinshipResult kinshipMe(@PathVariable String slug, @RequestParam("to") String to) {
+        try {
+            return kinshipService.relateToMe(slug, to);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "kinship", "invalid");
         }
     }
 }

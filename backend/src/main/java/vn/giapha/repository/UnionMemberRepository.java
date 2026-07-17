@@ -37,4 +37,15 @@ public interface UnionMemberRepository extends JpaRepository<UnionMember, Long> 
 
     @Query("select unionMember from UnionMember unionMember left join fetch unionMember.person where unionMember.id =:id")
     Optional<UnionMember> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        """
+        select um from UnionMember um
+        left join fetch um.person p
+        left join fetch um.union u
+        left join p.tree t
+        where t.slug = :slug
+        """
+    )
+    List<UnionMember> findByTreeSlug(@Param("slug") String slug);
 }

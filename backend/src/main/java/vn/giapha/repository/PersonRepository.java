@@ -37,6 +37,10 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
     Optional<Person> findByTree_SlugAndCodeIgnoreCase(String slug, String code);
 
+    List<Person> findByTree_Slug(String slug);
+
+    Optional<Person> findByTree_SlugAndLinkedUserId(String slug, String linkedUserId);
+
     @Query("select person.code from Person person where person.tree.slug = :slug")
     List<String> findCodesByTreeSlug(@Param("slug") String slug);
 

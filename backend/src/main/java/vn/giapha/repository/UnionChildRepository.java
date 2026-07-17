@@ -37,4 +37,15 @@ public interface UnionChildRepository extends JpaRepository<UnionChild, Long> {
 
     @Query("select unionChild from UnionChild unionChild left join fetch unionChild.child where unionChild.id =:id")
     Optional<UnionChild> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        """
+        select uc from UnionChild uc
+        left join fetch uc.child c
+        left join fetch uc.union u
+        left join c.tree t
+        where t.slug = :slug
+        """
+    )
+    List<UnionChild> findByTreeSlug(@Param("slug") String slug);
 }
