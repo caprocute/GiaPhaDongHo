@@ -7,7 +7,7 @@
   font-family: var(--font-body);
   color: var(--color-text-primary);
   background-color: var(--color-surface-page);
-  background-image: url("/art/scale-wave.svg");
+  background-image: url("./art/scale-wave.svg");
   background-size: 64px 40px;
   background-repeat: repeat;
   position: relative;
@@ -184,7 +184,7 @@
   display: grid;
   place-items: center;
   background-color: var(--color-surface-page);
-  background-image: url("/art/scale-wave.svg");
+  background-image: url("./art/scale-wave.svg");
   background-size: 64px 40px;
   color: var(--color-text-muted);
   font-family: var(--font-body);
