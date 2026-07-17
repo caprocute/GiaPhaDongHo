@@ -5,7 +5,7 @@ import { useAuth } from "@giapha/auth";
 import { Alert, Button, FormField, Input } from "@giapha/ui";
 import { Shield } from "lucide-react";
 import { adminSiteTitle } from "../lib/siteTitle";
-import dragonArt from "./art/login-dragon.svg";
+import dragonArt from "./art/login-dragon.jpg";
 import styles from "./adminLogin.module.css";
 
 const schema = z.object({
@@ -74,8 +74,8 @@ export function AdminLoginPage() {
           className={styles.artImg}
           src={dragonArt}
           alt=""
-          width={640}
-          height={900}
+          width={702}
+          height={1024}
           decoding="async"
         />
         <div className={styles.artFade} />
