@@ -1,72 +1,106 @@
 "use client";
 
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ComponentType, type ReactNode, type SVGProps } from "react";
+import {
+  BookOpen,
+  CalendarDays,
+  FilePenLine,
+  Flame,
+  GitBranch,
+  GraduationCap,
+  HandCoins,
+  Home,
+  Images,
+  Languages,
+  LayoutDashboard,
+  Newspaper,
+  Phone,
+  Search,
+  Users,
+} from "lucide-react";
+import { ClanSeal } from "../ClanSeal/ClanSeal";
 import styles from "./PublicHeader.module.css";
+
+export type PublicHeaderIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number | string }>;
+
+export type PublicNavItem = {
+  href: string;
+  label: string;
+  icon?: PublicHeaderIcon;
+  /** Ép trạng thái active (VD: tab CRM luôn sáng trên admin) */
+  forceActive?: boolean;
+};
 
 export interface PublicHeaderProps {
   brand?: string;
   subtitle?: string;
-  /** Slot bên phải hàng brand (VD: AuthNav) */
+  brandHref?: string;
+  /** Slot bên phải utility (VD: AuthNav) */
   endSlot?: ReactNode;
   activeHref?: string;
   utilityLeft?: ReactNode;
   utilityRight?: ReactNode;
+  /** Menu hàng 2 — mặc định menu portal */
+  navItems?: PublicNavItem[];
+  /** CTA brand row; `null` để ẩn */
+  cta?: { href: string; label: string } | null;
+  /** Bỏ max-width 1280 (admin full-bleed) */
+  fluid?: boolean;
+  /** Không sticky (khi nằm trong AppShell header cố định) */
+  sticky?: boolean;
 }
 
-const NAV = [
-  { href: "/", label: "Trang nhất" },
-  { href: "/persons", label: "Dòng họ" },
-  { href: "/tree", label: "Gia phả" },
-  { href: "/tu-khai", label: "Tự khai" },
-  { href: "/cong-duc", label: "Công đức" },
-  { href: "/su-kien", label: "Sự kiện" },
-  { href: "/nhac-gio", label: "Nhắc giỗ" },
-  { href: "/xung-ho", label: "Xưng hô" },
-  { href: "/khuyen-hoc", label: "Khuyến học" },
-  { href: "/news", label: "Tin tức" },
-  { href: "/album", label: "Thư viện" },
-] as const;
+const PORTAL_NAV: PublicNavItem[] = [
+  { href: "/", label: "Trang nhất", icon: Home },
+  { href: "/persons", label: "Dòng họ", icon: Users },
+  { href: "/tree", label: "Gia phả", icon: GitBranch },
+  { href: "/tu-khai", label: "Tự khai", icon: FilePenLine },
+  { href: "/cong-duc", label: "Công đức", icon: HandCoins },
+  { href: "/su-kien", label: "Sự kiện", icon: CalendarDays },
+  { href: "/nhac-gio", label: "Nhắc giỗ", icon: Flame },
+  { href: "/xung-ho", label: "Xưng hô", icon: Languages },
+  { href: "/khuyen-hoc", label: "Khuyến học", icon: GraduationCap },
+  { href: "/news", label: "Tin tức", icon: Newspaper },
+  { href: "/album", label: "Thư viện", icon: Images },
+];
 
-function Seal() {
-  return (
-    <svg className={styles.seal} viewBox="0 0 72 72" aria-hidden="true">
-      <circle cx="36" cy="36" r="34" fill="none" stroke="var(--color-heritage-accent)" strokeWidth="2" />
-      <circle
-        cx="36"
-        cy="36"
-        r="30.5"
-        fill="none"
-        stroke="var(--color-heritage-accent)"
-        strokeWidth=".8"
-        opacity=".7"
-      />
-      <circle cx="36" cy="36" r="26" fill="var(--color-heritage-frame)" />
-      <path
-        d="M36 50 V30 M36 37 L26 27 M36 37 L46 27 M36 30 L30 22.5 M36 30 L42 22.5"
-        stroke="var(--color-heritage-soft)"
-        strokeWidth="2.6"
-        strokeLinecap="round"
-        fill="none"
-      />
-      <circle cx="26" cy="27" r="2.8" fill="var(--color-heritage-accent)" />
-      <circle cx="46" cy="27" r="2.8" fill="var(--color-heritage-accent)" />
-      <circle cx="30" cy="22.5" r="2" fill="var(--color-heritage-line)" />
-      <circle cx="42" cy="22.5" r="2" fill="var(--color-heritage-line)" />
-      <path d="M27 50 h18" stroke="var(--color-heritage-accent)" strokeWidth="2.6" strokeLinecap="round" />
-    </svg>
-  );
+export const ADMIN_SURFACE_NAV_ICONS = {
+  home: Home,
+  tree: GitBranch,
+  persons: Users,
+  crm: LayoutDashboard,
+  search: Search,
+  book: BookOpen,
+  phone: Phone,
+} as const;
+
+function isNavActive(item: PublicNavItem, activeHref: string): boolean {
+  if (item.forceActive) return true;
+  if (item.href.startsWith("http://") || item.href.startsWith("https://")) {
+    return false;
+  }
+  if (item.href === "/") {
+    return activeHref === "/";
+  }
+  return activeHref === item.href || activeHref.startsWith(`${item.href}/`);
 }
 
 export function PublicHeader({
   brand = "Họ Hoàng – Huỳnh",
   subtitle = "Thôn Trung Bính · Bảo Ninh · Đồng Hới",
+  brandHref = "/",
   endSlot,
   activeHref = "/",
   utilityLeft,
   utilityRight,
+  navItems = PORTAL_NAV,
+  cta = { href: "/tree", label: "Tra cứu phả đồ" },
+  fluid = false,
+  sticky = true,
 }: PublicHeaderProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
+  const wrapClass = fluid ? `${styles.wrap} ${styles.wrapFluid}` : styles.wrap;
 
   useEffect(() => {
     setOpen(false);
@@ -87,14 +121,14 @@ export function PublicHeader({
   }, [open]);
 
   return (
-    <div className={styles.root}>
-      {/* Utility bar */}
+    <div className={sticky ? styles.root : `${styles.root} ${styles.rootStatic}`}>
       <div className={styles.utility}>
-        <div className={styles.wrap}>
+        <div className={wrapClass}>
           <span className={styles.utilityLeft}>
             {utilityLeft ?? (
               <>
-                ☎ 0970 307 9059 · <b>hohoang@giapha.vn</b>
+                <Phone size={13} strokeWidth={2.25} aria-hidden className={styles.utilityIcon} />
+                0970 307 9059 · <b>hohoang@giapha.vn</b>
               </>
             )}
           </span>
@@ -105,25 +139,26 @@ export function PublicHeader({
         </div>
       </div>
 
-      {/* Meander band */}
       <div className={styles.band} aria-hidden="true" />
 
       <header className={styles.masthead}>
-        {/* Hàng 1: brand (trái) + CTA + auth (phải) */}
-        <div className={`${styles.wrap} ${styles.brandRow}`}>
-          <a href="/" className={styles.brandLink} aria-label={brand}>
-            <Seal />
+        <div className={`${wrapClass} ${styles.brandRow}`}>
+          <a href={brandHref} className={styles.brandLink} aria-label={brand}>
+            <ClanSeal className={styles.seal} />
             <div className={styles.brand}>
               <h1>{brand}</h1>
               <div className={styles.sub}>{subtitle}</div>
             </div>
           </a>
 
-          <div className={styles.brandEnd}>
-            <a href="/tree" className={styles.cta}>Tra cứu phả đồ</a>
-          </div>
+          {cta ? (
+            <div className={styles.brandEnd}>
+              <a href={cta.href} className={styles.cta}>
+                {cta.label}
+              </a>
+            </div>
+          ) : null}
 
-          {/* Hamburger — chỉ hiện mobile */}
           <button
             type="button"
             className={styles.menuBtn}
@@ -136,21 +171,19 @@ export function PublicHeader({
           </button>
         </div>
 
-        {/* Hàng 2: tất cả menu chức năng — chỉ desktop */}
-        <div className={styles.navRow} aria-hidden="false">
-          <div className={styles.wrap}>
+        <div className={styles.navRow}>
+          <div className={wrapClass}>
             <nav className={styles.navStrip} aria-label="Menu chính">
-              {NAV.map((item) => {
-                const cur =
-                  item.href === "/"
-                    ? activeHref === "/"
-                    : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+              {navItems.map((item) => {
+                const cur = isNavActive(item, activeHref);
+                const Icon = item.icon;
                 return (
                   <a
-                    key={item.href}
+                    key={`${item.href}-${item.label}`}
                     href={item.href}
                     className={cur ? `${styles.navItem} ${styles.navItemCur}` : styles.navItem}
                   >
+                    {Icon ? <Icon className={styles.navIcon} size={14} strokeWidth={2.25} aria-hidden /> : null}
                     {item.label}
                   </a>
                 );
@@ -159,32 +192,32 @@ export function PublicHeader({
           </div>
         </div>
 
-        {/* Mobile drawer */}
         <div
           id={panelId}
           className={open ? `${styles.drawer} ${styles.drawerOpen}` : styles.drawer}
           hidden={!open}
         >
           <nav className={styles.drawerNav} aria-label="Menu di động">
-            {NAV.map((item) => {
-              const cur =
-                item.href === "/"
-                  ? activeHref === "/"
-                  : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+            {navItems.map((item) => {
+              const cur = isNavActive(item, activeHref);
+              const Icon = item.icon;
               return (
                 <a
-                  key={item.href}
+                  key={`d-${item.href}-${item.label}`}
                   href={item.href}
                   className={cur ? styles.cur : undefined}
                   onClick={() => setOpen(false)}
                 >
+                  {Icon ? <Icon className={styles.navIcon} size={16} strokeWidth={2.25} aria-hidden /> : null}
                   {item.label}
                 </a>
               );
             })}
-            <a href="/tree" className={`${styles.cta} ${styles.drawerCta}`} onClick={() => setOpen(false)}>
-              Tra cứu phả đồ
-            </a>
+            {cta ? (
+              <a href={cta.href} className={`${styles.cta} ${styles.drawerCta}`} onClick={() => setOpen(false)}>
+                {cta.label}
+              </a>
+            ) : null}
           </nav>
         </div>
       </header>

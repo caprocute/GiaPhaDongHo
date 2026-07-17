@@ -49,8 +49,11 @@ export type { DialogProps } from "./Dialog/Dialog";
 export { AppShell } from "./AppShell/AppShell";
 export type { AppShellProps } from "./AppShell/AppShell";
 
-export { PublicHeader } from "./PublicHeader/PublicHeader";
-export type { PublicHeaderProps } from "./PublicHeader/PublicHeader";
+export { PublicHeader, ADMIN_SURFACE_NAV_ICONS } from "./PublicHeader/PublicHeader";
+export type { PublicHeaderProps, PublicNavItem, PublicHeaderIcon } from "./PublicHeader/PublicHeader";
+
+export { ClanSeal } from "./ClanSeal/ClanSeal";
+export type { ClanSealProps } from "./ClanSeal/ClanSeal";
 
 export { PublicFooter } from "./PublicFooter/PublicFooter";
 export type { PublicFooterProps } from "./PublicFooter/PublicFooter";

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Search } from "lucide-react";
 import { useAuth } from "@giapha/auth";
 import { Alert, KPICard, Panel } from "@giapha/ui";
 import {
@@ -215,7 +216,7 @@ export function DashboardPage({ onPendingChange }: Props) {
           {timeGreeting()}, {name}
         </h2>
         <div className="crm-cmdk" role="search">
-          <span aria-hidden>🔍</span>
+          <Search size={15} strokeWidth={2.25} aria-hidden style={{ color: "var(--color-heritage-deep)", flex: "none" }} />
           <span>Tìm người, bài viết, thao tác…</span>
           <kbd>⌘K</kbd>
         </div>

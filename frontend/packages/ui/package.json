@@ -23,7 +23,8 @@
   },
   "dependencies": {
     "@giapha/lunar": "workspace:*",
-    "@giapha/tokens": "workspace:*"
+    "@giapha/tokens": "workspace:*",
+    "lucide-react": "^1.24.0"
   },
   "devDependencies": {
     "@figma/code-connect": "^1.4.9",

@@ -22,15 +22,25 @@ export function SideNavItem({ icon, active = false, badge, children, ...props }:
     transition: "all 0.13s",
     cursor: "pointer",
   };
-  const ic: CSSProperties = { width: 17, textAlign: "center", opacity: 0.85 };
+  const ic: CSSProperties = {
+    width: 18,
+    height: 18,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: "none",
+    color: "currentColor",
+    opacity: 0.92,
+  };
   const bdg: CSSProperties = {
     marginLeft: "auto",
     fontSize: 10.5,
     fontWeight: 700,
-    background: "var(--color-heritage-line)",
-    color: "var(--color-action-primary-bg)",
+    background: "var(--gradient-foil)",
+    color: "var(--color-heritage-frame)",
     borderRadius: 999,
     padding: "1px 8px",
+    fontVariantNumeric: "tabular-nums",
   };
 
   return (
