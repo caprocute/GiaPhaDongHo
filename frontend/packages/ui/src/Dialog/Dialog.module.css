@@ -33,8 +33,8 @@
 /* Biến thể trang trọng — đề cử / nghi thức */
 .ceremonial {
   width: min(520px, 100%);
-  padding: 0;
-  overflow: hidden;
+  padding: 10px;
+  overflow: auto;
   border: 1px solid var(--color-border-strong);
   background:
     radial-gradient(
@@ -49,10 +49,21 @@
 }
 
 .ceremonialFrame {
-  margin: 10px;
-  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   border: 1px solid color-mix(in srgb, var(--color-heritage-line) 70%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-heritage-deep) 12%, transparent);
+  background: color-mix(in srgb, var(--color-surface-card) 55%, transparent);
+}
+
+.ceremonialMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: var(--spacing-lg);
+  /* Chừa chỗ nút đóng — tránh lệch lề phải */
+  padding-right: calc(var(--spacing-lg) + 28px);
 }
 
 .eyebrow {
@@ -61,7 +72,7 @@
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--color-heritage-deep);
-  margin-bottom: var(--spacing-sm);
+  margin: 0 0 var(--spacing-sm);
 }
 
 .title {
@@ -74,14 +85,15 @@
 }
 
 .description {
-  margin: 0 0 var(--spacing-md);
+  margin: 0;
   font-size: var(--font-size-sm);
   line-height: 1.55;
   color: var(--color-text-secondary);
 }
 
 .body {
-  margin-bottom: var(--spacing-md);
+  margin: var(--spacing-md) 0 0;
+  min-width: 0;
 }
 
 .footer {
@@ -90,12 +102,23 @@
   gap: var(--spacing-sm);
   justify-content: flex-end;
   align-items: center;
-  padding-top: var(--spacing-sm);
+  margin: 0;
+  padding: var(--spacing-md) var(--spacing-lg);
   border-top: 1px solid color-mix(in srgb, var(--color-heritage-line) 35%, transparent);
+  background: color-mix(in srgb, var(--color-surface-sunken) 55%, transparent);
 }
 
 .footerDefault {
   border-top-color: var(--color-border-default);
+  background: transparent;
+  padding: var(--spacing-md) 0 0;
+  margin-top: var(--spacing-md);
+}
+
+/* Default (non-ceremonial): footer nằm trong padding panel */
+.panel:not(.ceremonial) .footer {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .close {
@@ -103,6 +126,10 @@
   top: var(--spacing-sm);
   right: var(--spacing-sm);
   z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
   min-height: 40px;
   min-width: 40px;
   padding: 0;
@@ -118,7 +145,7 @@
 
 .close:hover {
   color: var(--color-text-primary);
-  background: color-mix(in srgb, var(--color-ink-900) 6%, transparent);
+  background: color-mix(in srgb, var(--color-text-primary) 8%, transparent);
 }
 
 .ceremonial .close {

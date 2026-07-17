@@ -51,7 +51,12 @@ export function Dialog({
     window.addEventListener("keydown", onKey);
 
     const t = window.setTimeout(() => {
-      panelRef.current?.querySelector<HTMLElement>("button, [href], input, select, textarea")?.focus();
+      const root = panelRef.current;
+      if (!root) return;
+      const first = root.querySelector<HTMLElement>(
+        "input, textarea, select, button:not([aria-label='Đóng']), [href]",
+      );
+      first?.focus();
     }, 0);
 
     return () => {
@@ -72,11 +77,8 @@ export function Dialog({
     .filter(Boolean)
     .join(" ");
 
-  const inner = (
+  const head = (
     <>
-      <button type="button" className={styles.close} onClick={onClose} aria-label="Đóng">
-        ×
-      </button>
       {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
       <h2 id={titleId} className={styles.title}>
         {title}
@@ -86,20 +88,23 @@ export function Dialog({
           {description}
         </p>
       ) : null}
-      {children ? <div className={styles.body}>{children}</div> : null}
-      {footer !== null ? (
-        <div className={`${styles.footer} ${isCeremonial ? "" : styles.footerDefault}`}>
-          {footer !== undefined ? (
-            footer
-          ) : (
-            <Button type="button" variant="secondary" onClick={onClose}>
-              Đóng
-            </Button>
-          )}
-        </div>
-      ) : null}
     </>
   );
+
+  const body = children ? <div className={styles.body}>{children}</div> : null;
+
+  const foot =
+    footer !== null ? (
+      <div className={`${styles.footer} ${isCeremonial ? "" : styles.footerDefault}`}>
+        {footer !== undefined ? (
+          footer
+        ) : (
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Đóng
+          </Button>
+        )}
+      </div>
+    ) : null;
 
   return (
     <div
@@ -118,7 +123,24 @@ export function Dialog({
         aria-describedby={description ? descId : undefined}
         className={panelClass}
       >
-        {isCeremonial ? <div className={styles.ceremonialFrame}>{inner}</div> : inner}
+        <button type="button" className={styles.close} onClick={onClose} aria-label="Đóng">
+          ×
+        </button>
+        {isCeremonial ? (
+          <div className={styles.ceremonialFrame}>
+            <div className={styles.ceremonialMain}>
+              {head}
+              {body}
+            </div>
+            {foot}
+          </div>
+        ) : (
+          <>
+            {head}
+            {body}
+            {foot}
+          </>
+        )}
       </div>
     </div>
   );

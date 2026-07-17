@@ -6,8 +6,11 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 
 export function Textarea({ invalid, style, ...props }: TextareaProps) {
   const base: CSSProperties = {
+    boxSizing: "border-box",
+    display: "block",
     width: "100%",
     minHeight: "120px",
+    margin: 0,
     padding: "var(--spacing-sm) var(--spacing-md)",
     borderRadius: "var(--radius-md)",
     border: invalid
@@ -17,6 +20,7 @@ export function Textarea({ invalid, style, ...props }: TextareaProps) {
     color: "var(--color-text-primary)",
     fontFamily: "var(--font-body)",
     fontSize: "var(--font-size-md)",
+    lineHeight: 1.45,
     resize: "vertical",
     ...style,
   };
