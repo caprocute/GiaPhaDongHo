@@ -25,4 +25,5 @@ URL: `/gia-pha/{họ}/{chi}/ngay-gio/`
 
 ## 4. Gợi ý mở rộng khi xây mới (không có trên trang gốc)
 
-- Nhắc giỗ qua email/Zalo trước N ngày; xuất iCal; trang lịch tổng hợp giỗ + sự kiện dòng họ.
+- Nhắc giỗ qua email/Zalo trước N ngày; xuất iCal; trang lịch tổng hợp giỗ + sự kiện dòng họ.  
+  → Chi tiết kênh & nghiệm thu: [12b-admin-cau-hinh.md](12b-admin-cau-hinh.md) §6 + [15-production-go-live.md](15-production-go-live.md) §4.

@@ -35,12 +35,13 @@ Khu quản trị **không truy cập được từ ngoài** nhưng xác định 
 
 ## 5. Quản trị HỆ THỐNG (chuẩn NukeViet)
 
-- **FR-12.18** Cấu hình site: tên, logo, favicon, thông tin footer (người chịu trách nhiệm, tài khoản ngân hàng), meta SEO, mạng xã hội.
+- **FR-12.18** Cấu hình site: tên, logo, favicon, thông tin footer (người chịu trách nhiệm, tài khoản ngân hàng), meta SEO, mạng xã hội.  
+  → **Chi tiết production:** [12b-admin-cau-hinh.md](12b-admin-cau-hinh.md) (13 mục nav, SMTP/Zalo/PII/backup/webhook/audit).
 - **FR-12.19** Quản lý module (bật/tắt/cài mới), quản lý block trang chủ theo theme, quản lý theme (desktop/mobile).
-- **FR-12.20** **Sao lưu CSDL** định kỳ, tối ưu bảng, cron job.
-- **FR-12.21** Bảo mật: chặn IP, giới hạn đăng nhập sai, cấu hình captcha, quét thay đổi file (checkss), HTTPS.
-- **FR-12.22** Cấu hình email SMTP (gửi kích hoạt, quên mật khẩu, thông báo liên hệ).
-- **FR-12.23** Thống kê truy cập chi tiết; nhật ký hệ thống; quản lý ngôn ngữ giao diện.
+- **FR-12.20** **Sao lưu CSDL** định kỳ, tối ưu bảng, cron job. → chi tiết UI/job trong SRS-12b §7.1 + [15-production-go-live.md](15-production-go-live.md).
+- **FR-12.21** Bảo mật: chặn IP, giới hạn đăng nhập sai, cấu hình captcha, quét thay đổi file (checkss), HTTPS. → SRS-15 §5.
+- **FR-12.22** Cấu hình email SMTP (gửi kích hoạt, quên mật khẩu, thông báo liên hệ). → SRS-12b §6.1.
+- **FR-12.23** Thống kê truy cập chi tiết; nhật ký hệ thống; quản lý ngôn ngữ giao diện. → audit SRS-12b §7.3; dashboard SRS-15.
 
 ## 6. Khoảng trống nên bổ sung nếu xây hệ CRM dòng họ mới
 

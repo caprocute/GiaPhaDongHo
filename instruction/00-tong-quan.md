@@ -57,6 +57,8 @@ Xây dựng **nền tảng gia phả số** cho dòng họ Việt Nam:
 | TK-11 | 11-quy-trinh-phat-trien-voi-ai.md | Áp dụng mô hình PDF: tokens→gates→learn loop, skills |
 | TK-12 | 12-cau-hinh-ha-tang-cicd.md | Cấu hình máy chủ dev/staging/prod, GitHub Actions CI/CD chi tiết |
 | TK-13 | 13-ke-hoach-thuc-hien.md | Kế hoạch R0→R2 + **RP production**; hàng đợi F5/F7/F9/SaaS sau go-live |
+| — | `SRS/12b-admin-cau-hinh.md` | SRS cấu hình hệ thống (RP.1) |
+| — | `SRS/15-production-go-live.md` | SRS production / go-live (RP.2–6) |
 | TK-14 | 14-glossary.md | Thuật ngữ VN ↔ code |
 | TK-15 | 15-figma-ds-gia-pha-ho-hoang.md | File Figma DS «Gia phả họ Hoàng» — mẫu duyệt + Bridge |
 

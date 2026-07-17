@@ -285,7 +285,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [ ] **Sao lưu & khôi phục:** kích hoạt job backup, lịch, tải bản gần nhất, hướng dẫn restore (FR-12.20)
 - [ ] **Tích hợp & webhook:** endpoint đăng ký sự kiện (PersonUpdated, DonationReceived…) + secret
 - [ ] **Nhật ký audit:** lọc theo module/user/thời gian; deep-link từ CRM (FR-12.2 / R2.8 nâng cấp)
-- [ ] SRS cập nhật: mở rộng FR-12.18 thành ma trận section settings (file SRS riêng hoặc mục trong SRS-12)
+- [x] SRS chi tiết: [12b-admin-cau-hinh.md](../SRS/12b-admin-cau-hinh.md) (13 mục) + [15-production-go-live.md](../SRS/15-production-go-live.md) (RP.2–6)
 
 **Cổng RP.1:** lưu settings trên staging; đổi tên/logo/SMTP(test)/privacy → portal & mail phản ánh; secret không plaintext trong git.
 

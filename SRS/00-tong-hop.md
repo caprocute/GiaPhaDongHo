@@ -28,8 +28,11 @@ Website là **cổng thông tin dòng họ (họ tộc)** kết hợp 2 khối c
 | 10 | Thành viên, tài khoản, 2FA | [10-thanh-vien-tai-khoan.md](10-thanh-vien-tai-khoan.md) | Cao |
 | 11 | Liên hệ & tương tác (bình luận, RSS, mạng xã hội) | [11-lien-he-tuong-tac.md](11-lien-he-tuong-tac.md) | Trung bình |
 | 12 | **Quản trị / CRM ẩn** (suy luận từ nền tảng & dữ liệu) | [12-quan-tri-crm-an.md](12-quan-tri-crm-an.md) | **Lõi** |
+| 12a | Soạn phả đồ (Admin Tree Editor) | [12a-admin-soan-pha-do.md](12a-admin-soan-pha-do.md) | **Lõi** |
+| 12b | **Cấu hình hệ thống** (13 mục settings, SMTP/Zalo/PII…) | [12b-admin-cau-hinh.md](12b-admin-cau-hinh.md) | **Lõi · RP** |
 | 13 | Giao diện & trải nghiệm người dùng | [13-giao-dien-ux.md](13-giao-dien-ux.md) | Cao |
 | 14 | Nghiên cứu mã nguồn mở tương đương | [14-nghien-cuu-opensource.md](14-nghien-cuu-opensource.md) | Nghiên cứu |
+| 15 | **Production & go-live** (portal/CRM/ATTT/vận hành/UAT) | [15-production-go-live.md](15-production-go-live.md) | **Lõi · RP** |
 
 ## 3. Số liệu hiện trạng (quan sát 16/07/2026)
 
