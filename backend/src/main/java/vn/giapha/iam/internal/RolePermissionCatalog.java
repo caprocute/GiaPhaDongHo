@@ -49,7 +49,9 @@ public class RolePermissionCatalog implements PermissionService {
             "system:module:read",
             "system:module:write",
             "system:audit:read",
-            "system:dashboard:read"
+            "system:dashboard:read",
+            "iam:user:read",
+            "iam:user:write"
         ),
         RealmRoles.EDITOR,
         Set.of(

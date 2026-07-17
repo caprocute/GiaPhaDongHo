@@ -20,6 +20,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Settings,
+  UserCog,
   Users,
 } from "lucide-react";
 import { AuthCallbackPage } from "./auth/AuthCallbackPage";
@@ -42,6 +43,7 @@ import { ScholarshipAdminPage } from "./scholarship/ScholarshipAdminPage";
 import { SettingsPage } from "./settings/SettingsPage";
 import { SystemModulesPage } from "./system/SystemModulesPage";
 import { TreeEditorPage } from "./tree/TreeEditorPage";
+import { UsersAdminPage } from "./users/UsersAdminPage";
 import { adminSiteTitle } from "./lib/siteTitle";
 
 type LucideIcon = ComponentType<SVGProps<SVGSVGElement> & { size?: number | string; strokeWidth?: number | string }>;
@@ -88,6 +90,7 @@ const SIDE_NAV: NavGroup[] = [
   {
     label: "Hệ thống",
     items: [
+      { path: "/users", label: "Tài khoản", icon: UserCog },
       { path: "/system", label: "Module & nhật ký", icon: Boxes },
       { path: "/settings", label: "Cấu hình", icon: Settings },
     ],
@@ -231,6 +234,7 @@ function CrmRoutes() {
         <Route path="/notifications" element={<NotifyOutboxPage />} />
         <Route path="/scholarship" element={<ScholarshipAdminPage />} />
         <Route path="/system" element={<SystemModulesPage />} />
+        <Route path="/users" element={<UsersAdminPage />} />
         <Route path="/posts" element={<PostsListPage />} />
         <Route path="/posts/new" element={<PostFormPage />} />
         <Route path="/posts/:id" element={<PostFormPage />} />

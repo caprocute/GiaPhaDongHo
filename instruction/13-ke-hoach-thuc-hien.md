@@ -254,7 +254,7 @@ Chia từng route (1 PR / route nếu lớn):
 | **Portal** | Nhiều route còn demo/fallback khi API trống | Luồng chính 100% API; empty/error state nghiệp vụ; SEO/meta động |
 | **CMS / Media** | CRUD có; album public/lightbox chưa hoàn | Gallery công khai, hẹn giờ đăng, trang tĩnh, trình quản lý file |
 | **Công đức / Sự kiện / Tự khai / Nhắc giỗ** | Khung UI + API | Đối soát thật, SMTP/Zalo thật (hoặc tắt rõ), mockup admin parity, không lộ jargon UI |
-| **IAM / RBAC** | Role Keycloak + permission catalog | Menu theo role, thư ký nhánh (FR-12.10), đăng ký/duyệt thành viên (FR-12.16–17) |
+| **IAM / RBAC** | Role Keycloak + permission catalog; **màn Tài khoản** FR-12.16 (duyệt/khóa/gán quyền/reset MK) | Thư ký nhánh (FR-12.10); đăng ký portal nối auth settings (FR-12.17) |
 | **Riêng tư NĐ13** | Filter người sống cơ bản | Ma trận viewer đầy đủ; cấu hình PII trong settings; test + security-review |
 | **Chất lượng** | Gate A/B pilot; Gate S continue-on-error | Gate A/B/C/D/S bắt buộc; E2E smoke staging; perf phả đồ ≥200 node |
 | **Vận hành** | Script backup; deploy staging | Backup/restore có UI+cron; giám sát; runbook; prod env + HTTPS |
@@ -301,6 +301,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [ ] Admin donation / events / media / scholarship / moderation: **parity mockup** tương ứng (`admin-*.html`) + bỏ empty demo
 - [ ] Dashboard: số liệu thật (thành viên, giỗ tháng, CR pending, quỹ) — không số giả
 - [ ] Menu CRM theo permission thực; ẩn mục không được phép
+- [x] **Tài khoản đăng nhập (FR-12.16):** admin `/users` — duyệt/khóa/kích hoạt, gán nhóm quyền, mật khẩu tạm, lịch sử đăng nhập (facade Admin API)
 
 **Cổng RP.2:** tộc trưởng thêm người–hôn phối–duyệt tự khai–đăng tin–upload album trên staging không cần “biết API”.
 

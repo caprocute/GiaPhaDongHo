@@ -48,6 +48,13 @@ class RolePermissionCatalogUnitTest {
     }
 
     @Test
+    void genealogyAdminCanManageUsers() {
+        assertThat(catalog.hasPermission(List.of(RealmRoles.GENEALOGY_ADMIN), "iam:user:read")).isTrue();
+        assertThat(catalog.hasPermission(List.of(RealmRoles.GENEALOGY_ADMIN), "iam:user:write")).isTrue();
+        assertThat(catalog.hasPermission(List.of(RealmRoles.EDITOR), "iam:user:write")).isFalse();
+    }
+
+    @Test
     void acceptsRoleWithoutPrefix() {
         assertThat(catalog.hasPermission(List.of("editor"), "cms:post:write")).isTrue();
     }

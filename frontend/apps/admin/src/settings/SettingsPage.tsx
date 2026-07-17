@@ -920,7 +920,7 @@ export function SettingsPage() {
                 ))}
               </div>
               <p className={styles.muted}>
-                Gán vai trò tại <Link to="/system">Module hệ thống</Link> / quản trị thành viên. Thư ký nhánh
+                Gán vai trò tại <Link to="/users">Tài khoản</Link>. Thư ký nhánh
                 sẽ giới hạn theo nhánh đời ở giai đoạn sau.
               </p>
             </SectionCard>
