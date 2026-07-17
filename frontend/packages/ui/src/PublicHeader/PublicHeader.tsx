@@ -4,34 +4,26 @@ import { useEffect, useId, useState, type ReactNode } from "react";
 import styles from "./PublicHeader.module.css";
 
 export interface PublicHeaderProps {
-  /** Tên dòng họ — hero brand trên masthead */
   brand?: string;
   subtitle?: string;
-  /** Slot bên phải nav (VD: AuthNav) */
+  /** Slot bên phải hàng brand (VD: AuthNav) */
   endSlot?: ReactNode;
-  /** Path hiện tại để highlight menu */
   activeHref?: string;
   utilityLeft?: ReactNode;
   utilityRight?: ReactNode;
 }
 
-/** Hiển thị trên thanh nav desktop — tối đa 7 mục để vừa 1280px */
-const NAV_PRIMARY = [
+const NAV = [
+  { href: "/", label: "Trang nhất" },
   { href: "/persons", label: "Dòng họ" },
   { href: "/tree", label: "Gia phả" },
   { href: "/tu-khai", label: "Tự khai" },
   { href: "/cong-duc", label: "Công đức" },
   { href: "/su-kien", label: "Sự kiện" },
   { href: "/nhac-gio", label: "Nhắc giỗ" },
-  { href: "/news", label: "Tin tức" },
-] as const;
-
-/** Hiển thị đầy đủ trong drawer mobile */
-const NAV_ALL = [
-  { href: "/", label: "Trang nhất" },
-  ...NAV_PRIMARY,
   { href: "/xung-ho", label: "Xưng hô" },
   { href: "/khuyen-hoc", label: "Khuyến học" },
+  { href: "/news", label: "Tin tức" },
   { href: "/album", label: "Thư viện" },
 ] as const;
 
@@ -62,42 +54,6 @@ function Seal() {
       <circle cx="42" cy="22.5" r="2" fill="var(--color-heritage-line)" />
       <path d="M27 50 h18" stroke="var(--color-heritage-accent)" strokeWidth="2.6" strokeLinecap="round" />
     </svg>
-  );
-}
-
-function NavLinks({
-  activeHref,
-  onNavigate,
-  ctaClassName,
-  items,
-}: {
-  activeHref: string;
-  onNavigate?: () => void;
-  ctaClassName: string;
-  items: ReadonlyArray<{ href: string; label: string }>;
-}) {
-  return (
-    <>
-      {items.map((item) => {
-        const cur =
-          item.href === "/"
-            ? activeHref === "/"
-            : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
-        return (
-          <a
-            key={item.href}
-            href={item.href}
-            className={cur ? styles.cur : undefined}
-            onClick={onNavigate}
-          >
-            {item.label}
-          </a>
-        );
-      })}
-      <a href="/tree" className={ctaClassName} onClick={onNavigate}>
-        Tra cứu phả đồ
-      </a>
-    </>
   );
 }
 
@@ -132,6 +88,7 @@ export function PublicHeader({
 
   return (
     <div className={styles.root}>
+      {/* Utility bar */}
       <div className={styles.utility}>
         <div className={styles.wrap}>
           <span className={styles.utilityLeft}>
@@ -147,9 +104,13 @@ export function PublicHeader({
           </span>
         </div>
       </div>
+
+      {/* Meander band */}
       <div className={styles.band} aria-hidden="true" />
+
       <header className={styles.masthead}>
-        <div className={styles.wrap}>
+        {/* Hàng 1: brand (trái) + CTA + auth (phải) */}
+        <div className={`${styles.wrap} ${styles.brandRow}`}>
           <a href="/" className={styles.brandLink} aria-label={brand}>
             <Seal />
             <div className={styles.brand}>
@@ -158,10 +119,11 @@ export function PublicHeader({
             </div>
           </a>
 
-          <nav className={styles.nav} aria-label="Menu chính">
-            <NavLinks activeHref={activeHref} ctaClassName={styles.cta} items={NAV_PRIMARY} />
-          </nav>
+          <div className={styles.brandEnd}>
+            <a href="/tree" className={styles.cta}>Tra cứu phả đồ</a>
+          </div>
 
+          {/* Hamburger — chỉ hiện mobile */}
           <button
             type="button"
             className={styles.menuBtn}
@@ -174,18 +136,55 @@ export function PublicHeader({
           </button>
         </div>
 
+        {/* Hàng 2: tất cả menu chức năng — chỉ desktop */}
+        <div className={styles.navRow} aria-hidden="false">
+          <div className={styles.wrap}>
+            <nav className={styles.navStrip} aria-label="Menu chính">
+              {NAV.map((item) => {
+                const cur =
+                  item.href === "/"
+                    ? activeHref === "/"
+                    : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className={cur ? `${styles.navItem} ${styles.navItemCur}` : styles.navItem}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
+            </nav>
+          </div>
+        </div>
+
+        {/* Mobile drawer */}
         <div
           id={panelId}
           className={open ? `${styles.drawer} ${styles.drawerOpen}` : styles.drawer}
           hidden={!open}
         >
           <nav className={styles.drawerNav} aria-label="Menu di động">
-            <NavLinks
-              activeHref={activeHref}
-              onNavigate={() => setOpen(false)}
-              ctaClassName={`${styles.cta} ${styles.drawerCta}`}
-              items={NAV_ALL}
-            />
+            {NAV.map((item) => {
+              const cur =
+                item.href === "/"
+                  ? activeHref === "/"
+                  : activeHref === item.href || activeHref.startsWith(`${item.href}/`);
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className={cur ? styles.cur : undefined}
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
+            <a href="/tree" className={`${styles.cta} ${styles.drawerCta}`} onClick={() => setOpen(false)}>
+              Tra cứu phả đồ
+            </a>
           </nav>
         </div>
       </header>
