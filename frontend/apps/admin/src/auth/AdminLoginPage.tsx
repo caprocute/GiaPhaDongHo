@@ -68,6 +68,18 @@ export function AdminLoginPage() {
 
   return (
     <div className={styles.page}>
+      <div className={styles.art} aria-hidden>
+        <img
+          className={styles.artImg}
+          src="/art/login-dragon.svg"
+          alt=""
+          width={640}
+          height={900}
+          decoding="async"
+        />
+        <div className={styles.artFade} />
+      </div>
+
       <div className={styles.topStrip}>
         <span>
           <strong>GiaPhaHub</strong>

@@ -1,34 +1,62 @@
-/* Login CRM — nền trang sạch, khác portal (không split seal ceremonial) */
+/* Login CRM — nền hoa văn rồng SVG (phong cách cổ) · khác portal */
 
 .page {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   font-family: var(--font-body);
   color: var(--color-text-primary);
-  background:
-    radial-gradient(
-      ellipse 80% 55% at 50% -10%,
-      color-mix(in srgb, var(--color-heritage-soft) 35%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse 50% 40% at 100% 100%,
-      color-mix(in srgb, var(--color-heritage-frame) 8%, transparent),
-      transparent 55%
-    ),
-    var(--color-surface-page);
+  background-color: var(--color-surface-page);
+  background-image: url("/art/scale-wave.svg");
+  background-size: 64px 40px;
+  background-repeat: repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+.art {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.artImg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: min(92vh, 900px);
+  width: auto;
+  max-width: min(58vw, 640px);
+  object-fit: contain;
+  object-position: left bottom;
+  opacity: 0.92;
+}
+
+.artFade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 42%,
+    color-mix(in srgb, var(--color-surface-page) 55%, transparent) 62%,
+    color-mix(in srgb, var(--color-surface-page) 88%, transparent) 78%,
+    var(--color-surface-page) 100%
+  );
 }
 
 .topStrip {
-  flex: none;
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
   padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--color-surface-card);
+  background: color-mix(in srgb, var(--color-surface-card) 88%, transparent);
   border-bottom: 1px solid var(--color-border-default);
+  backdrop-filter: blur(6px);
   font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
   color: var(--color-text-muted);
@@ -43,22 +71,25 @@
 }
 
 .main {
-  flex: 1;
-  display: grid;
-  place-items: center;
-  padding: var(--spacing-xl) var(--spacing-md);
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--spacing-xl) clamp(var(--spacing-md), 6vw, 72px);
 }
 
 .panel {
   width: 100%;
   max-width: 420px;
-  background: var(--color-surface-card);
+  background: color-mix(in srgb, var(--color-surface-card) 94%, transparent);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   padding: 0;
   overflow: hidden;
+  backdrop-filter: blur(8px);
 }
 
 .panelHead {
@@ -67,7 +98,7 @@
   gap: var(--spacing-md);
   padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
   border-bottom: 1px solid var(--color-border-subtle);
-  background: color-mix(in srgb, var(--color-heritage-frame) 4%, var(--color-surface-card));
+  background: color-mix(in srgb, var(--color-heritage-frame) 5%, var(--color-surface-card));
 }
 
 .iconWrap {
@@ -139,18 +170,49 @@
 }
 
 .foot {
-  flex: none;
+  position: relative;
+  z-index: 2;
   padding: var(--spacing-md) var(--spacing-lg);
   font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-align: center;
+  background: color-mix(in srgb, var(--color-surface-card) 70%, transparent);
 }
 
 .loading {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: var(--color-surface-page);
+  background-color: var(--color-surface-page);
+  background-image: url("/art/scale-wave.svg");
+  background-size: 64px 40px;
   color: var(--color-text-muted);
   font-family: var(--font-body);
+}
+
+@media (max-width: 900px) {
+  .artImg {
+    max-width: 100%;
+    width: 100%;
+    height: min(48vh, 420px);
+    opacity: 0.55;
+    left: 50%;
+    transform: translateX(-50%);
+    object-position: center bottom;
+  }
+
+  .artFade {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-page) 20%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-page) 75%, transparent) 45%,
+      var(--color-surface-page) 72%
+    );
+  }
+
+  .main {
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: var(--spacing-lg);
+  }
 }
