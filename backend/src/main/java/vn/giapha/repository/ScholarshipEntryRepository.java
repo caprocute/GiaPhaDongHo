@@ -39,4 +39,25 @@ public interface ScholarshipEntryRepository extends JpaRepository<ScholarshipEnt
         "select scholarshipEntry from ScholarshipEntry scholarshipEntry left join fetch scholarshipEntry.tree where scholarshipEntry.id =:id"
     )
     Optional<ScholarshipEntry> findOneWithToOneRelationships(@Param("id") Long id);
+
+    @Query(
+        """
+        select s from ScholarshipEntry s
+        left join fetch s.tree t
+        where t.slug = :slug
+          and lower(s.status) = lower(:status)
+        order by s.year desc nulls last, s.id desc
+        """
+    )
+    List<ScholarshipEntry> findByTreeSlugAndStatus(@Param("slug") String slug, @Param("status") String status);
+
+    @Query(
+        """
+        select s from ScholarshipEntry s
+        left join fetch s.tree t
+        where t.slug = :slug
+        order by s.id desc
+        """
+    )
+    List<ScholarshipEntry> findByTreeSlug(@Param("slug") String slug);
 }
