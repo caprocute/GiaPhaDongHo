@@ -55,6 +55,13 @@ import styles from "./treeEditor.module.css";
 
 type GenderFilter = "all" | "M" | "F";
 
+/** Control compact trong rail/panel — đồng bộ với --te-control-h */
+const compactControl = {
+  minHeight: 36,
+  fontSize: "var(--font-size-sm)",
+  borderRadius: "var(--radius-sm)",
+} as const;
+
 function initials(name: string | null | undefined): string {
   const p = (name ?? "").trim().split(/\s+/).filter(Boolean);
   if (p.length === 0) return "?";
@@ -655,10 +662,14 @@ export function TreeEditorPage() {
         </div>
         <div className={styles.actions}>
           <button type="button" className={styles.ghostBtn} onClick={() => void reload()} disabled={loading}>
-            <RefreshCw size={14} /> Tải lại
+            <RefreshCw size={16} /> Tải lại
           </button>
-          <Button type="button" onClick={() => setShowCreateUnion(true)}>
-            <GitBranch size={14} /> Tạo hôn phối
+          <Button
+            type="button"
+            onClick={() => setShowCreateUnion(true)}
+            style={{ minHeight: 36, padding: "0 16px", fontSize: "var(--font-size-sm)" }}
+          >
+            <GitBranch size={16} /> Tạo hôn phối
           </Button>
           <button type="button" className={styles.closeBtn} onClick={closeEditor} aria-label="Đóng">
             <X size={18} />
@@ -681,7 +692,7 @@ export function TreeEditorPage() {
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHead}>
             <h3>
-              <Users size={13} style={{ marginRight: 6, verticalAlign: -1 }} />
+              <Users size={16} style={{ marginRight: 8, verticalAlign: -2 }} />
               Thành viên ({persons.length})
             </h3>
             <Input
@@ -689,6 +700,7 @@ export function TreeEditorPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Tìm thành viên"
+              style={compactControl}
             />
             <div className={styles.filters}>
               {(
@@ -713,6 +725,7 @@ export function TreeEditorPage() {
               value={genFilter}
               onChange={(e) => setGenFilter(e.target.value)}
               aria-label="Lọc theo đời"
+              style={compactControl}
             />
           </div>
           <div className={styles.list}>
@@ -753,14 +766,16 @@ export function TreeEditorPage() {
               </button>
             ))}
             {filteredSidebar.length === 0 ? (
-              <p className={styles.rowMeta} style={{ padding: 12 }}>
-                Không tìm thấy.
-              </p>
+              <p className={styles.emptyHint}>Không tìm thấy.</p>
             ) : null}
           </div>
           <div className={styles.sidebarFoot}>
-            <Button type="button" style={{ width: "100%" }} onClick={() => setShowCreatePerson(true)}>
-              <UserPlus size={14} /> Thêm thành viên
+            <Button
+              type="button"
+              style={{ width: "100%", minHeight: 36, fontSize: "var(--font-size-sm)" }}
+              onClick={() => setShowCreatePerson(true)}
+            >
+              <UserPlus size={16} /> Thêm thành viên
             </Button>
           </div>
         </aside>
@@ -938,6 +953,7 @@ export function TreeEditorPage() {
                     options={personOptions}
                     value={memberPersonId}
                     onChange={(e) => setMemberPersonId(e.target.value)}
+                    style={compactControl}
                   />
                   <div className={styles.miniFormRow}>
                     <Select
@@ -948,10 +964,12 @@ export function TreeEditorPage() {
                       ]}
                       value={memberRole}
                       onChange={(e) => setMemberRole(e.target.value)}
+                      style={compactControl}
                     />
                     <Button
                       type="button"
                       disabled={busy || !memberPersonId}
+                      style={{ minHeight: 36, fontSize: "var(--font-size-sm)", flex: "none" }}
                       onClick={() => {
                         void addMember(Number(memberPersonId), memberRole);
                         setMemberPersonId("");
@@ -965,7 +983,7 @@ export function TreeEditorPage() {
 
               <div className={styles.section}>
                 <p className={styles.sectionTitle}>Con cái ({myChildren.length})</p>
-                <p className={styles.rowMeta} style={{ marginBottom: 8 }}>
+                <p className={styles.rowMeta}>
                   Liên kết người đã có — không tạo mới tại đây.
                 </p>
                 {myChildren.map((c) => (
@@ -981,22 +999,26 @@ export function TreeEditorPage() {
                     </button>
                   </span>
                 ))}
-                <div className={styles.miniFormRow} style={{ marginTop: 8 }}>
-                  <Select
-                    options={personOptions}
-                    value={childPersonId}
-                    onChange={(e) => setChildPersonId(e.target.value)}
-                  />
-                  <Button
-                    type="button"
-                    disabled={busy || !childPersonId}
-                    onClick={() => {
-                      void addChild(Number(childPersonId));
-                      setChildPersonId("");
-                    }}
-                  >
-                    + Thêm
-                  </Button>
+                <div className={styles.miniForm}>
+                  <div className={styles.miniFormRow}>
+                    <Select
+                      options={personOptions}
+                      value={childPersonId}
+                      onChange={(e) => setChildPersonId(e.target.value)}
+                      style={compactControl}
+                    />
+                    <Button
+                      type="button"
+                      disabled={busy || !childPersonId}
+                      style={{ minHeight: 36, fontSize: "var(--font-size-sm)", flex: "none" }}
+                      onClick={() => {
+                        void addChild(Number(childPersonId));
+                        setChildPersonId("");
+                      }}
+                    >
+                      + Thêm
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -1065,7 +1087,7 @@ export function TreeEditorPage() {
                     "—"
                   )}
                 </div>
-                <div className={styles.rowMeta} style={{ marginTop: 6 }}>
+                <div className={styles.rowMeta}>
                   Hôn phối ({personUnions.length}):
                 </div>
                 {personUnions.length === 0 ? (
@@ -1076,7 +1098,7 @@ export function TreeEditorPage() {
                       key={u.unionId}
                       type="button"
                       className={styles.member}
-                      style={{ width: "100%", marginTop: 4 }}
+                      style={{ width: "100%" }}
                       onClick={() => {
                         setSelectedUnionId(u.unionId);
                         setSelectedPersonId(null);
@@ -1092,7 +1114,7 @@ export function TreeEditorPage() {
                 {selectedPerson.code ? (
                   <Button
                     type="button"
-                    style={{ width: "100%" }}
+                    style={{ width: "100%", minHeight: 36, fontSize: "var(--font-size-sm)" }}
                     onClick={() => navigate(`/persons/${encodeURIComponent(selectedPerson.code!)}`)}
                   >
                     Xem / sửa hồ sơ đầy đủ
@@ -1101,6 +1123,7 @@ export function TreeEditorPage() {
                 <Button
                   type="button"
                   variant="secondary"
+                  style={{ minHeight: 36, fontSize: "var(--font-size-sm)" }}
                   onClick={() => {
                     if (selectedPerson.code) {
                       setSearchParams({ root: selectedPerson.code });
@@ -1110,7 +1133,12 @@ export function TreeEditorPage() {
                 >
                   Đặt làm gốc cây
                 </Button>
-                <Button type="button" variant="secondary" onClick={() => setShowCreatePerson(true)}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  style={{ minHeight: 36, fontSize: "var(--font-size-sm)" }}
+                  onClick={() => setShowCreatePerson(true)}
+                >
                   Thêm thành viên mới
                 </Button>
               </div>
