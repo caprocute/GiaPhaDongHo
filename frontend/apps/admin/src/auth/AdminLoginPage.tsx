@@ -74,11 +74,10 @@ export function AdminLoginPage() {
           className={styles.artImg}
           src={dragonArt}
           alt=""
-          width={702}
-          height={1024}
+          width={1600}
+          height={901}
           decoding="async"
         />
-        <div className={styles.artFade} />
       </div>
 
       <div className={styles.topStrip}>
