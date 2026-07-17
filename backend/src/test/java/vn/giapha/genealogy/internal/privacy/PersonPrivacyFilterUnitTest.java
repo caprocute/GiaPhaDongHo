@@ -76,4 +76,22 @@ class PersonPrivacyFilterUnitTest {
         assertThat(filter.apply(priv, ViewerContext.member()).birthSolar()).isNull();
         assertThat(filter.apply(priv, ViewerContext.editor()).birthSolar()).isEqualTo(LocalDate.of(2000, 1, 1));
     }
+
+    @Test
+    void publicPrivacyAllowsGuestBirthDate() {
+        PersonPrivacyModel pub = new PersonPrivacyModel(
+            "alive",
+            "public",
+            LocalDate.of(1990, 5, 1),
+            "{\"d\":1}",
+            "ghi chú",
+            "user-1",
+            null,
+            null,
+            null
+        );
+        PersonPrivacyModel out = filter.apply(pub, ViewerContext.guest());
+        assertThat(out.birthSolar()).isEqualTo(LocalDate.of(1990, 5, 1));
+        assertThat(out.notes()).isEqualTo("ghi chú");
+    }
 }

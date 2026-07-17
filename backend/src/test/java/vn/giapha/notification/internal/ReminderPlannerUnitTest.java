@@ -19,4 +19,12 @@ class ReminderPlannerUnitTest {
         List<String> ch = ReminderPlanner.parseChannels("email, zalo, push");
         assertThat(ch).containsExactly(NotifyChannels.EMAIL, NotifyChannels.ZALO, NotifyChannels.WEB_PUSH);
     }
+
+    @Test
+    void attachAndExtractNotifyEmail() {
+        String raw = ReminderPlanner.attachNotifyEmail("email,zalo", "a@b.vn");
+        assertThat(raw).isEqualTo("email:a@b.vn,zalo");
+        assertThat(ReminderPlanner.extractNotifyEmail(raw)).isEqualTo("a@b.vn");
+        assertThat(ReminderPlanner.parseChannels(raw)).containsExactly(NotifyChannels.EMAIL, NotifyChannels.ZALO);
+    }
 }

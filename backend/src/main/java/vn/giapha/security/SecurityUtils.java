@@ -38,6 +38,27 @@ public final class SecurityUtils {
         return Optional.ofNullable(extractPrincipal(securityContext.getAuthentication()));
     }
 
+    /** Email từ JWT / OIDC (nếu có). */
+    public static Optional<String> getCurrentUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return Optional.empty();
+        }
+        if (authentication instanceof JwtAuthenticationToken jwtToken) {
+            Object email = jwtToken.getToken().getClaims().get(StandardClaimNames.EMAIL);
+            if (email instanceof String s && !s.isBlank()) {
+                return Optional.of(s.trim());
+            }
+        }
+        if (authentication.getPrincipal() instanceof DefaultOidcUser oidcUser) {
+            String email = oidcUser.getEmail();
+            if (email != null && !email.isBlank()) {
+                return Optional.of(email.trim());
+            }
+        }
+        return Optional.empty();
+    }
+
     private static String extractPrincipal(Authentication authentication) {
         if (authentication == null) {
             return null;

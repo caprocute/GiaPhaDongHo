@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Locale;
 import org.springframework.stereotype.Component;
+import vn.giapha.core.security.SettingsSecretCipher;
 import vn.giapha.domain.FamilyTree;
 import vn.giapha.genealogy.api.TreeSettingsDTO;
 
@@ -11,9 +12,11 @@ import vn.giapha.genealogy.api.TreeSettingsDTO;
 public class TreeSettingsCodec {
 
     private final ObjectMapper objectMapper;
+    private final SettingsSecretCipher secretCipher;
 
-    public TreeSettingsCodec(ObjectMapper objectMapper) {
+    public TreeSettingsCodec(ObjectMapper objectMapper, SettingsSecretCipher secretCipher) {
         this.objectMapper = objectMapper;
+        this.secretCipher = secretCipher;
     }
 
     public TreeSettingsDTO read(FamilyTree tree) {
@@ -22,14 +25,17 @@ public class TreeSettingsCodec {
         return dto;
     }
 
-    /** Bản đầy đủ (kể cả secret) — chỉ dùng nội bộ service. */
+    /** Bản đầy đủ (secret đã giải mã) — chỉ dùng nội bộ service. */
     public TreeSettingsDTO readInternal(FamilyTree tree) {
-        return parse(tree);
+        TreeSettingsDTO dto = parse(tree);
+        revealSecrets(dto);
+        return dto;
     }
 
     public void write(FamilyTree tree, TreeSettingsDTO incoming) {
         TreeSettingsDTO previous = parse(tree);
         mergeSecrets(incoming, previous);
+        protectSecrets(incoming);
         String display = incoming.getDisplayName() != null ? incoming.getDisplayName().trim() : "";
         tree.setSurname(extractSurname(display, tree.getSurname()));
         tree.setBranchName(extractBranch(display, tree.getBranchName()));
@@ -59,6 +65,30 @@ public class TreeSettingsCodec {
         dto.setSlug(tree.getSlug());
         ensureDefaults(dto, tree);
         return dto;
+    }
+
+    private void protectSecrets(TreeSettingsDTO dto) {
+        if (dto.getSmtp() != null && dto.getSmtp().getPassword() != null) {
+            dto.getSmtp().setPassword(secretCipher.protect(dto.getSmtp().getPassword()));
+        }
+        if (dto.getZalo() != null && dto.getZalo().getAccessToken() != null) {
+            dto.getZalo().setAccessToken(secretCipher.protect(dto.getZalo().getAccessToken()));
+        }
+        if (dto.getWebhook() != null && dto.getWebhook().getSecret() != null) {
+            dto.getWebhook().setSecret(secretCipher.protect(dto.getWebhook().getSecret()));
+        }
+    }
+
+    private void revealSecrets(TreeSettingsDTO dto) {
+        if (dto.getSmtp() != null && dto.getSmtp().getPassword() != null) {
+            dto.getSmtp().setPassword(secretCipher.reveal(dto.getSmtp().getPassword()));
+        }
+        if (dto.getZalo() != null && dto.getZalo().getAccessToken() != null) {
+            dto.getZalo().setAccessToken(secretCipher.reveal(dto.getZalo().getAccessToken()));
+        }
+        if (dto.getWebhook() != null && dto.getWebhook().getSecret() != null) {
+            dto.getWebhook().setSecret(secretCipher.reveal(dto.getWebhook().getSecret()));
+        }
     }
 
     private void ensureDefaults(TreeSettingsDTO dto, FamilyTree tree) {

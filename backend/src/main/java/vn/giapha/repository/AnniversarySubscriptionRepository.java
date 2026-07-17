@@ -27,18 +27,18 @@ public interface AnniversarySubscriptionRepository extends JpaRepository<Anniver
     }
 
     @Query(
-        value = "select anniversarySubscription from AnniversarySubscription anniversarySubscription left join fetch anniversarySubscription.person",
+        value = "select anniversarySubscription from AnniversarySubscription anniversarySubscription left join fetch anniversarySubscription.person person left join fetch person.tree",
         countQuery = "select count(anniversarySubscription) from AnniversarySubscription anniversarySubscription"
     )
     Page<AnniversarySubscription> findAllWithToOneRelationships(Pageable pageable);
 
     @Query(
-        "select anniversarySubscription from AnniversarySubscription anniversarySubscription left join fetch anniversarySubscription.person"
+        "select anniversarySubscription from AnniversarySubscription anniversarySubscription left join fetch anniversarySubscription.person person left join fetch person.tree"
     )
     List<AnniversarySubscription> findAllWithToOneRelationships();
 
     @Query(
-        "select anniversarySubscription from AnniversarySubscription anniversarySubscription left join fetch anniversarySubscription.person where anniversarySubscription.id =:id"
+        "select anniversarySubscription from AnniversarySubscription anniversarySubscription left join fetch anniversarySubscription.person person left join fetch person.tree where anniversarySubscription.id =:id"
     )
     Optional<AnniversarySubscription> findOneWithToOneRelationships(@Param("id") Long id);
 

@@ -55,6 +55,7 @@ public class TreeGenealogyService {
     private final DeathAnniversarySync deathAnniversarySync;
     private final ApplicationEventPublisher events;
     private final TreeSettingsCodec treeSettingsCodec;
+    private final TreeSmtpMailService treeSmtpMailService;
 
     public TreeGenealogyService(
         FamilyTreeRepository familyTreeRepository,
@@ -68,7 +69,8 @@ public class TreeGenealogyService {
         PersonPrivacyFilter personPrivacyFilter,
         DeathAnniversarySync deathAnniversarySync,
         ApplicationEventPublisher events,
-        TreeSettingsCodec treeSettingsCodec
+        TreeSettingsCodec treeSettingsCodec,
+        TreeSmtpMailService treeSmtpMailService
     ) {
         this.familyTreeRepository = familyTreeRepository;
         this.personRepository = personRepository;
@@ -82,6 +84,7 @@ public class TreeGenealogyService {
         this.deathAnniversarySync = deathAnniversarySync;
         this.events = events;
         this.treeSettingsCodec = treeSettingsCodec;
+        this.treeSmtpMailService = treeSmtpMailService;
     }
 
     @Transactional(readOnly = true)
@@ -126,7 +129,7 @@ public class TreeGenealogyService {
         return treeSettingsCodec.read(tree);
     }
 
-    /** Gửi thử email cấu hình — dry-run nếu chưa có mail sender. */
+    /** Gửi thử email qua SMTP cấu hình dòng họ. */
     public String testSmtp(String slug, String toEmail) {
         FamilyTree tree = familyTreeRepository.findBySlug(slug).orElseThrow(() -> new TreeNotFoundException(slug));
         TreeSettingsDTO settings = treeSettingsCodec.readInternal(tree);
@@ -137,8 +140,8 @@ public class TreeGenealogyService {
         if (to == null || to.isBlank()) {
             throw new IllegalStateException("Thiếu địa chỉ nhận thử.");
         }
-        // Runtime SMTP động từ settings sẽ gắn JavaMailSender riêng; v1 xác nhận cấu hình đã lưu.
-        return "Đã ghi nhận cấu hình gửi thư tới " + to + ". Kiểm tra hàng đợi nhắc giỗ sau khi bật kênh email.";
+        treeSmtpMailService.sendTest(settings.getSmtp(), to);
+        return "Đã gửi thư thử tới " + to + ".";
     }
 
     @Transactional(readOnly = true)

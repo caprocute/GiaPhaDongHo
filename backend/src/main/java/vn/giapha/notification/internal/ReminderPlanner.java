@@ -130,9 +130,12 @@ public class ReminderPlanner {
         payload.put("solarDate", gioDate.toString());
         payload.put("lunarDay", ann.getLunarDay());
         payload.put("lunarMonth", ann.getLunarMonth());
+        String treeSlug =
+            p.getTree() != null && p.getTree().getSlug() != null ? p.getTree().getSlug() : "";
+        payload.put("treeSlug", treeSlug);
         if (NotifyChannels.EMAIL.equals(channel)) {
-            // to: để trống → EmailChannelSender dùng defaultEmailTo / dry-run
-            payload.put("to", "");
+            String to = extractNotifyEmail(sub.getChannels());
+            payload.put("to", to != null ? to : "");
         }
 
         NotificationOutbox out = new NotificationOutbox();
@@ -157,6 +160,10 @@ public class ReminderPlanner {
             if (c.isEmpty()) {
                 continue;
             }
+            int colon = c.indexOf(':');
+            if (colon > 0) {
+                c = c.substring(0, colon);
+            }
             if ("push".equals(c) || "webpush".equals(c)) {
                 c = NotifyChannels.WEB_PUSH;
             }
@@ -169,5 +176,48 @@ public class ReminderPlanner {
             }
         }
         return out.isEmpty() ? List.of(NotifyChannels.EMAIL) : out;
+    }
+
+    /**
+     * Kênh lưu dạng {@code email:user@x.com,zalo} — lấy địa chỉ nhận thư.
+     */
+    static String extractNotifyEmail(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        for (String part : raw.split("[,;\\s]+")) {
+            String p = part.trim();
+            int colon = p.indexOf(':');
+            if (colon <= 0) {
+                continue;
+            }
+            String ch = p.substring(0, colon).trim().toLowerCase(Locale.ROOT);
+            String addr = p.substring(colon + 1).trim();
+            if (
+                (NotifyChannels.EMAIL.equals(ch) || "mail".equals(ch)) &&
+                addr.contains("@")
+            ) {
+                return addr;
+            }
+        }
+        return null;
+    }
+
+    /** Gắn địa chỉ vào kênh email khi đăng ký nhắc. */
+    static String attachNotifyEmail(String channels, String email) {
+        List<String> ch = parseChannels(channels);
+        if (email == null || email.isBlank() || !email.contains("@")) {
+            return String.join(",", ch);
+        }
+        String addr = email.trim();
+        List<String> encoded = new ArrayList<>();
+        for (String c : ch) {
+            if (NotifyChannels.EMAIL.equals(c)) {
+                encoded.add(NotifyChannels.EMAIL + ":" + addr);
+            } else {
+                encoded.add(c);
+            }
+        }
+        return String.join(",", encoded);
     }
 }

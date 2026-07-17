@@ -250,3 +250,10 @@ giapha:
   book:
     pdf-render-url: ${PDF_RENDER_URL:}
     export-prefix: exports
+
+# Jasypt — giải ENC(...) trong YAML; mã hóa secret metaJson (SettingsSecretCipher)
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator

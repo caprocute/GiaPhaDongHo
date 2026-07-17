@@ -249,7 +249,7 @@ Chia từng route (1 PR / route nếu lớn):
 
 | Trục | Hiện trạng (sau R1/R2) | Tiêu chí production |
 |------|------------------------|---------------------|
-| **Cấu hình hệ thống** | Nav 13 mục + form settings (metaJson); secret không trả GET; SMTP test dry-run | Jasypt ENC runtime + mail E2E thật (RP.4); backup job (RP.5); audit list API |
+| **Cấu hình hệ thống** | Nav 13 mục; SMTP gửi thật từ settings; secret metaJson qua Jasypt khi có master password | Audit list API; VAPID; rate-limit; backup job (RP.5) |
 | **Soạn phả đồ** | SRS-12a v1.1 cơ bản | Parity mockup còn lại (skeleton, nhãn đời, panel quan hệ đầy đủ, audit, role FE) |
 | **Portal** | Nhiều route còn demo/fallback khi API trống | Luồng chính 100% API; empty/error state nghiệp vụ; SEO/meta động |
 | **CMS / Media** | CRUD có; album public/lightbox chưa hoàn | Gallery công khai, hẹn giờ đăng, trang tĩnh, trình quản lý file |
@@ -279,7 +279,7 @@ Chia từng route (1 PR / route nếu lớn):
 - [x] **Đăng ký & xác thực:** bật/tắt tự kích hoạt, captcha, quy định thành viên — preference trong settings (nối IdP/portal ở RP.4)
 - [x] **Quyền riêng tư & PII:** toggle mask ngày sinh, mức mặc định `privacy` người sống — ăn `PersonPrivacyFilter` + createPerson (FR-12a.25 / NĐ13)
 - [x] **Phân quyền vai trò:** UI xem ma trận role→permission (read-only); không lộ tên kỹ thuật trên UI
-- [x] **Email (SMTP):** host/port/from + mật khẩu không trả GET; gửi thử endpoint; dùng cho nhắc giỗ khi bật kênh (FR-12.22) — *Jasypt ENC runtime: RP.4*
+- [x] **Email (SMTP):** host/port/from + mật khẩu không trả GET; gửi thử thật; Jasypt khi có `JASYPT_ENCRYPTOR_PASSWORD` (FR-12.22 / RP.4)
 - [x] **Zalo OA:** app id / OA id / token không trả GET; dry-run vs gửi thật; tắt kênh nếu mode=off
 - [x] **Nhắc nhở & giỗ:** đồng bộ với subscription mặc định (ngày trước, kênh) — portal lọc Zalo theo mode
 - [x] **Sao lưu & khôi phục:** lịch + giờ trong settings (job/restore runbook — RP.5)
@@ -322,12 +322,12 @@ Chia từng route (1 PR / route nếu lớn):
 
 ### RP.4 — Thông báo, bảo mật, tuân thủ
 
-- [ ] Reminder planner chạy cron staging; ít nhất **1 kênh thật** (email SMTP) end-to-end
-- [ ] Zalo: bật khi có OA; không thì UI “chưa kết nối Zalo”
+- [x] Reminder planner chạy cron staging; **SMTP từ TreeSettings** gửi thật qua `TreeMailSender` + `POST …/settings/smtp/test` (E2E khi có host)
+- [x] Zalo: mode=off / chưa webhook → dry-run; UI settings «chưa kết nối» khi tắt
 - [ ] Web Push: VAPID thật hoặc ẩn khỏi UI
 - [ ] Rate limit đăng nhập; HTTPS bắt buộc prod; không jargon trên UI (rule `no-tech-jargon-on-ui`)
-- [ ] Privacy regression tests + `/security-review` cho auth/donation/upload/settings secret
-- [ ] Gate S (semgrep/trivy) **bắt buộc xanh** (bỏ continue-on-error)
+- [x] Privacy regression tests (+ public/private matrix) — vẫn cần `/security-review` người duyệt 2 cho secret
+- [x] Gate S: Semgrep **fail CI**; Trivy CRITICAL **fail**; HIGH vẫn report
 - [ ] Audit mọi thao tác sửa cây / duyệt CR / đổi settings
 
 **Cổng RP.4:** checklist ATTT TK-10 go-live; không secret plaintext; PII người sống được chứng minh bằng test.

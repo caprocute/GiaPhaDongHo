@@ -23,6 +23,7 @@ import vn.giapha.service.dto.PersonDTO;
 import vn.giapha.service.mapper.AnniversarySubscriptionMapper;
 import vn.giapha.service.mapper.NotificationOutboxMapper;
 import vn.giapha.service.mapper.PersonMapper;
+import vn.giapha.security.SecurityUtils;
 
 @Service
 @Transactional
@@ -85,7 +86,10 @@ public class NotificationService {
             settings != null && settings.getNotify() != null
                 ? settings.getNotify()
                 : new TreeSettingsDTO.NotifySettings();
-        String channels = filterChannelsBySettings(normalizeChannels(dto.getChannels()), notify, settings);
+        String channels = ReminderPlanner.attachNotifyEmail(
+            filterChannelsBySettings(normalizeChannels(dto.getChannels()), notify, settings),
+            SecurityUtils.getCurrentUserEmail().orElse(null)
+        );
         int defaultDays = notify.getRemindDaysBefore() > 0 ? notify.getRemindDaysBefore() : 7;
         AnniversarySubscription existing = subscriptionRepository
             .findByUserIdAndPerson_Id(userId, person.getId())
