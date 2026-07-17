@@ -37,6 +37,6 @@ Nguồn: `primitive/color.co.tokens.json` (palette trước đổi Bảng vàng)
 Component **chỉ** dùng `--color-surface-*`, `--color-text-*`, `--color-action-*`, `--color-heritage-*`, `--color-status-*`, `--color-border-*`.
 
 - Light: map primitive `L*` / `ink.900` / `gold.400`…
-- Dark: map `D*` / `ink.d*` / `gold.d*`… (cùng tên semantic)
+- Dark: nền `D*`; chữ `ink.d*` (sáng); **heritage-soft → `gold.soft` sáng** (không dùng `gold.d-soft` — đó là tint nền tối); CTA vàng dùng chữ tối (`bg.D2`) để đủ tương phản.
 
 Build: `pnpm --dir design-tokens run build` → `frontend/packages/tokens/src/tokens.css`.

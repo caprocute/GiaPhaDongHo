@@ -27,7 +27,7 @@
 .foot li {
   font-size: 13px;
   line-height: 2;
-  opacity: 0.85;
+  color: color-mix(in srgb, var(--color-text-on-brand) 88%, transparent);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -70,7 +70,7 @@
 }
 
 .baseCopy {
-  opacity: 0.65;
+  color: color-mix(in srgb, var(--color-text-on-brand) 82%, transparent);
   flex: 1 1 12rem;
   text-align: left;
 }

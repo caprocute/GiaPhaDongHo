@@ -10,7 +10,7 @@
       "d400":   { "$type": "color", "$value": "#E2AF1D" },
       "d500":   { "$type": "color", "$value": "#F0C040" },
       "d700":   { "$type": "color", "$value": "#1A1712" },
-      "d-ink":  { "$type": "color", "$value": "#EBEBE6" },
+      "d-ink":  { "$type": "color", "$value": "#F7F4EC" },
       "d-soft": { "$type": "color", "$value": "#3A3228" }
     },
     "gold": {
@@ -34,8 +34,8 @@
     "ink": {
       "900":  { "$type": "color", "$value": "#29241D" },
       "700":  { "$type": "color", "$value": "#6B6256" },
-      "d900": { "$type": "color", "$value": "#EBEBE6" },
-      "d700": { "$type": "color", "$value": "#A89E90" }
+      "d900": { "$type": "color", "$value": "#F7F4EC" },
+      "d700": { "$type": "color", "$value": "#D0C6B8" }
     },
     "line": {
       "L":        { "$type": "color", "$value": "#D8D6CF" },

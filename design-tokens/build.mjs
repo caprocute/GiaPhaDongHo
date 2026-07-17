@@ -87,6 +87,7 @@ const semanticLight = `
   --color-action-primary-bg-deep: var(--color-son-700);
   --color-action-primary-fg: var(--color-son-ink);
   --color-text-primary: var(--color-ink-900);
+  --color-text-secondary: color-mix(in srgb, var(--color-ink-900) 78%, var(--color-ink-700));
   --color-text-muted: var(--color-ink-700);
   --color-text-on-brand: var(--color-son-ink);
   --color-surface-page: var(--color-bg-l1);
@@ -101,6 +102,7 @@ const semanticLight = `
   --color-heritage-frame: var(--color-son-700);
 `.trimEnd();
 
+/* Dark: chữ / accent phải sáng trên nền D* — không map soft → *-d-soft (đó là tint nền tối). */
 const semanticDark = `
   --color-status-success: var(--color-status-good-d);
   --color-status-warning: var(--color-status-warn-d);
@@ -108,8 +110,9 @@ const semanticDark = `
   --color-action-primary-bg: var(--color-gold-d500);
   --color-action-primary-bg-hover: var(--color-gold-d400);
   --color-action-primary-bg-deep: var(--color-son-d700);
-  --color-action-primary-fg: var(--color-son-d-ink);
+  --color-action-primary-fg: var(--color-bg-d2);
   --color-text-primary: var(--color-ink-d900);
+  --color-text-secondary: color-mix(in srgb, var(--color-ink-d900) 72%, var(--color-ink-d700));
   --color-text-muted: var(--color-ink-d700);
   --color-text-on-brand: var(--color-son-d-ink);
   --color-surface-page: var(--color-bg-d1);
@@ -118,9 +121,9 @@ const semanticDark = `
   --color-border-default: var(--color-line-d);
   --color-border-strong: var(--color-line-d-strong);
   --color-heritage-accent: var(--color-gold-d400);
-  --color-heritage-deep: var(--color-gold-d500);
-  --color-heritage-soft: var(--color-gold-d-soft);
-  --color-heritage-line: var(--color-gold-d-line);
+  --color-heritage-deep: var(--color-gold-d400);
+  --color-heritage-soft: var(--color-gold-soft);
+  --color-heritage-line: var(--color-gold-d400);
   --color-heritage-frame: var(--color-son-d700);
 `.trimEnd();
 
