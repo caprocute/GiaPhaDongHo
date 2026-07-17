@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Quỹ công đức</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-light:#D4A017;--gold-pale:#FDF6E3;--gold-border:#E8C96A;
+  --ink:#1C1410;--ink-2:#3D2B1F;--ink-muted:#8A7060;
+  --surface:#FEFCF8;--surface-2:#F5EFE0;--surface-3:#EDE3CC;
+  --border:#D9CBAA;--r:8px;--r-sm:4px;
+  --font-d:'Georgia',serif;--font-b:system-ui,-apple-system,sans-serif;
+  --success-bg:#E8F5E9;--success:#2E7D32;--success-border:#A5D6A7;
+  --warning-bg:#FFF8E1;--warning:#F57C00;--warning-border:#FFE082;
+  --error:#C62828;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.12);
+}
+body{font-family:var(--font-b);background:var(--surface-2);color:var(--ink);min-height:100vh}
+.page{max-width:1140px;margin:0 auto;padding:24px 20px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.page-head h1{font-family:var(--font-d);font-size:26px;color:var(--ink)}
+.page-head p{font-size:13px;color:var(--ink-muted);margin-top:4px;max-width:480px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold-light)}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--border)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-open{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.badge-draft{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border)}
+.badge-closed{background:var(--surface-3);color:var(--ink-muted)}
+
+/* tab */
+.tab-strip{display:flex;gap:4px;background:var(--surface-3);padding:5px;border-radius:var(--r);margin-bottom:24px;width:fit-content}
+.tab-btn{padding:7px 18px;border-radius:var(--r-sm);border:none;background:none;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer}
+.tab-btn.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
+
+/* stat cards */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)}
+.stat-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-muted);letter-spacing:.6px;margin-bottom:6px}
+.stat-value{font-family:var(--font-d);font-size:22px;font-weight:700;color:var(--ink)}
+.stat-sub{font-size:11px;color:var(--ink-muted);margin-top:3px}
+
+/* campaign cards */
+.campaign-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:24px}
+.campaign-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:0;overflow:hidden;box-shadow:var(--shadow-sm);cursor:pointer;transition:all .15s
+}
+.campaign-card:hover{border-color:var(--gold-border);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.campaign-card.active{border-color:var(--gold);border-width:2px}
+.campaign-top{padding:16px 16px 12px}
+.campaign-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.campaign-head h3{font-family:var(--font-d);font-size:15px;color:var(--ink);line-height:1.3}
+.campaign-amounts{display:flex;align-items:baseline;gap:6px;margin-bottom:8px}
+.raised{font-family:var(--font-d);font-size:20px;font-weight:700;color:var(--gold)}
+.goal{font-size:13px;color:var(--ink-muted)}
+.progress-wrap{height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.progress-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold-light) 100%);transition:width .4s}
+.campaign-stats{display:flex;gap:14px;font-size:12px;color:var(--ink-muted)}
+.campaign-stats span{display:flex;align-items:center;gap:4px}
+.campaign-bottom{background:var(--surface-2);padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+
+/* contribution section */
+.contrib-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.contrib-header h2{font-family:var(--font-d);font-size:18px}
+.contrib-filter{display:flex;gap:8px;align-items:center}
+.filter-select{padding:6px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;background:#fff;outline:none}
+.filter-input{padding:6px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;background:#fff;outline:none;width:200px}
+.filter-input:focus,.filter-select:focus{border-color:var(--gold)}
+
+/* add contrib form */
+.add-form{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:16px;box-shadow:var(--shadow-sm)}
+.add-form h4{font-family:var(--font-d);font-size:14px;color:var(--ink);margin-bottom:12px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-field label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-muted);letter-spacing:.5px;display:block;margin-bottom:4px}
+.form-input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;outline:none}
+.form-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.1)}
+
+/* contrib table */
+.contrib-table{background:#fff;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow-sm)}
+.contrib-thead{background:var(--surface-2);display:grid;grid-template-columns:1fr 100px 90px 80px 80px;padding:8px 14px;font-size:11px;font-weight:700;color:var(--ink-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.contrib-row{display:grid;grid-template-columns:1fr 100px 90px 80px 80px;padding:10px 14px;border-bottom:1px solid var(--border);align-items:center;font-size:13px;transition:background .12s}
+.contrib-row:hover{background:var(--surface-2)}
+.contrib-row:last-child{border-bottom:none}
+.contrib-donor{font-weight:600}
+.contrib-note{font-size:11px;color:var(--ink-muted);margin-top:2px}
+.amount-positive{font-weight:700;color:var(--success)}
+.kind-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--surface-2);color:var(--ink-muted);font-weight:600}
+.receipt-btn{font-size:11px;color:var(--gold);cursor:pointer;text-decoration:none}
+.receipt-btn:hover{text-decoration:underline}
+
+/* qr box */
+.qr-box{background:#fff;border:1px solid var(--gold-border);border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.qr-img{width:80px;height:80px;background:var(--surface-3);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink-muted);flex-shrink:0}
+.qr-info h4{font-family:var(--font-d);font-size:14px;color:var(--ink);margin-bottom:4px}
+.qr-info p{font-size:12px;color:var(--ink-muted);line-height:1.5}
+.qr-info strong{color:var(--gold)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <div>
+      <h1>Quỹ công đức</h1>
+      <p>Quản lý chiến dịch gây quỹ, ghi nhận đóng góp và in biên nhận cho thành viên dòng họ.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sec btn-sm">⬇ Xuất Excel</button>
+      <button class="btn btn-gold btn-sm">+ Tạo chiến dịch</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Tổng quỹ hiện có</div>
+      <div class="stat-value">127,5tr</div>
+      <div class="stat-sub">đồng · 3 chiến dịch</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Đang gây quỹ</div>
+      <div class="stat-value" style="color:var(--gold)">2 chiến dịch</div>
+      <div class="stat-sub">Mục tiêu: 200 triệu</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Người đóng góp</div>
+      <div class="stat-value">84</div>
+      <div class="stat-sub">thành viên · năm 2025</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Trung bình / người</div>
+      <div class="stat-value">1,5tr</div>
+      <div class="stat-sub">đồng · 2025</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-strip">
+    <button class="tab-btn on">📋 Chiến dịch</button>
+    <button class="tab-btn">💰 Đóng góp</button>
+    <button class="tab-btn">+ Tạo chiến dịch</button>
+  </div>
+
+  <!-- Campaign cards -->
+  <div class="campaign-grid">
+
+    <div class="campaign-card active">
+      <div class="campaign-top">
+        <div class="campaign-head">
+          <h3>Xây dựng nhà từ đường 2025</h3>
+          <span class="badge badge-open">Đang mở</span>
+        </div>
+        <div class="campaign-amounts">
+          <span class="raised">127,5tr</span>
+          <span class="goal">/ 200 triệu</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:63.75%"></div></div>
+        <div class="campaign-stats">
+          <span>📅 Bắt đầu: 01/01/2025</span>
+          <span>👥 84 người đóng góp</span>
+        </div>
+      </div>
+      <div class="campaign-bottom">
+        <button class="btn btn-gold btn-sm" style="flex:1">Ghi nhận đóng góp</button>
+        <button class="btn btn-sec btn-sm">Xem chi tiết</button>
+        <button class="btn btn-sec btn-sm">VietQR ↗</button>
+      </div>
+    </div>
+
+    <div class="campaign-card">
+      <div class="campaign-top">
+        <div class="campaign-head">
+          <h3>Quỹ học bổng tộc 2025</h3>
+          <span class="badge badge-open">Đang mở</span>
+        </div>
+        <div class="campaign-amounts">
+          <span class="raised">42,8tr</span>
+          <span class="goal">/ 80 triệu</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:53.5%"></div></div>
+        <div class="campaign-stats">
+          <span>📅 Hạn: 30/09/2025</span>
+          <span>👥 31 người đóng góp</span>
+        </div>
+      </div>
+      <div class="campaign-bottom">
+        <button class="btn btn-gold btn-sm" style="flex:1">Ghi nhận đóng góp</button>
+        <button class="btn btn-sec btn-sm">Xem chi tiết</button>
+      </div>
+    </div>
+
+    <div class="campaign-card">
+      <div class="campaign-top">
+        <div class="campaign-head">
+          <h3>Tổ chức giỗ tổ 2024</h3>
+          <span class="badge badge-closed">Đã đóng</span>
+        </div>
+        <div class="campaign-amounts">
+          <span class="raised">68,2tr</span>
+          <span class="goal">/ 60 triệu</span>
+        </div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:100%;background:var(--success)"></div></div>
+        <div class="campaign-stats">
+          <span>✓ Đã hoàn thành · Dư: 8,2tr</span>
+        </div>
+      </div>
+      <div class="campaign-bottom">
+        <button class="btn btn-sec btn-sm">Xem báo cáo</button>
+        <button class="btn btn-sec btn-sm">⬇ Xuất PDF</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VietQR -->
+  <div class="qr-box">
+    <div class="qr-img">QR<br>Code</div>
+    <div class="qr-info">
+      <h4>Thông tin chuyển khoản — Xây dựng nhà từ đường 2025</h4>
+      <p>
+        Ngân hàng: <strong>Vietcombank</strong> · Số TK: <strong>1234567890</strong><br>
+        Tên TK: <strong>HỘI ĐỒNG HỌ HOÀNG TRUNG BÌNH</strong><br>
+        Nội dung: <em>Họ tên + Đóng góp nhà từ đường 2025</em>
+      </p>
+    </div>
+    <button class="btn btn-sec btn-sm" style="flex-shrink:0;margin-left:auto">⬇ Tải QR</button>
+  </div>
+
+  <!-- Contribution section -->
+  <div class="contrib-header">
+    <h2>Đóng góp — Xây nhà từ đường 2025 <span style="font-size:13px;color:var(--ink-muted);font-family:var(--font-b)">(84 bản ghi)</span></h2>
+    <div class="contrib-filter">
+      <input class="filter-input" placeholder="Tìm theo tên người đóng góp…"/>
+      <select class="filter-select">
+        <option>Tất cả loại</option>
+        <option>Tiền mặt</option>
+        <option>Chuyển khoản</option>
+        <option>Hiện vật</option>
+      </select>
+      <select class="filter-select">
+        <option>Tất cả trạng thái</option>
+        <option>Đã xác nhận</option>
+        <option>Chờ đối soát</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Add form -->
+  <div class="add-form">
+    <h4>+ Ghi nhận đóng góp mới</h4>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Người công đức *</label>
+        <input class="form-input" placeholder="Tên hoặc mã thành viên…"/>
+      </div>
+      <div class="form-field">
+        <label>Số tiền (VND)</label>
+        <input class="form-input" placeholder="VD: 5000000" type="number"/>
+      </div>
+      <div class="form-field">
+        <label>Loại</label>
+        <select class="form-input">
+          <option>Tiền mặt</option>
+          <option>Chuyển khoản</option>
+          <option>Hiện vật</option>
+          <option>Công sức</option>
+          <option>Chờ đối soát</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Ghi chú</label>
+        <input class="form-input" placeholder="VD: Thay mặt chi Hoàng Văn A…"/>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-gold btn-sm">Ghi nhận & cộng quỹ</button>
+      <button class="btn btn-sec btn-sm">Đặt lại</button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="contrib-table">
+    <div class="contrib-thead">
+      <span>Người công đức</span>
+      <span>Số tiền</span>
+      <span>Loại</span>
+      <span>Ngày</span>
+      <span>Biên nhận</span>
+    </div>
+    <div class="contrib-row">
+      <div>
+        <div class="contrib-donor">Hoàng Minh Quang</div>
+        <div class="contrib-note">A3a · Chi nhánh Hà Nội</div>
+      </div>
+      <div class="amount-positive">10.000.000đ</div>
+      <div><span class="kind-badge">Chuyển khoản</span></div>
+      <div style="font-size:12px;color:var(--ink-muted)">12/03/2025</div>
+      <div><a class="receipt-btn">🖨 In biên nhận</a></div>
+    </div>
+    <div class="contrib-row">
+      <div>
+        <div class="contrib-donor">Hoàng Quang Bình</div>
+        <div class="contrib-note">A4a · Chuyển từ Sài Gòn</div>
+      </div>
+      <div class="amount-positive">5.000.000đ</div>
+      <div><span class="kind-badge">Chuyển khoản</span></div>
+      <div style="font-size:12px;color:var(--ink-muted)">08/03/2025</div>
+      <div><a class="receipt-btn">🖨 In biên nhận</a></div>
+    </div>
+    <div class="contrib-row">
+      <div>
+        <div class="contrib-donor">Nguyễn Thị Lan Anh</div>
+        <div class="contrib-note">A6a-sp</div>
+      </div>
+      <div class="amount-positive">2.000.000đ</div>
+      <div><span class="kind-badge">Tiền mặt</span></div>
+      <div style="font-size:12px;color:var(--ink-muted)">01/03/2025</div>
+      <div><a class="receipt-btn">🖨 In biên nhận</a></div>
+    </div>
+    <div class="contrib-row">
+      <div>
+        <div class="contrib-donor">Hoàng Trung Bảo</div>
+        <div class="contrib-note">A6m</div>
+      </div>
+      <div class="amount-positive">3.000.000đ</div>
+      <div><span class="kind-badge" style="background:#E3F2FD;color:#1565C0">Hiện vật</span></div>
+      <div style="font-size:12px;color:var(--ink-muted)">28/02/2025</div>
+      <div><a class="receipt-btn">🖨 In biên nhận</a></div>
+    </div>
+    <div class="contrib-row" style="background:var(--warning-bg)">
+      <div>
+        <div class="contrib-donor">Hoàng Cường Hải</div>
+        <div class="contrib-note">Chờ đối soát ngân hàng</div>
+      </div>
+      <div style="font-weight:700;color:var(--warning)">1.500.000đ</div>
+      <div><span class="kind-badge" style="background:var(--warning-bg);color:var(--warning)">Chờ đối soát</span></div>
+      <div style="font-size:12px;color:var(--ink-muted)">25/02/2025</div>
+      <div><a class="receipt-btn" style="color:var(--warning)">⚠ Xác nhận</a></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

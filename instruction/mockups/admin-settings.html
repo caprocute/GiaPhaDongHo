@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Cấu hình hệ thống</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-light:#D4A017;--gold-pale:#FDF6E3;--gold-border:#E8C96A;
+  --ink:#1C1410;--ink-2:#3D2B1F;--ink-muted:#8A7060;
+  --surface:#FEFCF8;--surface-2:#F5EFE0;--surface-3:#EDE3CC;
+  --border:#D9CBAA;--r:8px;--r-sm:4px;
+  --font-d:'Georgia',serif;--font-b:system-ui,-apple-system,sans-serif;
+  --success:#2E7D32;--success-bg:#E8F5E9;
+  --error:#C62828;--error-bg:#FFEBEE;
+  --info:#1565C0;--info-bg:#E3F2FD;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.12);
+}
+body{font-family:var(--font-b);background:var(--surface-2);color:var(--ink);min-height:100vh}
+.layout{display:flex;max-width:1100px;margin:0 auto;gap:24px;padding:24px 20px}
+
+/* left nav */
+.settings-nav{width:220px;flex-shrink:0}
+.settings-nav h2{font-family:var(--font-d);font-size:22px;color:var(--ink);margin-bottom:4px}
+.settings-nav p{font-size:12px;color:var(--ink-muted);margin-bottom:20px}
+.nav-group{margin-bottom:6px}
+.nav-group-label{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--ink-muted);letter-spacing:.8px;padding:8px 10px 4px;display:block}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--ink-2);cursor:pointer;transition:all .15s;text-decoration:none;margin-bottom:1px}
+.nav-item:hover{background:var(--surface-3);color:var(--ink)}
+.nav-item.on{background:var(--gold-pale);color:var(--gold);font-weight:700;border-left:3px solid var(--gold);padding-left:7px}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.on .nav-icon{opacity:1}
+
+/* main content */
+.settings-main{flex:1;min-width:0}
+
+/* section card */
+.section-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:16px;box-shadow:var(--shadow-sm);overflow:hidden}
+.section-head{
+  display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;
+  background:var(--surface);border-bottom:1px solid transparent;transition:background .15s
+}
+.section-head:hover{background:var(--surface-2)}
+.section-head.open{border-bottom-color:var(--border)}
+.section-icon{width:36px;height:36px;border-radius:var(--r-sm);background:var(--gold-pale);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.section-title h3{font-family:var(--font-d);font-size:15px;color:var(--ink)}
+.section-title p{font-size:12px;color:var(--ink-muted);margin-top:1px}
+.section-chevron{margin-left:auto;font-size:16px;color:var(--ink-muted);transition:transform .2s}
+.section-head.open .section-chevron{transform:rotate(90deg)}
+
+.section-body{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.section-body.hidden{display:none}
+
+/* form elements */
+.field-group{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.field-group:last-child{border-bottom:none;padding-bottom:0}
+.field-label{font-size:13px;font-weight:600;color:var(--ink);padding-top:6px}
+.field-hint{font-size:11px;color:var(--ink-muted);margin-top:2px;line-height:1.4}
+.field-ctrl{}
+.form-input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;outline:none;background:#fff}
+.form-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.1)}
+.form-select{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;outline:none;background:#fff;cursor:pointer}
+.form-textarea{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:13px;outline:none;resize:vertical;min-height:72px}
+.form-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.1)}
+
+/* toggle switch */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toggle-info{flex:1}
+.toggle-info strong{font-size:13px;font-weight:600;display:block}
+.toggle-info span{font-size:11px;color:var(--ink-muted)}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:11px;cursor:pointer;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle input:checked + .toggle-slider{background:var(--gold)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(18px)}
+
+/* image upload */
+.img-upload{display:flex;align-items:center;gap:12px}
+.img-preview{width:64px;height:64px;border-radius:var(--r);border:2px dashed var(--border);background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden}
+.img-preview img{width:100%;height:100%;object-fit:cover}
+.img-actions{display:flex;flex-direction:column;gap:6px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;border:none;white-space:nowrap}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--border)}
+.btn-danger-ghost{background:#fff;color:var(--error);border:1px solid var(--error)}
+
+/* color picker row */
+.color-row{display:flex;gap:8px;flex-wrap:wrap}
+.color-swatch{width:28px;height:28px;border-radius:var(--r-sm);cursor:pointer;border:2px solid transparent;transition:all .15s}
+.color-swatch.on{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset}
+.color-hex{width:100px;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;font-family:monospace;outline:none}
+
+/* tag input */
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:6px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--r-sm);background:#fff;cursor:text}
+.tag-input-wrap:focus-within{border-color:var(--gold)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--surface-2);border-radius:20px;font-size:12px;color:var(--ink)}
+.tag .rm{color:var(--ink-muted);cursor:pointer;font-size:13px}
+.tag .rm:hover{color:var(--error)}
+.tag-input{border:none;outline:none;font-size:12px;background:transparent;width:120px}
+
+/* save bar */
+.save-bar{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px;box-shadow:0 -4px 12px rgba(0,0,0,.06)}
+.save-bar-left{font-size:13px;color:var(--info);display:flex;align-items:center;gap:6px}
+.save-bar-right{display:flex;gap:8px}
+
+/* alert */
+.alert{padding:10px 14px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.alert-info{background:var(--info-bg);color:var(--info);border:1px solid #90CAF9}
+.alert-success{background:var(--success-bg);color:var(--success);border:1px solid #A5D6A7}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Left nav -->
+  <nav class="settings-nav">
+    <h2>Cấu hình</h2>
+    <p>Thiết lập toàn bộ hệ thống GiaPhaHub</p>
+
+    <div class="nav-group">
+      <span class="nav-group-label">Nhận diện</span>
+      <a class="nav-item on">🏛 Thông tin dòng họ</a>
+      <a class="nav-item">🎨 Thương hiệu & logo</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Phả hệ</span>
+      <a class="nav-item">🌳 Cài đặt cây phả hệ</a>
+      <a class="nav-item">📅 Âm-dương lịch</a>
+      <a class="nav-item">🔢 Mã hiệu thành viên</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Thành viên & bảo mật</span>
+      <a class="nav-item">👤 Đăng ký & xác thực</a>
+      <a class="nav-item">🔒 Quyền riêng tư & PII</a>
+      <a class="nav-item">🔑 Phân quyền vai trò</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Thông báo</span>
+      <a class="nav-item">📧 Email (SMTP)</a>
+      <a class="nav-item">💬 Zalo OA</a>
+      <a class="nav-item">🔔 Nhắc nhở & giỗ</a>
+    </div>
+    <div class="nav-group">
+      <span class="nav-group-label">Hệ thống</span>
+      <a class="nav-item">💾 Sao lưu & khôi phục</a>
+      <a class="nav-item">🔗 Tích hợp & webhook</a>
+      <a class="nav-item">📜 Nhật ký audit log</a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="settings-main">
+
+    <div class="alert alert-success">
+      ✓ Đã lưu cấu hình lúc 14:32 hôm nay · Không có thay đổi chưa lưu
+    </div>
+
+    <!-- Section: Thông tin dòng họ -->
+    <div class="section-card">
+      <div class="section-head open">
+        <div class="section-icon">🏛</div>
+        <div class="section-title">
+          <h3>Thông tin dòng họ</h3>
+          <p>Tên, địa chỉ, người đại diện, liên hệ</p>
+        </div>
+        <span class="section-chevron">›</span>
+      </div>
+      <div class="section-body">
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Tên dòng họ *</div>
+            <div class="field-hint">Hiện trên tiêu đề trang và portal công khai</div>
+          </div>
+          <div class="field-ctrl">
+            <input class="form-input" value="Họ Hoàng Trung Bình"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Tên viết tắt</div>
+            <div class="field-hint">VD: HHTB — dùng trong mã hiệu và xuất khẩu</div>
+          </div>
+          <div class="field-ctrl">
+            <input class="form-input" value="HHTB"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Tỉnh/Thành gốc</div>
+            <div class="field-hint">Quê gốc dòng họ theo địa danh hành chính</div>
+          </div>
+          <div class="field-ctrl">
+            <select class="form-select">
+              <option selected>Hà Nội</option>
+              <option>Hải Phòng</option>
+              <option>Nam Định</option>
+              <option>Thanh Hóa</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Địa chỉ nhà từ đường</div>
+          </div>
+          <div class="field-ctrl">
+            <input class="form-input" value="Thôn Đông, Xã Phú Xuyên, Hà Nội"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Người liên hệ chính</div>
+            <div class="field-hint">Hiển thị trên trang liên hệ portal</div>
+          </div>
+          <div class="field-ctrl" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <input class="form-input" value="Hoàng Minh Quang" placeholder="Họ tên"/>
+            <input class="form-input" value="0912.345.678" placeholder="Điện thoại"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Email liên hệ</div>
+          </div>
+          <div class="field-ctrl">
+            <input class="form-input" type="email" value="contact@hohoangtrungbinh.com"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Mô tả ngắn</div>
+            <div class="field-hint">Xuất hiện trong thẻ meta SEO và chia sẻ mạng xã hội</div>
+          </div>
+          <div class="field-ctrl">
+            <textarea class="form-textarea">Trang gia phả số dòng họ Hoàng Trung Bình, lưu giữ và phát huy truyền thống dòng tộc từ đời Thủy tổ Hoàng Văn Tổ.</textarea>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Từ khóa SEO</div>
+          </div>
+          <div class="field-ctrl">
+            <div class="tag-input-wrap">
+              <span class="tag">gia phả Hoàng<span class="rm">×</span></span>
+              <span class="tag">họ Hoàng Trung Bình<span class="rm">×</span></span>
+              <span class="tag">phả đồ<span class="rm">×</span></span>
+              <input class="tag-input" placeholder="Thêm từ khóa…"/>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Thương hiệu -->
+    <div class="section-card">
+      <div class="section-head open">
+        <div class="section-icon">🎨</div>
+        <div class="section-title">
+          <h3>Thương hiệu & Logo</h3>
+          <p>Logo, favicon, màu chủ đạo, font chữ</p>
+        </div>
+        <span class="section-chevron">›</span>
+      </div>
+      <div class="section-body">
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Logo portal</div>
+            <div class="field-hint">Định dạng SVG hoặc PNG nền trong. Tối thiểu 200×80px</div>
+          </div>
+          <div class="field-ctrl">
+            <div class="img-upload">
+              <div class="img-preview">🏛</div>
+              <div class="img-actions">
+                <button class="btn btn-sec">📁 Chọn file…</button>
+                <button class="btn btn-danger-ghost">🗑 Xóa</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Favicon</div>
+            <div class="field-hint">ICO hoặc PNG 32×32px</div>
+          </div>
+          <div class="field-ctrl">
+            <div class="img-upload">
+              <div class="img-preview" style="width:40px;height:40px;font-size:16px">🌿</div>
+              <button class="btn btn-sec">📁 Thay favicon…</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Màu chủ đạo</div>
+            <div class="field-hint">Áp dụng cho header, nút CTA, highlight trên toàn hệ thống</div>
+          </div>
+          <div class="field-ctrl">
+            <div class="color-row">
+              <div class="color-swatch on" style="background:#B8860B" title="Vàng trầm (mặc định)"></div>
+              <div class="color-swatch" style="background:#1D4E89" title="Xanh hoàng gia"></div>
+              <div class="color-swatch" style="background:#7D1D3F" title="Đỏ tía"></div>
+              <div class="color-swatch" style="background:#2E7D32" title="Xanh lá"></div>
+              <div class="color-swatch" style="background:#4A235A" title="Tím hoàng gia"></div>
+              <input class="color-hex" value="#B8860B" placeholder="#RRGGBB"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Phông chữ tiêu đề</div>
+          </div>
+          <div class="field-ctrl">
+            <select class="form-select">
+              <option selected>Georgia (Serif — mặc định)</option>
+              <option>Playfair Display (Serif)</option>
+              <option>Lora (Serif)</option>
+              <option>EB Garamond (Serif)</option>
+              <option>Inter (Sans-serif)</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Cài đặt cây phả hệ -->
+    <div class="section-card">
+      <div class="section-head open">
+        <div class="section-icon">🌳</div>
+        <div class="section-title">
+          <h3>Cài đặt cây phả hệ</h3>
+          <p>Giới hạn hiển thị, quyền xem, tính năng</p>
+        </div>
+        <span class="section-chevron">›</span>
+      </div>
+      <div class="section-body">
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Số node tối đa mặc định</div>
+            <div class="field-hint">Giới hạn node hiển thị lần đầu trên portal (FR-04.2)</div>
+          </div>
+          <div class="field-ctrl">
+            <input class="form-input" type="number" value="43" style="max-width:100px"/>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Phả đồ công khai</div>
+          </div>
+          <div class="field-ctrl" style="display:flex;flex-direction:column;gap:10px">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <strong>Cho phép khách xem phả đồ (không cần đăng nhập)</strong>
+                <span>Người không đăng ký vẫn xem được cây phả hệ cơ bản</span>
+              </div>
+              <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <strong>Ẩn ngày sinh đầy đủ của người còn sống</strong>
+                <span>Bảo vệ PII theo NĐ 13/2023 — khách chỉ thấy năm sinh</span>
+              </div>
+              <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <strong>Cho phép tự khai bổ sung hồ sơ</strong>
+                <span>Thành viên đăng nhập có thể tự cập nhật, chờ admin duyệt</span>
+              </div>
+              <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <strong>Xuất SVG/PNG từ portal</strong>
+                <span>Cho phép thành viên tải xuống phả đồ dạng ảnh</span>
+              </div>
+              <label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div>
+            <div class="field-label">Prefix mã hiệu</div>
+            <div class="field-hint">Ký tự đầu của mã hiệu thành viên (mặc định: A)</div>
+          </div>
+          <div class="field-ctrl" style="display:flex;gap:8px;align-items:center">
+            <input class="form-input" value="A" style="max-width:60px;text-align:center;font-size:16px;font-weight:700"/>
+            <span style="font-size:12px;color:var(--ink-muted)">VD: A1, A2a, A2a-sp</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section: Thông báo (collapsed) -->
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-icon">🔔</div>
+        <div class="section-title">
+          <h3>Nhắc nhở & Ngày giỗ</h3>
+          <p>Lịch trình gửi nhắc, kênh thông báo</p>
+        </div>
+        <span class="section-chevron">›</span>
+      </div>
+      <div class="section-body hidden">
+        <!-- expanded on click -->
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-icon">📧</div>
+        <div class="section-title">
+          <h3>Email (SMTP)</h3>
+          <p>Máy chủ gửi email hệ thống</p>
+        </div>
+        <span class="section-chevron">›</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-icon">💬</div>
+        <div class="section-title">
+          <h3>Zalo OA</h3>
+          <p>Access Token, Secret, App ID Zalo Official Account</p>
+        </div>
+        <span class="section-chevron">›</span>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-head">
+        <div class="section-icon">💾</div>
+        <div class="section-title">
+          <h3>Sao lưu & Khôi phục</h3>
+          <p>Backup DB định kỳ, export GEDCOM, restore</p>
+        </div>
+        <span class="section-chevron">›</span>
+      </div>
+    </div>
+
+    <!-- Save bar -->
+    <div class="save-bar">
+      <div class="save-bar-left">
+        ✏ 5 trường đã thay đổi chưa lưu
+      </div>
+      <div class="save-bar-right">
+        <button class="btn btn-sec">Đặt lại</button>
+        <button class="btn btn-gold">💾 Lưu cấu hình</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.section-head').forEach(h=>{
+  h.addEventListener('click',()=>{
+    h.classList.toggle('open');
+    const b=h.nextElementSibling;
+    if(b&&b.classList.contains('section-body'))b.classList.toggle('hidden');
+  });
+});
+</script>
+</body>
+</html>

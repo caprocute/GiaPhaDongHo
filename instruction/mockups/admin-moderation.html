@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Duyệt tự khai</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-light:#D4A017;--gold-pale:#FDF6E3;--gold-border:#E8C96A;
+  --ink:#1C1410;--ink-2:#3D2B1F;--ink-muted:#8A7060;
+  --surface:#FEFCF8;--surface-2:#F5EFE0;--surface-3:#EDE3CC;
+  --border:#D9CBAA;--r:8px;--r-sm:4px;
+  --font-d:'Georgia',serif;--font-b:system-ui,-apple-system,sans-serif;
+  --warning-bg:#FFF8E1;--warning:#F57C00;--warning-border:#FFE082;
+  --success-bg:#E8F5E9;--success:#2E7D32;--success-border:#A5D6A7;
+  --error-bg:#FFEBEE;--error:#C62828;--error-border:#EF9A9A;
+  --info-bg:#E3F2FD;--info:#1565C0;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow-md:0 4px 12px rgba(0,0,0,.12);
+}
+body{font-family:var(--font-b);background:var(--surface-2);color:var(--ink);min-height:100vh}
+
+/* page shell */
+.page{max-width:1100px;margin:0 auto;padding:24px 20px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.page-head h1{font-family:var(--font-d);font-size:26px;color:var(--ink);line-height:1.2}
+.page-head p{font-size:13px;color:var(--ink-muted);margin-top:4px;max-width:480px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--gold);color:#fff}.btn-primary:hover{background:var(--gold-light)}
+.btn-secondary{background:#fff;color:var(--ink);border:1px solid var(--border)}.btn-secondary:hover{background:var(--surface-2)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--error);color:#fff}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+/* alert */
+.alert{padding:10px 14px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.alert-warning{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border)}
+.alert-info{background:var(--info-bg);color:var(--info);border:1px solid #90CAF9}
+
+/* tabs */
+.tab-strip{display:flex;gap:4px;background:var(--surface-3);padding:5px;border-radius:var(--r);margin-bottom:20px;width:fit-content}
+.tab-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;border-radius:var(--r-sm);border:none;background:none;font-size:13px;font-weight:600;color:var(--ink-muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab-btn.on{background:#fff;color:var(--ink);box-shadow:var(--shadow-sm)}
+.tab-badge{font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;line-height:1.4}
+.badge-warning{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border)}
+.badge-success{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.badge-error{background:var(--error-bg);color:var(--error);border:1px solid var(--error-border)}
+.badge-default{background:var(--surface-3);color:var(--ink-muted)}
+
+/* bulk bar */
+.bulk-bar{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px;
+  box-shadow:var(--shadow-sm)
+}
+.bulk-check-label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer}
+.bulk-note{flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;outline:none}
+.bulk-note:focus{border-color:var(--gold)}
+
+/* cards */
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;box-shadow:var(--shadow-sm);transition:border-color .15s
+}
+.card:hover{border-color:var(--gold-border)}
+.card.selected{border-color:var(--gold);background:var(--gold-pale)}
+.card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;
+}
+.avatar-m{background:#D6E4F5;color:#1D4E89}
+.avatar-f{background:#F5D6E2;color:#7D1D3F}
+.avatar-u{background:var(--surface-3);color:var(--ink-muted)}
+.card-who{flex:1}
+.card-who strong{font-size:14px;color:var(--ink);display:block}
+.card-who a{color:var(--gold);text-decoration:none}.card-who a:hover{text-decoration:underline}
+.card-meta{font-size:11.5px;color:var(--ink-muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.badge-pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+
+/* diff preview */
+.diff-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;margin:8px 0;font-size:12px}
+.diff-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-muted);letter-spacing:.6px;margin-bottom:6px;display:block}
+.diff-field{display:flex;gap:8px;align-items:baseline;padding:3px 0;border-bottom:1px solid var(--border)}
+.diff-field:last-child{border-bottom:none}
+.diff-key{font-weight:700;color:var(--ink-2);min-width:100px;font-size:11px}
+.diff-old{color:var(--error);text-decoration:line-through;font-size:12px}
+.diff-arr{color:var(--ink-muted);font-size:10px}
+.diff-new{color:var(--success);font-size:12px;font-weight:600}
+.diff-only{color:var(--info);font-size:12px}
+
+/* card actions */
+.card-acts{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.card-acts-left{flex:1}
+.note-input{width:100%;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;outline:none}
+.note-input:focus{border-color:var(--gold)}
+
+/* empty */
+.empty{text-align:center;padding:60px 20px;color:var(--ink-muted)}
+.empty svg{opacity:.3;margin-bottom:12px}
+.empty h3{font-family:var(--font-d);font-size:18px;color:var(--ink-2);margin-bottom:6px}
+.empty p{font-size:13px}
+
+/* pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;margin-top:20px;padding:10px 0;font-size:13px;color:var(--ink-muted)}
+.page-btns{display:flex;gap:4px}
+.page-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--r-sm);background:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.page-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+.page-btn:hover:not(.on){background:var(--surface-2)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-head">
+    <div>
+      <h1>Duyệt tự khai</h1>
+      <p>Xem xét và phê duyệt thông tin con cháu tự khai bổ sung hoặc chỉnh sửa hồ sơ gia phả.</p>
+    </div>
+    <div style="display:flex;gap:8px;flex-shrink:0">
+      <button class="btn btn-secondary btn-sm">⬇ Xuất Excel</button>
+      <button class="btn btn-primary btn-sm">⚙ Cài đặt duyệt</button>
+    </div>
+  </div>
+
+  <!-- Alert -->
+  <div class="alert alert-warning">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm0 3.5l8.3 14.5H3.7L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
+    <span><b>14 yêu cầu</b> chờ duyệt hơn 3 ngày — cần xử lý ưu tiên</span>
+  </div>
+
+  <!-- Tab strip -->
+  <div class="tab-strip">
+    <button class="tab-btn on">
+      ⏰ Chờ duyệt
+      <span class="tab-badge badge-warning">23</span>
+    </button>
+    <button class="tab-btn">
+      ✓ Đã duyệt
+      <span class="tab-badge badge-success">142</span>
+    </button>
+    <button class="tab-btn">
+      ✗ Từ chối
+      <span class="tab-badge badge-error">18</span>
+    </button>
+    <button class="tab-btn">
+      ≡ Tất cả
+      <span class="tab-badge badge-default">183</span>
+    </button>
+  </div>
+
+  <!-- Bulk bar -->
+  <div class="bulk-bar">
+    <label class="bulk-check-label">
+      <input type="checkbox" /> Đã chọn 3
+    </label>
+    <span style="font-size:12px;color:var(--ink-muted);flex:1">trong tổng 23 yêu cầu chờ duyệt</span>
+    <input class="bulk-note" placeholder="Ghi chú cho các yêu cầu được chọn (tùy chọn)…" style="max-width:280px"/>
+    <button class="btn btn-success btn-sm">✓✓ Duyệt 3 yêu cầu</button>
+    <button class="btn btn-secondary btn-sm" style="border-color:var(--error);color:var(--error)">✗ Từ chối 3</button>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards">
+
+    <!-- Card 1 — selected -->
+    <div class="card selected">
+      <div class="card-head">
+        <input type="checkbox" checked style="margin-top:2px;flex-shrink:0;accent-color:var(--gold)"/>
+        <div class="avatar avatar-m">HV</div>
+        <div class="card-who" style="flex:1">
+          <strong><a href="#">Hoàng Văn Lộc</a></strong>
+          <div class="card-meta">
+            <span>Người gửi: hoangvanloc@gmail.com</span>
+            <span>·</span>
+            <span>Mã: A4h · Đời 4</span>
+            <span>·</span>
+            <span>15 phút trước</span>
+          </div>
+        </div>
+        <span class="badge-pill badge-warning">⏰ Chờ duyệt</span>
+      </div>
+
+      <div class="diff-box">
+        <span class="diff-label">Thay đổi đề xuất</span>
+        <div class="diff-field">
+          <span class="diff-key">Nghề nghiệp</span>
+          <span class="diff-old">—</span>
+          <span class="diff-arr">→</span>
+          <span class="diff-new">Kỹ sư phần mềm</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Địa chỉ</span>
+          <span class="diff-old">Hà Nội</span>
+          <span class="diff-arr">→</span>
+          <span class="diff-new">TP. Hồ Chí Minh, Q.7</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Ảnh đại diện</span>
+          <span class="diff-only">📷 Thêm ảnh mới (avatar_hvloc.jpg)</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Điện thoại</span>
+          <span class="diff-only">0912.345.678 (ẩn khách)</span>
+        </div>
+      </div>
+
+      <div class="card-acts">
+        <div class="card-acts-left">
+          <input class="note-input" placeholder="Ghi chú (tùy chọn)…" style="max-width:300px"/>
+        </div>
+        <button class="btn btn-success btn-sm">✓ Duyệt</button>
+        <button class="btn btn-secondary btn-sm" style="border-color:var(--error);color:var(--error)">✗ Từ chối</button>
+      </div>
+    </div>
+
+    <!-- Card 2 — selected -->
+    <div class="card selected">
+      <div class="card-head">
+        <input type="checkbox" checked style="margin-top:2px;flex-shrink:0;accent-color:var(--gold)"/>
+        <div class="avatar avatar-f">NT</div>
+        <div class="card-who" style="flex:1">
+          <strong><a href="#">Nguyễn Thị Lan Anh</a></strong>
+          <div class="card-meta">
+            <span>Người gửi: ntlananh@gmail.com</span>
+            <span>·</span>
+            <span>Mã: A6a-sp · Đời 6</span>
+            <span>·</span>
+            <span>2 giờ trước</span>
+          </div>
+        </div>
+        <span class="badge-pill badge-warning">⏰ Chờ duyệt</span>
+      </div>
+
+      <div class="diff-box">
+        <span class="diff-label">Thay đổi đề xuất</span>
+        <div class="diff-field">
+          <span class="diff-key">Tên thường dùng</span>
+          <span class="diff-old">Lan Anh</span>
+          <span class="diff-arr">→</span>
+          <span class="diff-new">Lan Anh (Ánh)</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Học vấn</span>
+          <span class="diff-only">Thạc sĩ Kinh tế — ĐH Kinh tế QD</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Sự nghiệp công đức</span>
+          <span class="diff-only">Đóng góp xây nhà từ đường 2024: 5 triệu đồng</span>
+        </div>
+      </div>
+
+      <div class="card-acts">
+        <div class="card-acts-left">
+          <input class="note-input" placeholder="Ghi chú (tùy chọn)…" style="max-width:300px"/>
+        </div>
+        <button class="btn btn-success btn-sm">✓ Duyệt</button>
+        <button class="btn btn-secondary btn-sm" style="border-color:var(--error);color:var(--error)">✗ Từ chối</button>
+      </div>
+    </div>
+
+    <!-- Card 3 — selected -->
+    <div class="card selected">
+      <div class="card-head">
+        <input type="checkbox" checked style="margin-top:2px;flex-shrink:0;accent-color:var(--gold)"/>
+        <div class="avatar avatar-m">HT</div>
+        <div class="card-who" style="flex:1">
+          <strong><a href="#">Hoàng Trung Bảo</a></strong>
+          <div class="card-meta">
+            <span>Người gửi: htbao_1997@gmail.com</span>
+            <span>·</span>
+            <span>Mã: A6m · Đời 6</span>
+            <span>·</span>
+            <span>5 giờ trước</span>
+          </div>
+        </div>
+        <span class="badge-pill badge-warning">⏰ Chờ duyệt</span>
+      </div>
+
+      <div class="diff-box">
+        <span class="diff-label">Thay đổi đề xuất</span>
+        <div class="diff-field">
+          <span class="diff-key">Ngày sinh dương</span>
+          <span class="diff-only">15/03/1997</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Nơi sinh</span>
+          <span class="diff-only">Phú Xuyên, Hà Nội</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Tình trạng hôn nhân</span>
+          <span class="diff-old">Chưa kết hôn</span>
+          <span class="diff-arr">→</span>
+          <span class="diff-new">Đã kết hôn (2023)</span>
+        </div>
+      </div>
+
+      <div class="card-acts">
+        <div class="card-acts-left">
+          <input class="note-input" placeholder="Ghi chú (tùy chọn)…" style="max-width:300px"/>
+        </div>
+        <button class="btn btn-success btn-sm">✓ Duyệt</button>
+        <button class="btn btn-secondary btn-sm" style="border-color:var(--error);color:var(--error)">✗ Từ chối</button>
+      </div>
+    </div>
+
+    <!-- Card 4 — normal -->
+    <div class="card">
+      <div class="card-head">
+        <input type="checkbox" style="margin-top:2px;flex-shrink:0;accent-color:var(--gold)"/>
+        <div class="avatar avatar-m">HC</div>
+        <div class="card-who" style="flex:1">
+          <strong><a href="#">Hoàng Cường Hải</a></strong>
+          <div class="card-meta">
+            <span>Mã: A6g · Đời 6</span>
+            <span>·</span>
+            <span>1 ngày trước</span>
+          </div>
+        </div>
+        <span class="badge-pill badge-warning">⏰ Chờ duyệt</span>
+      </div>
+
+      <div class="diff-box">
+        <span class="diff-label">Thay đổi đề xuất (5 trường)</span>
+        <div class="diff-field">
+          <span class="diff-key">Ảnh đại diện</span>
+          <span class="diff-only">📷 Thêm ảnh mới</span>
+        </div>
+        <div class="diff-field">
+          <span class="diff-key">Nghề nghiệp</span>
+          <span class="diff-old">—</span><span class="diff-arr">→</span><span class="diff-new">Bác sĩ nội khoa</span>
+        </div>
+        <div style="color:var(--ink-muted);font-size:11px;margin-top:4px">…và 3 trường khác</div>
+      </div>
+
+      <div class="card-acts">
+        <div class="card-acts-left">
+          <input class="note-input" placeholder="Ghi chú…" style="max-width:300px"/>
+        </div>
+        <button class="btn btn-success btn-sm">✓ Duyệt</button>
+        <button class="btn btn-secondary btn-sm" style="border-color:var(--error);color:var(--error)">✗ Từ chối</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <span>Hiển thị 1–4 / 23 yêu cầu</span>
+    <div class="page-btns">
+      <button class="page-btn">‹</button>
+      <button class="page-btn on">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <span style="padding:0 4px;line-height:32px">…</span>
+      <button class="page-btn">6</button>
+      <button class="page-btn">›</button>
+    </div>
+    <span>6 trang</span>
+  </div>
+
+</div>
+</body>
+</html>
