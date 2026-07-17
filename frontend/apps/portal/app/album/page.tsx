@@ -8,13 +8,12 @@ export default function AlbumPage() {
     <PageShell
       label="Di sản"
       title="Album ảnh"
-      lead="Thư viện ảnh dòng họ. Upload MinIO đã có (R1.4); danh sách công khai sẽ nối API sau."
+      lead="Hình ảnh sinh hoạt, lễ hội và di tích của dòng họ Hoàng – Huỳnh thôn Trung Bính."
       crumbs={[
         { label: "Trang chủ", href: "/" },
         { label: "Album" },
       ]}
     >
-      <p className={styles.note}>Demo — ảnh minh họa Unsplash</p>
       <div className={styles.albumGrid}>
         {DEMO_ALBUM.map((item) => (
           <div key={item.src} className={styles.albumCard}>

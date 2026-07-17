@@ -16,28 +16,64 @@ export function AppShell({ header, sidebar, children }: AppShellProps) {
     fontFamily: "var(--font-body)",
   };
 
-  const body: CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: sidebar ? "240px 1fr" : "1fr",
-  };
-
-  const main: CSSProperties = {
-    padding: "var(--spacing-lg)",
-  };
-
-  const aside: CSSProperties = {
-    padding: "var(--spacing-md)",
-    borderRight: "1px solid var(--color-border-subtle)",
-    background: "var(--color-surface-card)",
-  };
-
   return (
     <div style={root}>
       {header}
-      <div style={body}>
-        {sidebar ? <aside style={aside}>{sidebar}</aside> : null}
-        <main style={main}>{children}</main>
+      <div className="app-shell-body">
+        {sidebar ? <aside className="app-shell-aside">{sidebar}</aside> : null}
+        <main className="app-shell-main">{children}</main>
       </div>
+      <style>{`
+        .app-shell-body {
+          display: grid;
+          grid-template-columns: ${sidebar ? "220px 1fr" : "1fr"};
+          min-height: 0;
+        }
+        .app-shell-aside {
+          padding: var(--spacing-sm) 0;
+          border-right: 1px solid var(--color-border-subtle);
+          background: var(--color-surface-card);
+          overflow-y: auto;
+        }
+        .app-shell-main {
+          padding: var(--spacing-lg);
+          overflow-y: auto;
+          min-width: 0;
+        }
+        @media (max-width: 768px) {
+          .app-shell-body {
+            grid-template-columns: 1fr;
+          }
+          .app-shell-aside {
+            border-right: none;
+            border-bottom: 1px solid var(--color-border-subtle);
+            overflow-x: auto;
+            overflow-y: visible;
+            padding: 0;
+          }
+          .app-shell-aside nav {
+            flex-direction: row !important;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+          }
+          .app-shell-aside nav > div {
+            display: contents;
+          }
+          .app-shell-aside nav span {
+            display: none !important;
+          }
+          .app-shell-aside nav a {
+            border-left: none !important;
+            border-bottom: 2px solid transparent;
+            padding: 12px 14px !important;
+            white-space: nowrap;
+            font-size: 12.5px !important;
+          }
+          .app-shell-main {
+            padding: var(--spacing-md);
+          }
+        }
+      `}</style>
     </div>
   );
 }

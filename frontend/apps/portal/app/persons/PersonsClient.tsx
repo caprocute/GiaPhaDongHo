@@ -60,10 +60,7 @@ export function PersonsClient() {
         </>
       }
     >
-      <p className={styles.note}>
-        {source === "demo" ? "Đang hiển thị dữ liệu demo · " : "Nguồn API · "}
-        {rows.length} hồ sơ
-      </p>
+      <p className={styles.note}>{rows.length} hồ sơ{source === "demo" ? " · demo" : ""}</p>
 
       <div className={styles.filterBar}>
         <input

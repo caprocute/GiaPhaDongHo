@@ -23,7 +23,7 @@ export function GioCard({ day, month, name, tag }: GioCardProps) {
     left: 0,
     right: 0,
     height: 4,
-    background: "var(--color-action-primary-bg)",
+    background: "var(--gradient-foil)",
   };
   const dayStyle: CSSProperties = {
     fontFamily: "var(--font-display)",

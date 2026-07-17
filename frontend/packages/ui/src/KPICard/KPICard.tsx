@@ -23,7 +23,7 @@ export function KPICard({ label, value, delta, trend = "neutral" }: KPICardProps
     left: 0,
     right: 0,
     height: 2.5,
-    background: "var(--color-heritage-line)",
+    background: "var(--gradient-foil)",
   };
   const lbl: CSSProperties = {
     fontSize: 10.5,

@@ -45,21 +45,18 @@ export function GioClient() {
     <PageShell
       label="Hương hỏa"
       title="Ngày giỗ"
-      lead={`Lọc theo tháng âm — hiện tại lịch: tháng ${current.month}/${current.year} âm${current.leap ? " (nhuận)" : ""}.`}
+      lead="Tra cứu ngày giỗ theo tháng âm lịch."
       crumbs={[
         { label: "Trang chủ", href: "/" },
         { label: "Ngày giỗ" },
       ]}
       toolbarRight={
         <Link href="/persons" className={styles.tool}>
-          Danh sách thành viên
+          Thành viên
         </Link>
       }
     >
-      <p className={styles.note}>
-        {source === "demo" ? "Dữ liệu demo · " : "Nguồn API · "}
-        {rows.length} ngày trong tháng {month} âm
-      </p>
+      <p className={styles.note}>{rows.length} ngày trong tháng {month} âm{source === "demo" ? " · demo" : ""}</p>
 
       <div className={styles.filterBar}>
         <FormField label="Tháng âm">

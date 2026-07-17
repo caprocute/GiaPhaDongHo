@@ -21,43 +21,89 @@ import { SettingsPage } from "./settings/SettingsPage";
 import { SystemModulesPage } from "./system/SystemModulesPage";
 import { TreeEditorPage } from "./tree/TreeEditorPage";
 
-const navStyle = {
-  display: "flex",
-  flexDirection: "column" as const,
-  gap: "var(--spacing-sm)",
+const NAV_GROUPS = [
+  {
+    label: "Tổng quan",
+    items: [
+      { path: "/", label: "Bảng điều khiển", end: true },
+    ],
+  },
+  {
+    label: "Gia phả",
+    items: [
+      { path: "/persons", label: "Thành viên" },
+      { path: "/tree", label: "Phả đồ" },
+      { path: "/moderation", label: "Duyệt tự khai" },
+    ],
+  },
+  {
+    label: "Tộc sự",
+    items: [
+      { path: "/donation", label: "Quỹ công đức" },
+      { path: "/events", label: "Sự kiện" },
+      { path: "/notifications", label: "Nhắc giỗ" },
+      { path: "/scholarship", label: "Khuyến học" },
+    ],
+  },
+  {
+    label: "Nội dung",
+    items: [
+      { path: "/posts", label: "Bài viết" },
+      { path: "/comments", label: "Bình luận" },
+      { path: "/media", label: "Thư viện" },
+    ],
+  },
+  {
+    label: "Hệ thống",
+    items: [
+      { path: "/system", label: "Module" },
+      { path: "/settings", label: "Cài đặt" },
+    ],
+  },
+] as const;
+
+const groupLabel: React.CSSProperties = {
+  fontSize: 9.5,
+  fontWeight: 700,
+  letterSpacing: "0.28em",
+  textTransform: "uppercase",
+  color: "var(--color-heritage-deep)",
+  fontFamily: "var(--font-body)",
+  padding: "14px 12px 5px",
+  display: "block",
 };
 
-const linkStyle = ({ isActive }: { isActive: boolean }) => ({
-  color: isActive ? "var(--color-action-primary-bg)" : "var(--color-text-primary)",
-  textDecoration: "none",
-  fontFamily: "var(--font-body)",
-  fontWeight: isActive ? 600 : 400,
-  padding: "var(--spacing-xs) 0",
-});
-
 function Sidebar() {
-  const items = [
-    ["/", "Tổng quan"],
-    ["/persons", "Thành viên"],
-    ["/tree", "Tree editor"],
-    ["/moderation", "Duyệt tự khai"],
-    ["/donation", "Quỹ công đức"],
-    ["/events", "Sự kiện"],
-    ["/notifications", "Nhắc giỗ"],
-    ["/scholarship", "Khuyến học"],
-    ["/system", "Hệ thống"],
-    ["/posts", "Bài viết"],
-    ["/comments", "Bình luận"],
-    ["/media", "Thư viện"],
-    ["/settings", "Cài đặt"],
-  ] as const;
-
   return (
-    <nav style={navStyle} aria-label="Menu quản trị">
-      {items.map(([path, label]) => (
-        <NavLink key={path} to={path} end={path === "/"} style={linkStyle}>
-          {label}
-        </NavLink>
+    <nav aria-label="Menu quản trị" style={{ display: "flex", flexDirection: "column" }}>
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label}>
+          <span style={groupLabel}>{group.label}</span>
+          {group.items.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={"end" in item ? item.end : undefined}
+              style={({ isActive }) => ({
+                display: "flex",
+                alignItems: "center",
+                padding: "9px 12px",
+                fontSize: 13.5,
+                fontWeight: isActive ? 700 : 500,
+                color: isActive ? "var(--color-action-primary-bg)" : "var(--color-text-muted)",
+                background: isActive
+                  ? "color-mix(in srgb, var(--color-action-primary-bg) 8%, transparent)"
+                  : "transparent",
+                borderLeft: `2px solid ${isActive ? "var(--color-action-primary-bg)" : "transparent"}`,
+                textDecoration: "none",
+                fontFamily: "var(--font-body)",
+                transition: "all 0.13s",
+              })}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
       ))}
     </nav>
   );
@@ -68,28 +114,41 @@ function AdminHeader() {
   const name = user?.profile?.preferred_username ?? user?.profile?.name ?? "";
 
   return (
-    <header
-      style={{
-        padding: "var(--spacing-md) var(--spacing-lg)",
-        borderBottom: "1px solid var(--color-border-subtle)",
-        fontFamily: "var(--font-display)",
-        background: "var(--color-surface-card)",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: "var(--spacing-md)",
-      }}
-    >
-      <span>GiaPhaHub Admin · CRM</span>
-      {user ? (
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-sm)", fontFamily: "var(--font-body)", fontSize: "var(--font-size-sm)" }}>
-          <span style={{ color: "var(--color-text-muted)" }}>{name}</span>
-          <Button type="button" variant="ghost" onClick={() => void logout()}>
-            Đăng xuất
-          </Button>
-        </div>
-      ) : null}
-    </header>
+    <div>
+      <header
+        style={{
+          padding: "12px var(--spacing-lg)",
+          fontFamily: "var(--font-display)",
+          background: "var(--color-heritage-frame)",
+          color: "var(--color-text-on-brand)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "var(--spacing-md)",
+        }}
+      >
+        <span style={{ fontWeight: 700, letterSpacing: "0.04em", fontSize: 15 }}>
+          GiaPhaHub · Quản trị
+        </span>
+        {user ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-sm)", fontFamily: "var(--font-body)", fontSize: 13 }}>
+            <span style={{ color: "var(--color-heritage-soft)" }}>{name}</span>
+            <Button type="button" variant="ghost" onClick={() => void logout()} style={{ color: "var(--color-heritage-soft)", fontSize: 13 }}>
+              Đăng xuất
+            </Button>
+          </div>
+        ) : null}
+      </header>
+      <div
+        aria-hidden
+        style={{
+          height: 12,
+          background: `var(--color-heritage-frame) var(--pattern-meander) center / auto 10px repeat-x`,
+          borderTop: "1px solid var(--color-heritage-line)",
+          borderBottom: "1px solid var(--color-heritage-line)",
+        }}
+      />
+    </div>
   );
 }
 

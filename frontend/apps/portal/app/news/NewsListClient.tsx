@@ -44,9 +44,6 @@ export function NewsListClient() {
         { label: "Tin tức" },
       ]}
     >
-      <p className={styles.note}>
-        {source === "demo" ? "Đang hiển thị bài demo" : "Nguồn API"}
-      </p>
 
       {posts.length === 0 ? (
         <EmptyState title="Chưa có tin" description="Quay lại sau khi ban biên tập xuất bản bài." />
