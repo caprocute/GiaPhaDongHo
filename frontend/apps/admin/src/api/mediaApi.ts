@@ -65,6 +65,25 @@ export async function deleteMediaPhoto(id: number, token: string | null): Promis
   await apiFetch<void>(`/api/media-photos/${id}`, { method: "DELETE", token });
 }
 
+export type PhotoUpdateDto = {
+  id: number;
+  objectKey: string;
+  caption?: string | null;
+  album?: { id: number } | null;
+};
+
+export async function updateMediaPhoto(
+  id: number,
+  dto: PhotoUpdateDto,
+  token: string | null,
+): Promise<MediaPhotoDto> {
+  return apiFetch<MediaPhotoDto>(`/api/media-photos/${id}`, {
+    method: "PUT",
+    body: { ...dto, id },
+    token,
+  });
+}
+
 export function getPhotoUrl(objectKey: string): string {
   return MINIO_PUBLIC ? `${MINIO_PUBLIC}/${objectKey}` : "";
 }
@@ -94,6 +113,27 @@ export async function updateMediaAlbum(
     body: { ...dto, id },
     token,
   });
+}
+
+// Gallery endpoint (public) — trả về url + thumbUrl từ MinIO presigned URL
+export type GalleryPhotoDto = {
+  id: number;
+  caption?: string | null;
+  objectKey?: string | null;
+  albumId?: number | null;
+  url?: string | null;
+  thumbUrl?: string | null;
+};
+
+export async function listGalleryPhotos(
+  token: string | null,
+  opts: { albumId?: number | null; page?: number; size?: number } = {},
+): Promise<PageResult<GalleryPhotoDto>> {
+  const path =
+    opts.albumId != null
+      ? `/api/v1/media/gallery/albums/${opts.albumId}/photos`
+      : `/api/v1/media/gallery/photos`;
+  return apiFetchPage<GalleryPhotoDto>(path, { token, page: opts.page ?? 0, size: opts.size ?? 24 });
 }
 
 export async function uploadMediaPhoto(

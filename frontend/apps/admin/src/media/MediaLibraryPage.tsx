@@ -19,6 +19,7 @@ import {
   listGalleryPhotos,
   listMediaAlbums,
   updateMediaAlbum,
+  updateMediaPhoto,
   uploadMediaPhoto,
   type GalleryPhotoDto,
   type MediaAlbumDto,
@@ -77,6 +78,17 @@ export function MediaLibraryPage() {
   // ── Lightbox ──
   const [lightboxPhoto, setLightboxPhoto] = useState<GalleryPhotoDto | null>(null);
   const [lightboxIdx, setLightboxIdx] = useState(0);
+
+  // ── Edit photo modal ──
+  const [editPhoto, setEditPhoto] = useState<GalleryPhotoDto | null>(null);
+  const [editPhotoCaption, setEditPhotoCaption] = useState("");
+  const [editPhotoAlbumId, setEditPhotoAlbumId] = useState("");
+
+  function openEditPhoto(photo: GalleryPhotoDto) {
+    setEditPhoto(photo);
+    setEditPhotoCaption(photo.caption ?? "");
+    setEditPhotoAlbumId(photo.albumId != null ? String(photo.albumId) : "");
+  }
 
   // ── Album modals ──
   const [showCreateAlbum, setShowCreateAlbum] = useState(false);
@@ -259,6 +271,36 @@ export function MediaLibraryPage() {
       await loadPhotos(activeAlbumId, photoPage);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Xóa ảnh thất bại.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function doUpdatePhoto() {
+    if (!editPhoto) return;
+    setBusy(true);
+    try {
+      const token = await getAccessToken();
+      const albumId = editPhotoAlbumId ? Number(editPhotoAlbumId) : null;
+      await updateMediaPhoto(
+        editPhoto.id,
+        {
+          id: editPhoto.id,
+          objectKey: editPhoto.objectKey ?? "",
+          caption: editPhotoCaption.trim() || null,
+          album: albumId ? { id: albumId } : null,
+        },
+        token,
+      );
+      // Cập nhật lightbox nếu đang mở ảnh này
+      if (lightboxPhoto?.id === editPhoto.id) {
+        setLightboxPhoto({ ...lightboxPhoto, caption: editPhotoCaption.trim() || null, albumId });
+      }
+      setEditPhoto(null);
+      setToast("Đã cập nhật ảnh.");
+      await loadPhotos(activeAlbumId, photoPage);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Cập nhật ảnh thất bại.");
     } finally {
       setBusy(false);
     }
@@ -563,13 +605,25 @@ export function MediaLibraryPage() {
                         </svg>
                       </div>
                     )}
-                    <div className="ml-ov" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", opacity: 0, transition: "opacity 0.15s", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 6 }}>
-                      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <div className="ml-ov" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", opacity: 0, transition: "opacity 0.15s", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 6 }}>
+                      {/* Top row: checkbox + action buttons */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <button type="button" aria-label={isSel ? "Bỏ chọn" : "Chọn ảnh"}
                           onClick={(e) => { e.stopPropagation(); toggleSelect(photo.id); }}
-                          style={{ width: 20, height: 20, borderRadius: "50%", background: isSel ? "var(--color-primary)" : "rgba(255,255,255,0.85)", border: "2px solid white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: isSel ? "white" : "transparent" }}
+                          style={{ width: 20, height: 20, borderRadius: "50%", background: isSel ? "var(--color-primary)" : "rgba(255,255,255,0.85)", border: "2px solid white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: isSel ? "white" : "transparent", flexShrink: 0 }}
                         >✓</button>
+                        <div style={{ display: "flex", gap: 4 }}>
+                          <button type="button" aria-label="Sửa ảnh"
+                            onClick={(e) => { e.stopPropagation(); openEditPhoto(photo); }}
+                            style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.5)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "white", fontSize: "11px", fontWeight: 700, padding: "2px 7px", backdropFilter: "blur(4px)" }}
+                          >Sửa</button>
+                          <button type="button" aria-label="Xóa ảnh"
+                            onClick={(e) => { e.stopPropagation(); void doDeletePhoto(photo.id); }}
+                            style={{ background: "rgba(180,0,0,0.6)", border: "1px solid rgba(255,100,100,0.4)", borderRadius: "var(--radius-sm)", cursor: "pointer", color: "white", fontSize: "11px", fontWeight: 700, padding: "2px 7px" }}
+                          >Xóa</button>
+                        </div>
                       </div>
+                      {/* Bottom: caption */}
                       <div style={{ fontSize: "10px", color: "white", fontWeight: 600, lineHeight: 1.3, textShadow: "0 1px 2px rgba(0,0,0,.8)" }}>
                         {photo.caption ? photo.caption.slice(0, 50) : `#${photo.id}`}
                       </div>
@@ -801,6 +855,9 @@ export function MediaLibraryPage() {
                       style={{ display: "block", padding: "8px", textAlign: "center", borderRadius: "var(--radius-sm)", background: "var(--color-primary)", color: "white", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}>Tải xuống</a>
                   ) : null}
                   <button type="button" disabled={busy}
+                    onClick={() => openEditPhoto(lightboxPhoto)}
+                    style={{ padding: "8px", borderRadius: "var(--radius-sm)", border: "1px solid rgba(255,255,255,.15)", background: "rgba(255,255,255,.08)", color: "#e0e0e0", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>Sửa chú thích / album</button>
+                  <button type="button" disabled={busy}
                     onClick={() => void doDeletePhoto(lightboxPhoto.id)}
                     style={{ padding: "8px", borderRadius: "var(--radius-sm)", border: "1px solid rgba(198,40,40,.3)", background: "rgba(198,40,40,.15)", color: "#EF9A9A", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>Xóa ảnh này</button>
                 </div>
@@ -809,6 +866,55 @@ export function MediaLibraryPage() {
           </div>
         );
       })()}
+
+      {/* ═══ EDIT PHOTO ════════════════════════════════════════════════════ */}
+      {editPhoto != null && (
+        <div role="dialog" aria-modal="true" aria-label="Sửa ảnh"
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 600, display: "flex", alignItems: "center", justifyContent: "center" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setEditPhoto(null); }}
+        >
+          <div style={{ background: "var(--color-surface-card)", borderRadius: "var(--radius-md)", padding: "var(--spacing-lg)", width: 440, boxShadow: "var(--shadow-lg)", display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
+            {/* Preview nhỏ */}
+            {(editPhoto.thumbUrl ?? editPhoto.url) && (
+              <div style={{ width: "100%", height: 140, borderRadius: "var(--radius-sm)", overflow: "hidden", background: "var(--color-surface-raised)" }}>
+                <img src={editPhoto.thumbUrl ?? editPhoto.url ?? ""} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              </div>
+            )}
+            <h2 style={{ fontFamily: "var(--font-display)", margin: 0, fontSize: "var(--font-size-lg)" }}>Sửa ảnh #{editPhoto.id}</h2>
+            <FormField label="Chú thích">
+              <Input
+                value={editPhotoCaption}
+                onChange={(e) => setEditPhotoCaption(e.target.value)}
+                placeholder="Thêm chú thích cho ảnh…"
+                autoFocus
+              />
+            </FormField>
+            <FormField label="Album">
+              <Select
+                options={[
+                  { value: "", label: "— Không gắn album —" },
+                  ...albums.map((a) => ({ value: String(a.id), label: a.title })),
+                ]}
+                value={editPhotoAlbumId}
+                onChange={(e) => setEditPhotoAlbumId(e.target.value)}
+              />
+            </FormField>
+            <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>
+              Object key: <code>{editPhoto.objectKey}</code>
+            </div>
+            <div style={{ display: "flex", gap: "var(--spacing-sm)", justifyContent: "space-between", alignItems: "center" }}>
+              <button type="button" disabled={busy}
+                onClick={() => { setEditPhoto(null); void doDeletePhoto(editPhoto.id); }}
+                style={{ background: "none", border: "none", color: "var(--color-danger, #c62828)", cursor: "pointer", fontSize: "13px", fontWeight: 600, padding: 0 }}
+              >Xóa ảnh</button>
+              <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
+                <Button type="button" variant="secondary" onClick={() => setEditPhoto(null)}>Hủy</Button>
+                <Button type="button" disabled={busy} onClick={() => void doUpdatePhoto()}>Lưu thay đổi</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ═══ CREATE ALBUM ══════════════════════════════════════════════════ */}
       {showCreateAlbum && (
