@@ -6,6 +6,11 @@
 
     <!-- F8 / FR-15.35 — mở rộng đề cử khuyến học (expand) -->
     <changeSet id="20260718100000-1" author="giapha">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="scholarship_entry" columnName="person_id"/>
+            </not>
+        </preConditions>
         <addColumn tableName="scholarship_entry">
             <column name="person_code" type="varchar(255)"/>
             <column name="level" type="varchar(64)"/>
@@ -20,6 +25,11 @@
     </changeSet>
 
     <changeSet id="20260718100000-2" author="giapha">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_scholarship_entry__person_id"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint
             baseColumnNames="person_id"
             baseTableName="scholarship_entry"
