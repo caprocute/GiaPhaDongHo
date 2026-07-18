@@ -27,16 +27,18 @@ public interface ScholarshipEntryRepository extends JpaRepository<ScholarshipEnt
     }
 
     @Query(
-        value = "select scholarshipEntry from ScholarshipEntry scholarshipEntry left join fetch scholarshipEntry.tree",
+        value = "select scholarshipEntry from ScholarshipEntry scholarshipEntry left join fetch scholarshipEntry.tree left join fetch scholarshipEntry.person",
         countQuery = "select count(scholarshipEntry) from ScholarshipEntry scholarshipEntry"
     )
     Page<ScholarshipEntry> findAllWithToOneRelationships(Pageable pageable);
 
-    @Query("select scholarshipEntry from ScholarshipEntry scholarshipEntry left join fetch scholarshipEntry.tree")
+    @Query(
+        "select scholarshipEntry from ScholarshipEntry scholarshipEntry left join fetch scholarshipEntry.tree left join fetch scholarshipEntry.person"
+    )
     List<ScholarshipEntry> findAllWithToOneRelationships();
 
     @Query(
-        "select scholarshipEntry from ScholarshipEntry scholarshipEntry left join fetch scholarshipEntry.tree where scholarshipEntry.id =:id"
+        "select scholarshipEntry from ScholarshipEntry scholarshipEntry left join fetch scholarshipEntry.tree left join fetch scholarshipEntry.person where scholarshipEntry.id =:id"
     )
     Optional<ScholarshipEntry> findOneWithToOneRelationships(@Param("id") Long id);
 
@@ -44,6 +46,7 @@ public interface ScholarshipEntryRepository extends JpaRepository<ScholarshipEnt
         """
         select s from ScholarshipEntry s
         left join fetch s.tree t
+        left join fetch s.person
         where t.slug = :slug
           and lower(s.status) = lower(:status)
         order by s.year desc nulls last, s.id desc
@@ -55,6 +58,7 @@ public interface ScholarshipEntryRepository extends JpaRepository<ScholarshipEnt
         """
         select s from ScholarshipEntry s
         left join fetch s.tree t
+        left join fetch s.person
         where t.slug = :slug
         order by s.id desc
         """

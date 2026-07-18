@@ -591,3 +591,103 @@ export async function createUnionChild(
 export async function deleteUnionChild(id: number, token: string | null): Promise<void> {
   await apiFetch<void>(`/api/union-children/${id}`, { method: "DELETE", token });
 }
+
+export type ScholarshipEntryDto = {
+  id?: number;
+  personName: string;
+  achievement: string;
+  year?: number | null;
+  status?: string | null;
+  personCode?: string | null;
+  level?: string | null;
+  schoolOrField?: string | null;
+  medalNote?: string | null;
+  lineageNote?: string | null;
+  reviewNote?: string | null;
+  awardAmount?: number | string | null;
+  awardedAt?: string | null;
+  person?: { id?: number; code?: string; fullName?: string } | null;
+};
+
+export type ScholarshipStats = {
+  pendingCount: number;
+  approvedCount: number;
+  rejectedCount: number;
+  totalCount: number;
+  advancedDegreeCount: number;
+  awardedTotal: number | string;
+  fundCampaignId?: number | null;
+  fundTitle?: string | null;
+  fundRaisedAmount?: number | string | null;
+  fundGoalAmount?: number | string | null;
+  fundRemaining?: number | string | null;
+  fundStatus?: string | null;
+  awardRoundLabel?: string | null;
+};
+
+export type ScholarshipReviewBody = {
+  reviewNote?: string;
+  awardAmount?: number | null;
+};
+
+export type ScholarshipAwardRoundBody = {
+  entryIds: number[];
+  defaultAwardAmount?: number | null;
+  reviewNote?: string;
+  createHonorEvent?: boolean;
+  honorEventTitle?: string;
+  honorEventLocation?: string;
+};
+
+export async function listScholarshipAdmin(
+  slug: string,
+  token: string | null,
+  page = 0,
+  size = 20,
+  filter?: { status?: string; level?: string; year?: number; q?: string },
+): Promise<PageResult<ScholarshipEntryDto>> {
+  const q = new URLSearchParams();
+  if (filter?.status && filter.status !== "all") q.set("status", filter.status);
+  if (filter?.level) q.set("level", filter.level);
+  if (filter?.year != null) q.set("year", String(filter.year));
+  if (filter?.q) q.set("q", filter.q);
+  const qs = q.toString() ? `?${q.toString()}` : "";
+  return apiFetchPage<ScholarshipEntryDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/admin${qs}`,
+    { token, page, size },
+  );
+}
+
+export async function getScholarshipStats(
+  slug: string,
+  token: string | null,
+): Promise<ScholarshipStats> {
+  return apiFetch<ScholarshipStats>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/stats`,
+    { token },
+  );
+}
+
+export async function reviewScholarshipEntry(
+  slug: string,
+  id: number,
+  action: "approve" | "reject",
+  body: ScholarshipReviewBody | undefined,
+  token: string | null,
+): Promise<ScholarshipEntryDto> {
+  return apiFetch<ScholarshipEntryDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/${id}/${action}`,
+    { method: "POST", body: body ?? {}, token },
+  );
+}
+
+export async function awardScholarshipRound(
+  slug: string,
+  body: ScholarshipAwardRoundBody,
+  token: string | null,
+): Promise<{ awardedCount: number; honorEventId?: number | null; honorEventTitle?: string | null }> {
+  return apiFetch(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/award-round`,
+    { method: "POST", body, token },
+  );
+}

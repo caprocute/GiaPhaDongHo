@@ -22,6 +22,38 @@
     {
       "fieldName": "status",
       "fieldType": "String"
+    },
+    {
+      "fieldName": "personCode",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "level",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "schoolOrField",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "medalNote",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "lineageNote",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "reviewNote",
+      "fieldType": "String"
+    },
+    {
+      "fieldName": "awardAmount",
+      "fieldType": "BigDecimal"
+    },
+    {
+      "fieldName": "awardedAt",
+      "fieldType": "Instant"
     }
   ],
   "name": "ScholarshipEntry",
@@ -30,6 +62,14 @@
       "otherEntityField": "slug",
       "otherEntityName": "familyTree",
       "relationshipName": "tree",
+      "relationshipSide": "left",
+      "relationshipType": "many-to-one",
+      "relationshipWithBuiltInEntity": true
+    },
+    {
+      "otherEntityField": "fullName",
+      "otherEntityName": "person",
+      "relationshipName": "person",
       "relationshipSide": "left",
       "relationshipType": "many-to-one",
       "relationshipWithBuiltInEntity": true

@@ -2,10 +2,13 @@ package vn.giapha.scholarship.internal.web;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.giapha.core.security.RequiresPermission;
+import vn.giapha.scholarship.api.ScholarshipAwardRoundRequest;
+import vn.giapha.scholarship.api.ScholarshipReviewRequest;
 import vn.giapha.scholarship.internal.ScholarshipService;
 import vn.giapha.service.dto.ScholarshipEntryDTO;
 import vn.giapha.web.rest.errors.BadRequestAlertException;
@@ -34,13 +37,22 @@ public class TreeScholarshipResource {
     public ResponseEntity<List<ScholarshipEntryDTO>> admin(
         @PathVariable String slug,
         @RequestParam(required = false) String status,
+        @RequestParam(required = false) String level,
+        @RequestParam(required = false) Integer year,
+        @RequestParam(required = false) String q,
         @org.springdoc.core.annotations.ParameterObject Pageable pageable
     ) {
-        return PagedResponses.ok(scholarshipService.listAdmin(slug, status), pageable);
+        return PagedResponses.ok(scholarshipService.listAdmin(slug, status, level, year, q), pageable);
+    }
+
+    @GetMapping("/scholarship-entries/stats")
+    @RequiresPermission("scholarship:entry:read")
+    public Map<String, Object> stats(@PathVariable String slug) {
+        return scholarshipService.stats(slug);
     }
 
     @PostMapping("/scholarship-entries")
-    @RequiresPermission("scholarship:entry:write")
+    @RequiresPermission("scholarship:entry:nominate")
     public ScholarshipEntryDTO nominate(@PathVariable String slug, @Valid @RequestBody ScholarshipEntryDTO body) {
         try {
             return scholarshipService.nominate(slug, body);
@@ -50,20 +62,38 @@ public class TreeScholarshipResource {
     }
 
     @PostMapping("/scholarship-entries/{id}/approve")
-    @RequiresPermission("scholarship:entry:write")
-    public ScholarshipEntryDTO approve(@PathVariable String slug, @PathVariable Long id) {
+    @RequiresPermission("scholarship:entry:review")
+    public ScholarshipEntryDTO approve(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @RequestBody(required = false) ScholarshipReviewRequest body
+    ) {
         try {
-            return scholarshipService.review(slug, id, true);
+            return scholarshipService.review(slug, id, true, body);
         } catch (IllegalArgumentException e) {
             throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
         }
     }
 
     @PostMapping("/scholarship-entries/{id}/reject")
-    @RequiresPermission("scholarship:entry:write")
-    public ScholarshipEntryDTO reject(@PathVariable String slug, @PathVariable Long id) {
+    @RequiresPermission("scholarship:entry:review")
+    public ScholarshipEntryDTO reject(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @RequestBody(required = false) ScholarshipReviewRequest body
+    ) {
         try {
-            return scholarshipService.review(slug, id, false);
+            return scholarshipService.review(slug, id, false, body);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
+        }
+    }
+
+    @PostMapping("/scholarship-entries/award-round")
+    @RequiresPermission("scholarship:entry:review")
+    public Map<String, Object> awardRound(@PathVariable String slug, @RequestBody ScholarshipAwardRoundRequest body) {
+        try {
+            return scholarshipService.awardRound(slug, body);
         } catch (IllegalArgumentException e) {
             throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
         }

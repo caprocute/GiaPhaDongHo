@@ -54,4 +54,5 @@
     <include file="config/liquibase/changelog/20260716224500_person_search_unaccent.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260717010000_death_anniversary_person_unique.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260717100000_system_module_audit.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260718100000_expand_scholarship_entry.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

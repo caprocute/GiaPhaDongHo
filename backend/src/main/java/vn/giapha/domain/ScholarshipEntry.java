@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.Instant;
 
 /**
  * A ScholarshipEntry.
@@ -36,8 +38,35 @@ public class ScholarshipEntry implements Serializable {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "person_code")
+    private String personCode;
+
+    @Column(name = "level")
+    private String level;
+
+    @Column(name = "school_or_field")
+    private String schoolOrField;
+
+    @Column(name = "medal_note")
+    private String medalNote;
+
+    @Column(name = "lineage_note")
+    private String lineageNote;
+
+    @Column(name = "review_note")
+    private String reviewNote;
+
+    @Column(name = "award_amount", precision = 21, scale = 2)
+    private BigDecimal awardAmount;
+
+    @Column(name = "awarded_at")
+    private Instant awardedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private FamilyTree tree;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Person person;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -106,6 +135,110 @@ public class ScholarshipEntry implements Serializable {
         this.status = status;
     }
 
+    public String getPersonCode() {
+        return this.personCode;
+    }
+
+    public ScholarshipEntry personCode(String personCode) {
+        this.setPersonCode(personCode);
+        return this;
+    }
+
+    public void setPersonCode(String personCode) {
+        this.personCode = personCode;
+    }
+
+    public String getLevel() {
+        return this.level;
+    }
+
+    public ScholarshipEntry level(String level) {
+        this.setLevel(level);
+        return this;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public String getSchoolOrField() {
+        return this.schoolOrField;
+    }
+
+    public ScholarshipEntry schoolOrField(String schoolOrField) {
+        this.setSchoolOrField(schoolOrField);
+        return this;
+    }
+
+    public void setSchoolOrField(String schoolOrField) {
+        this.schoolOrField = schoolOrField;
+    }
+
+    public String getMedalNote() {
+        return this.medalNote;
+    }
+
+    public ScholarshipEntry medalNote(String medalNote) {
+        this.setMedalNote(medalNote);
+        return this;
+    }
+
+    public void setMedalNote(String medalNote) {
+        this.medalNote = medalNote;
+    }
+
+    public String getLineageNote() {
+        return this.lineageNote;
+    }
+
+    public ScholarshipEntry lineageNote(String lineageNote) {
+        this.setLineageNote(lineageNote);
+        return this;
+    }
+
+    public void setLineageNote(String lineageNote) {
+        this.lineageNote = lineageNote;
+    }
+
+    public String getReviewNote() {
+        return this.reviewNote;
+    }
+
+    public ScholarshipEntry reviewNote(String reviewNote) {
+        this.setReviewNote(reviewNote);
+        return this;
+    }
+
+    public void setReviewNote(String reviewNote) {
+        this.reviewNote = reviewNote;
+    }
+
+    public BigDecimal getAwardAmount() {
+        return this.awardAmount;
+    }
+
+    public ScholarshipEntry awardAmount(BigDecimal awardAmount) {
+        this.setAwardAmount(awardAmount);
+        return this;
+    }
+
+    public void setAwardAmount(BigDecimal awardAmount) {
+        this.awardAmount = awardAmount;
+    }
+
+    public Instant getAwardedAt() {
+        return this.awardedAt;
+    }
+
+    public ScholarshipEntry awardedAt(Instant awardedAt) {
+        this.setAwardedAt(awardedAt);
+        return this;
+    }
+
+    public void setAwardedAt(Instant awardedAt) {
+        this.awardedAt = awardedAt;
+    }
+
     public FamilyTree getTree() {
         return this.tree;
     }
@@ -116,6 +249,19 @@ public class ScholarshipEntry implements Serializable {
 
     public ScholarshipEntry tree(FamilyTree familyTree) {
         this.setTree(familyTree);
+        return this;
+    }
+
+    public Person getPerson() {
+        return this.person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    public ScholarshipEntry person(Person person) {
+        this.setPerson(person);
         return this;
     }
 
@@ -134,7 +280,6 @@ public class ScholarshipEntry implements Serializable {
 
     @Override
     public int hashCode() {
-        // see https://vladmihalcea.com/how-to-implement-equals-and-hashcode-using-the-jpa-entity-identifier/
         return getClass().hashCode();
     }
 
@@ -147,6 +292,14 @@ public class ScholarshipEntry implements Serializable {
             ", achievement='" + getAchievement() + "'" +
             ", year=" + getYear() +
             ", status='" + getStatus() + "'" +
+            ", personCode='" + getPersonCode() + "'" +
+            ", level='" + getLevel() + "'" +
+            ", schoolOrField='" + getSchoolOrField() + "'" +
+            ", medalNote='" + getMedalNote() + "'" +
+            ", lineageNote='" + getLineageNote() + "'" +
+            ", reviewNote='" + getReviewNote() + "'" +
+            ", awardAmount=" + getAwardAmount() +
+            ", awardedAt='" + getAwardedAt() + "'" +
             "}";
     }
 }

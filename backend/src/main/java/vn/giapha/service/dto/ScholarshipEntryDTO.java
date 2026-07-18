@@ -2,6 +2,8 @@ package vn.giapha.service.dto;
 
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -22,7 +24,25 @@ public class ScholarshipEntryDTO implements Serializable {
 
     private String status;
 
+    private String personCode;
+
+    private String level;
+
+    private String schoolOrField;
+
+    private String medalNote;
+
+    private String lineageNote;
+
+    private String reviewNote;
+
+    private BigDecimal awardAmount;
+
+    private Instant awardedAt;
+
     private FamilyTreeDTO tree;
+
+    private PersonDTO person;
 
     public Long getId() {
         return id;
@@ -64,12 +84,84 @@ public class ScholarshipEntryDTO implements Serializable {
         this.status = status;
     }
 
+    public String getPersonCode() {
+        return personCode;
+    }
+
+    public void setPersonCode(String personCode) {
+        this.personCode = personCode;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public String getSchoolOrField() {
+        return schoolOrField;
+    }
+
+    public void setSchoolOrField(String schoolOrField) {
+        this.schoolOrField = schoolOrField;
+    }
+
+    public String getMedalNote() {
+        return medalNote;
+    }
+
+    public void setMedalNote(String medalNote) {
+        this.medalNote = medalNote;
+    }
+
+    public String getLineageNote() {
+        return lineageNote;
+    }
+
+    public void setLineageNote(String lineageNote) {
+        this.lineageNote = lineageNote;
+    }
+
+    public String getReviewNote() {
+        return reviewNote;
+    }
+
+    public void setReviewNote(String reviewNote) {
+        this.reviewNote = reviewNote;
+    }
+
+    public BigDecimal getAwardAmount() {
+        return awardAmount;
+    }
+
+    public void setAwardAmount(BigDecimal awardAmount) {
+        this.awardAmount = awardAmount;
+    }
+
+    public Instant getAwardedAt() {
+        return awardedAt;
+    }
+
+    public void setAwardedAt(Instant awardedAt) {
+        this.awardedAt = awardedAt;
+    }
+
     public FamilyTreeDTO getTree() {
         return tree;
     }
 
     public void setTree(FamilyTreeDTO tree) {
         this.tree = tree;
+    }
+
+    public PersonDTO getPerson() {
+        return person;
+    }
+
+    public void setPerson(PersonDTO person) {
+        this.person = person;
     }
 
     @Override
@@ -102,7 +194,16 @@ public class ScholarshipEntryDTO implements Serializable {
             ", achievement='" + getAchievement() + "'" +
             ", year=" + getYear() +
             ", status='" + getStatus() + "'" +
+            ", personCode='" + getPersonCode() + "'" +
+            ", level='" + getLevel() + "'" +
+            ", schoolOrField='" + getSchoolOrField() + "'" +
+            ", medalNote='" + getMedalNote() + "'" +
+            ", lineageNote='" + getLineageNote() + "'" +
+            ", reviewNote='" + getReviewNote() + "'" +
+            ", awardAmount=" + getAwardAmount() +
+            ", awardedAt='" + getAwardedAt() + "'" +
             ", tree=" + getTree() +
+            ", person=" + getPerson() +
             "}";
     }
 }

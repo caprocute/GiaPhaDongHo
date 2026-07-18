@@ -62,6 +62,14 @@ entity ScholarshipEntry {
   achievement String required
   year Integer
   status String
+  personCode String
+  level String
+  schoolOrField String
+  medalNote String
+  lineageNote String
+  reviewNote String
+  awardAmount BigDecimal
+  awardedAt Instant
 }
 
 relationship ManyToOne {
@@ -73,6 +81,7 @@ relationship ManyToOne {
   EventRsvp{event(title)} to ClanEvent
   AnniversarySubscription{person(fullName)} to Person with builtInEntity
   ScholarshipEntry{tree(slug)} to FamilyTree with builtInEntity
+  ScholarshipEntry{person(fullName)} to Person with builtInEntity
 }
 
 paginate ChangeRequest, DonationContribution, ClanEvent with pagination

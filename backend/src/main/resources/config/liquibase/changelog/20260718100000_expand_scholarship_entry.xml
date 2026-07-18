@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- F8 / FR-15.35 — mở rộng đề cử khuyến học (expand) -->
+    <changeSet id="20260718100000-1" author="giapha">
+        <addColumn tableName="scholarship_entry">
+            <column name="person_code" type="varchar(255)"/>
+            <column name="level" type="varchar(64)"/>
+            <column name="school_or_field" type="varchar(255)"/>
+            <column name="medal_note" type="varchar(512)"/>
+            <column name="lineage_note" type="varchar(512)"/>
+            <column name="review_note" type="varchar(1024)"/>
+            <column name="award_amount" type="decimal(21,2)"/>
+            <column name="awarded_at" type="${datetimeType}"/>
+            <column name="person_id" type="bigint"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20260718100000-2" author="giapha">
+        <addForeignKeyConstraint
+            baseColumnNames="person_id"
+            baseTableName="scholarship_entry"
+            constraintName="fk_scholarship_entry__person_id"
+            referencedColumnNames="id"
+            referencedTableName="person"/>
+    </changeSet>
+</databaseChangeLog>

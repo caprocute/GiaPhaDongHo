@@ -44,7 +44,8 @@ public class RolePermissionCatalog implements PermissionService {
             "notify:outbox:read",
             "notify:outbox:write",
             "scholarship:entry:read",
-            "scholarship:entry:write",
+            "scholarship:entry:nominate",
+            "scholarship:entry:review",
             "book:export:write",
             "system:module:read",
             "system:module:write",
@@ -66,7 +67,8 @@ public class RolePermissionCatalog implements PermissionService {
             "event:rsvp:read",
             "notify:outbox:read",
             "scholarship:entry:read",
-            "scholarship:entry:write",
+            "scholarship:entry:nominate",
+            "scholarship:entry:review",
             "system:dashboard:read"
         ),
         RealmRoles.MEMBER,
@@ -80,7 +82,7 @@ public class RolePermissionCatalog implements PermissionService {
             "event:clan:read",
             "notify:subscription:read",
             "notify:subscription:write",
-            "scholarship:entry:write"
+            "scholarship:entry:nominate"
         ),
         RealmRoles.USER,
         Set.of(
@@ -91,7 +93,7 @@ public class RolePermissionCatalog implements PermissionService {
             "event:clan:read",
             "notify:subscription:read",
             "notify:subscription:write",
-            "scholarship:entry:write"
+            "scholarship:entry:nominate"
         )
     );
 

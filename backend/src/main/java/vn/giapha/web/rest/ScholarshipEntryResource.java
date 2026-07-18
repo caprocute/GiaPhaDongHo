@@ -54,7 +54,7 @@ public class ScholarshipEntryResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("")
-    @RequiresPermission("scholarship:entry:write")
+    @RequiresPermission("scholarship:entry:review")
     public ResponseEntity<ScholarshipEntryDTO> createScholarshipEntry(@Valid @RequestBody ScholarshipEntryDTO scholarshipEntryDTO)
         throws URISyntaxException {
         LOG.debug("REST request to save ScholarshipEntry : {}", scholarshipEntryDTO);
@@ -78,7 +78,7 @@ public class ScholarshipEntryResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PutMapping("/{id}")
-    @RequiresPermission("scholarship:entry:write")
+    @RequiresPermission("scholarship:entry:review")
     public ResponseEntity<ScholarshipEntryDTO> updateScholarshipEntry(
         @PathVariable(value = "id", required = false) final Long id,
         @Valid @RequestBody ScholarshipEntryDTO scholarshipEntryDTO
@@ -113,7 +113,7 @@ public class ScholarshipEntryResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    @RequiresPermission("scholarship:entry:write")
+    @RequiresPermission("scholarship:entry:review")
     public ResponseEntity<ScholarshipEntryDTO> partialUpdateScholarshipEntry(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody ScholarshipEntryDTO scholarshipEntryDTO
@@ -174,7 +174,7 @@ public class ScholarshipEntryResource {
      * @return the {@link ResponseEntity} with status {@code 204 (NO_CONTENT)}.
      */
     @DeleteMapping("/{id}")
-    @RequiresPermission("scholarship:entry:write")
+    @RequiresPermission("scholarship:entry:review")
     public ResponseEntity<Void> deleteScholarshipEntry(@PathVariable("id") Long id) {
         LOG.debug("REST request to delete ScholarshipEntry : {}", id);
         scholarshipEntryService.delete(id);

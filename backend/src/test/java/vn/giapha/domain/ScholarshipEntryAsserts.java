@@ -50,7 +50,15 @@ public class ScholarshipEntryAsserts {
             .satisfies(a -> assertThat(a.getPersonName()).as("check personName").isEqualTo(expected.getPersonName()))
             .satisfies(a -> assertThat(a.getAchievement()).as("check achievement").isEqualTo(expected.getAchievement()))
             .satisfies(a -> assertThat(a.getYear()).as("check year").isEqualTo(expected.getYear()))
-            .satisfies(a -> assertThat(a.getStatus()).as("check status").isEqualTo(expected.getStatus()));
+            .satisfies(a -> assertThat(a.getStatus()).as("check status").isEqualTo(expected.getStatus()))
+            .satisfies(a -> assertThat(a.getPersonCode()).as("check personCode").isEqualTo(expected.getPersonCode()))
+            .satisfies(a -> assertThat(a.getLevel()).as("check level").isEqualTo(expected.getLevel()))
+            .satisfies(a -> assertThat(a.getSchoolOrField()).as("check schoolOrField").isEqualTo(expected.getSchoolOrField()))
+            .satisfies(a -> assertThat(a.getMedalNote()).as("check medalNote").isEqualTo(expected.getMedalNote()))
+            .satisfies(a -> assertThat(a.getLineageNote()).as("check lineageNote").isEqualTo(expected.getLineageNote()))
+            .satisfies(a -> assertThat(a.getReviewNote()).as("check reviewNote").isEqualTo(expected.getReviewNote()))
+            .satisfies(a -> assertThat(a.getAwardAmount()).as("check awardAmount").isEqualTo(expected.getAwardAmount()))
+            .satisfies(a -> assertThat(a.getAwardedAt()).as("check awardedAt").isEqualTo(expected.getAwardedAt()));
     }
 
     /**
@@ -62,6 +70,7 @@ public class ScholarshipEntryAsserts {
     public static void assertScholarshipEntryUpdatableRelationshipsEquals(ScholarshipEntry expected, ScholarshipEntry actual) {
         assertThat(actual)
             .as("Verify ScholarshipEntry relationships")
-            .satisfies(a -> assertThat(a.getTree()).as("check tree").isEqualTo(expected.getTree()));
+            .satisfies(a -> assertThat(a.getTree()).as("check tree").isEqualTo(expected.getTree()))
+            .satisfies(a -> assertThat(a.getPerson()).as("check person").isEqualTo(expected.getPerson()));
     }
 }
