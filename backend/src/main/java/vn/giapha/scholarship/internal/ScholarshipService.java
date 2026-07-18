@@ -71,16 +71,13 @@ public class ScholarshipService {
 
     @Transactional(readOnly = true)
     public List<ScholarshipEntryDTO> listAdmin(String slug, String status, String level, Integer year, String q) {
-        List<ScholarshipEntry> rows;
-        if (status == null || status.isBlank() || "all".equalsIgnoreCase(status)) {
-            rows = repository.findByTreeSlug(slug);
-        } else {
-            rows = repository.findByTreeSlugAndStatus(slug, status.trim().toLowerCase(Locale.ROOT));
-        }
+        List<ScholarshipEntry> rows = repository.findByTreeSlug(slug);
+        String statusKey = status == null || status.isBlank() ? "all" : status.trim().toLowerCase(Locale.ROOT);
         String levelFilter = normalizeLevel(level);
         String query = q == null ? "" : q.trim().toLowerCase(Locale.ROOT);
         return rows
             .stream()
+            .filter(e -> matchesStatusFilter(e, statusKey))
             .filter(e -> levelFilter == null || levelFilter.equalsIgnoreCase(nullToEmpty(e.getLevel())))
             .filter(e -> year == null || Objects.equals(year, e.getYear()))
             .filter(e -> query.isEmpty() || matchesQuery(e, query))
@@ -95,6 +92,7 @@ public class ScholarshipService {
         long pending = all.stream().filter(e -> ScholarshipStatuses.NOMINATED.equalsIgnoreCase(nullToEmpty(e.getStatus()))).count();
         long approved = all.stream().filter(e -> ScholarshipStatuses.APPROVED.equalsIgnoreCase(nullToEmpty(e.getStatus()))).count();
         long rejected = all.stream().filter(e -> ScholarshipStatuses.REJECTED.equalsIgnoreCase(nullToEmpty(e.getStatus()))).count();
+        long awaitingAward = all.stream().filter(this::isAwaitingAward).count();
         long advanced = all
             .stream()
             .filter(e -> ScholarshipStatuses.APPROVED.equalsIgnoreCase(nullToEmpty(e.getStatus())))
@@ -117,6 +115,7 @@ public class ScholarshipService {
         out.put("pendingCount", pending);
         out.put("approvedCount", approved);
         out.put("rejectedCount", rejected);
+        out.put("awaitingAwardCount", awaitingAward);
         out.put("totalCount", all.size());
         out.put("advancedDegreeCount", advanced);
         out.put("awardedTotal", awardedTotal);
@@ -131,29 +130,51 @@ public class ScholarshipService {
         return out;
     }
 
+    /**
+     * Thành viên cổng thông tin đề cử → chờ duyệt.
+     */
     public ScholarshipEntryDTO nominate(String slug, ScholarshipEntryDTO dto) {
-        FamilyTree tree = requireTree(slug);
+        return createEntry(slug, dto, ScholarshipStatuses.NOMINATED, false);
+    }
+
+    /**
+     * Quản trị thêm/sửa hồ sơ khuyến học.
+     * {@code publishNow=true} → vào bảng vàng ngay; ngược lại chờ duyệt.
+     */
+    public ScholarshipEntryDTO upsertAdmin(String slug, ScholarshipEntryDTO dto, boolean publishNow) {
         if (dto.getPersonName() == null || dto.getPersonName().isBlank()) {
             throw new IllegalArgumentException("Họ tên người được đề cử bắt buộc");
         }
         if (dto.getAchievement() == null || dto.getAchievement().isBlank()) {
             throw new IllegalArgumentException("Thành tích bắt buộc");
         }
-        ScholarshipEntry e = new ScholarshipEntry();
-        e.setPersonName(dto.getPersonName().trim());
-        e.setAchievement(dto.getAchievement().trim());
-        e.setYear(dto.getYear());
-        e.setStatus(ScholarshipStatuses.NOMINATED);
-        e.setTree(tree);
-        e.setPersonCode(trimToNull(dto.getPersonCode()));
-        e.setLevel(normalizeLevel(dto.getLevel()));
-        e.setSchoolOrField(trimToNull(dto.getSchoolOrField()));
-        e.setMedalNote(trimToNull(dto.getMedalNote()));
-        e.setLineageNote(trimToNull(dto.getLineageNote()));
-        linkPerson(slug, e);
-        return mapper.toDto(repository.save(e));
+        if (dto.getId() != null) {
+            ScholarshipEntry e = requireEntry(slug, dto.getId());
+            boolean wasApproved = ScholarshipStatuses.APPROVED.equalsIgnoreCase(nullToEmpty(e.getStatus()));
+            fillFields(slug, e, dto);
+            if (publishNow) {
+                e.setStatus(ScholarshipStatuses.APPROVED);
+            }
+            ScholarshipEntry saved = repository.save(e);
+            if (!wasApproved && ScholarshipStatuses.APPROVED.equalsIgnoreCase(nullToEmpty(saved.getStatus()))) {
+                events.publishEvent(new ScholarshipApproved(saved.getId(), slug, saved.getPersonName(), saved.getYear()));
+            }
+            return mapper.toDto(saved);
+        }
+        return createEntry(slug, dto, publishNow ? ScholarshipStatuses.APPROVED : ScholarshipStatuses.NOMINATED, publishNow);
     }
 
+    public void deleteAdmin(String slug, Long id) {
+        ScholarshipEntry e = requireEntry(slug, id);
+        if (e.getAwardAmount() != null && e.getAwardAmount().signum() > 0) {
+            throw new IllegalArgumentException("Không xóa hồ sơ đã trao học bổng — hãy điều chỉnh ghi chú hoặc số tiền thay vì xóa");
+        }
+        repository.delete(e);
+    }
+
+    /**
+     * Duyệt vào bảng vàng / từ chối — không gắn số tiền (tiền thuộc bước trao học bổng).
+     */
     public ScholarshipEntryDTO review(String slug, Long id, boolean approve, ScholarshipReviewRequest body) {
         ScholarshipEntry e = requireEntry(slug, id);
         if (body != null && body.getReviewNote() != null && !body.getReviewNote().isBlank()) {
@@ -161,10 +182,6 @@ public class ScholarshipService {
         }
         if (approve) {
             e.setStatus(ScholarshipStatuses.APPROVED);
-            if (body != null && body.getAwardAmount() != null && body.getAwardAmount().signum() > 0) {
-                e.setAwardAmount(body.getAwardAmount().setScale(2, RoundingMode.HALF_UP));
-                e.setAwardedAt(Instant.now());
-            }
             ScholarshipEntry saved = repository.save(e);
             events.publishEvent(new ScholarshipApproved(saved.getId(), slug, saved.getPersonName(), saved.getYear()));
             return mapper.toDto(saved);
@@ -173,37 +190,53 @@ public class ScholarshipService {
         return mapper.toDto(repository.save(e));
     }
 
+    /**
+     * Trao học bổng: nguồn = quỹ khuyến học (tham chiếu); đích = ghi awardAmount trên hồ sơ đã vào bảng vàng.
+     * Chỉ chấp nhận entry status=approved và chưa có số tiền trao.
+     */
     public Map<String, Object> awardRound(String slug, ScholarshipAwardRoundRequest body) {
         if (body == null || body.getEntryIds() == null || body.getEntryIds().isEmpty()) {
-            throw new IllegalArgumentException("Chọn ít nhất một đề cử để trao học bổng");
+            throw new IllegalArgumentException("Chọn ít nhất một hồ sơ đã vào bảng vàng để trao học bổng");
+        }
+        BigDecimal defaultAmount = body.getDefaultAwardAmount();
+        if (defaultAmount == null || defaultAmount.signum() <= 0) {
+            throw new IllegalArgumentException("Nhập số tiền mỗi suất học bổng");
         }
         FamilyTree tree = requireTree(slug);
-        BigDecimal defaultAmount = body.getDefaultAwardAmount();
         String note = trimToNull(body.getReviewNote());
+        BigDecimal amount = defaultAmount.setScale(2, RoundingMode.HALF_UP);
         int awarded = 0;
+        int skipped = 0;
         for (Long id : body.getEntryIds()) {
             if (id == null) {
                 continue;
             }
             ScholarshipEntry e = requireEntry(slug, id);
-            e.setStatus(ScholarshipStatuses.APPROVED);
+            if (!ScholarshipStatuses.APPROVED.equalsIgnoreCase(nullToEmpty(e.getStatus()))) {
+                skipped++;
+                continue;
+            }
+            if (e.getAwardAmount() != null && e.getAwardAmount().signum() > 0) {
+                skipped++;
+                continue;
+            }
+            e.setAwardAmount(amount);
+            e.setAwardedAt(Instant.now());
             if (note != null) {
                 e.setReviewNote(note);
             }
-            if (defaultAmount != null && defaultAmount.signum() > 0) {
-                e.setAwardAmount(defaultAmount.setScale(2, RoundingMode.HALF_UP));
-                e.setAwardedAt(Instant.now());
-            } else if (e.getAwardAmount() != null && e.getAwardedAt() == null) {
-                e.setAwardedAt(Instant.now());
-            }
-            ScholarshipEntry saved = repository.save(e);
-            events.publishEvent(new ScholarshipApproved(saved.getId(), slug, saved.getPersonName(), saved.getYear()));
+            repository.save(e);
             awarded++;
+        }
+        if (awarded == 0) {
+            throw new IllegalArgumentException(
+                "Không trao được suất nào — chỉ trao cho hồ sơ đã vào bảng vàng và chưa ghi nhận tiền"
+            );
         }
 
         Long honorEventId = null;
         String honorEventTitle = null;
-        if (body.isCreateHonorEvent() && awarded > 0) {
+        if (body.isCreateHonorEvent()) {
             int year = LocalDate.now(ZoneOffset.UTC).getYear();
             honorEventTitle = trimToNull(body.getHonorEventTitle());
             if (honorEventTitle == null) {
@@ -215,16 +248,69 @@ public class ScholarshipService {
             event.setStartSolar(LocalDate.now(ZoneOffset.UTC).plusMonths(1).atStartOfDay().toInstant(ZoneOffset.UTC));
             event.setLocation(trimToNull(body.getHonorEventLocation()));
             event.setChecklistJson(
-                "{\"items\":[{\"label\":\"Công bố bảng vàng\",\"done\":false},{\"label\":\"Trao học bổng\",\"done\":false}]}"
+                "{\"items\":[{\"label\":\"Công bố bảng vàng\",\"done\":true},{\"label\":\"Trao học bổng\",\"done\":true}]}"
             );
             honorEventId = clanEventRepository.save(event).getId();
         }
 
         Map<String, Object> out = new HashMap<>();
         out.put("awardedCount", awarded);
+        out.put("skippedCount", skipped);
+        out.put("amountPerSlot", amount);
         out.put("honorEventId", honorEventId);
         out.put("honorEventTitle", honorEventTitle);
         return out;
+    }
+
+    private ScholarshipEntryDTO createEntry(String slug, ScholarshipEntryDTO dto, String status, boolean publishEvent) {
+        FamilyTree tree = requireTree(slug);
+        if (dto.getPersonName() == null || dto.getPersonName().isBlank()) {
+            throw new IllegalArgumentException("Họ tên người được đề cử bắt buộc");
+        }
+        if (dto.getAchievement() == null || dto.getAchievement().isBlank()) {
+            throw new IllegalArgumentException("Thành tích bắt buộc");
+        }
+        ScholarshipEntry e = new ScholarshipEntry();
+        e.setTree(tree);
+        e.setStatus(status);
+        fillFields(slug, e, dto);
+        ScholarshipEntry saved = repository.save(e);
+        if (publishEvent || ScholarshipStatuses.APPROVED.equalsIgnoreCase(status)) {
+            events.publishEvent(new ScholarshipApproved(saved.getId(), slug, saved.getPersonName(), saved.getYear()));
+        }
+        return mapper.toDto(saved);
+    }
+
+    private void fillFields(String slug, ScholarshipEntry e, ScholarshipEntryDTO dto) {
+        e.setPersonName(dto.getPersonName().trim());
+        e.setAchievement(dto.getAchievement().trim());
+        e.setYear(dto.getYear());
+        e.setPersonCode(trimToNull(dto.getPersonCode()));
+        e.setLevel(normalizeLevel(dto.getLevel()));
+        e.setSchoolOrField(trimToNull(dto.getSchoolOrField()));
+        e.setMedalNote(trimToNull(dto.getMedalNote()));
+        e.setLineageNote(trimToNull(dto.getLineageNote()));
+        if (dto.getReviewNote() != null) {
+            e.setReviewNote(trimToNull(dto.getReviewNote()));
+        }
+        linkPerson(slug, e);
+    }
+
+    private boolean matchesStatusFilter(ScholarshipEntry e, String statusKey) {
+        if ("all".equals(statusKey)) {
+            return true;
+        }
+        if ("awaiting_award".equals(statusKey)) {
+            return isAwaitingAward(e);
+        }
+        return statusKey.equalsIgnoreCase(nullToEmpty(e.getStatus()));
+    }
+
+    private boolean isAwaitingAward(ScholarshipEntry e) {
+        if (!ScholarshipStatuses.APPROVED.equalsIgnoreCase(nullToEmpty(e.getStatus()))) {
+            return false;
+        }
+        return e.getAwardAmount() == null || e.getAwardAmount().signum() <= 0;
     }
 
     private Map<String, Object> resolveScholarshipFund(Long treeId) {

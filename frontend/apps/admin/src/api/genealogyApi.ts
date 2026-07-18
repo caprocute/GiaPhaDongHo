@@ -613,6 +613,7 @@ export type ScholarshipStats = {
   pendingCount: number;
   approvedCount: number;
   rejectedCount: number;
+  awaitingAwardCount?: number;
   totalCount: number;
   advancedDegreeCount: number;
   awardedTotal: number | string;
@@ -627,12 +628,11 @@ export type ScholarshipStats = {
 
 export type ScholarshipReviewBody = {
   reviewNote?: string;
-  awardAmount?: number | null;
 };
 
 export type ScholarshipAwardRoundBody = {
   entryIds: number[];
-  defaultAwardAmount?: number | null;
+  defaultAwardAmount: number;
   reviewNote?: string;
   createHonorEvent?: boolean;
   honorEventTitle?: string;
@@ -685,9 +685,45 @@ export async function awardScholarshipRound(
   slug: string,
   body: ScholarshipAwardRoundBody,
   token: string | null,
-): Promise<{ awardedCount: number; honorEventId?: number | null; honorEventTitle?: string | null }> {
+): Promise<{
+  awardedCount: number;
+  skippedCount?: number;
+  amountPerSlot?: number | string;
+  honorEventId?: number | null;
+  honorEventTitle?: string | null;
+}> {
   return apiFetch(
     `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/award-round`,
     { method: "POST", body, token },
+  );
+}
+
+export async function upsertScholarshipAdmin(
+  slug: string,
+  dto: ScholarshipEntryDto,
+  token: string | null,
+  publishNow = false,
+): Promise<ScholarshipEntryDto> {
+  const q = publishNow ? "?publishNow=true" : "?publishNow=false";
+  if (dto.id != null) {
+    return apiFetch<ScholarshipEntryDto>(
+      `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/admin/${dto.id}${q}`,
+      { method: "PUT", body: dto, token },
+    );
+  }
+  return apiFetch<ScholarshipEntryDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/admin${q}`,
+    { method: "POST", body: dto, token },
+  );
+}
+
+export async function deleteScholarshipAdmin(
+  slug: string,
+  id: number,
+  token: string | null,
+): Promise<void> {
+  await apiFetch<void>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/admin/${id}`,
+    { method: "DELETE", token },
   );
 }

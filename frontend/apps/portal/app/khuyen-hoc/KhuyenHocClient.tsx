@@ -30,7 +30,7 @@ type Entry = {
 };
 
 const LEVELS = [
-  { value: "", label: "Chọn trình độ (tuỳ chọn)" },
+  { value: "", label: "Chọn trình độ" },
   { value: "phd", label: "Tiến sĩ" },
   { value: "master", label: "Thạc sĩ" },
   { value: "university", label: "Đại học" },
@@ -57,7 +57,9 @@ const nominateSchema = z.object({
       return n >= 1950 && n <= now + 1;
     }, "Năm không hợp lệ"),
   personCode: z.string().trim().max(32).optional().or(z.literal("")),
-  level: z.enum(["", "phd", "master", "university", "highschool"]),
+  level: z.enum(["phd", "master", "university", "highschool"], {
+    message: "Chọn trình độ",
+  }),
   schoolOrField: z.string().trim().max(200).optional().or(z.literal("")),
   medalNote: z.string().trim().max(300).optional().or(z.literal("")),
 });
@@ -351,13 +353,14 @@ export function KhuyenHocClient() {
                   placeholder="2026"
                 />
               </FormField>
-              <FormField label="Trình độ" htmlFor={`${formId}-level`} error={fieldErrors.level}>
+              <FormField label="Trình độ" htmlFor={`${formId}-level`} required error={fieldErrors.level}>
                 <select
                   id={`${formId}-level`}
                   className={styles.filterSelect}
                   value={level}
                   onChange={(e) => setLevel(e.target.value)}
                   disabled={pending}
+                  required
                 >
                   {LEVELS.map((l) => (
                     <option key={l.value || "none"} value={l.value}>

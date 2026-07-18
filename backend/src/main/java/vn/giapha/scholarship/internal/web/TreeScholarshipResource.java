@@ -51,11 +51,56 @@ public class TreeScholarshipResource {
         return scholarshipService.stats(slug);
     }
 
+    /** Thành viên cổng thông tin đề cử. */
     @PostMapping("/scholarship-entries")
     @RequiresPermission("scholarship:entry:nominate")
     public ScholarshipEntryDTO nominate(@PathVariable String slug, @Valid @RequestBody ScholarshipEntryDTO body) {
         try {
             return scholarshipService.nominate(slug, body);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
+        }
+    }
+
+    /** Quản trị tạo hồ sơ (có thể công bố bảng vàng ngay). */
+    @PostMapping("/scholarship-entries/admin")
+    @RequiresPermission("scholarship:entry:review")
+    public ScholarshipEntryDTO createAdmin(
+        @PathVariable String slug,
+        @Valid @RequestBody ScholarshipEntryDTO body,
+        @RequestParam(defaultValue = "false") boolean publishNow
+    ) {
+        try {
+            body.setId(null);
+            return scholarshipService.upsertAdmin(slug, body, publishNow);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
+        }
+    }
+
+    /** Quản trị sửa hồ sơ. */
+    @PutMapping("/scholarship-entries/admin/{id}")
+    @RequiresPermission("scholarship:entry:review")
+    public ScholarshipEntryDTO updateAdmin(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @Valid @RequestBody ScholarshipEntryDTO body,
+        @RequestParam(defaultValue = "false") boolean publishNow
+    ) {
+        try {
+            body.setId(id);
+            return scholarshipService.upsertAdmin(slug, body, publishNow);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
+        }
+    }
+
+    @DeleteMapping("/scholarship-entries/admin/{id}")
+    @RequiresPermission("scholarship:entry:review")
+    public ResponseEntity<Void> deleteAdmin(@PathVariable String slug, @PathVariable Long id) {
+        try {
+            scholarshipService.deleteAdmin(slug, id);
+            return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
         }
@@ -89,6 +134,9 @@ public class TreeScholarshipResource {
         }
     }
 
+    /**
+     * Trao học bổng đợt: chỉ hồ sơ đã vào bảng vàng, ghi số tiền từ quỹ khuyến học.
+     */
     @PostMapping("/scholarship-entries/award-round")
     @RequiresPermission("scholarship:entry:review")
     public Map<String, Object> awardRound(@PathVariable String slug, @RequestBody ScholarshipAwardRoundRequest body) {
