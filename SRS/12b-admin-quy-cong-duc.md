@@ -48,6 +48,7 @@ toàn bộ luồng: chiến dịch gây quỹ → thành viên đóng góp → a
 | goalAmount | BigDecimal | Mục tiêu (nullable) |
 | raisedAmount | BigDecimal | Computed: SUM confirmed contributions |
 | status | Enum | `draft` / `open` / `closed` |
+| purpose | Enum | `general` / `scholarship` / `tomb` / `ancestral_house` / `genealogy` / `event` / `relief` / `other` — **do admin chọn**, không đoán theo tên. `scholarship` = nguồn quỹ cho SRS-12c |
 | vietqrPayload | String | JSON `{bankBin,accountNo,accountName}` |
 | createdAt | Instant | Auto |
 | updatedAt | Instant | Auto |

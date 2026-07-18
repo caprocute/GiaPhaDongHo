@@ -30,6 +30,8 @@ Website là **cổng thông tin dòng họ (họ tộc)** kết hợp 2 khối c
 | 12 | **Quản trị / CRM ẩn** (suy luận từ nền tảng & dữ liệu) | [12-quan-tri-crm-an.md](12-quan-tri-crm-an.md) | **Lõi** |
 | 12a | Soạn phả đồ (Admin Tree Editor) | [12a-admin-soan-pha-do.md](12a-admin-soan-pha-do.md) | **Lõi** |
 | 12b | **Cấu hình hệ thống** (13 mục settings, SMTP/Zalo/PII…) | [12b-admin-cau-hinh.md](12b-admin-cau-hinh.md) | **Lõi · RP** |
+| 12b′ | Quản trị quỹ công đức (chiến dịch, đóng góp, purpose) | [12b-admin-quy-cong-duc.md](12b-admin-quy-cong-duc.md) | **Lõi · R2** |
+| 12c | **Khuyến học & bảng vàng** (hồ sơ, đợt trao, quỹ nguồn) | [12c-admin-khuyen-hoc.md](12c-admin-khuyen-hoc.md) | **Lõi · R2/F8** |
 | 13 | Giao diện & trải nghiệm người dùng | [13-giao-dien-ux.md](13-giao-dien-ux.md) | Cao |
 | 14 | Nghiên cứu mã nguồn mở tương đương | [14-nghien-cuu-opensource.md](14-nghien-cuu-opensource.md) | Nghiên cứu |
 | 15 | **Production & go-live** (portal/CRM/ATTT/vận hành/UAT) | [15-production-go-live.md](15-production-go-live.md) | **Lõi · RP** |

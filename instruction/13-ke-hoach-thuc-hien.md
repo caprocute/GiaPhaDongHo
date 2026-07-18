@@ -225,6 +225,9 @@ Chia từng route (1 PR / route nếu lớn):
 
 ### R2.6 Khuyến học (F8)  **[SS — chủ yếu CMS]**
 - [x] Category/workflow đề cử → duyệt → bảng vàng
+- [x] SRS chặt: [SRS/12c-admin-khuyen-hoc.md](../SRS/12c-admin-khuyen-hoc.md) (nguồn→đích, đợt CRUD, quỹ `purpose`)
+- [ ] Entity `ScholarshipAwardRound` + `ScholarshipAward` + UI Quản lý đợt (đóng debt §6 SRS-12c)
+- [ ] Bỏ nhãn đợt ghép từ tháng/năm máy; banner theo đợt `open`
 
 ### R2.7 PDF sách gia phả (F10)  **[sau tree-viz ổn]**
 - [x] Service `pdf-render` Playwright

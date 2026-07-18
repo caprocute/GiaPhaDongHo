@@ -1,0 +1,25 @@
+---
+description: Mọi dữ liệu CRM phải có nguồn gốc và quản trị được — cấm heuristic/nhãn tự sinh
+alwaysApply: true
+---
+
+# Nguồn gốc dữ liệu & quản trị được (CRM)
+
+Áp dụng mọi màn admin/portal nghiệp vụ (Khuyến học, Công đức, Sự kiện, …). Chi tiết Khuyến học: `SRS/12c-admin-khuyen-hoc.md`.
+
+## Nguyên tắc
+1. **Nguồn gốc**: mỗi số liệu / nhãn / quan hệ trên UI truy được về bản ghi (hoặc cấu hình) do người dùng hoặc hệ thống ghi rõ — không “suy” từ tên, lịch máy, thứ tự list.
+2. **Quản trị được**: master data dùng trong luồng (đợt trao, mục đích quỹ, danh mục…) phải có màn/API CRUD trước khi gắn vào giao dịch.
+3. **Nguồn → đích**: mỗi thao tác ghi rõ đầu vào và đầu ra (VD duyệt bảng vàng ≠ trao tiền).
+4. **Chọn liên kết tường minh**: FK / enum do admin chọn (VD quỹ `purpose=scholarship`), cấm keyword/heuristic trên tiêu đề.
+
+## Cấm
+- Ghép nhãn nghiệp vụ từ ngày giờ hệ thống (VD «Đợt 2/2026» từ tháng hiện tại).
+- Lấy “quỹ mặc định” bằng `title.contains(...)`.
+- Placeholder / số giả trên KPI production-facing.
+- Gộp hai bước khác nguồn vào một action không giải thích (duyệt công bố + ghi tiền).
+
+## Khi thi công
+- Thiếu master data → empty state hướng dẫn tạo (không tự bịa).
+- Stats/banner lấy bản ghi `open` / FK do admin đặt, không fallback lịch.
+- Diff chạm domain mới: cập nhật SRS tương ứng + checklist `instruction/13-ke-hoach-thuc-hien.md`.

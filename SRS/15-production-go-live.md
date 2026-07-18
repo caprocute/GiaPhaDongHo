@@ -45,7 +45,7 @@ Gồm: portal chuyên nghiệp, CRM đủ dùng hàng ngày, kênh thông báo t
 **FR-15.32** Chương Phả ký / Tộc ước / Hương hỏa: soạn rich-text admin + đọc portal (FR-12.7).  
 **FR-15.33** Xuất ấn phẩm: chọn chương → PDF/Excel tin cậy trên staging (FR-12.9); lỗi hiện thông báo nghiệp vụ.  
 **FR-15.34** Trước go-live: **một** trong hai — import Excel tối thiểu **hoặc** GEDCOM subset.  
-**FR-15.35** Màn admin Công đức / Sự kiện / Media / Khuyến học / Duyệt tự khai: parity bố cục mockup `instruction/mockups/admin-*.html`; số liệu thật, không placeholder giả.  
+**FR-15.35** Màn admin Công đức / Sự kiện / Media / Khuyến học / Duyệt tự khai: parity bố cục mockup `instruction/mockups/admin-*.html`; số liệu thật, không placeholder giả. Khuyến học tuân [SRS-12c](12c-admin-khuyen-hoc.md): đợt trao là master data CRUD, không sinh nhãn đợt từ lịch máy.  
 **FR-15.36** Dashboard: KPI lấy API thật (số thành viên, giỗ tháng này, yêu cầu chờ duyệt, tiến độ quỹ).  
 **FR-15.37** Menu CRM ẩn mục không có permission; nhãn nghiệp vụ.
 
