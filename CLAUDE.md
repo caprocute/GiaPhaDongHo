@@ -11,7 +11,8 @@ Dự án: nền tảng gia phả số dòng họ Việt Nam. Spring Boot 4.x/Jav
 ## UI generation rules
 - CHỈ dùng component từ `packages/ui` cho pattern đã có; cấm styled-div trần cho pattern tồn tại.
 - CẤM hardcode màu/spacing/font — chỉ dùng design token (`var(--color-…)`, Tailwind theme từ `packages/tokens`).
-- Mọi form: `FormField` + Zod schema. Mọi bảng: `DataTable`. Mọi ngày tháng: `DualDatePicker` (dương/âm).
+- Mọi form: `FormField` + Zod schema. **Mọi bảng: `ProTable` (từ `@giapha/ui`) — cấm dùng `DataTable` cũ; cấm `<table>` trần.**  Mọi ngày tháng: `DualDatePicker` (dương/âm).
+- `ProTable` bắt buộc khai báo `rowKey`; dùng `ProTableColumn<T>[]` cho kiểu cột; tích hợp `pagination`, `loading`, `emptyState`, `exportable` trực tiếp vào component — không wrap thêm `<Pagination>` ngoài.
 - Sau khi sinh màn hình: chạy `pnpm lint:tokens && pnpm test:a11y` rồi mới báo kết quả (kèm output thật).
 
 ## Backend rules — JHipster CLI bắt buộc (siết chặt)
