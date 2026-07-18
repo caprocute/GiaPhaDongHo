@@ -117,7 +117,7 @@ const _CSS = `
 .ddp-day--today{border-color:var(--color-heritage-accent)}
 .ddp-day--today .ddp-s{color:var(--color-heritage-deep);font-weight:800}
 .ddp-day--sel,.ddp-day--rs,.ddp-day--re{background:var(--color-heritage-accent) !important;border-color:var(--color-heritage-accent) !important}
-.ddp-day--sel .ddp-s,.ddp-day--rs .ddp-s,.ddp-day--re .ddp-s{color:#fff !important;font-weight:800}
+.ddp-day--sel .ddp-s,.ddp-day--rs .ddp-s,.ddp-day--re .ddp-s{color:var(--color-text-on-brand) !important;font-weight:800}
 .ddp-day--sel .ddp-l,.ddp-day--rs .ddp-l,.ddp-day--re .ddp-l{color:rgba(255,255,255,.8) !important;font-weight:normal}
 .ddp-day--rs{border-radius:var(--radius-sm) 0 0 var(--radius-sm)}
 .ddp-day--re{border-radius:0 var(--radius-sm) var(--radius-sm) 0}
@@ -134,7 +134,7 @@ const _CSS = `
 .ddp-panel--lunar .ddp-day--today{border-color:var(--color-son-500)}
 .ddp-panel--lunar .ddp-day--today .ddp-l{color:var(--color-son-500);font-weight:800}
 .ddp-panel--lunar .ddp-day--sel,.ddp-panel--lunar .ddp-day--rs,.ddp-panel--lunar .ddp-day--re{background:var(--color-son-500) !important;border-color:var(--color-son-500) !important}
-.ddp-panel--lunar .ddp-day--sel .ddp-l,.ddp-panel--lunar .ddp-day--rs .ddp-l,.ddp-panel--lunar .ddp-day--re .ddp-l{color:#fff !important;font-weight:800}
+.ddp-panel--lunar .ddp-day--sel .ddp-l,.ddp-panel--lunar .ddp-day--rs .ddp-l,.ddp-panel--lunar .ddp-day--re .ddp-l{color:var(--color-text-on-brand) !important;font-weight:800}
 .ddp-panel--lunar .ddp-day--sel .ddp-s,.ddp-panel--lunar .ddp-day--rs .ddp-s,.ddp-panel--lunar .ddp-day--re .ddp-s{color:rgba(255,255,255,.68) !important}
 .ddp-panel--lunar .ddp-day--ir{background:color-mix(in srgb,var(--color-son-500) 10%,var(--color-surface-card))}
 .ddp-panel--lunar .ddp-day--hr{background:color-mix(in srgb,var(--color-son-500) 6%,var(--color-surface-card))}

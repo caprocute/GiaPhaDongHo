@@ -428,8 +428,11 @@ export type TreeFeatureSettings = {
 
 export type NotifySettings = {
   remindDaysBefore?: number;
+  /** Giờ gửi nhắc trong ngày (0–23). */
+  remindHour?: number;
   channelEmail?: boolean;
   channelZalo?: boolean;
+  channelWeb?: boolean;
 };
 
 export type CalendarSettings = {

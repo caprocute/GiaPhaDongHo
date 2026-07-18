@@ -396,8 +396,14 @@ public class TreeSettingsDTO implements Serializable {
         @Max(30)
         private int remindDaysBefore = 7;
 
+        /** Giờ gửi nhắc trong ngày (0–23), múi giờ cây. */
+        @Min(0)
+        @Max(23)
+        private int remindHour = 8;
+
         private boolean channelEmail = true;
         private boolean channelZalo = false;
+        private boolean channelWeb = true;
 
         public int getRemindDaysBefore() {
             return remindDaysBefore;
@@ -405,6 +411,14 @@ public class TreeSettingsDTO implements Serializable {
 
         public void setRemindDaysBefore(int remindDaysBefore) {
             this.remindDaysBefore = remindDaysBefore;
+        }
+
+        public int getRemindHour() {
+            return remindHour;
+        }
+
+        public void setRemindHour(int remindHour) {
+            this.remindHour = remindHour;
         }
 
         public boolean isChannelEmail() {
@@ -421,6 +435,14 @@ public class TreeSettingsDTO implements Serializable {
 
         public void setChannelZalo(boolean channelZalo) {
             this.channelZalo = channelZalo;
+        }
+
+        public boolean isChannelWeb() {
+            return channelWeb;
+        }
+
+        public void setChannelWeb(boolean channelWeb) {
+            this.channelWeb = channelWeb;
         }
     }
 

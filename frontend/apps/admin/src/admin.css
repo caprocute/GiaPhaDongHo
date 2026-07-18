@@ -1452,6 +1452,358 @@ code {
   font-size: var(--font-size-sm);
 }
 
+/* ── Notifications / Ngày giỗ (parity mockup) ── */
+.stat-val-warn {
+  color: var(--color-status-warning);
+}
+
+.stat-val-err {
+  color: var(--color-status-danger);
+}
+
+.gio-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 300px);
+  gap: var(--spacing-md);
+  align-items: start;
+}
+
+.gio-layout-config-focus {
+  grid-template-columns: 1fr minmax(280px, 340px);
+}
+
+.gio-config-help {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.gio-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.gio-search {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 160px;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--spacing-sm);
+}
+
+.gio-search input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  flex: 1;
+  min-width: 0;
+}
+
+.gio-search-icon {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.gio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.gio-card {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  transition: border-color var(--motion-duration-fast);
+}
+
+.gio-card:hover {
+  border-color: var(--color-heritage-accent);
+}
+
+.gio-card-near {
+  border-color: color-mix(in srgb, var(--color-status-warning) 45%, var(--color-border-subtle));
+  background: color-mix(in srgb, var(--color-status-warning) 8%, var(--color-surface-card));
+}
+
+.gio-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: color-mix(in srgb, var(--color-heritage-accent) 12%, var(--color-surface-card));
+  border: 1px solid color-mix(in srgb, var(--color-heritage-accent) 40%, var(--color-border-subtle));
+  border-radius: var(--radius-sm);
+  padding: 5px 9px;
+  min-width: 54px;
+  flex: none;
+}
+
+.gio-badge-near {
+  background: color-mix(in srgb, var(--color-status-warning) 12%, var(--color-surface-card));
+  border-color: color-mix(in srgb, var(--color-status-warning) 40%, var(--color-border-subtle));
+}
+
+.gio-badge-mm {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--color-heritage-accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gio-badge-near .gio-badge-mm {
+  color: var(--color-status-warning);
+}
+
+.gio-badge-dd {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.gio-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.gio-card-name {
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.gio-card-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.gio-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.gio-days-left {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-status-warning);
+}
+
+.gio-config {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  position: sticky;
+  top: var(--spacing-md);
+}
+
+.gio-config-hd {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-surface-sunken);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-family: var(--font-display);
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+.gio-config-body {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.gio-config-section {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.gio-config-section-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.gio-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.gio-toggle-row:last-of-type {
+  border-bottom: none;
+}
+
+.gio-toggle-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+}
+
+.gio-toggle-sub {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.gio-switch {
+  flex: none;
+}
+
+.gio-config-preview {
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary, var(--color-text-primary));
+  line-height: 1.6;
+}
+
+.gio-preview-channel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-heritage-accent);
+  margin-bottom: 4px;
+}
+
+.gio-config-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-heritage-accent);
+  text-decoration: none;
+  margin-top: 4px;
+}
+
+.gio-config-link:hover {
+  text-decoration: underline;
+}
+
+.gio-help-box {
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 9px 13px;
+}
+
+.outbox-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.outbox-row {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.outbox-row-failed {
+  background: color-mix(in srgb, var(--color-status-danger) 8%, var(--color-surface-card));
+  border-color: color-mix(in srgb, var(--color-status-danger) 35%, var(--color-border-subtle));
+}
+
+.outbox-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 150px;
+  flex-wrap: wrap;
+}
+
+.outbox-channel {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.outbox-body {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.outbox-empty {
+  color: var(--color-text-muted);
+}
+
+.outbox-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  text-align: right;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.outbox-meta-err {
+  color: var(--color-status-danger);
+}
+
+.outbox-retry {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--color-status-danger);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.outbox-retry:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 900px) {
   .stat-row {
     grid-template-columns: repeat(2, 1fr);
@@ -1459,5 +1811,24 @@ code {
 
   .rsvp-row {
     grid-template-columns: 1fr;
+  }
+
+  .gio-layout,
+  .gio-layout-config-focus {
+    grid-template-columns: 1fr;
+  }
+
+  .gio-config {
+    position: static;
+  }
+
+  .outbox-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .outbox-meta {
+    text-align: left;
+    justify-content: flex-start;
   }
 }

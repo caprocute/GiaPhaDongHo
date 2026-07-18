@@ -219,6 +219,9 @@ public class NotificationService {
                 if (NotifyChannels.ZALO.equals(ch)) {
                     return zaloLive;
                 }
+                if (NotifyChannels.WEB_PUSH.equals(ch)) {
+                    return notify.isChannelWeb();
+                }
                 return true;
             })
             .toList();
@@ -228,6 +231,9 @@ public class NotificationService {
             }
             if (zaloLive) {
                 return NotifyChannels.ZALO;
+            }
+            if (notify.isChannelWeb()) {
+                return NotifyChannels.WEB_PUSH;
             }
             throw new IllegalStateException("Dòng họ chưa bật kênh nhắc giỗ nào.");
         }

@@ -152,8 +152,10 @@ const emptySettings = (): TreeSettingsDto => ({
   },
   notify: {
     remindDaysBefore: 7,
+    remindHour: 8,
     channelEmail: true,
     channelZalo: false,
+    channelWeb: true,
   },
   calendar: { timezone: "Asia/Ho_Chi_Minh", showLeapMonthLabel: true },
   auth: {
@@ -1089,6 +1091,23 @@ export function SettingsPage() {
                   }
                 />
               </div>
+              <div className={styles.field}>
+                <div>
+                  <div className={styles.label}>Giờ gửi tin nhắc</div>
+                </div>
+                <Input
+                  type="number"
+                  min={0}
+                  max={23}
+                  style={{ maxWidth: 120 }}
+                  value={String(form.notify?.remindHour ?? 8)}
+                  onChange={(e) =>
+                    patchNested("notify", {
+                      remindHour: Math.min(23, Math.max(0, Number(e.target.value) || 0)),
+                    })
+                  }
+                />
+              </div>
               <div className={styles.toggles}>
                 <Toggle
                   checked={!!form.notify?.channelEmail}
@@ -1105,6 +1124,12 @@ export function SettingsPage() {
                       ? "Bật chế độ Zalo ở mục trên trước khi gợi ý kênh này"
                       : "Portal chỉ hiện khi chế độ Zalo không phải Tắt"
                   }
+                />
+                <Toggle
+                  checked={form.notify?.channelWeb !== false}
+                  onChange={(v) => patchNested("notify", { channelWeb: v })}
+                  label="Gợi ý thông báo trên cổng"
+                  hint="Tin nhắc hiển thị trên cổng thông tin khi thành viên đăng nhập"
                 />
               </div>
               {!canSuggestZalo && form.notify?.channelZalo ? (
