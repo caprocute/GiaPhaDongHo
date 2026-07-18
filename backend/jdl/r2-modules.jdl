@@ -18,6 +18,8 @@ entity DonationCampaign {
   raisedAmount BigDecimal
   vietqrPayload TextBlob
   status String
+  /** general | scholarship — mục đích quỹ (không đoán theo tên) */
+  purpose String
 }
 
 entity DonationContribution {

@@ -25,6 +25,10 @@
     {
       "fieldName": "status",
       "fieldType": "String"
+    },
+    {
+      "fieldName": "purpose",
+      "fieldType": "String"
     }
   ],
   "name": "DonationCampaign",

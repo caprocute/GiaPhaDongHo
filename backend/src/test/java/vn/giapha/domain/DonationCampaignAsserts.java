@@ -62,7 +62,8 @@ public class DonationCampaignAsserts {
                     .isEqualTo(expected.getRaisedAmount())
             )
             .satisfies(a -> assertThat(a.getVietqrPayload()).as("check vietqrPayload").isEqualTo(expected.getVietqrPayload()))
-            .satisfies(a -> assertThat(a.getStatus()).as("check status").isEqualTo(expected.getStatus()));
+            .satisfies(a -> assertThat(a.getStatus()).as("check status").isEqualTo(expected.getStatus()))
+            .satisfies(a -> assertThat(a.getPurpose()).as("check purpose").isEqualTo(expected.getPurpose()));
     }
 
     /**

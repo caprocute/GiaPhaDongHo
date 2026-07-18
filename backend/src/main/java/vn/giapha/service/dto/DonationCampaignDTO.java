@@ -26,6 +26,8 @@ public class DonationCampaignDTO implements Serializable {
 
     private String status;
 
+    private String purpose;
+
     private FamilyTreeDTO tree;
 
     public Long getId() {
@@ -76,6 +78,14 @@ public class DonationCampaignDTO implements Serializable {
         this.status = status;
     }
 
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+
     public FamilyTreeDTO getTree() {
         return tree;
     }
@@ -115,6 +125,7 @@ public class DonationCampaignDTO implements Serializable {
             ", raisedAmount=" + getRaisedAmount() +
             ", vietqrPayload='" + getVietqrPayload() + "'" +
             ", status='" + getStatus() + "'" +
+            ", purpose='" + getPurpose() + "'" +
             ", tree=" + getTree() +
             "}";
     }

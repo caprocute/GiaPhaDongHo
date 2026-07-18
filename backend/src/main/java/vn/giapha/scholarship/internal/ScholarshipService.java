@@ -19,6 +19,7 @@ import vn.giapha.domain.DonationCampaign;
 import vn.giapha.domain.FamilyTree;
 import vn.giapha.domain.Person;
 import vn.giapha.domain.ScholarshipEntry;
+import vn.giapha.donation.api.DonationStatuses;
 import vn.giapha.repository.ClanEventRepository;
 import vn.giapha.repository.DonationCampaignRepository;
 import vn.giapha.repository.FamilyTreeRepository;
@@ -317,11 +318,15 @@ public class ScholarshipService {
         List<DonationCampaign> campaigns = campaignRepository.findByTreeId(treeId);
         DonationCampaign match = campaigns
             .stream()
-            .filter(c -> isScholarshipFundTitle(c.getTitle()))
-            .filter(c -> c.getStatus() == null || !"closed".equalsIgnoreCase(c.getStatus()))
+            .filter(c -> DonationStatuses.PURPOSE_SCHOLARSHIP.equalsIgnoreCase(nullToEmpty(c.getPurpose())))
+            .filter(c -> c.getStatus() == null || !DonationStatuses.CAMPAIGN_CLOSED.equalsIgnoreCase(c.getStatus()))
             .findFirst()
             .orElseGet(() ->
-                campaigns.stream().filter(c -> isScholarshipFundTitle(c.getTitle())).findFirst().orElse(null)
+                campaigns
+                    .stream()
+                    .filter(c -> DonationStatuses.PURPOSE_SCHOLARSHIP.equalsIgnoreCase(nullToEmpty(c.getPurpose())))
+                    .findFirst()
+                    .orElse(null)
             );
         Map<String, Object> fund = new HashMap<>();
         if (match == null) {
@@ -330,6 +335,7 @@ public class ScholarshipService {
             fund.put("raisedAmount", BigDecimal.ZERO);
             fund.put("goalAmount", null);
             fund.put("status", null);
+            fund.put("purpose", null);
             return fund;
         }
         fund.put("id", match.getId());
@@ -337,15 +343,8 @@ public class ScholarshipService {
         fund.put("raisedAmount", match.getRaisedAmount() != null ? match.getRaisedAmount() : BigDecimal.ZERO);
         fund.put("goalAmount", match.getGoalAmount());
         fund.put("status", match.getStatus());
+        fund.put("purpose", match.getPurpose());
         return fund;
-    }
-
-    private static boolean isScholarshipFundTitle(String title) {
-        if (title == null) {
-            return false;
-        }
-        String t = title.toLowerCase(Locale.ROOT);
-        return t.contains("khuyến học") || t.contains("hoc bong") || t.contains("học bổng") || t.contains("scholarship");
     }
 
     private void linkPerson(String slug, ScholarshipEntry e) {

@@ -3,6 +3,6 @@
  */
 @org.springframework.modulith.ApplicationModule(
     displayName = "scholarship",
-    allowedDependencies = { "core :: security" }
+    allowedDependencies = { "core :: security", "donation :: api" }
 )
 package vn.giapha.scholarship;

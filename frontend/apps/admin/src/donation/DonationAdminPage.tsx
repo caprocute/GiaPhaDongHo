@@ -231,6 +231,7 @@ type CampaignForm = {
   title: string;
   goal: string;
   status: string;
+  purpose: string;
   bankBin: string;
   accountNo: string;
   accountName: string;
@@ -243,6 +244,7 @@ function initForm(c?: DonationCampaignDto): CampaignForm {
     title:       c?.title ?? "",
     goal:        c?.goalAmount != null ? String(c.goalAmount) : "",
     status:      c?.status ?? "open",
+    purpose:     c?.purpose === "scholarship" ? "scholarship" : "general",
     bankBin:     qr.bankBin ?? "",
     accountNo:   qr.accountNo ?? "",
     accountName: qr.accountName ?? "",
@@ -288,6 +290,7 @@ function CampaignDialog({ open, initial, slug, onClose, onSaved, getToken }: Cam
         title:        form.title.trim(),
         goalAmount:   form.goal.trim() ? Number(form.goal.replace(/[^0-9]/g, "")) : null,
         status:       form.status,
+        purpose:      form.purpose,
         vietqrPayload: Object.keys(vqr).length > 0 ? JSON.stringify(vqr) : null,
       }, token);
       await onSaved();
@@ -319,6 +322,17 @@ function CampaignDialog({ open, initial, slug, onClose, onSaved, getToken }: Cam
 
         <FormField label="Tiêu đề chiến dịch" required>
           <Input value={form.title} onChange={(e) => patch("title", e.target.value)} autoFocus />
+        </FormField>
+
+        <FormField label="Mục đích quỹ" required>
+          <Select
+            value={form.purpose}
+            onChange={(e) => patch("purpose", e.target.value)}
+            options={[
+              { value: "general", label: "Công đức / công trình chung" },
+              { value: "scholarship", label: "Quỹ khuyến học (trao học bổng)" },
+            ]}
+          />
         </FormField>
 
         <div className="admin-form-grid">
@@ -596,7 +610,10 @@ function CampaignItem({ cv, selected, onClick }: {
     >
       <div className="fund-campaign-item-top">
         <span className="fund-campaign-name">{c.title}</span>
-        <span style={{ flexShrink: 0 }}>
+        <span style={{ flexShrink: 0, display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          {c.purpose === "scholarship" ? (
+            <Badge tone="warning">Khuyến học</Badge>
+          ) : null}
           <Badge tone={STATUS_TONE[st] ?? "default"}>
             {STATUS_LABEL[st] ?? st}
           </Badge>

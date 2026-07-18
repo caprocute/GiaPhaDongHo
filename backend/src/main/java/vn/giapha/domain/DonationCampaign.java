@@ -42,6 +42,10 @@ public class DonationCampaign implements Serializable {
     @Column(name = "status")
     private String status;
 
+    /** general | scholarship */
+    @Column(name = "purpose")
+    private String purpose;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private FamilyTree tree;
 
@@ -125,6 +129,19 @@ public class DonationCampaign implements Serializable {
         this.status = status;
     }
 
+    public String getPurpose() {
+        return this.purpose;
+    }
+
+    public DonationCampaign purpose(String purpose) {
+        this.setPurpose(purpose);
+        return this;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+
     public FamilyTree getTree() {
         return this.tree;
     }
@@ -167,6 +184,7 @@ public class DonationCampaign implements Serializable {
             ", raisedAmount=" + getRaisedAmount() +
             ", vietqrPayload='" + getVietqrPayload() + "'" +
             ", status='" + getStatus() + "'" +
+            ", purpose='" + getPurpose() + "'" +
             "}";
     }
 }

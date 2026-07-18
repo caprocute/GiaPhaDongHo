@@ -601,8 +601,9 @@ export function ScholarshipAdminPage() {
               </>
             ) : (
               <>
-                Chưa gắn quỹ — tạo chiến dịch tên chứa «khuyến học» hoặc «học bổng» tại{" "}
-                <Link to="/donation">Công đức</Link>.
+                Chưa gắn quỹ — tại{" "}
+                <Link to="/donation">Công đức</Link>, tạo hoặc sửa chiến dịch và chọn mục đích
+                «Quỹ khuyến học».
               </>
             )}
           </p>
@@ -1041,8 +1042,8 @@ export function ScholarshipAdminPage() {
       >
         <div className="admin-form">
           <p className="sch-award-explain">
-            <strong>Nguồn:</strong> quỹ khuyến học
-            {stats?.fundTitle ? ` «${stats.fundTitle}»` : " (gắn tại Công đức)"}.
+            <strong>Nguồn:</strong> chiến dịch Công đức có mục đích «Quỹ khuyến học»
+            {stats?.fundTitle ? ` — «${stats.fundTitle}»` : " (chưa chọn)"}.
             <br />
             <strong>Đích:</strong> cột học bổng trên hồ sơ bảng vàng + (tuỳ chọn) sự kiện lễ vinh danh.
           </p>
