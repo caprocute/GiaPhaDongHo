@@ -179,15 +179,15 @@ CRUD: tiêu đề, quỹ (select chỉ campaign `purpose=scholarship`), ngày, s
 
 ---
 
-## 6. Lệch hiện trạng (debt — phải đóng theo SRS này)
+## 6. Lệch hiện trạng
 
-| Hiện trạng | Yêu cầu SRS-12c |
-|------------|-----------------|
-| Nhãn «Đợt 2/2026» ghép từ tháng/năm máy | Xóa; chỉ hiện `AwardRound.title` |
-| Banner lấy chiến dịch scholarship đầu tiên | Banner theo **đợt đang mở** + quỹ của đợt |
-| `awardAmount` gắn thẳng trên Entry khi trao | Thêm `AwardRound` + `Award` (Entry có thể denormalize amount sau) |
-| Không màn CRUD đợt | Thêm «Quản lý đợt» |
-| KPI đợt không quản trị | Stats lấy đợt `open` |
+| Đã đóng (2026-07-19) | Cách đóng |
+|----------------------|-----------|
+| Nhãn «Đợt n/năm» từ lịch máy | Stats/`awardRoundLabel` = `AwardRound.title` đợt `open` |
+| Banner quỹ đầu tiên theo purpose | Banner theo đợt `open` + `fundCampaign` của đợt |
+| Trao thẳng `entry.awardAmount` | `POST …/scholarship-award-rounds/{id}/awards` → `ScholarshipAward` (+ denormalize entry) |
+| Không CRUD đợt | API + dialog «Quản lý đợt» trên admin |
+| KPI đợt không quản trị | `GET …/stats` lấy đợt `open` mới nhất |
 
 ---
 

@@ -3056,6 +3056,31 @@ code {
   margin-left: auto;
 }
 
+.sch-round-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.sch-round-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted, var(--color-surface-card));
+}
+
+.sch-round-meta {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
 .sch-filter-bar {
   display: flex;
   gap: var(--spacing-sm);

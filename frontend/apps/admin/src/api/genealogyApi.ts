@@ -625,17 +625,53 @@ export type ScholarshipStats = {
   fundGoalAmount?: number | string | null;
   fundRemaining?: number | string | null;
   fundStatus?: string | null;
+  /** Tên đợt đang mở do admin tạo — không ghép từ lịch máy */
   awardRoundLabel?: string | null;
+  awardRoundId?: number | null;
+  awardRoundStatus?: string | null;
+  awardRoundDefaultAmount?: number | string | null;
+  awardRoundOpenFrom?: string | null;
+  awardRoundOpenTo?: string | null;
 };
 
 export type ScholarshipReviewBody = {
   reviewNote?: string;
 };
 
-export type ScholarshipAwardRoundBody = {
+export type ScholarshipAwardRoundDto = {
+  id?: number;
+  title: string;
+  code?: string | null;
+  fundCampaignId: number;
+  fundCampaignTitle?: string | null;
+  openFrom?: string | null;
+  openTo?: string | null;
+  defaultAmount?: number | string | null;
+  status?: string | null;
+  note?: string | null;
+  honorEventId?: number | null;
+  honorEventTitle?: string | null;
+  createdAt?: string | null;
+  closedAt?: string | null;
+  awardCount?: number | null;
+};
+
+export type ScholarshipAwardRoundUpsert = {
+  title: string;
+  code?: string;
+  fundCampaignId: number;
+  openFrom?: string | null;
+  openTo?: string | null;
+  defaultAmount?: number | null;
+  status?: string;
+  note?: string;
+  honorEventId?: number | null;
+};
+
+export type ScholarshipGrantAwardsBody = {
   entryIds: number[];
-  defaultAwardAmount: number;
-  reviewNote?: string;
+  amount?: number;
+  note?: string;
   createHonorEvent?: boolean;
   honorEventTitle?: string;
   honorEventLocation?: string;
@@ -683,19 +719,60 @@ export async function reviewScholarshipEntry(
   );
 }
 
-export async function awardScholarshipRound(
+export async function listScholarshipAwardRounds(
   slug: string,
-  body: ScholarshipAwardRoundBody,
+  token: string | null,
+): Promise<ScholarshipAwardRoundDto[]> {
+  return apiFetch<ScholarshipAwardRoundDto[]>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-award-rounds`,
+    { token },
+  );
+}
+
+export async function upsertScholarshipAwardRound(
+  slug: string,
+  dto: ScholarshipAwardRoundUpsert & { id?: number },
+  token: string | null,
+): Promise<ScholarshipAwardRoundDto> {
+  if (dto.id != null) {
+    return apiFetch<ScholarshipAwardRoundDto>(
+      `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-award-rounds/${dto.id}`,
+      { method: "PUT", body: dto, token },
+    );
+  }
+  return apiFetch<ScholarshipAwardRoundDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-award-rounds`,
+    { method: "POST", body: dto, token },
+  );
+}
+
+export async function deleteScholarshipAwardRound(
+  slug: string,
+  id: number,
+  token: string | null,
+): Promise<void> {
+  await apiFetch<void>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-award-rounds/${id}`,
+    { method: "DELETE", token },
+  );
+}
+
+export async function grantScholarshipAwards(
+  slug: string,
+  roundId: number,
+  body: ScholarshipGrantAwardsBody,
   token: string | null,
 ): Promise<{
   awardedCount: number;
   skippedCount?: number;
   amountPerSlot?: number | string;
+  roundId?: number;
+  roundTitle?: string | null;
   honorEventId?: number | null;
   honorEventTitle?: string | null;
 }> {
   return apiFetch(
-    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/award-round`,
+    `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-award-rounds/${roundId}/awards`,
     { method: "POST", body, token },
   );
 }

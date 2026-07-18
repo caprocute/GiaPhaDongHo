@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.giapha.core.security.RequiresPermission;
+import vn.giapha.scholarship.api.ScholarshipAwardRoundDTO;
 import vn.giapha.scholarship.api.ScholarshipAwardRoundRequest;
+import vn.giapha.scholarship.api.ScholarshipGrantAwardsRequest;
 import vn.giapha.scholarship.api.ScholarshipReviewRequest;
 import vn.giapha.scholarship.internal.ScholarshipService;
 import vn.giapha.service.dto.ScholarshipEntryDTO;
@@ -49,6 +51,64 @@ public class TreeScholarshipResource {
     @RequiresPermission("scholarship:entry:read")
     public Map<String, Object> stats(@PathVariable String slug) {
         return scholarshipService.stats(slug);
+    }
+
+    @GetMapping("/scholarship-award-rounds")
+    @RequiresPermission("scholarship:entry:read")
+    public List<ScholarshipAwardRoundDTO> listRounds(@PathVariable String slug) {
+        return scholarshipService.listRounds(slug);
+    }
+
+    @PostMapping("/scholarship-award-rounds")
+    @RequiresPermission("scholarship:entry:review")
+    public ScholarshipAwardRoundDTO createRound(
+        @PathVariable String slug,
+        @RequestBody ScholarshipAwardRoundRequest body
+    ) {
+        try {
+            return scholarshipService.createRound(slug, body);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipAwardRound", "invalid");
+        }
+    }
+
+    @PutMapping("/scholarship-award-rounds/{id}")
+    @RequiresPermission("scholarship:entry:review")
+    public ScholarshipAwardRoundDTO updateRound(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @RequestBody ScholarshipAwardRoundRequest body
+    ) {
+        try {
+            return scholarshipService.updateRound(slug, id, body);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipAwardRound", "invalid");
+        }
+    }
+
+    @DeleteMapping("/scholarship-award-rounds/{id}")
+    @RequiresPermission("scholarship:entry:review")
+    public ResponseEntity<Void> deleteRound(@PathVariable String slug, @PathVariable Long id) {
+        try {
+            scholarshipService.deleteRound(slug, id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipAwardRound", "invalid");
+        }
+    }
+
+    @PostMapping("/scholarship-award-rounds/{id}/awards")
+    @RequiresPermission("scholarship:entry:review")
+    public Map<String, Object> grantAwards(
+        @PathVariable String slug,
+        @PathVariable Long id,
+        @RequestBody ScholarshipGrantAwardsRequest body
+    ) {
+        try {
+            return scholarshipService.grantAwards(slug, id, body);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestAlertException(e.getMessage(), "scholarshipAward", "invalid");
+        }
     }
 
     /** Thành viên cổng thông tin đề cử. */
@@ -129,19 +189,6 @@ public class TreeScholarshipResource {
     ) {
         try {
             return scholarshipService.review(slug, id, false, body);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
-        }
-    }
-
-    /**
-     * Trao học bổng đợt: chỉ hồ sơ đã vào bảng vàng, ghi số tiền từ quỹ khuyến học.
-     */
-    @PostMapping("/scholarship-entries/award-round")
-    @RequiresPermission("scholarship:entry:review")
-    public Map<String, Object> awardRound(@PathVariable String slug, @RequestBody ScholarshipAwardRoundRequest body) {
-        try {
-            return scholarshipService.awardRound(slug, body);
         } catch (IllegalArgumentException e) {
             throw new BadRequestAlertException(e.getMessage(), "scholarshipEntry", "invalid");
         }

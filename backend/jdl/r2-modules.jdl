@@ -74,6 +74,29 @@ entity ScholarshipEntry {
   awardedAt Instant
 }
 
+/** SRS-12c — đợt trao học bổng (master data) */
+entity ScholarshipAwardRound {
+  title String required
+  code String
+  openFrom Instant
+  openTo Instant
+  defaultAmount BigDecimal
+  status String
+  note String
+  createdAt Instant
+  closedAt Instant
+  createdBy String
+  closedBy String
+}
+
+/** SRS-12c — suất đã trao trong một đợt */
+entity ScholarshipAward {
+  amount BigDecimal required
+  awardedAt Instant
+  awardedBy String
+  note String
+}
+
 relationship ManyToOne {
   ChangeRequest{tree(slug)} to FamilyTree with builtInEntity
   ChangeRequest{person(fullName)} to Person with builtInEntity
@@ -84,8 +107,13 @@ relationship ManyToOne {
   AnniversarySubscription{person(fullName)} to Person with builtInEntity
   ScholarshipEntry{tree(slug)} to FamilyTree with builtInEntity
   ScholarshipEntry{person(fullName)} to Person with builtInEntity
+  ScholarshipAwardRound{tree(slug)} to FamilyTree with builtInEntity
+  ScholarshipAwardRound{fundCampaign(title)} to DonationCampaign
+  ScholarshipAwardRound{honorEvent(title)} to ClanEvent
+  ScholarshipAward{round(title)} to ScholarshipAwardRound
+  ScholarshipAward{entry(personName)} to ScholarshipEntry
 }
 
-paginate ChangeRequest, DonationContribution, ClanEvent with pagination
-dto ChangeRequest, DonationCampaign, DonationContribution, ClanEvent, EventRsvp, AnniversarySubscription, NotificationOutbox, ScholarshipEntry with mapstruct
-service ChangeRequest, DonationCampaign, DonationContribution, ClanEvent, EventRsvp, AnniversarySubscription, NotificationOutbox, ScholarshipEntry with serviceClass
+paginate ChangeRequest, DonationContribution, ClanEvent, ScholarshipAwardRound, ScholarshipAward with pagination
+dto ChangeRequest, DonationCampaign, DonationContribution, ClanEvent, EventRsvp, AnniversarySubscription, NotificationOutbox, ScholarshipEntry, ScholarshipAwardRound, ScholarshipAward with mapstruct
+service ChangeRequest, DonationCampaign, DonationContribution, ClanEvent, EventRsvp, AnniversarySubscription, NotificationOutbox, ScholarshipEntry, ScholarshipAwardRound, ScholarshipAward with serviceClass

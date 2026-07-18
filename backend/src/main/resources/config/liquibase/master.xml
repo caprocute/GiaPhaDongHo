@@ -56,4 +56,5 @@
     <include file="config/liquibase/changelog/20260717100000_system_module_audit.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260718100000_expand_scholarship_entry.xml" relativeToChangelogFile="false"/>
     <include file="config/liquibase/changelog/20260718120000_donation_campaign_purpose.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20260719010000_scholarship_award_round.xml" relativeToChangelogFile="false"/>
 </databaseChangeLog>

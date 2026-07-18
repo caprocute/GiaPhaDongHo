@@ -24,13 +24,19 @@ import {
   Textarea,
 } from "@giapha/ui";
 import {
-  awardScholarshipRound,
   defaultTreeSlug,
   deleteScholarshipAdmin,
+  deleteScholarshipAwardRound,
   getScholarshipStats,
+  grantScholarshipAwards,
+  listDonationCampaignsAdmin,
   listScholarshipAdmin,
+  listScholarshipAwardRounds,
   reviewScholarshipEntry,
   upsertScholarshipAdmin,
+  upsertScholarshipAwardRound,
+  type DonationCampaignDto,
+  type ScholarshipAwardRoundDto,
   type ScholarshipEntryDto,
   type ScholarshipStats,
 } from "../api/genealogyApi";
@@ -194,10 +200,28 @@ export function ScholarshipAdminPage() {
   const [awardNote, setAwardNote] = useState("");
   const [createEvent, setCreateEvent] = useState(true);
 
+  const [roundsOpen, setRoundsOpen] = useState(false);
+  const [rounds, setRounds] = useState<ScholarshipAwardRoundDto[]>([]);
+  const [fundOptions, setFundOptions] = useState<DonationCampaignDto[]>([]);
+  const [roundsBusy, setRoundsBusy] = useState(false);
+  const [roundFormErr, setRoundFormErr] = useState<string | null>(null);
+  const [roundForm, setRoundForm] = useState({
+    id: undefined as number | undefined,
+    title: "",
+    fundCampaignId: "",
+    defaultAmount: "2000000",
+    status: "open",
+    note: "",
+    openFrom: "",
+    openTo: "",
+  });
+
   const yearOptions = useMemo(() => {
     const now = new Date().getFullYear();
     return [now, now - 1, now - 2, now - 3];
   }, []);
+
+  const hasOpenRound = stats?.awardRoundId != null;
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -226,6 +250,10 @@ export function ScholarshipAdminPage() {
       setTotalElements(list.totalElements);
       setTotalPages(list.totalPages);
       setStats(st);
+      if (st.awardRoundDefaultAmount != null) {
+        const def = toNumber(st.awardRoundDefaultAmount);
+        if (def > 0) setAwardAmount(String(Math.round(def)));
+      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được đề cử khuyến học.");
       setRows([]);
@@ -370,7 +398,142 @@ export function ScholarshipAdminPage() {
     }
   }
 
+  function emptyRoundForm() {
+    return {
+      id: undefined as number | undefined,
+      title: "",
+      fundCampaignId: fundOptions[0]?.id != null ? String(fundOptions[0].id) : "",
+      defaultAmount: "2000000",
+      status: "open",
+      note: "",
+      openFrom: "",
+      openTo: "",
+    };
+  }
+
+  async function openRoundsDialog() {
+    setRoundFormErr(null);
+    setRoundsBusy(true);
+    setError(null);
+    try {
+      const token = await getAccessToken();
+      const [roundList, campaigns] = await Promise.all([
+        listScholarshipAwardRounds(slug, token),
+        listDonationCampaignsAdmin(slug, token, 0, 100),
+      ]);
+      const funds = campaigns.content
+        .map((v) => v.campaign)
+        .filter((c) => (c.purpose ?? "").toLowerCase() === "scholarship" && c.id != null);
+      setRounds(roundList);
+      setFundOptions(funds);
+      setRoundForm({
+        id: undefined,
+        title: "",
+        fundCampaignId: funds[0]?.id != null ? String(funds[0].id) : "",
+        defaultAmount: "2000000",
+        status: "open",
+        note: "",
+        openFrom: "",
+        openTo: "",
+      });
+      setRoundsOpen(true);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "Không tải được danh sách đợt trao.");
+    } finally {
+      setRoundsBusy(false);
+    }
+  }
+
+  function editRound(r: ScholarshipAwardRoundDto) {
+    setRoundFormErr(null);
+    setRoundForm({
+      id: r.id,
+      title: r.title ?? "",
+      fundCampaignId: r.fundCampaignId != null ? String(r.fundCampaignId) : "",
+      defaultAmount:
+        r.defaultAmount != null && toNumber(r.defaultAmount) > 0
+          ? String(Math.round(toNumber(r.defaultAmount)))
+          : "2000000",
+      status: (r.status ?? "open").toLowerCase(),
+      note: r.note ?? "",
+      openFrom: r.openFrom ? r.openFrom.slice(0, 10) : "",
+      openTo: r.openTo ? r.openTo.slice(0, 10) : "",
+    });
+  }
+
+  async function saveRound(e: FormEvent) {
+    e.preventDefault();
+    setRoundFormErr(null);
+    const title = roundForm.title.trim();
+    const fundId = Number(roundForm.fundCampaignId);
+    if (!title) {
+      setRoundFormErr("Nhập tên đợt trao học bổng.");
+      return;
+    }
+    if (!Number.isFinite(fundId) || fundId <= 0) {
+      setRoundFormErr("Chọn quỹ khuyến học làm nguồn tiền.");
+      return;
+    }
+    const amount = Number(String(roundForm.defaultAmount).replace(/[^0-9]/g, ""));
+    setRoundsBusy(true);
+    try {
+      const token = await getAccessToken();
+      await upsertScholarshipAwardRound(
+        slug,
+        {
+          id: roundForm.id,
+          title,
+          fundCampaignId: fundId,
+          defaultAmount: Number.isFinite(amount) && amount > 0 ? amount : null,
+          status: roundForm.status,
+          note: roundForm.note.trim() || undefined,
+          openFrom: roundForm.openFrom ? `${roundForm.openFrom}T00:00:00Z` : null,
+          openTo: roundForm.openTo ? `${roundForm.openTo}T23:59:59Z` : null,
+        },
+        token,
+      );
+      const [roundList, st] = await Promise.all([
+        listScholarshipAwardRounds(slug, token),
+        getScholarshipStats(slug, token),
+      ]);
+      setRounds(roundList);
+      setStats(st);
+      setRoundForm(emptyRoundForm());
+      setMsg(roundForm.id ? "Đã cập nhật đợt trao." : "Đã tạo đợt trao học bổng.");
+    } catch (ex) {
+      setRoundFormErr(ex instanceof ApiError ? ex.message : "Không lưu được đợt trao.");
+    } finally {
+      setRoundsBusy(false);
+    }
+  }
+
+  async function removeRound(id: number) {
+    if (!window.confirm("Xóa đợt này? Chỉ xóa được khi chưa có suất đã trao.")) return;
+    setRoundsBusy(true);
+    setRoundFormErr(null);
+    try {
+      const token = await getAccessToken();
+      await deleteScholarshipAwardRound(slug, id, token);
+      const [roundList, st] = await Promise.all([
+        listScholarshipAwardRounds(slug, token),
+        getScholarshipStats(slug, token),
+      ]);
+      setRounds(roundList);
+      setStats(st);
+      if (roundForm.id === id) setRoundForm(emptyRoundForm());
+      setMsg("Đã xóa đợt trao.");
+    } catch (ex) {
+      setRoundFormErr(ex instanceof ApiError ? ex.message : "Không xóa được đợt.");
+    } finally {
+      setRoundsBusy(false);
+    }
+  }
+
   function openAwardDialog() {
+    if (!hasOpenRound || stats?.awardRoundId == null) {
+      setError("Chưa có đợt trao đang mở — mở «Quản lý đợt» để tạo đợt và chọn quỹ khuyến học.");
+      return;
+    }
     const ids = awardCandidateIds();
     if (ids.length === 0) {
       setError(
@@ -400,6 +563,10 @@ export function ScholarshipAdminPage() {
   }
 
   async function confirmAward() {
+    if (stats?.awardRoundId == null) {
+      setError("Chưa có đợt trao đang mở.");
+      return;
+    }
     const ids = awardCandidateIds();
     const amount = Number(String(awardAmount).replace(/[^0-9]/g, ""));
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -411,14 +578,15 @@ export function ScholarshipAdminPage() {
     setMsg(null);
     try {
       const token = await getAccessToken();
-      const result = await awardScholarshipRound(
+      const result = await grantScholarshipAwards(
         slug,
+        stats.awardRoundId,
         {
           entryIds: ids,
-          defaultAwardAmount: amount,
-          reviewNote: awardNote.trim() || undefined,
+          amount,
+          note: awardNote.trim() || undefined,
           createHonorEvent: createEvent,
-          honorEventTitle: stats?.awardRoundLabel
+          honorEventTitle: stats.awardRoundLabel
             ? `Lễ vinh danh — ${stats.awardRoundLabel}`
             : undefined,
         },
@@ -430,13 +598,30 @@ export function ScholarshipAdminPage() {
         ? ` Đã tạo sự kiện «${result.honorEventTitle ?? "Lễ vinh danh"}» (mục Sự kiện).`
         : "";
       setMsg(
-        `Đã ghi nhận ${result.awardedCount} suất × ${formatVnd(amount)} từ quỹ khuyến học vào hồ sơ bảng vàng.${eventHint}`,
+        `Đã ghi nhận ${result.awardedCount} suất × ${formatVnd(amount)} trong đợt «${result.roundTitle ?? stats.awardRoundLabel}».${eventHint}`,
       );
       await reload();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không trao được học bổng đợt này.");
     } finally {
       setBulkBusy(false);
+    }
+  }
+
+  function roundStatusLabel(status?: string | null): string {
+    const s = (status ?? "").toLowerCase();
+    if (s === "open") return "Đang mở";
+    if (s === "draft") return "Nháp";
+    if (s === "closed") return "Đã đóng";
+    return status || "—";
+  }
+
+  function formatDay(iso?: string | null): string {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleDateString("vi-VN");
+    } catch {
+      return "";
     }
   }
 
@@ -516,8 +701,13 @@ export function ScholarshipAdminPage() {
             <Button type="button" variant="secondary" onClick={exportCsv} disabled={rows.length === 0}>
               <Download size={15} aria-hidden /> Xuất danh sách
             </Button>
-            <Button type="button" variant="secondary" onClick={openAwardDialog} disabled={bulkBusy}>
-              <Medal size={15} aria-hidden /> Trao học bổng
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => void openRoundsDialog()}
+              disabled={roundsBusy}
+            >
+              <Award size={15} aria-hidden /> Quản lý đợt
             </Button>
             <Button type="button" onClick={openCreate}>
               <Plus size={15} aria-hidden /> Thêm hồ sơ
@@ -588,27 +778,44 @@ export function ScholarshipAdminPage() {
           <Award size={28} />
         </div>
         <div className="award-banner-text">
-          <h3>
-            Quỹ & trao học bổng
-            {stats?.awardRoundLabel ? ` — ${stats.awardRoundLabel}` : ""}
-          </h3>
-          <p>
-            {stats?.fundTitle ? (
-              <>
-                Nguồn tiền: quỹ «{stats.fundTitle}» còn{" "}
-                <strong>{formatVndCompact(fundRemaining)}</strong>
-                {awaitingAward > 0 ? ` · ${awaitingAward} hồ sơ bảng vàng chưa ghi suất` : null}
-              </>
-            ) : (
-              <>
-                Chưa gắn quỹ — tại{" "}
-                <Link to="/donation">Công đức</Link>, tạo hoặc sửa chiến dịch và chọn mục đích
-                «Quỹ khuyến học».
-              </>
-            )}
-          </p>
+          {hasOpenRound ? (
+            <>
+              <h3>{stats?.awardRoundLabel}</h3>
+              <p>
+                {stats?.fundTitle ? (
+                  <>
+                    Nguồn tiền: quỹ «{stats.fundTitle}» còn{" "}
+                    <strong>{formatVndCompact(fundRemaining)}</strong>
+                    {awaitingAward > 0 ? ` · ${awaitingAward} hồ sơ bảng vàng chưa ghi suất` : null}
+                    {stats?.awardRoundOpenFrom || stats?.awardRoundOpenTo ? (
+                      <>
+                        {" "}
+                        · Thời gian đợt:{" "}
+                        {[formatDay(stats.awardRoundOpenFrom), formatDay(stats.awardRoundOpenTo)]
+                          .filter(Boolean)
+                          .join(" – ")}
+                      </>
+                    ) : null}
+                  </>
+                ) : (
+                  <>Đợt đang mở chưa gắn quỹ — mở «Quản lý đợt» để chọn quỹ khuyến học.</>
+                )}
+              </p>
+            </>
+          ) : (
+            <>
+              <h3>Chưa có đợt trao đang mở</h3>
+              <p>
+                Tạo đợt trao và chọn quỹ khuyến học (mục đích «Quỹ khuyến học» tại{" "}
+                <Link to="/donation">Công đức</Link>) trước khi ghi suất tiền.
+              </p>
+            </>
+          )}
         </div>
         <div className="award-banner-acts">
+          <Button type="button" variant="secondary" onClick={() => void openRoundsDialog()}>
+            {hasOpenRound ? "Sửa đợt" : "Tạo đợt"}
+          </Button>
           {stats?.fundCampaignId != null ? (
             <Link to="/donation">
               <Button type="button" variant="secondary">
@@ -619,9 +826,9 @@ export function ScholarshipAdminPage() {
           <Button
             type="button"
             onClick={openAwardDialog}
-            disabled={bulkBusy || awaitingAward === 0}
+            disabled={bulkBusy || !hasOpenRound || awaitingAward === 0}
           >
-            Trao học bổng đợt này
+            <Medal size={15} aria-hidden /> Trao suất đợt này
           </Button>
         </div>
       </div>
@@ -1025,8 +1232,12 @@ export function ScholarshipAdminPage() {
 
       <Dialog
         open={awardOpen}
-        title="Trao học bổng từ quỹ tộc"
-        description="Bước này chỉ ghi số tiền lên hồ sơ đã vào bảng vàng — không thay thế bước duyệt công bố."
+        title={
+          stats?.awardRoundLabel
+            ? `Trao suất — ${stats.awardRoundLabel}`
+            : "Trao suất học bổng"
+        }
+        description="Ghi số tiền từ quỹ của đợt đang mở lên hồ sơ đã vào bảng vàng — không thay thế bước duyệt công bố."
         onClose={() => !bulkBusy && setAwardOpen(false)}
         size="md"
         footer={
@@ -1042,10 +1253,9 @@ export function ScholarshipAdminPage() {
       >
         <div className="admin-form">
           <p className="sch-award-explain">
-            <strong>Nguồn:</strong> chiến dịch Công đức có mục đích «Quỹ khuyến học»
-            {stats?.fundTitle ? ` — «${stats.fundTitle}»` : " (chưa chọn)"}.
+            <strong>Nguồn:</strong> quỹ «{stats?.fundTitle ?? "—"}» gắn với đợt đang mở.
             <br />
-            <strong>Đích:</strong> cột học bổng trên hồ sơ bảng vàng + (tuỳ chọn) sự kiện lễ vinh danh.
+            <strong>Đích:</strong> suất học bổng trên hồ sơ bảng vàng + (tuỳ chọn) sự kiện lễ vinh danh.
           </p>
           <FormField label="Số tiền mỗi suất (đồng)" required htmlFor="award-amount">
             <Input
@@ -1056,13 +1266,13 @@ export function ScholarshipAdminPage() {
               placeholder="2000000"
             />
           </FormField>
-          <FormField label="Ghi chú đợt trao (tuỳ chọn)" htmlFor="award-note">
+          <FormField label="Ghi chú khi trao (tuỳ chọn)" htmlFor="award-note">
             <Textarea
               id="award-note"
               rows={2}
               value={awardNote}
               onChange={(e) => setAwardNote(e.target.value)}
-              placeholder="Ví dụ: Đợt 2/2026 — trao tại nhà thờ họ"
+              placeholder="Ví dụ: Trao tại nhà thờ họ"
             />
           </FormField>
           <label className="sch-check-inline">
@@ -1071,7 +1281,7 @@ export function ScholarshipAdminPage() {
               checked={createEvent}
               onChange={(e) => setCreateEvent(e.target.checked)}
             />
-            <span>Tạo sự kiện «Lễ vinh danh» trong mục Sự kiện</span>
+            <span>Tạo sự kiện «Lễ vinh danh» trong mục Sự kiện (nếu đợt chưa gắn sự kiện)</span>
           </label>
           <p className="sch-award-explain">
             Sẽ ghi nhận <strong>{awardIdsPreview.length}</strong> suất
@@ -1080,6 +1290,160 @@ export function ScholarshipAdminPage() {
               : null}
             .
           </p>
+        </div>
+      </Dialog>
+
+      <Dialog
+        open={roundsOpen}
+        title="Quản lý đợt trao học bổng"
+        description="Mỗi đợt do thư ký đặt tên và gắn một quỹ khuyến học. Chỉ đợt đang mở mới dùng để trao suất."
+        onClose={() => !roundsBusy && setRoundsOpen(false)}
+        size="lg"
+        footer={
+          <Button type="button" variant="secondary" onClick={() => setRoundsOpen(false)} disabled={roundsBusy}>
+            Đóng
+          </Button>
+        }
+      >
+        <div className="admin-form">
+          {fundOptions.length === 0 ? (
+            <Alert title="Cần quỹ khuyến học" variant="info">
+              Chưa có chiến dịch mục đích «Quỹ khuyến học». Tạo tại{" "}
+              <Link to="/donation">Công đức</Link> rồi quay lại tạo đợt.
+            </Alert>
+          ) : null}
+          {roundFormErr ? (
+            <Alert title="Không lưu được" variant="error">
+              {roundFormErr}
+            </Alert>
+          ) : null}
+
+          <form className="admin-form" onSubmit={(e) => void saveRound(e)} noValidate>
+            <FormField label="Tên đợt" required htmlFor="round-title">
+              <Input
+                id="round-title"
+                value={roundForm.title}
+                onChange={(e) => setRoundForm((f) => ({ ...f, title: e.target.value }))}
+                placeholder="Ví dụ: Giỗ tổ 2026 — học bổng hè"
+              />
+            </FormField>
+            <FormField label="Quỹ nguồn" required htmlFor="round-fund">
+              <select
+                id="round-fund"
+                className="fi"
+                value={roundForm.fundCampaignId}
+                onChange={(e) => setRoundForm((f) => ({ ...f, fundCampaignId: e.target.value }))}
+              >
+                <option value="">— Chọn quỹ khuyến học —</option>
+                {fundOptions.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.title}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <div className="admin-form-grid">
+              <FormField label="Số tiền gợi ý mỗi suất (đồng)" htmlFor="round-amount">
+                <Input
+                  id="round-amount"
+                  value={roundForm.defaultAmount}
+                  onChange={(e) => setRoundForm((f) => ({ ...f, defaultAmount: e.target.value }))}
+                  inputMode="numeric"
+                />
+              </FormField>
+              <FormField label="Trạng thái" htmlFor="round-status">
+                <select
+                  id="round-status"
+                  className="fi"
+                  value={roundForm.status}
+                  onChange={(e) => setRoundForm((f) => ({ ...f, status: e.target.value }))}
+                >
+                  <option value="draft">Nháp</option>
+                  <option value="open">Đang mở</option>
+                  <option value="closed">Đã đóng</option>
+                </select>
+              </FormField>
+            </div>
+            <div className="admin-form-grid">
+              <FormField label="Mở từ ngày" htmlFor="round-from">
+                <Input
+                  id="round-from"
+                  type="date"
+                  value={roundForm.openFrom}
+                  onChange={(e) => setRoundForm((f) => ({ ...f, openFrom: e.target.value }))}
+                />
+              </FormField>
+              <FormField label="Đến ngày" htmlFor="round-to">
+                <Input
+                  id="round-to"
+                  type="date"
+                  value={roundForm.openTo}
+                  onChange={(e) => setRoundForm((f) => ({ ...f, openTo: e.target.value }))}
+                />
+              </FormField>
+            </div>
+            <FormField label="Ghi chú" htmlFor="round-note">
+              <Textarea
+                id="round-note"
+                rows={2}
+                value={roundForm.note}
+                onChange={(e) => setRoundForm((f) => ({ ...f, note: e.target.value }))}
+              />
+            </FormField>
+            <div style={{ display: "flex", gap: "var(--spacing-sm)", flexWrap: "wrap" }}>
+              <Button type="submit" disabled={roundsBusy || fundOptions.length === 0}>
+                {roundsBusy ? "Đang lưu…" : roundForm.id ? "Cập nhật đợt" : "Tạo đợt"}
+              </Button>
+              {roundForm.id != null ? (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={roundsBusy}
+                  onClick={() => setRoundForm(emptyRoundForm())}
+                >
+                  Tạo đợt mới
+                </Button>
+              ) : null}
+            </div>
+          </form>
+
+          <div className="sch-round-list" style={{ marginTop: "var(--spacing-lg)" }}>
+            <h4 style={{ margin: "0 0 var(--spacing-sm)" }}>Các đợt đã tạo</h4>
+            {rounds.length === 0 ? (
+              <EmptyState title="Chưa có đợt" description="Tạo đợt đầu tiên bằng biểu mẫu phía trên." />
+            ) : (
+              <ul className="sch-round-ul">
+                {rounds.map((r) => (
+                  <li key={r.id} className="sch-round-item">
+                    <div>
+                      <strong>{r.title}</strong>
+                      <span className="sch-round-meta">
+                        {" "}
+                        · {roundStatusLabel(r.status)}
+                        {r.fundCampaignTitle ? ` · quỹ «${r.fundCampaignTitle}»` : null}
+                        {r.awardCount != null && r.awardCount > 0
+                          ? ` · ${r.awardCount} suất đã trao`
+                          : null}
+                      </span>
+                    </div>
+                    <div style={{ display: "flex", gap: "var(--spacing-xs)" }}>
+                      <Button type="button" variant="secondary" onClick={() => editRound(r)} disabled={roundsBusy}>
+                        <Pencil size={14} aria-hidden /> Sửa
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => r.id != null && void removeRound(r.id)}
+                        disabled={roundsBusy || (r.awardCount != null && r.awardCount > 0)}
+                      >
+                        <Trash2 size={14} aria-hidden /> Xóa
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </Dialog>
     </div>
