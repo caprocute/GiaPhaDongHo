@@ -19,8 +19,13 @@ export type { SwitchProps } from "./Switch/Switch";
 export { FormField } from "./FormField/FormField";
 export type { FormFieldProps } from "./FormField/FormField";
 
-export { DualDatePicker } from "./DualDatePicker/DualDatePicker";
-export type { DualDatePickerProps, DualDateValue } from "./DualDatePicker/DualDatePicker";
+export { DualDatePicker, DualDateRangePicker } from "./DualDatePicker/DualDatePicker";
+export type {
+  DualDatePickerProps,
+  DualDateRangePickerProps,
+  DualDateValue,
+  DualDateRangeValue,
+} from "./DualDatePicker/DualDatePicker";
 
 export { DataTable } from "./DataTable/DataTable";
 export type { DataTableColumn, DataTableProps } from "./DataTable/DataTable";
