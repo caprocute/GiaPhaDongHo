@@ -12,11 +12,16 @@ public class ImgproxyProperties {
     private String key;
     /** Hex-encoded signing salt (64 ký tự hex = 32 bytes). */
     private String salt;
+    /** MinIO bucket name — dùng làm source S3 trong imgproxy URL (s3://bucket/objectKey). */
+    private String bucket;
     /** Bật/tắt URL signing. Dev có thể dùng false khi chưa có imgproxy thật. */
     private boolean signingEnabled = true;
 
     public String getBaseUrl() { return baseUrl; }
     public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
+
+    public String getBucket() { return bucket; }
+    public void setBucket(String bucket) { this.bucket = bucket; }
 
     public String getKey() { return key; }
     public void setKey(String key) { this.key = key; }

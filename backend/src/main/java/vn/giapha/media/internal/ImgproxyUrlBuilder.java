@@ -33,8 +33,10 @@ public class ImgproxyUrlBuilder {
             throw new IllegalStateException("giapha.imgproxy.base-url chưa cấu hình");
         }
 
-        // Encode source URL (S3 path) dạng base64url không padding
-        String sourceUrl = "s3://" + props.getBaseUrl() + "/" + objectKey;
+        // Encode source URL — dạng s3://bucket/objectKey để imgproxy lấy từ MinIO qua S3 protocol
+        String bucket = (props.getBucket() != null && !props.getBucket().isBlank())
+            ? props.getBucket() : "giapha-media";
+        String sourceUrl = "s3://" + bucket + "/" + objectKey;
         String encodedSource = base64url(sourceUrl.getBytes(StandardCharsets.UTF_8));
 
         String path = "/" + processingPath + "/" + encodedSource;

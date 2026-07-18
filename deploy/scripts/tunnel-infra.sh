@@ -14,6 +14,7 @@ LOCAL_MINIO=19000
 LOCAL_MINIO_CONSOLE=19001
 LOCAL_ES=19200
 LOCAL_KC=18086
+LOCAL_IMGPROXY=18888
 
 usage() {
   cat <<EOF
@@ -56,7 +57,7 @@ free_port() {
 }
 
 free_all_tunnel_ports() {
-  for p in "$LOCAL_PG" "$LOCAL_REDIS" "$LOCAL_MINIO" "$LOCAL_MINIO_CONSOLE" "$LOCAL_ES" "$LOCAL_KC"; do
+  for p in "$LOCAL_PG" "$LOCAL_REDIS" "$LOCAL_MINIO" "$LOCAL_MINIO_CONSOLE" "$LOCAL_ES" "$LOCAL_KC" "$LOCAL_IMGPROXY"; do
     free_port "$p"
   done
 }
@@ -89,6 +90,7 @@ start_tunnel() {
     -L "${LOCAL_MINIO_CONSOLE}:127.0.0.1:${REMOTE_MINIO_CONSOLE_PORT:-19001}"
     -L "${LOCAL_ES}:127.0.0.1:${REMOTE_ES_PORT:-19200}"
     -L "${LOCAL_KC}:127.0.0.1:${REMOTE_KC_PORT:-18086}"
+    -L "${LOCAL_IMGPROXY}:127.0.0.1:${REMOTE_IMGPROXY_PORT:-18888}"
   )
 
   # Nền: ssh -N
@@ -147,7 +149,7 @@ status_tunnel() {
   else
     echo "Trạng thái: STOPPED"
   fi
-  for p in "$LOCAL_PG" "$LOCAL_REDIS" "$LOCAL_MINIO" "$LOCAL_ES" "$LOCAL_KC"; do
+  for p in "$LOCAL_PG" "$LOCAL_REDIS" "$LOCAL_MINIO" "$LOCAL_ES" "$LOCAL_KC" "$LOCAL_IMGPROXY"; do
     if command -v lsof >/dev/null 2>&1 && lsof -nP -iTCP:"$p" -sTCP:LISTEN >/dev/null 2>&1; then
       echo "LISTEN :$p — $(lsof -nP -iTCP:"$p" -sTCP:LISTEN | tail -n +2 | awk '{print $1,$2}' | head -1)"
     else
@@ -164,6 +166,7 @@ print_ports() {
   MinIO console   localhost:${LOCAL_MINIO_CONSOLE}
   Elasticsearch   localhost:${LOCAL_ES}
   Keycloak        localhost:${LOCAL_KC}
+  imgproxy        localhost:${LOCAL_IMGPROXY}
 EOF
 }
 

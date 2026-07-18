@@ -529,7 +529,7 @@ export function MediaLibraryPage() {
                     }}
                   >
                     {src ? (
-                      <img src={src} alt={photo.caption ?? ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                      <img src={src} alt={photo.caption ?? ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} onError={(e) => { if (photo.url && e.currentTarget.src !== photo.url) e.currentTarget.src = photo.url; }} />
                     ) : (
                       // Skeleton shimmer when no URL available (MinIO not configured)
                       <div className="ml-skel" style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -651,7 +651,7 @@ export function MediaLibraryPage() {
               {/* Photo */}
               <div style={{ flex: 1, background: "#111", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
                 {src ? (
-                  <img src={src} alt={lightboxPhoto.caption ?? ""} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", display: "block" }} />
+                  <img src={src} alt={lightboxPhoto.caption ?? ""} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", display: "block" }} onError={(e) => { if (lightboxPhoto.thumbUrl && e.currentTarget.src !== lightboxPhoto.thumbUrl) e.currentTarget.src = lightboxPhoto.thumbUrl; }} />
                 ) : thumbSrc ? (
                   <img src={thumbSrc} alt={lightboxPhoto.caption ?? ""} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", display: "block" }} />
                 ) : (

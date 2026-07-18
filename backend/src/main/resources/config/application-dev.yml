@@ -112,5 +112,7 @@ giapha:
     secret-key: ${MINIO_SECRET_KEY:changeme}
     bucket: ${MINIO_BUCKET:giapha-media}
   imgproxy:
-    base-url: ${IMGPROXY_BASE_URL:http://localhost:8888}
+    # Tunnel DEV: localhost:18888 — khớp port gph-imgproxy trên server remote
+    base-url: ${IMGPROXY_BASE_URL:http://localhost:18888}
+    bucket: ${MINIO_BUCKET:giapha-media}
     signing-enabled: ${IMGPROXY_SIGNING_ENABLED:false}
