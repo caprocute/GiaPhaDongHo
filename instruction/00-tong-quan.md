@@ -57,6 +57,10 @@ Xây dựng **nền tảng gia phả số** cho dòng họ Việt Nam:
 | TK-11 | 11-quy-trinh-phat-trien-voi-ai.md | Áp dụng mô hình PDF: tokens→gates→learn loop, skills |
 | TK-12 | 12-cau-hinh-ha-tang-cicd.md | Cấu hình máy chủ dev/staging/prod, GitHub Actions CI/CD chi tiết |
 | TK-13 | 13-ke-hoach-thuc-hien.md | Kế hoạch R0→R2 + **RP production**; hàng đợi F5/F7/F9/SaaS sau go-live |
+| — | `SRS/12b-admin-quy-cong-duc.md` | SRS quỹ công đức: chiến dịch gây quỹ, ghi nhận đóng góp, bảng vàng |
+| — | `SRS/12c-admin-khuyen-hoc.md` | SRS khuyến học: hồ sơ thành tích, đợt trao, trao suất |
+| — | `SRS/12d-su-kien-dong-ho.md` | SRS sự kiện dòng họ (ClanEvent): CRUD, chi phí sự kiện, RSVP |
+| — | `SRS/12e-so-quy-thu-chi.md` | SRS sổ quỹ thu–chi thống nhất: FundExpense, fund_ledger_v, UI sổ quỹ |
 | — | `SRS/12b-admin-cau-hinh.md` | SRS cấu hình hệ thống (RP.1) |
 | — | `SRS/15-production-go-live.md` | SRS production / go-live (RP.2–6) |
 | TK-14 | 14-glossary.md | Thuật ngữ VN ↔ code |
@@ -65,6 +69,6 @@ Xây dựng **nền tảng gia phả số** cho dòng họ Việt Nam:
 ## 5. Phạm vi phát hành (đề xuất)
 
 - **R1 (lõi):** Gia phả + phả đồ + ngày giỗ + CMS tin tức + tìm kiếm + tài khoản/2FA + CRM lõi + triển khai Compose.
-- **R2 (mở rộng):** Công đức/quỹ, sự kiện & điểm danh, cổng tự khai + duyệt, thông báo Zalo/email, xuất PDF sách.
+- **R2 (mở rộng):** Công đức/quỹ (SRS-12b), sự kiện & điểm danh (SRS-12d), sổ quỹ thu–chi (SRS-12e), khuyến học (SRS-12c), cổng tự khai + duyệt, thông báo Zalo/email, xuất PDF sách.
 - **RP (production):** Hoàn thiện cấu hình đầy đủ, parity mockup/SRS, SMTP/PII thật, bỏ stub/demo đường chính, E2E + backup/restore + go-live — chi tiết [13-ke-hoach-thuc-hien.md](13-ke-hoach-thuc-hien.md) §RP.
 - **Hàng đợi sau go-live:** Bản đồ mộ (F5), di sản Hán-Nôm (F7), trợ lý AI (F9), multi-tenant SaaS — không chặn phát hành.

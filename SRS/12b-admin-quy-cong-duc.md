@@ -1,7 +1,7 @@
 # SRS-12b — Quản trị quỹ công đức (Admin + Portal)
 
-**Version:** 1.0 · 2026-07-17  
-**Liên kết:** FR-07.1–07.7 (SRS-07), FR-12a (admin soan pha), TK-06 (security)
+**Version:** 1.1 · 2026-07-19 (bổ sung bên CHI, cross-ref sổ quỹ)  
+**Liên kết:** FR-07.1–07.7 (SRS-07), FR-12a (admin soan pha), TK-06 (security), SRS-12c (khuyến học), SRS-12d (sự kiện), SRS-12e (sổ quỹ thu–chi)
 
 ---
 
@@ -195,6 +195,34 @@ Ghi chú    [Thay mặt chi họ Hoàng Đông...  ]
 
 KPI card "Quỹ công đức" (đã có trong DashboardPage) hiển thị chiến dịch open đầu tiên.
 Mở rộng tương lai: Panel riêng với progress bars cho tất cả chiến dịch đang mở.
+
+---
+
+## 7b. Bên CHI (Expense) — liên kết với SRS-12e
+
+Campaign detail panel thêm tab **"Sổ thu–chi"** — xem SRS-12e §6.1:
+
+- Hiển thị `fund_ledger_v` filter theo `campaign_id`: tất cả thu (contributions confirmed) + chi (awards, event expenses, fund expenses).
+- KPI inline: **Tổng thu / Tổng chi / Số dư**.
+- Nút **[+ Ghi khoản chi]** → tạo `FundExpense` gắn campaign này (SRS-12e §2).
+- Tab "Chờ duyệt" (badge đếm): FundExpense pending + ClanEventExpense pending của sự kiện liên kết campaign này.
+
+**Kết nối tới các module:**
+
+| Từ campaign detail | Đến | Điều kiện |
+|--------------------|-----|-----------|
+| Tab "Sự kiện" | Danh sách ClanEvent.linkedCampaignId = this | Luôn hiện (có thể rỗng) |
+| Tab "Khuyến học" | Danh sách AwardRound.fundCampaignId = this | Chỉ khi purpose = scholarship |
+| Nút [Xem sổ đầy đủ →] | Màn Sổ quỹ (SRS-12e) filter campaign này | Luôn hiện |
+
+**Số dư thực tế campaign (thêm vào Campaign header §5.3):**
+```
+127,5 tr đã thu / Mục tiêu: 200 tr
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░ 63%  ·  84 người
+Đã chi: 35,2 tr  ·  Số dư: 92,3 tr  [Xem sổ →]
+```
+
+`raisedAmount` (thu) và `totalExpenses` (chi) lấy từ `fund_ledger_v` — không lưu riêng trong campaign.
 
 ---
 
