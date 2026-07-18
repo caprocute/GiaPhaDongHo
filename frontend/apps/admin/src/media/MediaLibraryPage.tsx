@@ -49,7 +49,8 @@ type Tab = "photos" | "albums" | "upload";
 type AlbumRow = MediaAlbumDto & Record<string, unknown>;
 type UploadItem = { file: File; status: "pending" | "uploading" | "done" | "error"; result?: UploadResponse; error?: string };
 
-const PHOTO_PAGE = 24;
+const PAGE_SIZE_OPTIONS = [12, 24, 48, 96] as const;
+const DEFAULT_PAGE_SIZE = 24;
 const ALBUM_LIMIT = 200;
 
 export function MediaLibraryPage() {
@@ -71,6 +72,7 @@ export function MediaLibraryPage() {
   const [activeAlbumId, setActiveAlbumId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [photoPage, setPhotoPage] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
   // ── Selection ──
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -128,13 +130,13 @@ export function MediaLibraryPage() {
   }, [getAccessToken]);
 
   const loadPhotos = useCallback(
-    async (albumId: number | null, page: number) => {
+    async (albumId: number | null, page: number, size: number) => {
       setLoadingPhotos(true);
       setError(null);
       setPhotos([]); // clear ngay để tránh hiển thị kết quả cũ
       try {
         const token = await getAccessToken();
-        const res = await listGalleryPhotos(token, { albumId, page, size: PHOTO_PAGE });
+        const res = await listGalleryPhotos(token, { albumId, page, size });
         setPhotos(res.content);
         setPhotoTotal(res.totalElements);
         setPhotoTotalPages(Math.max(1, res.totalPages));
@@ -155,17 +157,24 @@ export function MediaLibraryPage() {
     setSearchQuery("");
   }
 
-  // Page change — keep album, just change page
+  // Page change — keep album + pageSize, chỉ đổi trang
   function handlePageChange(newPage: number) {
     setPhotoPage(newPage);
     setSelectedIds(new Set());
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Trigger photo reload whenever albumId or page changes
+  // Page size change — reset về trang 1
+  function handlePageSizeChange(size: number) {
+    setPageSize(size);
+    setPhotoPage(0);
+    setSelectedIds(new Set());
+  }
+
+  // Trigger photo reload whenever albumId, page, or pageSize changes
   useEffect(() => {
-    void loadPhotos(activeAlbumId, photoPage);
-  }, [activeAlbumId, photoPage, loadPhotos]);
+    void loadPhotos(activeAlbumId, photoPage, pageSize);
+  }, [activeAlbumId, photoPage, pageSize, loadPhotos]);
 
   // Load albums once on mount
   useEffect(() => {
@@ -244,7 +253,7 @@ export function MediaLibraryPage() {
     setUploadCaption("");
     const done = uploadQueue.filter((u) => u.status === "done").length;
     setToast(`Hoàn tất: ${done}/${items.length} ảnh.`);
-    await loadPhotos(activeAlbumId, photoPage);
+    await loadPhotos(activeAlbumId, photoPage, pageSize);
     await loadAlbums();
   }
 
@@ -268,7 +277,7 @@ export function MediaLibraryPage() {
       setLightboxPhoto(null);
       setSelectedIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
       setToast("Đã xóa ảnh.");
-      await loadPhotos(activeAlbumId, photoPage);
+      await loadPhotos(activeAlbumId, photoPage, pageSize);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Xóa ảnh thất bại.");
     } finally {
@@ -298,7 +307,7 @@ export function MediaLibraryPage() {
       }
       setEditPhoto(null);
       setToast("Đã cập nhật ảnh.");
-      await loadPhotos(activeAlbumId, photoPage);
+      await loadPhotos(activeAlbumId, photoPage, pageSize);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Cập nhật ảnh thất bại.");
     } finally {
@@ -315,7 +324,7 @@ export function MediaLibraryPage() {
       await Promise.all([...selectedIds].map((id) => deleteMediaPhoto(id, token)));
       setSelectedIds(new Set());
       setToast(`Đã xóa ${selectedIds.size} ảnh.`);
-      await loadPhotos(activeAlbumId, photoPage);
+      await loadPhotos(activeAlbumId, photoPage, pageSize);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Xóa thất bại.");
     } finally {
@@ -540,7 +549,7 @@ export function MediaLibraryPage() {
             <span style={{ fontSize: "13px", color: "var(--color-text-muted)", marginLeft: "auto" }}>
               {loadingPhotos ? "Đang tải…" : `${photoTotal.toLocaleString("vi-VN")} ảnh · trang ${photoPage + 1}/${photoTotalPages}`}
             </span>
-            <button type="button" onClick={() => void loadPhotos(activeAlbumId, photoPage)} aria-label="Tải lại" style={{ background: "var(--color-surface-card)", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-sm)", padding: "6px 10px", cursor: "pointer", fontSize: "14px", color: "var(--color-text-muted)" }}>↻</button>
+            <button type="button" onClick={() => void loadPhotos(activeAlbumId, photoPage, pageSize)} aria-label="Tải lại" style={{ background: "var(--color-surface-card)", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-sm)", padding: "6px 10px", cursor: "pointer", fontSize: "14px", color: "var(--color-text-muted)" }}>↻</button>
           </div>
 
           {/* Selection bar */}
@@ -556,7 +565,7 @@ export function MediaLibraryPage() {
           {/* Photo grid */}
           {loadingPhotos ? (
             <div style={{ display: "grid", gap: "var(--spacing-sm)", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))" }}>
-              {Array.from({ length: PHOTO_PAGE }).map((_, i) => (
+              {Array.from({ length: pageSize }).map((_, i) => (
                 <div key={i} className="ml-skel" style={{ aspectRatio: "1", borderRadius: "var(--radius-sm)" }} />
               ))}
             </div>
@@ -639,14 +648,27 @@ export function MediaLibraryPage() {
             </div>
           )}
 
-          {/* Pagination */}
-          {photoTotalPages > 1 && (
-            <div style={{ display: "flex", justifyContent: "center", gap: "var(--spacing-xs)", marginTop: "var(--spacing-lg)", alignItems: "center", flexWrap: "wrap" }}>
-              <Button type="button" variant="secondary" disabled={photoPage === 0 || loadingPhotos} onClick={() => handlePageChange(0)}>«</Button>
-              <Button type="button" variant="secondary" disabled={photoPage === 0 || loadingPhotos} onClick={() => handlePageChange(photoPage - 1)}>‹ Trước</Button>
+          {/* Pagination — luôn hiện để có thể đổi pageSize */}
+          <div style={{ display: "flex", justifyContent: "center", gap: "var(--spacing-xs)", marginTop: "var(--spacing-lg)", alignItems: "center", flexWrap: "wrap", paddingBottom: "var(--spacing-sm)" }}>
+            {/* Page size selector */}
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-xs)", marginRight: "var(--spacing-sm)", background: "var(--color-surface-card)", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-sm)", padding: "2px 6px 2px 10px" }}>
+              <span style={{ fontSize: "12px", color: "var(--color-text-muted)", whiteSpace: "nowrap" }}>Số ảnh/trang:</span>
+              {PAGE_SIZE_OPTIONS.map((s) => (
+                <button key={s} type="button" disabled={loadingPhotos}
+                  onClick={() => handlePageSizeChange(s)}
+                  style={{ minWidth: 32, height: 26, borderRadius: "var(--radius-sm)", border: "1px solid", borderColor: s === pageSize ? "var(--color-primary)" : "transparent", background: s === pageSize ? "var(--color-primary)" : "none", color: s === pageSize ? "#fff" : "var(--color-text-muted)", fontSize: "12px", fontWeight: 700, cursor: "pointer", padding: "0 6px" }}
+                >{s}</button>
+              ))}
+            </div>
 
-              {/* Page number pills */}
-              {Array.from({ length: photoTotalPages }, (_, i) => i)
+            {/* Nav buttons + page pills */}
+            <Button type="button" variant="secondary" disabled={photoPage === 0 || loadingPhotos} onClick={() => handlePageChange(0)}>«</Button>
+            <Button type="button" variant="secondary" disabled={photoPage === 0 || loadingPhotos} onClick={() => handlePageChange(photoPage - 1)}>‹</Button>
+
+            {photoTotalPages <= 1 ? (
+              <span style={{ minWidth: 32, height: 32, borderRadius: "var(--radius-sm)", border: "1px solid var(--color-primary)", background: "var(--color-primary)", color: "#fff", fontSize: "13px", fontWeight: 600, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>1</span>
+            ) : (
+              Array.from({ length: photoTotalPages }, (_, i) => i)
                 .filter((i) => i === 0 || i === photoTotalPages - 1 || Math.abs(i - photoPage) <= 2)
                 .reduce<(number | "…")[]>((acc, cur, idx, arr) => {
                   if (idx > 0) {
@@ -658,7 +680,7 @@ export function MediaLibraryPage() {
                 }, [])
                 .map((item, i) =>
                   item === "…" ? (
-                    <span key={`e-${i}`} style={{ fontSize: "13px", color: "var(--color-text-muted)", padding: "0 4px" }}>…</span>
+                    <span key={`e-${i}`} style={{ fontSize: "13px", color: "var(--color-text-muted)", padding: "0 2px" }}>…</span>
                   ) : (
                     <button key={item} type="button" disabled={loadingPhotos}
                       onClick={() => handlePageChange(item as number)}
@@ -666,15 +688,15 @@ export function MediaLibraryPage() {
                     >{(item as number) + 1}</button>
                   )
                 )
-              }
+            )}
 
-              <Button type="button" variant="secondary" disabled={photoPage >= photoTotalPages - 1 || loadingPhotos} onClick={() => handlePageChange(photoPage + 1)}>Tiếp ›</Button>
-              <Button type="button" variant="secondary" disabled={photoPage >= photoTotalPages - 1 || loadingPhotos} onClick={() => handlePageChange(photoTotalPages - 1)}>»</Button>
-              <span style={{ fontSize: "12px", color: "var(--color-text-muted)", marginLeft: "var(--spacing-sm)" }}>
-                {photoTotal.toLocaleString("vi-VN")} ảnh · {PHOTO_PAGE}/trang
-              </span>
-            </div>
-          )}
+            <Button type="button" variant="secondary" disabled={photoPage >= photoTotalPages - 1 || loadingPhotos} onClick={() => handlePageChange(photoPage + 1)}>›</Button>
+            <Button type="button" variant="secondary" disabled={photoPage >= photoTotalPages - 1 || loadingPhotos} onClick={() => handlePageChange(photoTotalPages - 1)}>»</Button>
+
+            <span style={{ fontSize: "12px", color: "var(--color-text-muted)", marginLeft: "var(--spacing-xs)", whiteSpace: "nowrap" }}>
+              {loadingPhotos ? "…" : `${photoTotal.toLocaleString("vi-VN")} ảnh · trang ${photoPage + 1}/${photoTotalPages}`}
+            </span>
+          </div>
         </>
       )}
 
