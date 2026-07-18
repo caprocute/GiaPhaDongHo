@@ -1,5 +1,8 @@
 import { apiFetch, apiFetchPage, type PageResult } from "./http";
 
+const MINIO_PUBLIC =
+  ((import.meta.env as Record<string, unknown>)["VITE_MINIO_PUBLIC_URL"] as string | undefined)?.replace(/\/$/, "") ?? "";
+
 export type MediaAlbumDto = {
   id?: number;
   title: string;
@@ -60,6 +63,37 @@ export async function listMediaPhotos(
 
 export async function deleteMediaPhoto(id: number, token: string | null): Promise<void> {
   await apiFetch<void>(`/api/media-photos/${id}`, { method: "DELETE", token });
+}
+
+export function getPhotoUrl(objectKey: string): string {
+  return MINIO_PUBLIC ? `${MINIO_PUBLIC}/${objectKey}` : "";
+}
+
+export function getAlbumCoverUrl(album: MediaAlbumDto): string {
+  return album.coverObjectKey ? getPhotoUrl(album.coverObjectKey) : "";
+}
+
+export async function listMediaPhotosFiltered(
+  token: string | null,
+  opts: { albumId?: number | null; page?: number; size?: number } = {},
+): Promise<PageResult<MediaPhotoDto>> {
+  const q = opts.albumId != null ? `&albumId.equals=${opts.albumId}` : "";
+  return apiFetchPage<MediaPhotoDto>(
+    `/api/media-photos?eagerload=true&sort=id,desc${q}`,
+    { token, page: opts.page ?? 0, size: opts.size ?? 24 },
+  );
+}
+
+export async function updateMediaAlbum(
+  id: number,
+  dto: MediaAlbumDto,
+  token: string | null,
+): Promise<MediaAlbumDto> {
+  return apiFetch<MediaAlbumDto>(`/api/media-albums/${id}`, {
+    method: "PUT",
+    body: { ...dto, id },
+    token,
+  });
 }
 
 export async function uploadMediaPhoto(
