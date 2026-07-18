@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@giapha/auth";
 import {
   Alert,
-  Badge,
   Button,
   FormField,
   Input,
@@ -17,18 +16,17 @@ import {
   deleteMediaAlbum,
   deleteMediaPhoto,
   getAlbumCoverUrl,
-  getPhotoUrl,
+  listGalleryPhotos,
   listMediaAlbums,
-  listMediaPhotosFiltered,
   updateMediaAlbum,
   uploadMediaPhoto,
+  type GalleryPhotoDto,
   type MediaAlbumDto,
-  type MediaPhotoDto,
   type UploadResponse,
 } from "../api/mediaApi";
 import { AdminPageHeader } from "../components/AdminPageHeader";
 
-// ── CSS injection (hover effects) ──────────────────────────────────────────
+// ── CSS injection ──────────────────────────────────────────────────────────
 let _mlCss = false;
 function ensureMediaCss() {
   if (_mlCss || typeof document === "undefined") return;
@@ -40,12 +38,12 @@ function ensureMediaCss() {
     .ml-album-card:hover{border-color:var(--color-primary)!important;box-shadow:var(--shadow-md)!important}
     .ml-drop:hover,.ml-drop.over{border-color:var(--color-primary)!important;background:color-mix(in srgb,var(--color-primary) 6%,transparent)!important}
     @keyframes ml-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-    .ml-skel{animation:ml-shimmer 1.5s ease infinite;background:linear-gradient(90deg,var(--color-surface-raised) 0%,var(--color-surface-card) 50%,var(--color-surface-raised) 100%);background-size:200% 100%}
+    .ml-skel{animation:ml-shimmer 1.5s ease infinite;background-size:200% 100%;background-image:linear-gradient(90deg,var(--color-surface-raised) 0%,var(--color-surface-card) 50%,var(--color-surface-raised) 100%)}
   `;
   document.head.appendChild(s);
 }
 
-// ── Types ───────────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────
 type Tab = "photos" | "albums" | "upload";
 type AlbumRow = MediaAlbumDto & Record<string, unknown>;
 
@@ -56,12 +54,12 @@ export function MediaLibraryPage() {
   ensureMediaCss();
   const { getAccessToken } = useAuth();
 
-  // ── Tab / view ──
+  // ── Tab ──
   const [tab, setTab] = useState<Tab>("photos");
 
   // ── Data ──
   const [albums, setAlbums] = useState<MediaAlbumDto[]>([]);
-  const [photos, setPhotos] = useState<MediaPhotoDto[]>([]);
+  const [photos, setPhotos] = useState<GalleryPhotoDto[]>([]);
   const [photoTotal, setPhotoTotal] = useState(0);
   const [photoTotalPages, setPhotoTotalPages] = useState(1);
 
@@ -74,7 +72,7 @@ export function MediaLibraryPage() {
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   // ── Lightbox ──
-  const [lightboxPhoto, setLightboxPhoto] = useState<MediaPhotoDto | null>(null);
+  const [lightboxPhoto, setLightboxPhoto] = useState<GalleryPhotoDto | null>(null);
   const [lightboxIdx, setLightboxIdx] = useState(0);
 
   // ── Album modals ──
@@ -97,7 +95,6 @@ export function MediaLibraryPage() {
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
-  // Auto-dismiss toast
   useEffect(() => {
     if (!toast) return;
     const t = window.setTimeout(() => setToast(null), 3000);
@@ -117,7 +114,7 @@ export function MediaLibraryPage() {
       setError(null);
       try {
         const token = await getAccessToken();
-        const res = await listMediaPhotosFiltered(token, { albumId, page, size: PHOTO_PAGE });
+        const res = await listGalleryPhotos(token, { albumId, page, size: PHOTO_PAGE });
         setPhotos(res.content);
         setPhotoTotal(res.totalElements);
         setPhotoTotalPages(Math.max(1, res.totalPages));
@@ -143,7 +140,7 @@ export function MediaLibraryPage() {
     setSelectedIds(new Set());
   }, [activeAlbumId]);
 
-  // ── Lightbox keyboard nav ──────────────────────────────────────────────
+  // ── Lightbox keyboard ──────────────────────────────────────────────────
   const lightboxPrev = useCallback(() => {
     const idx = Math.max(0, lightboxIdx - 1);
     setLightboxPhoto(photos[idx] ?? null);
@@ -171,10 +168,11 @@ export function MediaLibraryPage() {
   const filteredPhotos = useMemo(() => {
     if (!searchQuery.trim()) return photos;
     const q = searchQuery.toLowerCase();
-    return photos.filter(
-      (p) => p.caption?.toLowerCase().includes(q) || p.album?.title?.toLowerCase().includes(q),
-    );
-  }, [photos, searchQuery]);
+    return photos.filter((p) => {
+      const album = albums.find((a) => a.id === p.albumId);
+      return p.caption?.toLowerCase().includes(q) || album?.title?.toLowerCase().includes(q);
+    });
+  }, [photos, searchQuery, albums]);
 
   const albumOptions = useMemo(
     () => [
@@ -235,9 +233,7 @@ export function MediaLibraryPage() {
     try {
       const token = await getAccessToken();
       await createMediaAlbum({ title: newTitle.trim(), description: newDesc.trim() || null }, token);
-      setNewTitle("");
-      setNewDesc("");
-      setShowCreateAlbum(false);
+      setNewTitle(""); setNewDesc(""); setShowCreateAlbum(false);
       setToast("Đã tạo album.");
       await loadAlbums();
     } catch (e) {
@@ -264,7 +260,7 @@ export function MediaLibraryPage() {
   }
 
   async function doDeleteAlbum(id: number, title: string) {
-    if (!confirm(`Xóa album «${title}»? Ảnh trong album sẽ mất liên kết nhưng không bị xóa.`)) return;
+    if (!confirm(`Xóa album «${title}»? Ảnh không bị xóa nhưng mất liên kết.`)) return;
     setBusy(true);
     try {
       const token = await getAccessToken();
@@ -310,18 +306,13 @@ export function MediaLibraryPage() {
       width: 72,
       render: (row) => {
         const url = getAlbumCoverUrl(row as MediaAlbumDto);
+        const letter = (row.title as string).charAt(0).toUpperCase();
         return url ? (
-          <img
-            src={url}
-            alt=""
-            style={{ width: 48, height: 48, objectFit: "cover", borderRadius: "var(--radius-sm)", display: "block" }}
-          />
+          <img src={url} alt="" style={{ width: 48, height: 48, objectFit: "cover", borderRadius: "var(--radius-sm)", display: "block" }} />
         ) : (
-          <div style={{
-            width: 48, height: 48, borderRadius: "var(--radius-sm)",
-            background: "var(--color-surface-raised)",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem",
-          }}>📁</div>
+          <div style={{ width: 48, height: 48, borderRadius: "var(--radius-sm)", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.2rem", color: "#fff" }}>
+            {letter}
+          </div>
         );
       },
     },
@@ -345,31 +336,9 @@ export function MediaLibraryPage() {
       width: 220,
       render: (row) => (
         <div style={{ display: "flex", gap: "var(--spacing-xs)" }}>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => { setActiveAlbumId(row.id as number); setTab("photos"); }}
-          >
-            Xem ảnh
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              setEditAlbum(row as MediaAlbumDto);
-              setEditTitle(row.title as string);
-              setEditDesc((row.description as string | null | undefined) ?? "");
-            }}
-          >
-            Sửa
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => void doDeleteAlbum(row.id as number, row.title as string)}
-          >
-            Xóa
-          </Button>
+          <Button type="button" variant="secondary" onClick={() => { setActiveAlbumId(row.id as number); setTab("photos"); }}>Xem ảnh</Button>
+          <Button type="button" variant="secondary" onClick={() => { setEditAlbum(row as MediaAlbumDto); setEditTitle(row.title as string); setEditDesc((row.description as string | null | undefined) ?? ""); }}>Sửa</Button>
+          <Button type="button" variant="secondary" onClick={() => void doDeleteAlbum(row.id as number, row.title as string)}>Xóa</Button>
         </div>
       ),
     },
@@ -383,12 +352,8 @@ export function MediaLibraryPage() {
         description="Quản lý album, ảnh sự kiện, tư liệu lịch sử dòng họ — FR-08."
         actions={
           <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
-            <Button type="button" variant="secondary" onClick={() => setShowCreateAlbum(true)}>
-              📁 Album mới
-            </Button>
-            <Button type="button" onClick={() => setTab("upload")}>
-              ⬆ Tải ảnh lên
-            </Button>
+            <Button type="button" variant="secondary" onClick={() => setShowCreateAlbum(true)}>+ Album mới</Button>
+            <Button type="button" onClick={() => setTab("upload")}>Tải ảnh lên</Button>
           </div>
         }
       />
@@ -396,20 +361,17 @@ export function MediaLibraryPage() {
       {error ? <Alert title="Lỗi" variant="error">{error}</Alert> : null}
       {toast ? <Alert title="Xong" variant="success">{toast}</Alert> : null}
 
-      {/* ── Stats row ── */}
+      {/* ── Stats ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "var(--spacing-sm)", marginBottom: "var(--spacing-lg)" }}>
         {[
-          { label: "Tổng ảnh", value: photoTotal, sub: "trong thư viện", color: "var(--color-primary)" },
+          { label: "Tổng ảnh", value: photoTotal, sub: "trong thư viện", accent: true },
           { label: "Số album", value: albums.length, sub: "album sự kiện & tư liệu" },
           { label: "Hiển thị", value: filteredPhotos.length, sub: activeAlbumId ? "ảnh trong album" : "ảnh trang này" },
           { label: "Đã chọn", value: selectedIds.size, sub: selectedIds.size > 0 ? "→ thanh thao tác" : "click ảnh để chọn" },
         ].map((c) => (
-          <div key={c.label} style={{
-            background: "var(--color-surface-card)", border: "1px solid var(--color-border-subtle)",
-            borderRadius: "var(--radius-md)", padding: "var(--spacing-md)", boxShadow: "var(--shadow-sm)",
-          }}>
+          <div key={c.label} style={{ background: "var(--color-surface-card)", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-md)", padding: "var(--spacing-md)", boxShadow: "var(--shadow-sm)" }}>
             <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".6px", color: "var(--color-text-muted)", marginBottom: "var(--spacing-xs)" }}>{c.label}</div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: c.color ?? "var(--color-text-default)" }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "22px", fontWeight: 700, color: c.accent ? "var(--color-primary)" : "var(--color-text-default)" }}>
               {c.value.toLocaleString("vi-VN")}
             </div>
             <div style={{ fontSize: "11px", color: "var(--color-text-muted)", marginTop: 2 }}>{c.sub}</div>
@@ -419,39 +381,31 @@ export function MediaLibraryPage() {
 
       {/* ── Tab bar ── */}
       <div style={{ display: "flex", gap: 4, background: "var(--color-surface-raised)", padding: 5, borderRadius: "var(--radius-md)", marginBottom: "var(--spacing-lg)", width: "fit-content" }} role="tablist">
-        {([ ["photos", "🖼 Ảnh"], ["albums", "📁 Album"], ["upload", "⬆ Tải lên"] ] as [Tab, string][]).map(([k, lbl]) => (
+        {([["photos", "Ảnh"], ["albums", "Album"], ["upload", "Tải lên"]] as [Tab, string][]).map(([k, lbl]) => (
           <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-            style={{
-              padding: "7px 18px", borderRadius: "var(--radius-sm)", border: "none",
-              background: tab === k ? "var(--color-surface-card)" : "none",
-              boxShadow: tab === k ? "var(--shadow-sm)" : "none",
-              fontSize: "13px", fontWeight: 600, cursor: "pointer",
-              color: tab === k ? "var(--color-text-default)" : "var(--color-text-muted)",
-            }}
+            style={{ padding: "7px 20px", borderRadius: "var(--radius-sm)", border: "none", background: tab === k ? "var(--color-surface-card)" : "none", boxShadow: tab === k ? "var(--shadow-sm)" : "none", fontSize: "13px", fontWeight: 600, cursor: "pointer", color: tab === k ? "var(--color-text-default)" : "var(--color-text-muted)" }}
           >{lbl}</button>
         ))}
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* TAB: ẢNH                                                          */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* ═══ TAB: ẢNH ══════════════════════════════════════════════════════ */}
       {tab === "photos" && (
         <>
           {/* Album strip */}
           <div style={{ display: "flex", gap: "var(--spacing-sm)", overflowX: "auto", paddingBottom: "var(--spacing-xs)", marginBottom: "var(--spacing-md)" }}>
-            {/* All-photos card */}
             {([
               { id: null as number | null, title: "Tất cả ảnh", coverObjectKey: null as string | null },
               ...albums.map((a) => ({ id: a.id ?? null, title: a.title, coverObjectKey: a.coverObjectKey ?? null })),
-            ]).map((item) => {
+            ]).map((item, i) => {
               const isActive = activeAlbumId === item.id;
-              const url = item.coverObjectKey ? getPhotoUrl(item.coverObjectKey) : "";
+              // Build cover URL from objectKey if present
+              const url = item.coverObjectKey ? getAlbumCoverUrl({ id: item.id ?? undefined, title: item.title, coverObjectKey: item.coverObjectKey }) : "";
+              const letter = item.title.charAt(0).toUpperCase();
               return (
                 <div
                   key={item.id ?? "all"}
                   className="ml-album-card"
-                  role="button" tabIndex={0}
-                  aria-pressed={isActive}
+                  role="button" tabIndex={0} aria-pressed={isActive}
                   onClick={() => setActiveAlbumId(item.id)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setActiveAlbumId(item.id); }}
                   style={{
@@ -461,11 +415,22 @@ export function MediaLibraryPage() {
                     background: "var(--color-surface-card)",
                   }}
                 >
-                  <div style={{ height: 80, background: "var(--color-surface-raised)", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {/* Cover area */}
+                  <div style={{ height: 80, overflow: "hidden", position: "relative" }}>
                     {url ? (
-                      <img src={url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      <img src={url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    ) : item.id == null ? (
+                      // "All photos" — mosaic placeholder
+                      <div style={{ width: "100%", height: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2, padding: 2, background: "var(--color-surface-raised)" }}>
+                        {[0,1,2,3].map((j) => (
+                          <div key={j} className="ml-skel" style={{ borderRadius: 2, background: "var(--color-surface-raised)" }} />
+                        ))}
+                      </div>
                     ) : (
-                      <span style={{ fontSize: "1.8rem", opacity: 0.4 }}>{item.id == null ? "🗃" : "📁"}</span>
+                      // Album — initial letter on primary background
+                      <div style={{ width: "100%", height: "100%", background: `color-mix(in srgb, var(--color-primary) ${60 - (i % 4) * 8}%, var(--color-surface-raised))`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "2rem", color: "var(--color-on-primary, #fff)", opacity: 0.9 }}>
+                        {letter}
+                      </div>
                     )}
                   </div>
                   <div style={{ padding: "6px 8px", borderTop: "1px solid var(--color-border-subtle)" }}>
@@ -475,6 +440,7 @@ export function MediaLibraryPage() {
                 </div>
               );
             })}
+
             {/* Add album */}
             <div
               className="ml-album-card"
@@ -490,63 +456,31 @@ export function MediaLibraryPage() {
                 background: "var(--color-surface-card)", transition: "all 0.15s",
               }}
             >
-              <span style={{ fontSize: "1.5rem", opacity: 0.5 }}>+</span>
-              <span>Tạo album</span>
+              <span style={{ fontSize: "1.6rem", fontWeight: 300, color: "var(--color-text-muted)", lineHeight: 1 }}>+</span>
+              <span style={{ fontWeight: 600 }}>Tạo album</span>
             </div>
           </div>
 
           {/* Toolbar */}
           <div style={{ display: "flex", gap: "var(--spacing-sm)", alignItems: "center", marginBottom: "var(--spacing-md)", flexWrap: "wrap" }}>
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm chú thích, album…"
-              style={{ width: 220 }}
-              aria-label="Tìm ảnh"
-            />
+            <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Tìm chú thích, album…" style={{ width: 220 }} aria-label="Tìm ảnh" />
             {activeAlbumId != null && (
-              <Badge tone="default">
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, padding: "3px 10px", background: "color-mix(in srgb,var(--color-primary) 12%,var(--color-surface-card))", borderRadius: "var(--radius-sm)", fontSize: "12px", fontWeight: 600, color: "var(--color-primary)" }}>
                 {albums.find((a) => a.id === activeAlbumId)?.title ?? "Album"}
-                <button
-                  type="button"
-                  onClick={() => setActiveAlbumId(null)}
-                  aria-label="Bỏ lọc album"
-                  style={{ background: "none", border: "none", cursor: "pointer", marginLeft: 4, color: "inherit" }}
-                >✕</button>
-              </Badge>
+                <button type="button" onClick={() => setActiveAlbumId(null)} aria-label="Bỏ lọc" style={{ background: "none", border: "none", cursor: "pointer", lineHeight: 1, color: "inherit", padding: 0, marginLeft: 2 }}>✕</button>
+              </span>
             )}
-            <span style={{ fontSize: "13px", color: "var(--color-text-muted)", marginLeft: "auto" }}>
-              {filteredPhotos.length} ảnh{activeAlbumId ? " trong album" : ""}
-            </span>
-            <Button type="button" variant="secondary" onClick={() => void reload()} aria-label="Tải lại">↻</Button>
+            <span style={{ fontSize: "13px", color: "var(--color-text-muted)", marginLeft: "auto" }}>{filteredPhotos.length} ảnh</span>
+            <button type="button" onClick={() => void reload()} aria-label="Tải lại" style={{ background: "var(--color-surface-card)", border: "1px solid var(--color-border-subtle)", borderRadius: "var(--radius-sm)", padding: "6px 10px", cursor: "pointer", fontSize: "14px", color: "var(--color-text-muted)" }}>↻</button>
           </div>
 
           {/* Selection bar */}
           {selectedIds.size > 0 && (
-            <div style={{
-              display: "flex", alignItems: "center", gap: "var(--spacing-sm)",
-              padding: "var(--spacing-sm) var(--spacing-md)",
-              background: "color-mix(in srgb,var(--color-primary) 8%,var(--color-surface-card))",
-              border: "1px solid color-mix(in srgb,var(--color-primary) 30%,var(--color-border-subtle))",
-              borderRadius: "var(--radius-md)", marginBottom: "var(--spacing-md)",
-            }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--spacing-sm)", padding: "var(--spacing-sm) var(--spacing-md)", background: "color-mix(in srgb,var(--color-primary) 8%,var(--color-surface-card))", border: "1px solid color-mix(in srgb,var(--color-primary) 30%,var(--color-border-subtle))", borderRadius: "var(--radius-md)", marginBottom: "var(--spacing-md)" }}>
               <span style={{ flex: 1, fontSize: "13px", fontWeight: 600 }}>Đã chọn {selectedIds.size} ảnh</span>
               <Button type="button" variant="secondary" onClick={() => setSelectedIds(new Set())}>Bỏ chọn</Button>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setSelectedIds(new Set(filteredPhotos.map((p) => p.id!).filter(Boolean)))}
-              >
-                Chọn tất cả
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={busy}
-                onClick={() => void doDeleteSelected()}
-              >
-                🗑 Xóa {selectedIds.size} ảnh
-              </Button>
+              <Button type="button" variant="secondary" onClick={() => setSelectedIds(new Set(filteredPhotos.map((p) => p.id)))}>Chọn tất cả</Button>
+              <Button type="button" variant="secondary" disabled={busy} onClick={() => void doDeleteSelected()}>Xóa {selectedIds.size}</Button>
             </div>
           )}
 
@@ -554,25 +488,30 @@ export function MediaLibraryPage() {
           {loading ? (
             <div style={{ display: "grid", gap: "var(--spacing-sm)", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))" }}>
               {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="ml-skel" style={{ aspectRatio: "1", borderRadius: "var(--radius-sm)", background: "var(--color-surface-raised)" }} />
+                <div key={i} className="ml-skel" style={{ aspectRatio: "1", borderRadius: "var(--radius-sm)" }} />
               ))}
             </div>
           ) : filteredPhotos.length === 0 ? (
-            <div style={{ padding: "var(--spacing-xl)", textAlign: "center", color: "var(--color-text-muted)" }}>
-              <div style={{ fontSize: "2.5rem", marginBottom: "var(--spacing-sm)" }}>🖼</div>
+            <div style={{ padding: "var(--spacing-xl)", textAlign: "center", color: "var(--color-text-muted)", background: "var(--color-surface-card)", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border-subtle)" }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--color-surface-raised)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto var(--spacing-sm)" }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}>
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--font-size-lg)", marginBottom: "var(--spacing-xs)" }}>
                 {activeAlbumId ? "Album này chưa có ảnh" : "Chưa có ảnh nào"}
               </div>
-              <div style={{ fontSize: "13px", marginBottom: "var(--spacing-md)" }}>
-                Tải ảnh lên để bổ sung thư viện tư liệu dòng họ.
-              </div>
+              <div style={{ fontSize: "13px", marginBottom: "var(--spacing-md)" }}>Tải ảnh lên để bổ sung thư viện tư liệu dòng họ.</div>
               <Button type="button" onClick={() => setTab("upload")}>Tải ảnh lên</Button>
             </div>
           ) : (
             <div style={{ display: "grid", gap: "var(--spacing-sm)", gridTemplateColumns: "repeat(auto-fill,minmax(150px,1fr))" }}>
               {filteredPhotos.map((photo, idx) => {
-                const url = photo.objectKey ? getPhotoUrl(photo.objectKey) : "";
-                const isSel = photo.id != null && selectedIds.has(photo.id);
+                const src = photo.thumbUrl ?? photo.url ?? "";
+                const isSel = selectedIds.has(photo.id);
+                const albumName = albums.find((a) => a.id === photo.albumId)?.title;
                 return (
                   <div
                     key={photo.id}
@@ -580,44 +519,34 @@ export function MediaLibraryPage() {
                     role="button" tabIndex={0}
                     aria-label={photo.caption ?? `Ảnh #${photo.id}`}
                     onClick={() => { setLightboxPhoto(photo); setLightboxIdx(idx); }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") { setLightboxPhoto(photo); setLightboxIdx(idx); }
-                    }}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { setLightboxPhoto(photo); setLightboxIdx(idx); } }}
                     style={{
                       position: "relative", aspectRatio: "1", borderRadius: "var(--radius-sm)",
                       overflow: "hidden", cursor: "pointer",
                       border: `2px solid ${isSel ? "var(--color-primary)" : "transparent"}`,
-                      boxShadow: isSel
-                        ? "0 0 0 3px color-mix(in srgb,var(--color-primary) 25%,transparent)"
-                        : "var(--shadow-sm)",
+                      boxShadow: isSel ? "0 0 0 3px color-mix(in srgb,var(--color-primary) 25%,transparent)" : "var(--shadow-sm)",
                       background: "var(--color-surface-raised)", transition: "border-color 0.15s,box-shadow 0.15s",
                     }}
                   >
-                    {url ? (
-                      <img src={url} alt={photo.caption ?? ""} loading="lazy"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    {src ? (
+                      <img src={src} alt={photo.caption ?? ""} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     ) : (
-                      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", color: "var(--color-text-muted)" }}>🖼</div>
+                      // Skeleton shimmer when no URL available (MinIO not configured)
+                      <div className="ml-skel" style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.2 }}>
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                      </div>
                     )}
 
                     {/* Hover overlay */}
-                    <div className="ml-ov" style={{
-                      position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)",
-                      opacity: 0, transition: "opacity 0.15s",
-                      display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 6,
-                    }}>
+                    <div className="ml-ov" style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", opacity: 0, transition: "opacity 0.15s", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 6 }}>
                       <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                        <button
-                          type="button"
-                          aria-label={isSel ? "Bỏ chọn" : "Chọn ảnh"}
-                          onClick={(e) => { e.stopPropagation(); if (photo.id != null) toggleSelect(photo.id); }}
-                          style={{
-                            width: 20, height: 20, borderRadius: "50%",
-                            background: isSel ? "var(--color-primary)" : "rgba(255,255,255,0.85)",
-                            border: "2px solid white", cursor: "pointer",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            fontSize: "10px", color: isSel ? "white" : "transparent",
-                          }}
+                        <button type="button" aria-label={isSel ? "Bỏ chọn" : "Chọn ảnh"}
+                          onClick={(e) => { e.stopPropagation(); toggleSelect(photo.id); }}
+                          style={{ width: 20, height: 20, borderRadius: "50%", background: isSel ? "var(--color-primary)" : "rgba(255,255,255,0.85)", border: "2px solid white", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", color: isSel ? "white" : "transparent" }}
                         >✓</button>
                       </div>
                       <div style={{ fontSize: "10px", color: "white", fontWeight: 600, lineHeight: 1.3, textShadow: "0 1px 2px rgba(0,0,0,.8)" }}>
@@ -625,10 +554,10 @@ export function MediaLibraryPage() {
                       </div>
                     </div>
 
-                    {/* Album badge (when viewing all) */}
-                    {photo.album?.title && activeAlbumId == null ? (
+                    {/* Album badge */}
+                    {albumName && activeAlbumId == null ? (
                       <div style={{ position: "absolute", bottom: 5, right: 5, background: "rgba(0,0,0,.65)", color: "white", fontSize: "9px", fontWeight: 700, padding: "1px 5px", borderRadius: 8 }}>
-                        {photo.album.title.slice(0, 12)}
+                        {albumName.slice(0, 14)}
                       </div>
                     ) : null}
                   </div>
@@ -641,18 +570,14 @@ export function MediaLibraryPage() {
           {photoTotalPages > 1 && (
             <div style={{ display: "flex", justifyContent: "center", gap: "var(--spacing-xs)", marginTop: "var(--spacing-lg)", alignItems: "center" }}>
               <Button type="button" variant="secondary" disabled={photoPage === 0} onClick={() => setPhotoPage((p) => p - 1)}>‹ Trước</Button>
-              <span style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
-                Trang {photoPage + 1} / {photoTotalPages} · {photoTotal.toLocaleString("vi-VN")} ảnh
-              </span>
+              <span style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>Trang {photoPage + 1} / {photoTotalPages} · {photoTotal.toLocaleString("vi-VN")} ảnh</span>
               <Button type="button" variant="secondary" disabled={photoPage >= photoTotalPages - 1} onClick={() => setPhotoPage((p) => p + 1)}>Tiếp ›</Button>
             </div>
           )}
         </>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* TAB: ALBUM                                                         */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* ═══ TAB: ALBUM ════════════════════════════════════════════════════ */}
       {tab === "albums" && (
         <ProTable
           rowKey="id"
@@ -662,122 +587,96 @@ export function MediaLibraryPage() {
           exportable
           exportFilename="albums"
           onRefresh={() => void loadAlbums()}
-          toolbar={{
-            title: `${albums.length} album`,
-            actions: (
-              <Button type="button" onClick={() => setShowCreateAlbum(true)}>+ Tạo album</Button>
-            ),
-          }}
-          emptyState={{
-            title: "Chưa có album",
-            description: "Tạo album để tổ chức ảnh theo sự kiện dòng họ.",
-            action: <Button type="button" onClick={() => setShowCreateAlbum(true)}>Tạo album mới</Button>,
-          }}
+          toolbar={{ title: `${albums.length} album`, actions: <Button type="button" onClick={() => setShowCreateAlbum(true)}>+ Tạo album</Button> }}
+          emptyState={{ title: "Chưa có album", description: "Tạo album để tổ chức ảnh theo sự kiện.", action: <Button type="button" onClick={() => setShowCreateAlbum(true)}>Tạo album mới</Button> }}
         />
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* TAB: TẢI LÊN                                                       */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* ═══ TAB: TẢI LÊN ══════════════════════════════════════════════════ */}
       {tab === "upload" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)", maxWidth: 680 }}>
-          {/* Drop zone */}
           <div
             className={`ml-drop${dragOver ? " over" : ""}`}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={(e) => { e.preventDefault(); setDragOver(false); void doUpload(e.dataTransfer.files); }}
             onClick={() => document.getElementById("ml-file-input")?.click()}
-            style={{
-              border: "2px dashed var(--color-border-subtle)", borderRadius: "var(--radius-md)",
-              padding: "var(--spacing-xl)", textAlign: "center", cursor: "pointer",
-              transition: "all 0.15s", background: "var(--color-surface-card)",
-            }}
+            style={{ border: "2px dashed var(--color-border-subtle)", borderRadius: "var(--radius-md)", padding: "var(--spacing-xl)", textAlign: "center", cursor: "pointer", transition: "all 0.15s", background: "var(--color-surface-card)" }}
           >
-            <div style={{ fontSize: "2.5rem", marginBottom: "var(--spacing-sm)", opacity: 0.6 }}>📤</div>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--font-size-lg)", marginBottom: "var(--spacing-xs)" }}>
-              Kéo thả ảnh vào đây
+            <div style={{ width: 48, height: 48, borderRadius: "50%", background: "var(--color-surface-raised)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto var(--spacing-sm)" }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-primary)" }}>
+                <polyline points="16 16 12 12 8 16"/>
+                <line x1="12" y1="12" x2="12" y2="21"/>
+                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+              </svg>
             </div>
-            <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>
-              hoặc <strong style={{ color: "var(--color-primary)" }}>chọn file</strong> — JPG, PNG, WebP · nhiều file cùng lúc
-            </div>
-            <input
-              id="ml-file-input"
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              disabled={busy}
-              onChange={(e) => void doUpload(e.target.files)}
-            />
+            <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--font-size-lg)", marginBottom: "var(--spacing-xs)" }}>Kéo thả ảnh vào đây</div>
+            <div style={{ fontSize: "13px", color: "var(--color-text-muted)" }}>hoặc <strong style={{ color: "var(--color-primary)" }}>chọn file</strong> — JPG, PNG, WebP · nhiều file cùng lúc</div>
+            <input id="ml-file-input" type="file" accept="image/*" multiple hidden disabled={busy} onChange={(e) => void doUpload(e.target.files)} />
           </div>
-
-          {/* Upload options */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "var(--spacing-md)" }}>
             <FormField label="Gắn vào album">
               <Select options={albumOptions} value={uploadAlbumId} onChange={(e) => setUploadAlbumId(e.target.value)} />
             </FormField>
             <FormField label="Chú thích chung">
-              <Input
-                value={uploadCaption}
-                onChange={(e) => setUploadCaption(e.target.value)}
-                placeholder="VD: Giỗ Tổ 2026 — lễ dâng hương"
-              />
+              <Input value={uploadCaption} onChange={(e) => setUploadCaption(e.target.value)} placeholder="VD: Giỗ Tổ 2026" />
             </FormField>
           </div>
-
           {lastUpload ? (
             <Alert title="Tải lên thành công" variant="success">
               Ảnh #{lastUpload.photoId} đã lưu.{" "}
               <a href={lastUpload.presignedGetUrl} target="_blank" rel="noreferrer" style={{ color: "var(--color-primary)" }}>Xem ảnh</a>
             </Alert>
           ) : null}
-
           <Alert title="Sau khi tải lên" variant="info">
             Ảnh xuất hiện ngay trong thư viện và trang album trên{" "}
             <a href="/photos/" target="_blank" rel="noreferrer">cổng thông tin</a>.
-            Mở ảnh trong tab Ảnh để gắn thẻ thành viên trong ảnh.
+            Cấu hình <code>VITE_MINIO_PUBLIC_URL</code> để hiển thị thumbnail trong admin.
           </Alert>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* LIGHTBOX MODAL                                                     */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* ═══ LIGHTBOX ═════════════════════════════════════════════════════ */}
       {lightboxPhoto != null && (() => {
-        const url = lightboxPhoto.objectKey ? getPhotoUrl(lightboxPhoto.objectKey) : "";
+        const src = lightboxPhoto.url ?? "";
+        const thumbSrc = lightboxPhoto.thumbUrl ?? src;
+        const album = albums.find((a) => a.id === lightboxPhoto.albumId);
         return (
           <div
             role="dialog" aria-modal="true" aria-label="Xem ảnh"
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.87)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={(e) => { if (e.target === e.currentTarget) setLightboxPhoto(null); }}
           >
             <div style={{ display: "flex", maxWidth: 980, width: "95vw", maxHeight: "90vh", borderRadius: "var(--radius-md)", overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,.6)" }}>
-              {/* Photo side */}
+              {/* Photo */}
               <div style={{ flex: 1, background: "#111", position: "relative", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 400 }}>
-                {url ? (
-                  <img src={url} alt={lightboxPhoto.caption ?? ""} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", display: "block" }} />
+                {src ? (
+                  <img src={src} alt={lightboxPhoto.caption ?? ""} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", display: "block" }} />
+                ) : thumbSrc ? (
+                  <img src={thumbSrc} alt={lightboxPhoto.caption ?? ""} style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", display: "block" }} />
                 ) : (
-                  <div style={{ fontSize: "4rem", opacity: 0.2 }}>🖼</div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12, opacity: 0.3 }}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ color: "white" }}>
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <span style={{ color: "white", fontSize: "12px" }}>Ảnh chưa load — cấu hình VITE_MINIO_PUBLIC_URL</span>
+                  </div>
                 )}
 
-                {/* Prev / Next */}
                 <button type="button" onClick={lightboxPrev} disabled={lightboxIdx === 0} aria-label="Ảnh trước"
                   style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,.5)", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: "20px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: lightboxIdx === 0 ? 0.25 : 1 }}>‹</button>
                 <button type="button" onClick={lightboxNext} disabled={lightboxIdx >= photos.length - 1} aria-label="Ảnh tiếp"
                   style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,.5)", color: "white", border: "none", width: 40, height: 40, borderRadius: "50%", fontSize: "20px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: lightboxIdx >= photos.length - 1 ? 0.25 : 1 }}>›</button>
-
-                {/* Close */}
                 <button type="button" onClick={() => setLightboxPhoto(null)} aria-label="Đóng"
                   style={{ position: "absolute", top: 10, right: 10, background: "rgba(0,0,0,.6)", color: "white", border: "none", width: 32, height: 32, borderRadius: "50%", cursor: "pointer", fontSize: "18px", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-
-                {/* Index indicator */}
                 <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,.5)", color: "white", fontSize: "11px", padding: "3px 10px", borderRadius: 12 }}>
                   {lightboxIdx + 1} / {photos.length}
                 </div>
               </div>
 
-              {/* Metadata sidebar */}
+              {/* Sidebar */}
               <div style={{ width: 260, flexShrink: 0, background: "#1a1a1a", color: "#e0e0e0", padding: "var(--spacing-md)", display: "flex", flexDirection: "column", gap: "var(--spacing-sm)", overflowY: "auto" }}>
                 <div>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: "15px", color: "white", lineHeight: 1.4 }}>
@@ -788,16 +687,13 @@ export function MediaLibraryPage() {
 
                 <div style={{ height: 1, background: "rgba(255,255,255,.1)" }} />
 
-                {/* Album link */}
                 <div>
                   <div style={{ fontSize: "11px", fontWeight: 700, color: "#aaa", marginBottom: 4 }}>Album</div>
-                  {lightboxPhoto.album ? (
+                  {album ? (
                     <button type="button"
-                      onClick={() => { setActiveAlbumId(lightboxPhoto.album?.id ?? null); setLightboxPhoto(null); setTab("photos"); }}
+                      onClick={() => { setActiveAlbumId(album.id ?? null); setLightboxPhoto(null); setTab("photos"); }}
                       style={{ background: "none", border: "none", color: "#90CAF9", cursor: "pointer", fontSize: "13px", padding: 0, textAlign: "left" }}
-                    >
-                      {lightboxPhoto.album.title} →
-                    </button>
+                    >{album.title} →</button>
                   ) : (
                     <span style={{ fontSize: "13px", color: "#666" }}>Chưa gắn album</span>
                   )}
@@ -805,49 +701,31 @@ export function MediaLibraryPage() {
 
                 <div style={{ height: 1, background: "rgba(255,255,255,.1)" }} />
 
-                {/* Cross-module links */}
                 <div>
                   <div style={{ fontSize: "11px", fontWeight: 700, color: "#aaa", marginBottom: 6 }}>Liên kết</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                    <a
-                      href={lightboxPhoto.album ? `/photos/album-${lightboxPhoto.album.id}/` : "/photos/"}
-                      target="_blank" rel="noreferrer"
-                      style={{ fontSize: "12px", color: "#90CAF9", textDecoration: "none" }}
-                    >🌐 Xem trên cổng thông tin</a>
-                    {url ? (
+                    <a href={album ? `/photos/album-${album.id}/` : "/photos/"} target="_blank" rel="noreferrer" style={{ fontSize: "12px", color: "#90CAF9", textDecoration: "none" }}>
+                      Xem trên cổng thông tin
+                    </a>
+                    {src ? (
                       <button type="button"
-                        onClick={() => { navigator.clipboard.writeText(url).catch(() => undefined); setToast("Đã sao chép link."); }}
+                        onClick={() => { navigator.clipboard.writeText(src).catch(() => undefined); setToast("Đã sao chép link."); }}
                         style={{ background: "none", border: "none", color: "#90CAF9", cursor: "pointer", fontSize: "12px", textAlign: "left", padding: 0 }}
-                      >📋 Sao chép link ảnh</button>
+                      >Sao chép link ảnh</button>
                     ) : null}
-                    <button type="button"
-                      onClick={() => { setLightboxPhoto(null); setTab("photos"); }}
-                      style={{ background: "none", border: "none", color: "#90CAF9", cursor: "pointer", fontSize: "12px", textAlign: "left", padding: 0 }}
-                    >🏷 Gắn tag thành viên (xem trong tab Ảnh)</button>
                   </div>
                 </div>
 
-                {/* View count */}
-                {lightboxPhoto.viewCount != null ? (
-                  <>
-                    <div style={{ height: 1, background: "rgba(255,255,255,.1)" }} />
-                    <div style={{ fontSize: "12px", color: "#aaa" }}>
-                      Lượt xem: <strong style={{ color: "#e0e0e0" }}>{lightboxPhoto.viewCount.toLocaleString("vi-VN")}</strong>
-                    </div>
-                  </>
-                ) : null}
-
-                {/* Actions */}
                 <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
-                  {url ? (
-                    <a href={url} download target="_blank" rel="noreferrer"
+                  {src ? (
+                    <a href={src} download target="_blank" rel="noreferrer"
                       style={{ display: "block", padding: "8px", textAlign: "center", borderRadius: "var(--radius-sm)", background: "var(--color-primary)", color: "white", fontSize: "12px", fontWeight: 600, textDecoration: "none" }}
-                    >📥 Tải xuống</a>
+                    >Tải xuống</a>
                   ) : null}
                   <button type="button" disabled={busy}
-                    onClick={() => { if (lightboxPhoto.id != null) void doDeletePhoto(lightboxPhoto.id); }}
+                    onClick={() => void doDeletePhoto(lightboxPhoto.id)}
                     style={{ padding: "8px", borderRadius: "var(--radius-sm)", border: "1px solid rgba(198,40,40,.3)", background: "rgba(198,40,40,.15)", color: "#EF9A9A", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
-                  >🗑 Xóa ảnh này</button>
+                  >Xóa ảnh này</button>
                 </div>
               </div>
             </div>
@@ -855,12 +733,9 @@ export function MediaLibraryPage() {
         );
       })()}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* CREATE ALBUM MODAL                                                 */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* ═══ CREATE ALBUM ══════════════════════════════════════════════════ */}
       {showCreateAlbum && (
-        <div
-          role="dialog" aria-modal="true" aria-label="Tạo album mới"
+        <div role="dialog" aria-modal="true" aria-label="Tạo album mới"
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center" }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowCreateAlbum(false); }}
         >
@@ -880,12 +755,9 @@ export function MediaLibraryPage() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* EDIT ALBUM MODAL                                                   */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
+      {/* ═══ EDIT ALBUM ════════════════════════════════════════════════════ */}
       {editAlbum != null && (
-        <div
-          role="dialog" aria-modal="true" aria-label="Sửa album"
+        <div role="dialog" aria-modal="true" aria-label="Sửa album"
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 400, display: "flex", alignItems: "center", justifyContent: "center" }}
           onClick={(e) => { if (e.target === e.currentTarget) setEditAlbum(null); }}
         >
