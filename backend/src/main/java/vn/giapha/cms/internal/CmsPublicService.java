@@ -64,7 +64,14 @@ public class CmsPublicService {
     }
 
     public List<CmsCategoryDTO> listCategories() {
-        return cmsCategoryMapper.toDto(cmsCategoryRepository.findAll());
+        return cmsCategoryMapper.toDto(cmsCategoryRepository.findVisibleOnNavOrdered());
+    }
+
+    public Optional<CmsCategoryDTO> getCategoryBySlug(String slug) {
+        if (slug == null || slug.isBlank()) {
+            return Optional.empty();
+        }
+        return cmsCategoryRepository.findBySlug(slug.trim()).map(cmsCategoryMapper::toDto);
     }
 
     public Page<CmsCommentDTO> listApprovedComments(String postSlug, Pageable pageable) {

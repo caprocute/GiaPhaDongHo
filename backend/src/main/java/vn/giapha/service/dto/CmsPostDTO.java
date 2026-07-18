@@ -34,6 +34,8 @@ public class CmsPostDTO implements Serializable {
 
     private String authorName;
 
+    private String coverObjectKey;
+
     private CmsCategoryDTO category;
 
     public Long getId() {
@@ -106,6 +108,14 @@ public class CmsPostDTO implements Serializable {
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
+    }
+
+    public String getCoverObjectKey() {
+        return coverObjectKey;
+    }
+
+    public void setCoverObjectKey(String coverObjectKey) {
+        this.coverObjectKey = coverObjectKey;
     }
 
     public CmsCategoryDTO getCategory() {

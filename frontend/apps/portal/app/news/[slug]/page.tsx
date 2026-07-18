@@ -21,6 +21,14 @@ export default async function NewsDetailPage({ params }: Props) {
       crumbs={[
         { label: "Trang chủ", href: "/" },
         { label: "Tin tức", href: "/news" },
+        ...(post.category?.slug
+          ? [
+              {
+                label: post.category.name ?? post.category.slug,
+                href: `/tin/${encodeURIComponent(post.category.slug)}`,
+              },
+            ]
+          : []),
         { label: post.title.length > 40 ? `${post.title.slice(0, 40)}…` : post.title },
       ]}
     >

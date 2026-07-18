@@ -33,6 +33,15 @@ public class CmsCategory implements Serializable {
     @Column(name = "layout")
     private String layout;
 
+    @Column(name = "sort_order")
+    private Integer sortOrder;
+
+    @Column(name = "visible_on_nav")
+    private Boolean visibleOnNav;
+
+    @Column(name = "description")
+    private String description;
+
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
     public Long getId() {
@@ -85,6 +94,30 @@ public class CmsCategory implements Serializable {
 
     public void setLayout(String layout) {
         this.layout = layout;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public Boolean getVisibleOnNav() {
+        return visibleOnNav;
+    }
+
+    public void setVisibleOnNav(Boolean visibleOnNav) {
+        this.visibleOnNav = visibleOnNav;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here

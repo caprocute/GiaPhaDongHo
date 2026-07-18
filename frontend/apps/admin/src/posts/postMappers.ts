@@ -19,6 +19,7 @@ export function fromCmsPost(dto: CmsPostDto): PostRecord {
     categorySlug: dto.category?.slug ?? undefined,
     authorName: dto.authorName ?? undefined,
     publishedAt: dto.publishedAt ?? undefined,
+    coverObjectKey: dto.coverObjectKey ?? undefined,
   };
 }
 
@@ -36,6 +37,7 @@ export function toCmsPostDto(
     status: record.status,
     authorName: record.authorName ?? null,
     publishedAt: record.publishedAt ?? null,
+    coverObjectKey: record.coverObjectKey ?? null,
     category: category ?? null,
   };
 }

@@ -34,12 +34,35 @@ export async function deleteCmsPost(id: number, token: string | null): Promise<v
 }
 
 export async function listCmsCategories(token: string | null): Promise<CmsCategoryDto[]> {
-  const page = await apiFetchPage<CmsCategoryDto>(`/api/cms-categories?sort=name,asc`, {
+  const page = await apiFetchPage<CmsCategoryDto>(`/api/cms-categories?sort=sortOrder,asc&sort=name,asc`, {
     token,
     page: 0,
     size: 200,
   });
   return page.content;
+}
+
+export async function createCmsCategory(
+  dto: CmsCategoryDto,
+  token: string | null,
+): Promise<CmsCategoryDto> {
+  return apiFetch<CmsCategoryDto>("/api/cms-categories", { method: "POST", body: dto, token });
+}
+
+export async function updateCmsCategory(
+  id: number,
+  dto: CmsCategoryDto,
+  token: string | null,
+): Promise<CmsCategoryDto> {
+  return apiFetch<CmsCategoryDto>(`/api/cms-categories/${id}`, {
+    method: "PUT",
+    body: { ...dto, id },
+    token,
+  });
+}
+
+export async function deleteCmsCategory(id: number, token: string | null): Promise<void> {
+  await apiFetch<void>(`/api/cms-categories/${id}`, { method: "DELETE", token });
 }
 
 export async function listCmsComments(

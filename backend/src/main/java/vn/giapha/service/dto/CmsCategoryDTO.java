@@ -22,6 +22,12 @@ public class CmsCategoryDTO implements Serializable {
 
     private String layout;
 
+    private Integer sortOrder;
+
+    private Boolean visibleOnNav;
+
+    private String description;
+
     public Long getId() {
         return id;
     }
@@ -52,6 +58,30 @@ public class CmsCategoryDTO implements Serializable {
 
     public void setLayout(String layout) {
         this.layout = layout;
+    }
+
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public Boolean getVisibleOnNav() {
+        return visibleOnNav;
+    }
+
+    public void setVisibleOnNav(Boolean visibleOnNav) {
+        this.visibleOnNav = visibleOnNav;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override

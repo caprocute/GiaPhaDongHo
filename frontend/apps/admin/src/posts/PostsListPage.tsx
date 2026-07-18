@@ -13,6 +13,7 @@ import { deleteCmsPost, listCmsCategories, listCmsPosts } from "../api/cmsApi";
 import type { CmsCategoryDto } from "../api/cmsTypes";
 import { ApiError } from "../api/http";
 import { AdminPageHeader } from "../components/AdminPageHeader";
+import { CategoriesManageDialog } from "./CategoriesManageDialog";
 import { fromCmsPost } from "./postMappers";
 import type { PostRecord } from "./types";
 
@@ -39,6 +40,7 @@ export function PostsListPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [catsOpen, setCatsOpen] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -172,11 +174,16 @@ export function PostsListPage() {
     <div className="admin-stack">
       <AdminPageHeader
         title="Bài viết"
-        description="Tin tức và thông báo hiển thị trên trang công khai khi đã xuất bản."
+        description="Chuyên mục do thư ký tạo — mỗi mục tương ứng một trang tin trên cổng. Bài xuất bản mới hiện công khai."
         actions={
-          <Link to="/posts/new">
-            <Button type="button">+ Viết bài</Button>
-          </Link>
+          <>
+            <Button type="button" variant="secondary" onClick={() => setCatsOpen(true)}>
+              Quản lý chuyên mục
+            </Button>
+            <Link to="/posts/new">
+              <Button type="button">+ Viết bài</Button>
+            </Link>
+          </>
         }
       />
       {error ? (
@@ -195,18 +202,25 @@ export function PostsListPage() {
           >
             Tất cả chuyên mục
           </button>
-          {categories.map((c) => (
-            <button
-              key={c.slug}
-              type="button"
-              className={`cms-cat${category === c.slug ? " on" : ""}`}
-              onClick={() => setCategory(c.slug)}
-            >
-              {c.name}
-            </button>
-          ))}
+          {categories.length === 0 ? (
+            <p className="cms-sidebar-note">Chưa có chuyên mục — bấm «Quản lý chuyên mục».</p>
+          ) : (
+            categories.map((c) => (
+              <button
+                key={c.slug}
+                type="button"
+                className={`cms-cat${category === c.slug ? " on" : ""}`}
+                onClick={() => setCategory(c.slug)}
+              >
+                {c.name}
+              </button>
+            ))
+          )}
+          <button type="button" className="cms-cat cms-cat-add" onClick={() => setCatsOpen(true)}>
+            + Quản lý chuyên mục
+          </button>
           <div className="cms-sidebar-note">
-            Tháng này: <b>{counts.published}</b> bài đã xuất bản trên trang hiện tại.
+            Trên trang này: <b>{counts.published}</b> bài đã xuất bản (theo bộ lọc hiện tại).
           </div>
         </aside>
 
@@ -266,6 +280,12 @@ export function PostsListPage() {
           />
         </div>
       </div>
+
+      <CategoriesManageDialog
+        open={catsOpen}
+        onClose={() => setCatsOpen(false)}
+        onChanged={(cats) => setCategories(cats)}
+      />
     </div>
   );
 }

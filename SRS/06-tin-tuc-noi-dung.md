@@ -1,5 +1,7 @@
 # SRS-06 — Tin tức & Quản lý nội dung (CMS)
 
+> **Thi công admin/portal hiện tại:** xem [12f-admin-cms-bai-viet.md](12f-admin-cms-bai-viet.md) (chuyên mục ↔ `/tin/{slug}`, TipTap + thư viện, xem trước).
+
 Toàn bộ khối nội dung dùng module News của NukeViet, chia thành nhiều chuyên mục (module ảo).
 
 ## 1. Các chuyên mục quan sát được

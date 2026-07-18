@@ -1,5 +1,5 @@
 import { API_BASE, TREE_SLUG } from "./config";
-import type { ApiAnniversary, ApiPerson, ApiPost } from "./types";
+import type { ApiAnniversary, ApiCategory, ApiPerson, ApiPost } from "./types";
 
 export type PageResult<T> = {
   content: T[];
@@ -80,8 +80,15 @@ export async function fetchPerson(code: string): Promise<ApiPerson | null> {
   );
 }
 
-export async function fetchPostsPage(page: number, size = 20): Promise<PageResult<ApiPost>> {
-  return getPage<ApiPost>(`/api/v1/posts?sort=publishedAt,desc`, page, size);
+export async function fetchPostsPage(
+  page: number,
+  size = 20,
+  categorySlug?: string,
+): Promise<PageResult<ApiPost>> {
+  const cat = categorySlug?.trim()
+    ? `&category=${encodeURIComponent(categorySlug.trim())}`
+    : "";
+  return getPage<ApiPost>(`/api/v1/posts?sort=publishedAt,desc${cat}`, page, size);
 }
 
 /** Fallback compat — SSR home. */
@@ -91,6 +98,14 @@ export async function fetchPosts(size = 20): Promise<ApiPost[]> {
 
 export async function fetchPost(slug: string): Promise<ApiPost | null> {
   return getJson<ApiPost>(`/api/v1/posts/${encodeURIComponent(slug)}`);
+}
+
+export async function fetchCategories(): Promise<ApiCategory[]> {
+  return (await getJson<ApiCategory[]>(`/api/v1/categories`)) ?? [];
+}
+
+export async function fetchCategory(slug: string): Promise<ApiCategory | null> {
+  return getJson<ApiCategory>(`/api/v1/categories/${encodeURIComponent(slug)}`);
 }
 
 export async function fetchAnniversariesPage(

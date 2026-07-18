@@ -3,6 +3,9 @@ export type CmsCategoryDto = {
   slug: string;
   name: string;
   layout?: string | null;
+  sortOrder?: number | null;
+  visibleOnNav?: boolean | null;
+  description?: string | null;
 };
 
 export type CmsPostDto = {
@@ -15,6 +18,7 @@ export type CmsPostDto = {
   publishedAt?: string | null;
   viewCount?: number | null;
   authorName?: string | null;
+  coverObjectKey?: string | null;
   category?: CmsCategoryDto | null;
 };
 

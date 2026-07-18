@@ -10,4 +10,5 @@ export type PostRecord = {
   categorySlug?: string;
   authorName?: string;
   publishedAt?: string;
+  coverObjectKey?: string;
 };

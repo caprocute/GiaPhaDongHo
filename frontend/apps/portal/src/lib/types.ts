@@ -13,6 +13,16 @@ export type ApiPerson = {
   privacy?: string;
 };
 
+export type ApiCategory = {
+  id?: number;
+  slug: string;
+  name: string;
+  description?: string | null;
+  layout?: string | null;
+  sortOrder?: number | null;
+  visibleOnNav?: boolean | null;
+};
+
 export type ApiPost = {
   id?: number;
   slug: string;
@@ -22,7 +32,8 @@ export type ApiPost = {
   publishedAt?: string;
   authorName?: string;
   viewCount?: number;
-  category?: { slug?: string; name?: string };
+  coverObjectKey?: string | null;
+  category?: { slug?: string; name?: string; description?: string | null };
 };
 
 export type ApiAnniversary = {

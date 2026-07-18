@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- SRS-12f — chuyên mục liên kết portal + ảnh đại diện bài -->
+    <changeSet id="20260719020000-1" author="giapha">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cms_category"/>
+            <not>
+                <columnExists tableName="cms_category" columnName="sort_order"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="cms_category">
+            <column name="sort_order" type="integer" defaultValueNumeric="100">
+                <constraints nullable="true"/>
+            </column>
+            <column name="visible_on_nav" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="true"/>
+            </column>
+            <column name="description" type="varchar(1024)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20260719020000-2" author="giapha">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cms_post"/>
+            <not>
+                <columnExists tableName="cms_post" columnName="cover_object_key"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="cms_post">
+            <column name="cover_object_key" type="varchar(512)"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- Seed chuyên mục chuẩn (upsert theo slug) — SRS-06 / SRS-12f -->
+    <changeSet id="20260719020000-3" author="giapha">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="cms_category"/>
+        </preConditions>
+        <sql>
+            INSERT INTO cms_category (id, slug, name, layout, sort_order, visible_on_nav, description)
+            SELECT nextval('sequence_generator'), 'thong-tin-dong-ho', 'Thông tin dòng họ', 'article', 10, true,
+                   'Từ đường, lăng mộ, lễ nghi và hội đồng gia tộc'
+            WHERE NOT EXISTS (SELECT 1 FROM cms_category WHERE slug = 'thong-tin-dong-ho');
+
+            INSERT INTO cms_category (id, slug, name, layout, sort_order, visible_on_nav, description)
+            SELECT nextval('sequence_generator'), 'hoat-dong-dong-ho', 'Hoạt động dòng họ', 'article', 20, true,
+                   'Sự kiện tôn tạo, họp họ và sinh hoạt cộng đồng'
+            WHERE NOT EXISTS (SELECT 1 FROM cms_category WHERE slug = 'hoat-dong-dong-ho');
+
+            INSERT INTO cms_category (id, slug, name, layout, sort_order, visible_on_nav, description)
+            SELECT nextval('sequence_generator'), 'thong-bao', 'Thông báo', 'notice', 30, true,
+                   'Văn bản thông báo chính thức của hội đồng gia tộc'
+            WHERE NOT EXISTS (SELECT 1 FROM cms_category WHERE slug = 'thong-bao');
+
+            INSERT INTO cms_category (id, slug, name, layout, sort_order, visible_on_nav, description)
+            SELECT nextval('sequence_generator'), 'ho-hoang-bon-phuong', 'Họ Hoàng bốn phương', 'article', 40, true,
+                   'Tin các chi / vùng họ Hoàng – Huỳnh'
+            WHERE NOT EXISTS (SELECT 1 FROM cms_category WHERE slug = 'ho-hoang-bon-phuong');
+
+            INSERT INTO cms_category (id, slug, name, layout, sort_order, visible_on_nav, description)
+            SELECT nextval('sequence_generator'), 'danh-nhan-guong-sang-dong-ho', 'Danh nhân – Gương sáng', 'portrait', 50, true,
+                   'Chân dung nhân vật tiêu biểu của dòng họ'
+            WHERE NOT EXISTS (SELECT 1 FROM cms_category WHERE slug = 'danh-nhan-guong-sang-dong-ho');
+
+            INSERT INTO cms_category (id, slug, name, layout, sort_order, visible_on_nav, description)
+            SELECT nextval('sequence_generator'), 'thu-vien-tu-lieu', 'Thư viện – Tư liệu', 'document', 60, true,
+                   'Bài sớ, tư liệu lịch sử và văn hóa'
+            WHERE NOT EXISTS (SELECT 1 FROM cms_category WHERE slug = 'thu-vien-tu-lieu');
+
+            UPDATE cms_category SET
+              name = 'Thông tin dòng họ',
+              layout = COALESCE(layout, 'article'),
+              sort_order = COALESCE(sort_order, 10),
+              visible_on_nav = COALESCE(visible_on_nav, true),
+              description = COALESCE(description, 'Từ đường, lăng mộ, lễ nghi và hội đồng gia tộc')
+            WHERE slug = 'thong-tin-dong-ho';
+
+            UPDATE cms_category SET
+              name = 'Hoạt động dòng họ',
+              layout = COALESCE(layout, 'article'),
+              sort_order = COALESCE(sort_order, 20),
+              visible_on_nav = COALESCE(visible_on_nav, true),
+              description = COALESCE(description, 'Sự kiện tôn tạo, họp họ và sinh hoạt cộng đồng')
+            WHERE slug = 'hoat-dong-dong-ho';
+
+            UPDATE cms_category SET
+              name = 'Thông báo',
+              layout = COALESCE(layout, 'notice'),
+              sort_order = COALESCE(sort_order, 30),
+              visible_on_nav = COALESCE(visible_on_nav, true),
+              description = COALESCE(description, 'Văn bản thông báo chính thức của hội đồng gia tộc')
+            WHERE slug = 'thong-bao';
+
+            UPDATE cms_category SET
+              name = 'Họ Hoàng bốn phương',
+              layout = COALESCE(layout, 'article'),
+              sort_order = COALESCE(sort_order, 40),
+              visible_on_nav = COALESCE(visible_on_nav, true),
+              description = COALESCE(description, 'Tin các chi / vùng họ Hoàng – Huỳnh')
+            WHERE slug = 'ho-hoang-bon-phuong';
+
+            UPDATE cms_category SET
+              name = 'Danh nhân – Gương sáng',
+              layout = COALESCE(layout, 'portrait'),
+              sort_order = COALESCE(sort_order, 50),
+              visible_on_nav = COALESCE(visible_on_nav, true),
+              description = COALESCE(description, 'Chân dung nhân vật tiêu biểu của dòng họ')
+            WHERE slug = 'danh-nhan-guong-sang-dong-ho';
+
+            UPDATE cms_category SET
+              name = 'Thư viện – Tư liệu',
+              layout = COALESCE(layout, 'document'),
+              sort_order = COALESCE(sort_order, 60),
+              visible_on_nav = COALESCE(visible_on_nav, true),
+              description = COALESCE(description, 'Bài sớ, tư liệu lịch sử và văn hóa')
+            WHERE slug = 'thu-vien-tu-lieu';
+        </sql>
+    </changeSet>
+</databaseChangeLog>

@@ -69,4 +69,10 @@ public class PublicCmsResource {
         LOG.debug("GET categories");
         return ResponseEntity.ok(cmsPublicService.listCategories());
     }
+
+    @GetMapping("/categories/{slug}")
+    public ResponseEntity<CmsCategoryDTO> getCategory(@PathVariable String slug) {
+        LOG.debug("GET category slug={}", slug);
+        return ResponseUtil.wrapOrNotFound(cmsPublicService.getCategoryBySlug(slug));
+    }
 }

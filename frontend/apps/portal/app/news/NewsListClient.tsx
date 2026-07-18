@@ -6,10 +6,10 @@ import { EmptyState, Pagination } from "@giapha/ui";
 import { PageShell } from "../../src/chrome/PageShell";
 import { formatViDate } from "../../src/chrome/personUi";
 import styles from "../../src/chrome/portal.module.css";
-import { fetchPostsPage } from "../../src/lib/api";
+import { fetchCategories, fetchPostsPage } from "../../src/lib/api";
 import type { PageResult } from "../../src/lib/api";
 import { DEMO_POSTS } from "../../src/lib/demoContent";
-import type { ApiPost } from "../../src/lib/types";
+import type { ApiCategory, ApiPost } from "../../src/lib/types";
 
 const PAGE_SIZE = 20;
 
@@ -28,6 +28,17 @@ export function NewsListClient() {
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<PageResult<ApiPost>>(demoResult(1));
   const [source, setSource] = useState<"api" | "demo">("demo");
+  const [categories, setCategories] = useState<ApiCategory[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchCategories().then((cats) => {
+      if (!cancelled) setCategories(cats);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,12 +65,23 @@ export function NewsListClient() {
     <PageShell
       label="Di sản sống"
       title="Tin tức dòng họ"
-      lead="Hoạt động, thông báo và gương sáng của họ Hoàng – Huỳnh thôn Trung Bính."
+      lead="Hoạt động, thông báo và gương sáng — chọn chuyên mục do ban biên tập quản lý."
       crumbs={[
         { label: "Trang chủ", href: "/" },
         { label: "Tin tức" },
       ]}
     >
+      {categories.length > 0 ? (
+        <div className={styles.chips} aria-label="Chuyên mục" style={{ marginBottom: 20 }}>
+          <span className={`${styles.chip} ${styles.chipGold}`}>Tất cả</span>
+          {categories.map((c) => (
+            <Link key={c.slug} href={`/tin/${encodeURIComponent(c.slug)}`} className={styles.chip}>
+              {c.name}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+
       {posts.length === 0 ? (
         <EmptyState title="Chưa có tin" description="Quay lại sau khi ban biên tập xuất bản bài." />
       ) : (

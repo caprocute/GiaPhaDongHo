@@ -142,6 +142,7 @@ Mỗi component: đủ 4 mảnh (TK-04) — code + story + `USAGE.md` (spec/mapp
 - [x] JDL: Category, Post, Comment (duyệt cơ bản)
 - [x] API public list/detail + admin CRUD (`GET /api/v1/posts|categories`; JHipster `/api/cms-posts` + `@RequiresPermission`; sự kiện `PostPublished`)
 - [x] TipTap trong admin (`RichTextEditor`) + CRUD bài viết qua `/api/cms-posts` (portal `/news`)
+- [x] SRS-12f: chuyên mục ↔ `/tin/{slug}`, seed VI, CRUD chuyên mục, TipTap + media/preview ([SRS/12f-admin-cms-bai-viet.md](../SRS/12f-admin-cms-bai-viet.md))
 
 ### R1.4 Media tối thiểu  **[SS với R1.3]**
 - [x] Upload MinIO + metadata album/photo — `media/` Modulith: `MinioStorageService`, `MediaUploadController` (`POST /api/v1/media/upload`)

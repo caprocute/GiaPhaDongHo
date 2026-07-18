@@ -1,6 +1,11 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useEffect } from "react";
+import Image from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import Youtube from "@tiptap/extension-youtube";
+import Placeholder from "@tiptap/extension-placeholder";
+import { useEffect, useState } from "react";
+import { MediaPickerDialog } from "./MediaPickerDialog";
 
 export interface RichTextEditorProps {
   value: string;
@@ -11,10 +16,10 @@ export interface RichTextEditorProps {
 }
 
 const TOOLBAR_BTN: React.CSSProperties = {
-  padding: "2px 8px",
+  padding: "4px 9px",
   border: "1px solid var(--color-border-default)",
-  borderRadius: 4,
-  background: "transparent",
+  borderRadius: "var(--radius-sm, 4px)",
+  background: "var(--color-surface-card)",
   cursor: "pointer",
   fontFamily: "var(--font-body)",
   fontSize: 13,
@@ -26,17 +31,39 @@ const TOOLBAR_BTN_ACTIVE: React.CSSProperties = {
   ...TOOLBAR_BTN,
   background: "var(--color-surface-sunken)",
   borderColor: "var(--color-border-strong)",
+  fontWeight: 700,
 };
 
 export function RichTextEditor({
   value,
   onChange,
-  placeholder = "Nhập nội dung bài viết…",
+  placeholder = "Soạn nội dung bài viết…",
   readOnly = false,
-  minHeight = 240,
+  minHeight = 420,
 }: RichTextEditorProps) {
+  const [mediaOpen, setMediaOpen] = useState(false);
+
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+      }),
+      Placeholder.configure({ placeholder }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
+      }),
+      Image.configure({
+        allowBase64: false,
+        HTMLAttributes: { class: "cms-inline-img" },
+      }),
+      Youtube.configure({
+        width: 640,
+        height: 360,
+        modestBranding: true,
+        HTMLAttributes: { class: "cms-yt-embed" },
+      }),
+    ],
     content: value,
     editable: !readOnly,
     onUpdate({ editor: e }) {
@@ -44,51 +71,53 @@ export function RichTextEditor({
     },
   });
 
-  // Sync external value resets (e.g. form reset)
   useEffect(() => {
     if (!editor) return;
     if (editor.getHTML() !== value) {
-      editor.commands.setContent(value, false);
+      editor.commands.setContent(value || "", false);
     }
   }, [value, editor]);
 
   if (!editor) return null;
 
-  const cmd = editor.chain().focus();
+  const cmd = () => editor.chain().focus();
+
+  function setLink() {
+    if (!editor) return;
+    const prev = editor.getAttributes("link").href as string | undefined;
+    const url = window.prompt("Nhập đường dẫn liên kết", prev ?? "https://");
+    if (url === null) return;
+    if (!url.trim()) {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+    editor.chain().focus().extendMarkRange("link").setLink({ href: url.trim() }).run();
+  }
+
+  function setYoutube() {
+    if (!editor) return;
+    const url = window.prompt("Dán đường dẫn YouTube (youtube.com hoặc youtu.be)");
+    if (!url?.trim()) return;
+    editor.chain().focus().setYoutubeVideo({ src: url.trim() }).run();
+  }
 
   return (
-    <div
-      style={{
-        border: "1px solid var(--color-border-default)",
-        borderRadius: 6,
-        overflow: "hidden",
-        fontFamily: "var(--font-body)",
-      }}
-    >
+    <div className="rte-shell">
       {!readOnly && (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 4,
-            padding: "6px 10px",
-            borderBottom: "1px solid var(--color-border-default)",
-            background: "var(--color-surface-sunken)",
-          }}
-        >
+        <div className="rte-toolbar" role="toolbar" aria-label="Công cụ soạn thảo">
           <button
             type="button"
-            title="In đậm (Ctrl+B)"
+            title="In đậm"
             style={editor.isActive("bold") ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
-            onClick={() => cmd.toggleBold().run()}
+            onClick={() => cmd().toggleBold().run()}
           >
             <strong>B</strong>
           </button>
           <button
             type="button"
-            title="In nghiêng (Ctrl+I)"
+            title="In nghiêng"
             style={editor.isActive("italic") ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
-            onClick={() => cmd.toggleItalic().run()}
+            onClick={() => cmd().toggleItalic().run()}
           >
             <em>I</em>
           </button>
@@ -96,62 +125,82 @@ export function RichTextEditor({
             type="button"
             title="Gạch ngang"
             style={editor.isActive("strike") ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
-            onClick={() => cmd.toggleStrike().run()}
+            onClick={() => cmd().toggleStrike().run()}
           >
             <s>S</s>
           </button>
-          <span style={{ width: 1, background: "var(--color-border-default)", margin: "2px 4px" }} />
-          {[1, 2, 3].map((level) => (
-            <button
-              key={level}
-              type="button"
-              title={`Tiêu đề ${level}`}
-              style={editor.isActive("heading", { level }) ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
-              onClick={() => cmd.toggleHeading({ level: level as 1 | 2 | 3 }).run()}
-            >
-              H{level}
-            </button>
-          ))}
-          <span style={{ width: 1, background: "var(--color-border-default)", margin: "2px 4px" }} />
+          <span className="rte-sep" />
           <button
             type="button"
-            title="Danh sách gạch đầu dòng"
+            title="Tiêu đề mục"
+            style={editor.isActive("heading", { level: 2 }) ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
+            onClick={() => cmd().toggleHeading({ level: 2 }).run()}
+          >
+            H2
+          </button>
+          <button
+            type="button"
+            title="Tiêu đề phụ"
+            style={editor.isActive("heading", { level: 3 }) ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
+            onClick={() => cmd().toggleHeading({ level: 3 }).run()}
+          >
+            H3
+          </button>
+          <span className="rte-sep" />
+          <button
+            type="button"
+            title="Danh sách"
             style={editor.isActive("bulletList") ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
-            onClick={() => cmd.toggleBulletList().run()}
+            onClick={() => cmd().toggleBulletList().run()}
           >
             • —
           </button>
           <button
             type="button"
-            title="Danh sách đánh số"
+            title="Danh sách số"
             style={editor.isActive("orderedList") ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
-            onClick={() => cmd.toggleOrderedList().run()}
+            onClick={() => cmd().toggleOrderedList().run()}
           >
-            1. —
+            1.
           </button>
           <button
             type="button"
             title="Trích dẫn"
             style={editor.isActive("blockquote") ? TOOLBAR_BTN_ACTIVE : TOOLBAR_BTN}
-            onClick={() => cmd.toggleBlockquote().run()}
+            onClick={() => cmd().toggleBlockquote().run()}
           >
-            " "
+            “ ”
           </button>
-          <span style={{ width: 1, background: "var(--color-border-default)", margin: "2px 4px" }} />
+          <span className="rte-sep" />
+          <button type="button" title="Chèn liên kết" style={TOOLBAR_BTN} onClick={setLink}>
+            Liên kết
+          </button>
           <button
             type="button"
-            title="Hoàn tác (Ctrl+Z)"
+            title="Chèn ảnh từ thư viện"
             style={TOOLBAR_BTN}
-            onClick={() => cmd.undo().run()}
+            onClick={() => setMediaOpen(true)}
+          >
+            Ảnh thư viện
+          </button>
+          <button type="button" title="Chèn video YouTube" style={TOOLBAR_BTN} onClick={setYoutube}>
+            Video
+          </button>
+          <span className="rte-sep" />
+          <button
+            type="button"
+            title="Hoàn tác"
+            style={TOOLBAR_BTN}
+            onClick={() => cmd().undo().run()}
             disabled={!editor.can().undo()}
           >
             ↩
           </button>
           <button
             type="button"
-            title="Làm lại (Ctrl+Shift+Z)"
+            title="Làm lại"
             style={TOOLBAR_BTN}
-            onClick={() => cmd.redo().run()}
+            onClick={() => cmd().redo().run()}
             disabled={!editor.can().redo()}
           >
             ↪
@@ -160,44 +209,97 @@ export function RichTextEditor({
       )}
       <EditorContent
         editor={editor}
-        style={{
-          minHeight,
-          padding: "12px 14px",
-          background: "var(--color-surface-card)",
-          outline: "none",
-          fontSize: 14,
-          lineHeight: 1.65,
-          color: "var(--color-text-primary)",
-          cursor: readOnly ? "default" : "text",
+        className="rte-body"
+        style={{ minHeight }}
+      />
+      <MediaPickerDialog
+        open={mediaOpen}
+        onClose={() => setMediaOpen(false)}
+        onPick={(url, alt) => {
+          editor.chain().focus().setImage({ src: url, alt: alt ?? "" }).run();
         }}
-        placeholder={placeholder}
       />
       <style>{`
-        .ProseMirror { outline: none; }
-        .ProseMirror p.is-editor-empty:first-child::before {
+        .rte-shell {
+          border: 1px solid var(--color-border-default);
+          border-radius: var(--radius-md, 8px);
+          overflow: hidden;
+          background: var(--color-surface-card);
+        }
+        .rte-toolbar {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          padding: 8px 10px;
+          border-bottom: 1px solid var(--color-border-subtle);
+          background: var(--color-surface-sunken);
+          position: sticky;
+          top: 0;
+          z-index: 2;
+        }
+        .rte-sep {
+          width: 1px;
+          background: var(--color-border-default);
+          margin: 2px 4px;
+          align-self: stretch;
+        }
+        .rte-body .ProseMirror {
+          outline: none;
+          padding: 16px 18px;
+          font-size: 15px;
+          line-height: 1.7;
+          color: var(--color-text-primary);
+          min-height: inherit;
+        }
+        .rte-body .ProseMirror p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           color: var(--color-text-muted);
           pointer-events: none;
           float: left;
           height: 0;
         }
-        .ProseMirror h1 { font-family: var(--font-display); font-size: 1.5em; margin: .75em 0 .35em; }
-        .ProseMirror h2 { font-family: var(--font-display); font-size: 1.25em; margin: .65em 0 .3em; }
-        .ProseMirror h3 { font-family: var(--font-display); font-size: 1.1em; margin: .55em 0 .25em; }
-        .ProseMirror ul, .ProseMirror ol { padding-left: 1.4em; margin: .5em 0; }
-        .ProseMirror blockquote {
+        .rte-body .ProseMirror h2 {
+          font-family: var(--font-display);
+          font-size: 1.35em;
+          margin: 0.85em 0 0.35em;
+          color: var(--color-heritage-deep, var(--color-text-primary));
+        }
+        .rte-body .ProseMirror h3 {
+          font-family: var(--font-display);
+          font-size: 1.15em;
+          margin: 0.7em 0 0.3em;
+        }
+        .rte-body .ProseMirror ul,
+        .rte-body .ProseMirror ol {
+          padding-left: 1.4em;
+          margin: 0.5em 0;
+        }
+        .rte-body .ProseMirror blockquote {
           border-left: 3px solid var(--color-heritage-accent);
           padding-left: 12px;
           color: var(--color-text-muted);
-          margin: .5em 0;
+          margin: 0.6em 0;
           font-style: italic;
         }
-        .ProseMirror code {
-          background: var(--color-surface-sunken);
-          border-radius: 3px;
-          padding: 1px 4px;
-          font-family: monospace;
-          font-size: .9em;
+        .rte-body .ProseMirror a {
+          color: var(--color-heritage-accent);
+          text-decoration: underline;
+        }
+        .rte-body .ProseMirror img.cms-inline-img,
+        .rte-body .ProseMirror img {
+          max-width: 100%;
+          height: auto;
+          border-radius: var(--radius-sm, 4px);
+          margin: 0.75em 0;
+        }
+        .rte-body .ProseMirror div[data-youtube-video],
+        .rte-body .ProseMirror .cms-yt-embed {
+          margin: 0.85em 0;
+          max-width: 100%;
+        }
+        .rte-body .ProseMirror iframe {
+          max-width: 100%;
+          border-radius: var(--radius-sm, 4px);
         }
       `}</style>
     </div>

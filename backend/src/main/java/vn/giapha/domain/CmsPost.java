@@ -53,6 +53,9 @@ public class CmsPost implements Serializable {
     @Column(name = "author_name")
     private String authorName;
 
+    @Column(name = "cover_object_key")
+    private String coverObjectKey;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private CmsCategory category;
 
@@ -173,6 +176,14 @@ public class CmsPost implements Serializable {
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
+    }
+
+    public String getCoverObjectKey() {
+        return coverObjectKey;
+    }
+
+    public void setCoverObjectKey(String coverObjectKey) {
+        this.coverObjectKey = coverObjectKey;
     }
 
     public CmsCategory getCategory() {
