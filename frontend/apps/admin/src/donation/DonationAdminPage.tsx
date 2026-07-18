@@ -1,5 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle, PlusCircle, Receipt, RefreshCw, TrendingUp, XCircle } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import {
+  BookOpenCheck,
+  CalendarDays,
+  CheckCircle,
+  GraduationCap,
+  PlusCircle,
+  Receipt,
+  RefreshCw,
+  TrendingUp,
+  XCircle,
+} from "lucide-react";
 import { useAuth } from "@giapha/auth";
 import {
   Alert,
@@ -16,18 +27,28 @@ import {
 } from "@giapha/ui";
 import {
   confirmContribution,
+  createFundExpense,
   defaultTreeSlug,
+  getCampaignBalance,
   listCampaignContributions,
+  listClanEvents,
   listDonationCampaignsAdmin,
+  listFundLedger,
+  listScholarshipAwardRounds,
   recordDonationContribution,
   rejectContribution,
   upsertDonationCampaign,
+  type CampaignBalanceDto,
+  type ClanEventView,
   type DonationCampaignDto,
   type DonationCampaignView,
   type DonationContributionDto,
+  type FundLedgerEntryDto,
+  type ScholarshipAwardRoundDto,
 } from "../api/genealogyApi";
 import { apiBase, ApiError } from "../api/http";
 import { AdminPageHeader } from "../components/AdminPageHeader";
+import { fmtCurrency, fmtDateShort } from "../lib/formatters";
 
 const PAGE_SIZE = 20;
 
@@ -125,6 +146,30 @@ const KIND_OPTIONS = [
   { value: "labor",          label: "Công sức" },
 ];
 
+const LEDGER_SOURCE_LABEL: Record<string, string> = {
+  contribution:      "Đóng góp",
+  scholarship_award: "Học bổng",
+  event_expense:     "Chi sự kiện",
+  fund_expense:      "Chi khác",
+};
+
+const LEDGER_SOURCE_TONE: Record<string, BadgeTone> = {
+  contribution:      "success",
+  scholarship_award: "accent",
+  event_expense:     "warning",
+  fund_expense:      "default",
+};
+
+const FUND_EXPENSE_CATEGORY_OPTIONS = [
+  { value: "construction", label: "Xây dựng" },
+  { value: "maintenance",  label: "Bảo trì" },
+  { value: "printing",     label: "In ấn" },
+  { value: "admin",        label: "Hành chính" },
+  { value: "catering",     label: "Ẩm thực" },
+  { value: "transport",    label: "Đi lại" },
+  { value: "other",        label: "Khác" },
+];
+
 type VietQrConfig = { bankBin?: string; accountNo?: string; accountName?: string };
 
 function parseVietQr(payload: string | null | undefined): VietQrConfig {
@@ -196,6 +241,165 @@ function ProgressSection({ cv }: { cv: DonationCampaignView }) {
           <div className="fund-progress-pct">{pct}% hoàn thành</div>
         </>
       )}
+    </div>
+  );
+}
+
+/* ── Số dư thực tế (thu − chi) ── */
+function BalanceLine({ balance }: { balance: CampaignBalanceDto | null }) {
+  if (!balance) return null;
+  return (
+    <div className="fl-balance-line">
+      <span>
+        Đã chi: <strong className="fl-amount-debit">{fmtCurrency(balance.totalExpense)}</strong>
+      </span>
+      <span aria-hidden>·</span>
+      <span>
+        Số dư: <strong className="fl-amount-credit">{fmtCurrency(balance.balance)}</strong>
+      </span>
+      <Link to={`/fund-ledger?campaign=${balance.campaignId}`} className="fl-link">
+        Xem sổ quỹ →
+      </Link>
+    </div>
+  );
+}
+
+/* ── Form ghi khoản chi từ quỹ ── */
+interface FundExpenseFormProps {
+  campaignId: number;
+  slug: string;
+  getToken: () => Promise<string | null>;
+  onSaved: () => Promise<void>;
+  onClose: () => void;
+}
+
+function FundExpenseForm({ campaignId, slug, getToken, onSaved, onClose }: FundExpenseFormProps) {
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("other");
+  const [expenseDate, setExpenseDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [paidByName, setPaidByName] = useState("");
+  const [receiptRef, setReceiptRef] = useState("");
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!description.trim()) { setErr("Nhập mô tả khoản chi."); return; }
+    const amountNum = Number(amount.replace(/[^0-9]/g, ""));
+    if (!Number.isFinite(amountNum) || amountNum <= 0) { setErr("Nhập số tiền hợp lệ."); return; }
+    if (!paidByName.trim()) { setErr("Nhập người thực hiện."); return; }
+    setBusy(true);
+    setErr(null);
+    try {
+      const token = await getToken();
+      await createFundExpense(
+        slug,
+        {
+          campaignId,
+          description: description.trim(),
+          amount: amountNum,
+          category,
+          expenseDate,
+          paidByName: paidByName.trim(),
+          receiptRef: receiptRef.trim() || null,
+          note: note.trim() || null,
+        },
+        token,
+      );
+      await onSaved();
+    } catch (ex) {
+      setErr(ex instanceof ApiError ? ex.message : "Ghi khoản chi thất bại.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="fl-add-form">
+      <div className="fl-add-form-title">Ghi khoản chi từ quỹ</div>
+      {err ? (
+        <div className="fl-alert-gap">
+          <Alert title="Lỗi" variant="error">{err}</Alert>
+        </div>
+      ) : null}
+      <form onSubmit={handleSubmit}>
+        <div className="fl-add-form-grid">
+          <FormField label="Mô tả" required>
+            <Input value={description} onChange={(e) => setDescription(e.target.value)} autoFocus />
+          </FormField>
+          <FormField label="Số tiền (VND)" required>
+            <Input
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              inputMode="numeric"
+              placeholder="VD: 2000000"
+            />
+          </FormField>
+          <FormField label="Hạng mục" required>
+            <Select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              options={FUND_EXPENSE_CATEGORY_OPTIONS}
+            />
+          </FormField>
+          <FormField label="Ngày chi" required>
+            <Input type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} />
+          </FormField>
+          <FormField label="Người thực hiện" required>
+            <Input value={paidByName} onChange={(e) => setPaidByName(e.target.value)} />
+          </FormField>
+          <FormField label="Số biên lai">
+            <Input value={receiptRef} onChange={(e) => setReceiptRef(e.target.value)} />
+          </FormField>
+        </div>
+        <FormField label="Ghi chú">
+          <Input value={note} onChange={(e) => setNote(e.target.value)} />
+        </FormField>
+        <div className="fl-add-form-actions">
+          <Button type="submit" disabled={busy}>
+            {busy ? "Đang lưu…" : "Ghi khoản chi"}
+          </Button>
+          <Button type="button" variant="secondary" onClick={onClose}>Hủy</Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/* ── Bảng sổ thu–chi của chiến dịch ── */
+function CampaignLedgerTable({ entries }: { entries: FundLedgerEntryDto[] }) {
+  if (entries.length === 0) {
+    return (
+      <EmptyState
+        title="Chưa có giao dịch"
+        description="Sổ thu–chi ghi nhận đóng góp đã xác nhận và các khoản chi của chiến dịch."
+      />
+    );
+  }
+  return (
+    <div className="fl-table">
+      <div className="fl-thead fl-thead-ledger" aria-hidden>
+        <span>Ngày</span>
+        <span>Loại</span>
+        <span>Mô tả</span>
+        <span>Số tiền</span>
+      </div>
+      {entries.map((en, i) => (
+        <div key={`${en.sourceType}-${en.sourceId ?? i}`} className="fl-row fl-row-ledger">
+          <div className="fl-row-sub">{fmtDateShort(en.txDate)}</div>
+          <div>
+            <Badge tone={LEDGER_SOURCE_TONE[en.sourceType] ?? "default"}>
+              {LEDGER_SOURCE_LABEL[en.sourceType] ?? en.sourceType}
+            </Badge>
+          </div>
+          <div className="fl-row-label">{en.label}</div>
+          <div className={`fl-amount ${en.direction === "credit" ? "fl-amount-credit" : "fl-amount-debit"}`}>
+            {en.direction === "credit" ? "+" : "−"}{fmtCurrency(en.amount)}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -670,12 +874,24 @@ function CampaignItem({ cv, selected, onClick }: {
 export function DonationAdminPage() {
   const { getAccessToken } = useAuth();
   const slug = defaultTreeSlug();
+  const [searchParams] = useSearchParams();
 
   /* Campaign state */
   const [campaigns, setCampaigns]     = useState<DonationCampaignView[]>([]);
   const [campaignTotal, setCampaignTotal] = useState(0);
   const [campaignPage, setCampaignPage]   = useState(0);
   const [selectedCv, setSelectedCv]       = useState<DonationCampaignView | null>(null);
+
+  /* Detail tab: đóng góp | sổ thu–chi | sự kiện | khuyến học */
+  const [detailTab, setDetailTab]         = useState<"contribs" | "ledger" | "events" | "scholarship">("contribs");
+  const [balance, setBalance]             = useState<CampaignBalanceDto | null>(null);
+  const [ledgerEntries, setLedgerEntries] = useState<FundLedgerEntryDto[]>([]);
+  const [ledgerPage, setLedgerPage]       = useState(0);
+  const [ledgerTotal, setLedgerTotal]     = useState(0);
+  const [ledgerTotalPages, setLedgerTotalPages] = useState(1);
+  const [showFundExpenseForm, setShowFundExpenseForm] = useState(false);
+  const [linkedEvents, setLinkedEvents]   = useState<ClanEventView[]>([]);
+  const [linkedRounds, setLinkedRounds]   = useState<ScholarshipAwardRoundDto[]>([]);
 
   /* Contribution state */
   const [contribs, setContribs]           = useState<DonationContributionDto[]>([]);
@@ -751,6 +967,83 @@ export function DonationAdminPage() {
   useEffect(() => { void reloadCampaigns(); }, [reloadCampaigns]);
   useEffect(() => { setContribPage(0); }, [selectedCv, contribStatus, contribKind, contribSearch]);
   useEffect(() => { void reloadContribs(); }, [reloadContribs]);
+
+  /* Preselect chiến dịch từ ?campaign= (cross-link từ Sự kiện / Khuyến học) */
+  useEffect(() => {
+    const raw = searchParams.get("campaign");
+    if (!raw) return;
+    const cid = Number(raw);
+    if (!Number.isFinite(cid)) return;
+    const cv = campaigns.find((c) => c.campaign.id === cid);
+    if (cv) {
+      setSelectedCv((prev) => (prev?.campaign?.id === cid ? prev : cv));
+    }
+  }, [campaigns, searchParams]);
+
+  /* Số dư thực tế của chiến dịch đang chọn */
+  const reloadBalance = useCallback(async () => {
+    const cid = selectedCv?.campaign?.id;
+    if (cid == null) { setBalance(null); return; }
+    try {
+      const token = await getAccessToken();
+      setBalance(await getCampaignBalance(slug, cid, token));
+    } catch {
+      setBalance(null);
+    }
+  }, [getAccessToken, selectedCv, slug]);
+
+  useEffect(() => { void reloadBalance(); }, [reloadBalance]);
+
+  /* Sổ thu–chi của chiến dịch */
+  const reloadLedger = useCallback(async () => {
+    const cid = selectedCv?.campaign?.id;
+    if (cid == null || detailTab !== "ledger") { setLedgerEntries([]); return; }
+    try {
+      const token = await getAccessToken();
+      const r = await listFundLedger(slug, token, { campaignId: cid, page: ledgerPage, size: PAGE_SIZE });
+      setLedgerEntries(r.content);
+      setLedgerTotal(r.totalElements);
+      setLedgerTotalPages(r.totalPages);
+    } catch {
+      setLedgerEntries([]);
+    }
+  }, [detailTab, getAccessToken, ledgerPage, selectedCv, slug]);
+
+  useEffect(() => { void reloadLedger(); }, [reloadLedger]);
+  useEffect(() => {
+    setDetailTab("contribs");
+    setLedgerPage(0);
+    setShowFundExpenseForm(false);
+  }, [selectedCv?.campaign?.id]);
+
+  /* Sự kiện / đợt trao liên kết với chiến dịch */
+  useEffect(() => {
+    const cid = selectedCv?.campaign?.id;
+    if (cid == null || detailTab !== "events") { setLinkedEvents([]); return; }
+    void (async () => {
+      try {
+        const token = await getAccessToken();
+        const r = await listClanEvents(slug, token, 0, 100);
+        setLinkedEvents(r.content.filter((ev) => ev.event?.linkedCampaignId === cid));
+      } catch {
+        setLinkedEvents([]);
+      }
+    })();
+  }, [detailTab, getAccessToken, selectedCv, slug]);
+
+  useEffect(() => {
+    const cid = selectedCv?.campaign?.id;
+    if (cid == null || detailTab !== "scholarship") { setLinkedRounds([]); return; }
+    void (async () => {
+      try {
+        const token = await getAccessToken();
+        const rounds = await listScholarshipAwardRounds(slug, token);
+        setLinkedRounds(rounds.filter((r) => r.fundCampaignId === cid));
+      } catch {
+        setLinkedRounds([]);
+      }
+    })();
+  }, [detailTab, getAccessToken, selectedCv, slug]);
 
   /* Debounced search */
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -988,10 +1281,58 @@ export function DonationAdminPage() {
               {/* Progress */}
               <ProgressSection cv={selectedCv} />
 
+              {/* Số dư thực tế */}
+              <BalanceLine balance={balance} />
+
               {/* VietQR */}
               <VietQrSection cv={selectedCv} />
 
+              {/* Detail tabs */}
+              <div className="mod-tabs" role="tablist">
+                <button
+                  role="tab"
+                  type="button"
+                  aria-selected={detailTab === "contribs"}
+                  className={`mod-tab${detailTab === "contribs" ? " mod-tab-on" : ""}`}
+                  onClick={() => setDetailTab("contribs")}
+                >
+                  Đóng góp
+                </button>
+                <button
+                  role="tab"
+                  type="button"
+                  aria-selected={detailTab === "ledger"}
+                  className={`mod-tab${detailTab === "ledger" ? " mod-tab-on" : ""}`}
+                  onClick={() => setDetailTab("ledger")}
+                >
+                  <BookOpenCheck size={14} /> Sổ thu–chi
+                </button>
+                {selectedCv.campaign.purpose === "event" ? (
+                  <button
+                    role="tab"
+                    type="button"
+                    aria-selected={detailTab === "events"}
+                    className={`mod-tab${detailTab === "events" ? " mod-tab-on" : ""}`}
+                    onClick={() => setDetailTab("events")}
+                  >
+                    <CalendarDays size={14} /> Sự kiện
+                  </button>
+                ) : null}
+                {selectedCv.campaign.purpose === "scholarship" ? (
+                  <button
+                    role="tab"
+                    type="button"
+                    aria-selected={detailTab === "scholarship"}
+                    className={`mod-tab${detailTab === "scholarship" ? " mod-tab-on" : ""}`}
+                    onClick={() => setDetailTab("scholarship")}
+                  >
+                    <GraduationCap size={14} /> Khuyến học
+                  </button>
+                ) : null}
+              </div>
+
               {/* Contributions */}
+              {detailTab === "contribs" ? (
               <div className="fund-contribs">
                 {/* Tab strip */}
                 <div className="mod-tabs" role="tablist">
@@ -1076,6 +1417,145 @@ export function DonationAdminPage() {
                   </div>
                 )}
               </div>
+              ) : null}
+
+              {/* Sổ thu–chi */}
+              {detailTab === "ledger" ? (
+                <div className="fund-contribs">
+                  <div className="fund-contribs-filter">
+                    <span className="fund-sidebar-label">
+                      Sổ thu–chi ({ledgerTotal})
+                    </span>
+                    <div className="fl-filter-end">
+                      <Button
+                        variant={showFundExpenseForm ? "secondary" : "primary"}
+                        onClick={() => setShowFundExpenseForm((v) => !v)}
+                      >
+                        <PlusCircle size={13} />
+                        {showFundExpenseForm ? "Ẩn form" : "Ghi khoản chi"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {showFundExpenseForm && selectedCv.campaign.id != null ? (
+                    <FundExpenseForm
+                      campaignId={selectedCv.campaign.id}
+                      slug={slug}
+                      getToken={getAccessToken}
+                      onSaved={async () => {
+                        setPageMsg("Đã ghi khoản chi — chờ xác nhận trong Sổ quỹ.");
+                        setShowFundExpenseForm(false);
+                        await Promise.all([reloadLedger(), reloadBalance()]);
+                      }}
+                      onClose={() => setShowFundExpenseForm(false)}
+                    />
+                  ) : null}
+
+                  <CampaignLedgerTable entries={ledgerEntries} />
+
+                  {ledgerTotalPages > 1 && (
+                    <div style={{ paddingTop: "var(--spacing-sm)" }}>
+                      <Pagination
+                        page={ledgerPage + 1}
+                        totalPages={ledgerTotalPages}
+                        totalItems={ledgerTotal}
+                        pageSize={PAGE_SIZE}
+                        onPageChange={(p) => setLedgerPage(p - 1)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {/* Sự kiện liên kết */}
+              {detailTab === "events" ? (
+                <div className="fund-contribs">
+                  <div className="fund-contribs-filter">
+                    <span className="fund-sidebar-label">
+                      Sự kiện dùng quỹ này ({linkedEvents.length})
+                    </span>
+                    <div className="fl-filter-end">
+                      <Link to="/events">
+                        <Button variant="secondary">
+                          <CalendarDays size={13} /> Tạo sự kiện
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                  {linkedEvents.length === 0 ? (
+                    <EmptyState
+                      title="Chưa có sự kiện liên kết"
+                      description="Gắn quỹ này khi tạo/sửa sự kiện trong mục Sự kiện."
+                    />
+                  ) : (
+                    <ul className="fl-mini-list">
+                      {linkedEvents.map((ev) => (
+                        <li key={ev.event?.id} className="fl-mini-item">
+                          <div>
+                            <div className="fl-row-label">{ev.event?.title}</div>
+                            <div className="fl-row-sub">
+                              {fmtDateShort(ev.event?.startSolar)}
+                              {ev.event?.location ? ` · ${ev.event.location}` : ""}
+                              {num(ev.event?.estimatedBudget) > 0
+                                ? ` · dự toán ${fmtCurrency(num(ev.event?.estimatedBudget))}`
+                                : ""}
+                            </div>
+                          </div>
+                          <Link to="/events" className="fl-link">
+                            Mở →
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
+
+              {/* Đợt trao khuyến học liên kết */}
+              {detailTab === "scholarship" ? (
+                <div className="fund-contribs">
+                  <div className="fund-contribs-filter">
+                    <span className="fund-sidebar-label">
+                      Đợt trao dùng quỹ này ({linkedRounds.length})
+                    </span>
+                    <div className="fl-filter-end">
+                      <Link to="/scholarship">
+                        <Button variant="secondary">
+                          <GraduationCap size={13} /> Mở Khuyến học
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                  {linkedRounds.length === 0 ? (
+                    <EmptyState
+                      title="Chưa có đợt trao liên kết"
+                      description="Tạo đợt trao và chọn quỹ này tại mục Khuyến học."
+                    />
+                  ) : (
+                    <ul className="fl-mini-list">
+                      {linkedRounds.map((r) => (
+                        <li key={r.id} className="fl-mini-item">
+                          <div>
+                            <div className="fl-row-label">{r.title}</div>
+                            <div className="fl-row-sub">
+                              {r.status === "open" ? "Đang mở" : r.status === "closed" ? "Đã đóng" : "Nháp"}
+                              {num(r.defaultAmount) > 0
+                                ? ` · ${fmtCurrency(num(r.defaultAmount))}/suất`
+                                : ""}
+                              {r.awardCount != null && r.awardCount > 0
+                                ? ` · ${r.awardCount} suất đã trao`
+                                : ""}
+                            </div>
+                          </div>
+                          <Link to="/scholarship" className="fl-link">
+                            Mở →
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
             </>
           )}
         </div>

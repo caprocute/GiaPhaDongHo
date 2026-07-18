@@ -9,6 +9,7 @@ import {
 } from "@giapha/ui";
 import {
   BookOpen,
+  BookOpenCheck,
   Boxes,
   CalendarDays,
   ClipboardCheck,
@@ -37,6 +38,7 @@ import { PostsListPage } from "./posts/PostsListPage";
 import { DashboardPage } from "./dashboard/DashboardPage";
 import { DonationAdminPage } from "./donation/DonationAdminPage";
 import { EventsAdminPage } from "./events/EventsAdminPage";
+import { FundLedgerPage } from "./fund-ledger/FundLedgerPage";
 import { ModerationInboxPage } from "./moderation/ModerationInboxPage";
 import { NotifyOutboxPage } from "./notifications/NotifyOutboxPage";
 import { ScholarshipAdminPage } from "./scholarship/ScholarshipAdminPage";
@@ -75,9 +77,15 @@ const SIDE_NAV: NavGroup[] = [
     label: "Tộc sự",
     items: [
       { path: "/moderation", label: "Chờ duyệt", icon: ClipboardCheck, badgeKey: "pending" },
+    ],
+  },
+  {
+    label: "Tài chính",
+    items: [
       { path: "/donation", label: "Quỹ công đức", icon: HandCoins },
       { path: "/events", label: "Sự kiện", icon: CalendarDays },
       { path: "/scholarship", label: "Khuyến học", icon: GraduationCap },
+      { path: "/fund-ledger", label: "Sổ quỹ", icon: BookOpenCheck },
     ],
   },
   {
@@ -231,6 +239,7 @@ function CrmRoutes() {
         <Route path="/moderation" element={<ModerationInboxPage />} />
         <Route path="/donation" element={<DonationAdminPage />} />
         <Route path="/events" element={<EventsAdminPage />} />
+        <Route path="/fund-ledger" element={<FundLedgerPage />} />
         <Route path="/notifications" element={<NotifyOutboxPage />} />
         <Route path="/scholarship" element={<ScholarshipAdminPage />} />
         <Route path="/system" element={<SystemModulesPage />} />

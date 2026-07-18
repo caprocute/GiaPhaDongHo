@@ -276,6 +276,15 @@ export type ClanEventDto = {
   lunarJson?: string | null;
   location?: string | null;
   checklistJson?: string | null;
+  /** draft | published | completed | cancelled */
+  status?: string | null;
+  /** ancestral_anniversary | clan_meeting | scholarship_ceremony | grave_renovation | other */
+  type?: string | null;
+  linkedCampaignId?: number | null;
+  estimatedBudget?: number | string | null;
+  description?: string | null;
+  publishedAt?: string | null;
+  cancelledAt?: string | null;
 };
 
 export type ClanEventView = {
@@ -804,5 +813,224 @@ export async function deleteScholarshipAdmin(
   await apiFetch<void>(
     `/api/v1/trees/${encodeURIComponent(slug)}/scholarship-entries/admin/${id}`,
     { method: "DELETE", token },
+  );
+}
+
+/* ══════════════════════════════════════════════════════
+   Tài chính dòng họ — chi phí sự kiện, khoản chi quỹ, sổ quỹ
+   ══════════════════════════════════════════════════════ */
+
+export type ClanEventExpenseDto = {
+  id?: number;
+  eventId?: number;
+  description: string;
+  amount: number | string;
+  /** catering | venue | equipment | printing | transport | ritual_items | other */
+  category: string;
+  /** LocalDate ISO */
+  expenseDate: string;
+  paidByName: string;
+  receiptRef?: string | null;
+  note?: string | null;
+  /** pending | confirmed | rejected */
+  status?: string | null;
+  createdAt?: string | null;
+  confirmedAt?: string | null;
+  confirmedBy?: string | null;
+};
+
+export type FundExpenseDto = {
+  id?: number;
+  campaignId?: number;
+  description: string;
+  amount: number | string;
+  /** construction | maintenance | printing | admin | catering | transport | other */
+  category: string;
+  expenseDate: string;
+  paidByName: string;
+  receiptRef?: string | null;
+  note?: string | null;
+  /** pending | confirmed | rejected */
+  status?: string | null;
+  createdAt?: string | null;
+  confirmedAt?: string | null;
+};
+
+export type FundLedgerEntryDto = {
+  direction: "credit" | "debit";
+  sourceType: "contribution" | "scholarship_award" | "event_expense" | "fund_expense";
+  campaignId?: number;
+  campaignTitle?: string | null;
+  amount: number | string;
+  txDate: string;
+  label: string;
+  sourceId?: number;
+};
+
+export type CampaignBalanceDto = {
+  campaignId: number;
+  totalIncome: number | string;
+  totalExpense: number | string;
+  balance: number | string;
+};
+
+export type FundSummaryDto = {
+  totalIncome: number | string;
+  totalExpense: number | string;
+  balance: number | string;
+  pendingExpenseCount: number;
+};
+
+export async function listEventExpenses(
+  slug: string,
+  eventId: number,
+  token: string | null,
+  page = 0,
+  size = 50,
+): Promise<PageResult<ClanEventExpenseDto>> {
+  return apiFetchPage<ClanEventExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/events/${eventId}/expenses`,
+    { token, page, size },
+  );
+}
+
+export async function createEventExpense(
+  slug: string,
+  eventId: number,
+  dto: ClanEventExpenseDto,
+  token: string | null,
+): Promise<ClanEventExpenseDto> {
+  return apiFetch<ClanEventExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/events/${eventId}/expenses`,
+    { method: "POST", body: dto, token },
+  );
+}
+
+export async function confirmEventExpense(
+  slug: string,
+  eventId: number,
+  expenseId: number,
+  token: string | null,
+): Promise<ClanEventExpenseDto> {
+  return apiFetch<ClanEventExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/events/${eventId}/expenses/${expenseId}/confirm`,
+    { method: "PATCH", token },
+  );
+}
+
+export async function rejectEventExpense(
+  slug: string,
+  eventId: number,
+  expenseId: number,
+  token: string | null,
+): Promise<ClanEventExpenseDto> {
+  return apiFetch<ClanEventExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/events/${eventId}/expenses/${expenseId}/reject`,
+    { method: "PATCH", token },
+  );
+}
+
+export async function listFundExpenses(
+  slug: string,
+  token: string | null,
+  opts?: { campaignId?: number; status?: string; page?: number; size?: number },
+): Promise<PageResult<FundExpenseDto>> {
+  const q = new URLSearchParams();
+  if (opts?.campaignId != null) q.set("campaignId", String(opts.campaignId));
+  if (opts?.status) q.set("status", opts.status);
+  const qs = q.toString() ? `?${q.toString()}` : "";
+  return apiFetchPage<FundExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/fund-expenses${qs}`,
+    { token, page: opts?.page ?? 0, size: opts?.size ?? 20 },
+  );
+}
+
+export async function createFundExpense(
+  slug: string,
+  dto: FundExpenseDto,
+  token: string | null,
+): Promise<FundExpenseDto> {
+  return apiFetch<FundExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/fund-expenses`,
+    { method: "POST", body: dto, token },
+  );
+}
+
+export async function confirmFundExpense(
+  slug: string,
+  expenseId: number,
+  token: string | null,
+): Promise<FundExpenseDto> {
+  return apiFetch<FundExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/fund-expenses/${expenseId}/confirm`,
+    { method: "PATCH", token },
+  );
+}
+
+export async function rejectFundExpense(
+  slug: string,
+  expenseId: number,
+  token: string | null,
+): Promise<FundExpenseDto> {
+  return apiFetch<FundExpenseDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/fund-expenses/${expenseId}/reject`,
+    { method: "PATCH", token },
+  );
+}
+
+export async function listFundLedger(
+  slug: string,
+  token: string | null,
+  opts?: {
+    campaignId?: number;
+    direction?: "credit" | "debit";
+    from?: string;
+    to?: string;
+    page?: number;
+    size?: number;
+  },
+): Promise<PageResult<FundLedgerEntryDto>> {
+  const q = new URLSearchParams();
+  if (opts?.campaignId != null) q.set("campaignId", String(opts.campaignId));
+  if (opts?.direction) q.set("direction", opts.direction);
+  if (opts?.from) q.set("from", opts.from);
+  if (opts?.to) q.set("to", opts.to);
+  const qs = q.toString() ? `?${q.toString()}` : "";
+  return apiFetchPage<FundLedgerEntryDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/fund-ledger${qs}`,
+    { token, page: opts?.page ?? 0, size: opts?.size ?? 20 },
+  );
+}
+
+export async function getCampaignBalance(
+  slug: string,
+  campaignId: number,
+  token: string | null,
+): Promise<CampaignBalanceDto> {
+  return apiFetch<CampaignBalanceDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/donation-campaigns/${campaignId}/balance`,
+    { token },
+  );
+}
+
+export async function getFundSummary(
+  slug: string,
+  token: string | null,
+): Promise<FundSummaryDto> {
+  return apiFetch<FundSummaryDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/fund-summary`,
+    { token },
+  );
+}
+
+export async function changeEventStatus(
+  slug: string,
+  eventId: number,
+  status: "published" | "completed" | "cancelled",
+  token: string | null,
+): Promise<ClanEventDto> {
+  return apiFetch<ClanEventDto>(
+    `/api/v1/trees/${encodeURIComponent(slug)}/events/${eventId}/status`,
+    { method: "PATCH", body: { status }, token },
   );
 }

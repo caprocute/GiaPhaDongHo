@@ -3504,3 +3504,235 @@ code {
   .ml-lightbox-sidebar { display: none; }
   .ml-lightbox-box { max-width: 100vw; width: 100vw; border-radius: 0; max-height: 100dvh; }
 }
+
+/* ── Fund Ledger (sổ quỹ) ──────────────────────────────────────────────────── */
+.fl-table {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.fl-thead,
+.fl-row {
+  display: grid;
+  gap: var(--spacing-sm);
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.fl-thead {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  background: var(--color-surface-sunken);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.fl-row {
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.fl-row:last-child {
+  border-bottom: none;
+}
+
+.fl-thead-ledger,
+.fl-row-ledger {
+  grid-template-columns: 90px 110px 1fr 130px;
+}
+
+.fl-thead-full,
+.fl-row-full {
+  grid-template-columns: 90px 50px 1fr 130px 110px;
+}
+
+.fl-thead-expense,
+.fl-row-expense {
+  grid-template-columns: 1fr 110px 90px 90px 110px 110px 150px;
+}
+
+.fl-row-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.fl-row-sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.fl-amount {
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.fl-amount-credit {
+  color: var(--color-status-success);
+}
+
+.fl-amount-debit {
+  color: var(--color-status-danger);
+}
+
+.fl-row-acts {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.fl-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-card);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.fl-action-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.fl-action-btn-confirm {
+  border-color: var(--color-status-success);
+  color: var(--color-status-success);
+}
+
+.fl-action-btn-reject {
+  border-color: var(--color-status-danger);
+  color: var(--color-status-danger);
+}
+
+.fl-add-form {
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.fl-add-form-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.fl-add-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.fl-add-form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+}
+
+.fl-alert-gap {
+  margin-bottom: var(--spacing-sm);
+}
+
+.fl-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-action-primary-bg);
+  text-decoration: none;
+}
+
+.fl-link:hover {
+  text-decoration: underline;
+}
+
+.fl-budget-line {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs) 0;
+}
+
+.fl-budget-line strong {
+  color: var(--color-text-primary);
+}
+
+.fl-balance-line {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  padding: var(--spacing-xs) 0 var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border-subtle);
+  margin-bottom: var(--spacing-sm);
+}
+
+.fl-mini-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-card);
+  overflow: hidden;
+}
+
+.fl-mini-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.fl-mini-item:last-child {
+  border-bottom: none;
+}
+
+.fl-filter-end {
+  margin-left: auto;
+  display: flex;
+  gap: var(--spacing-xs);
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .fl-thead {
+    display: none;
+  }
+
+  .fl-row-ledger,
+  .fl-row-full,
+  .fl-row-expense {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fl-amount {
+    text-align: left;
+  }
+
+  .fl-add-form-grid {
+    grid-template-columns: 1fr;
+  }
+}

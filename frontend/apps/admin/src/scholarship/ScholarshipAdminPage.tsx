@@ -27,6 +27,7 @@ import {
   defaultTreeSlug,
   deleteScholarshipAdmin,
   deleteScholarshipAwardRound,
+  getCampaignBalance,
   getScholarshipStats,
   grantScholarshipAwards,
   listDonationCampaignsAdmin,
@@ -35,6 +36,7 @@ import {
   reviewScholarshipEntry,
   upsertScholarshipAdmin,
   upsertScholarshipAwardRound,
+  type CampaignBalanceDto,
   type DonationCampaignDto,
   type ScholarshipAwardRoundDto,
   type ScholarshipEntryDto,
@@ -42,6 +44,7 @@ import {
 } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
 import { AdminPageHeader } from "../components/AdminPageHeader";
+import { fmtCurrency } from "../lib/formatters";
 
 const PAGE_SIZE = 20;
 
@@ -222,6 +225,24 @@ export function ScholarshipAdminPage() {
   }, []);
 
   const hasOpenRound = stats?.awardRoundId != null;
+
+  const [fundBalance, setFundBalance] = useState<CampaignBalanceDto | null>(null);
+
+  useEffect(() => {
+    const cid = stats?.fundCampaignId;
+    if (cid == null || !hasOpenRound) {
+      setFundBalance(null);
+      return;
+    }
+    void (async () => {
+      try {
+        const token = await getAccessToken();
+        setFundBalance(await getCampaignBalance(slug, cid, token));
+      } catch {
+        setFundBalance(null);
+      }
+    })();
+  }, [getAccessToken, hasOpenRound, slug, stats?.fundCampaignId]);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -786,6 +807,15 @@ export function ScholarshipAdminPage() {
                   <>
                     Nguồn tiền: quỹ «{stats.fundTitle}» còn{" "}
                     <strong>{formatVndCompact(fundRemaining)}</strong>
+                    {fundBalance != null ? (
+                      <>
+                        {" "}
+                        · <span className="fl-amount-credit">Quỹ còn: {fmtCurrency(fundBalance.balance)}</span>{" "}
+                        <Link to={`/fund-ledger?campaign=${fundBalance.campaignId}`} className="fl-link">
+                          Xem sổ quỹ →
+                        </Link>
+                      </>
+                    ) : null}
                     {awaitingAward > 0 ? ` · ${awaitingAward} hồ sơ bảng vàng chưa ghi suất` : null}
                     {stats?.awardRoundOpenFrom || stats?.awardRoundOpenTo ? (
                       <>
