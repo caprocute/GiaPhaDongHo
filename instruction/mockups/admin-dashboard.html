@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Dashboard CRM</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;--ok-bd:#A5D6A7;
+  --warn:#F57C00;--warn-bg:#FFF8E1;--warn-bd:#FFE082;
+  --err:#C62828;--err-bg:#FFEBEE;--err-bd:#EF9A9A;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 14px rgba(0,0,0,.12);
+}
+body{font-family:var(--fb);background:var(--s2);color:var(--ink);min-height:100vh}
+.page{max-width:1200px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:18px}
+.section-sep{border-top:2px dashed var(--bd);padding-top:24px;margin-top:4px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.8px;margin-bottom:12px}
+
+/* Top bar */
+.crm-top{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh)}
+.crm-top h2{font-family:var(--fd);font-size:18px;color:var(--ink);flex:1;margin:0}
+
+/* Global search ⌘K */
+.crm-search{position:relative;min-width:300px}
+.crm-search-input{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);padding:7px 12px;cursor:text;font-size:13px;color:var(--ink-m);transition:all .15s}
+.crm-search-input:hover{border-color:var(--gold-bd)}
+.crm-search-input input{border:none;background:transparent;outline:none;font-size:13px;flex:1;color:var(--ink)}
+.crm-search-input input::placeholder{color:var(--ink-m)}
+.crm-search-input kbd{margin-left:auto;font-size:10px;background:var(--s3);border:1px solid var(--bd);border-radius:3px;padding:1px 5px;font-family:monospace;color:var(--ink-m);white-space:nowrap}
+
+/* Search dropdown */
+.search-dropdown{position:absolute;top:calc(100% + 5px);left:0;right:0;background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh-md);z-index:100;overflow:hidden}
+.search-group-hd{padding:7px 12px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-m)}
+.search-result{display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--bd);text-decoration:none;color:inherit}
+.search-result:last-child{border-bottom:none}
+.search-result:hover{background:var(--gold-pale)}
+.search-result.active{background:var(--gold-pale)}
+.search-icon{width:30px;height:30px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid var(--bd)}
+.search-icon.person{background:var(--ok-bg);border-color:var(--ok-bd)}
+.search-icon.post{background:var(--s3)}
+.search-icon.event{background:var(--warn-bg);border-color:var(--warn-bd)}
+.search-result-text{flex:1;min-width:0}
+.search-result-title{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-result-meta{font-size:11px;color:var(--ink-m);margin-top:1px}
+.search-result-type{font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--s3);color:var(--ink-m);flex-shrink:0}
+.search-footer{padding:8px 12px;text-align:center;font-size:11px;color:var(--gold);font-weight:600;border-top:1px solid var(--bd);cursor:pointer}
+.search-footer:hover{background:var(--gold-pale)}
+
+.crm-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;font-family:var(--fd);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* KPI row */
+.crm-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--bd)}
+.kpi.ok::before{background:var(--ok)}
+.kpi.warn::before{background:var(--warn)}
+.kpi.gold::before{background:var(--gold)}
+.kpi.info::before{background:#1565C0}
+.kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.6px;margin-bottom:6px}
+.kpi-val{font-family:var(--fd);font-size:28px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.kpi-delta{font-size:11px;color:var(--ink-m)}
+.kpi-delta .up{color:var(--ok)}
+.kpi-delta .dn{color:var(--warn)}
+.kpi-delta .warn{color:var(--warn)}
+.kpi-link{display:block;margin-top:10px;font-size:11px;color:var(--gold);font-weight:600;text-decoration:none}
+
+/* Progress mini */
+.kpi-progress{height:4px;background:var(--s3);border-radius:2px;margin-top:10px}
+.kpi-progress-bar{height:4px;background:var(--gold);border-radius:2px}
+
+/* Two-column layout */
+.crm-cols{display:grid;grid-template-columns:1fr 360px;gap:16px}
+
+/* Panel */
+.panel{background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh)}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--bd);background:var(--s2);border-radius:var(--r) var(--r) 0 0}
+.panel-hd h3{font-family:var(--fd);font-size:15px;color:var(--ink);margin:0}
+.panel-link{font-size:12px;color:var(--gold);text-decoration:none;font-weight:600}
+.panel-body{padding:0}
+.panel-footer{padding:10px 16px;border-top:1px solid var(--bd);text-align:center;background:var(--s2);border-radius:0 0 var(--r) var(--r)}
+.panel-footer a{font-size:12px;color:var(--gold);font-weight:600}
+
+/* Change requests */
+.crm-req{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd);font-size:13px}
+.crm-req:last-child{border-bottom:none}
+.crm-req-avatar{width:34px;height:34px;border-radius:50%;background:var(--s3);color:var(--ink-m);font-family:var(--fd);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.crm-req-avatar.overdue{background:#ffccbc;color:#bf360c}
+.crm-req-who{flex:1;min-width:0}
+.crm-req-who b{display:block;font-size:13px;color:var(--ink);margin-bottom:1px}
+.crm-req-who .detail{font-size:12px;color:var(--ink-m);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-req-who small{font-size:10px;color:var(--ink-m)}
+.crm-req-who small.ov{color:var(--err);font-weight:600}
+.chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;flex-shrink:0;align-self:flex-start;margin-top:2px}
+.chip-add{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.chip-mod{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+.crm-req-acts{display:flex;gap:4px;flex-shrink:0;align-self:center}
+.act-ok{padding:4px 10px;border-radius:var(--r-sm);border:none;background:var(--ok);color:#fff;font-size:11px;font-weight:700;cursor:pointer}
+.act-no{padding:4px 10px;border-radius:var(--r-sm);border:1px solid var(--bd);background:#fff;color:var(--ink-m);font-size:11px;font-weight:600;cursor:pointer}
+.crm-empty{padding:20px 16px;text-align:center;font-size:13px;color:var(--ink-m)}
+
+/* Anniversaries */
+.crm-gio-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--bd);font-size:13px}
+.crm-gio-row:last-child{border-bottom:none}
+.crm-cal{display:flex;flex-direction:column;align-items:center;background:var(--gold-pale);border:1px solid var(--gold-bd);border-radius:var(--r-sm);padding:4px 8px;min-width:50px;flex-shrink:0}
+.crm-cal-mm{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--gold);letter-spacing:.5px}
+.crm-cal-dd{font-family:var(--fd);font-size:19px;font-weight:700;color:var(--ink);line-height:1.1}
+.crm-gio-info{flex:1;min-width:0}
+.crm-gio-info b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crm-gio-info small{font-size:11px;color:var(--ink-m)}
+.crm-gio-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd);flex-shrink:0}
+.crm-gio-tag.sent{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+
+/* Audit log */
+.crm-audit{list-style:none;padding:0}
+.crm-audit li{display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--bd);font-size:12px;color:var(--ink-m)}
+.crm-audit li:last-child{border-bottom:none}
+.crm-audit li b{color:var(--ink);font-size:12px;flex-shrink:0}
+.crm-audit .action{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crm-audit .audit-t{font-size:10px;white-space:nowrap;flex-shrink:0}
+.audit-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.audit-dot.create{background:var(--ok)}
+.audit-dot.update{background:var(--gold)}
+.audit-dot.delete{background:var(--err)}
+
+/* Quick actions grid */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.quick-act{display:flex;flex-direction:column;align-items:center;gap:5px;padding:14px 8px;background:#fff;border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;transition:all .15s;text-align:center;text-decoration:none;color:var(--ink)}
+.quick-act:hover{border-color:var(--gold-bd);background:var(--gold-pale);transform:translateY(-1px)}
+.quick-act-icon{font-size:20px}
+.quick-act-label{font-size:11px;font-weight:600;color:var(--ink-m)}
+
+@media(max-width:900px){
+  .crm-kpis{grid-template-columns:repeat(2,1fr)}
+  .crm-cols{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ===== STATE 1: Normal (no search) ===== -->
+  <p class="section-label">Trạng thái bình thường</p>
+
+  <!-- Top bar -->
+  <div class="crm-top">
+    <h2>Chào buổi sáng, Trung</h2>
+    <div class="crm-search">
+      <div class="crm-search-input">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" style="color:var(--ink-m);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Tìm người, bài viết, sự kiện…" readonly>
+        <kbd>⌘K</kbd>
+      </div>
+    </div>
+    <div class="crm-avatar">TB</div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="crm-kpis">
+    <div class="kpi ok">
+      <div class="kpi-lbl">Thành viên trong phả</div>
+      <div class="kpi-val">3.241</div>
+      <div class="kpi-delta"><span class="up">↑ 12</span> thêm tháng này · 6 module đang bật</div>
+      <a href="#" class="kpi-link">Xem danh sách →</a>
+    </div>
+    <div class="kpi warn">
+      <div class="kpi-lbl">Chờ duyệt</div>
+      <div class="kpi-val">7</div>
+      <div class="kpi-delta"><span class="dn">⚠ 2 tự khai quá 48 giờ</span></div>
+      <a href="#" class="kpi-link">Mở hàng đợi →</a>
+    </div>
+    <div class="kpi info">
+      <div class="kpi-lbl">Giỗ tháng này</div>
+      <div class="kpi-val">8</div>
+      <div class="kpi-delta">Gần nhất: 05/07 ÂL — Hoàng Ngọc Bình</div>
+      <a href="#" class="kpi-link">Xem lịch giỗ →</a>
+    </div>
+    <div class="kpi gold">
+      <div class="kpi-lbl">Quỹ xây nhà thờ 2025</div>
+      <div class="kpi-val">127,5tr</div>
+      <div class="kpi-delta">63% mục tiêu 200tr</div>
+      <div class="kpi-progress"><div class="kpi-progress-bar" style="width:63%"></div></div>
+      <a href="#" class="kpi-link">Xem chiến dịch →</a>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:14px">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.7px;margin-bottom:10px">Thao tác nhanh</div>
+    <div class="quick-grid">
+      <a href="#" class="quick-act"><span class="quick-act-icon">👤</span><span class="quick-act-label">Thêm người</span></a>
+      <a href="#" class="quick-act"><span class="quick-act-icon">📝</span><span class="quick-act-label">Viết bài</span></a>
+      <a href="#" class="quick-act"><span class="quick-act-icon">✅</span><span class="quick-act-label">Duyệt (7)</span></a>
+      <a href="#" class="quick-act"><span class="quick-act-icon">📅</span><span class="quick-act-label">Tạo sự kiện</span></a>
+      <a href="#" class="quick-act"><span class="quick-act-icon">💰</span><span class="quick-act-label">Ghi nhận quỹ</span></a>
+      <a href="#" class="quick-act"><span class="quick-act-icon">🔔</span><span class="quick-act-label">Gửi nhắc giỗ</span></a>
+    </div>
+  </div>
+
+  <!-- Two-column -->
+  <div class="crm-cols">
+
+    <!-- Pending requests -->
+    <div class="panel">
+      <div class="panel-hd">
+        <h3>Tự khai của con cháu — chờ duyệt</h3>
+        <a href="#" class="panel-link">Mở hàng đợi →</a>
+      </div>
+      <div class="panel-body">
+        <div class="crm-req">
+          <div class="crm-req-avatar">MQ</div>
+          <div class="crm-req-who">
+            <b>Hoàng Minh Quang</b>
+            <div class="detail">Cập nhật ảnh đại diện và thêm thông tin nghề nghiệp</div>
+            <small>Mã A147 · gửi 3 giờ trước</small>
+          </div>
+          <span class="chip chip-mod">Sửa 1 trường</span>
+          <div class="crm-req-acts"><button class="act-ok">Duyệt</button><button class="act-no">Từ chối</button></div>
+        </div>
+        <div class="crm-req">
+          <div class="crm-req-avatar">HL</div>
+          <div class="crm-req-who">
+            <b>Hoàng Thị Lan</b>
+            <div class="detail">Thêm con gái Hoàng Ngọc Linh vào hồ sơ gia đình</div>
+            <small>Mã B082 · gửi 8 giờ trước</small>
+          </div>
+          <span class="chip chip-add">+1 người</span>
+          <div class="crm-req-acts"><button class="act-ok">Duyệt</button><button class="act-no">Từ chối</button></div>
+        </div>
+        <div class="crm-req">
+          <div class="crm-req-avatar overdue">HK</div>
+          <div class="crm-req-who">
+            <b>Hoàng Đình Khoa</b>
+            <div class="detail">Thêm album ảnh gia đình thế hệ thứ 4</div>
+            <small class="ov">Mã D201 · gửi 51 giờ trước — QUÁ 48H</small>
+          </div>
+          <span class="chip chip-add">+1 ảnh</span>
+          <div class="crm-req-acts"><button class="act-ok">Duyệt</button><button class="act-no">Từ chối</button></div>
+        </div>
+        <div class="crm-req">
+          <div class="crm-req-avatar overdue">HP</div>
+          <div class="crm-req-who">
+            <b>Hoàng Thị Phương</b>
+            <div class="detail">Bổ sung thông tin học vấn và sự nghiệp</div>
+            <small class="ov">Mã A398 · gửi 54 giờ trước — QUÁ 48H</small>
+          </div>
+          <span class="chip chip-mod">Sửa 1 trường</span>
+          <div class="crm-req-acts"><button class="act-ok">Duyệt</button><button class="act-no">Từ chối</button></div>
+        </div>
+      </div>
+      <div class="panel-footer"><a href="#">Xem tất cả 7 yêu cầu chờ duyệt →</a></div>
+    </div>
+
+    <!-- Right col: Anniversaries + Audit -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <div class="panel">
+        <div class="panel-hd">
+          <h3>Giỗ sắp tới</h3>
+          <a href="#" class="panel-link">Cấu hình nhắc →</a>
+        </div>
+        <div class="panel-body">
+          <div class="crm-gio-row">
+            <div class="crm-cal"><span class="crm-cal-mm">Th.7 ÂL</span><span class="crm-cal-dd">05</span></div>
+            <div class="crm-gio-info"><b>Hoàng Ngọc Bình</b><small>Mã A001 · Đời 3 · còn 3 ngày</small></div>
+            <span class="crm-gio-tag">Chưa nhắc</span>
+          </div>
+          <div class="crm-gio-row">
+            <div class="crm-cal"><span class="crm-cal-mm">Th.7 ÂL</span><span class="crm-cal-dd">18</span></div>
+            <div class="crm-gio-info"><b>Hoàng Thị Mây</b><small>Mã B022 · Đời 4 · còn 16 ngày</small></div>
+            <span class="crm-gio-tag sent">Đã nhắc</span>
+          </div>
+          <div class="crm-gio-row">
+            <div class="crm-cal"><span class="crm-cal-mm">Th.8 ÂL</span><span class="crm-cal-dd">03</span></div>
+            <div class="crm-gio-info"><b>Hoàng Văn Đức</b><small>Mã A005 · Đời 2</small></div>
+            <span class="crm-gio-tag">Chưa nhắc</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-hd">
+          <h3>Hoạt động gần đây</h3>
+          <a href="#" class="panel-link">Nhật ký đầy đủ →</a>
+        </div>
+        <div class="panel-body">
+          <ul class="crm-audit">
+            <li><span class="audit-dot update"></span><b>admin</b><span class="action">duyệt thay đổi — Person A091</span><span class="audit-t">14:32</span></li>
+            <li><span class="audit-dot create"></span><b>Hoàng MQ</b><span class="action">đăng ký đóng góp 500.000đ</span><span class="audit-t">13:55</span></li>
+            <li><span class="audit-dot create"></span><b>admin</b><span class="action">tạo chiến dịch quỹ 2025</span><span class="audit-t">11:20</span></li>
+            <li><span class="audit-dot update"></span><b>system</b><span class="action">gửi 14 tin nhắc giỗ</span><span class="audit-t">08:00</span></li>
+            <li><span class="audit-dot create"></span><b>Hoàng TL</b><span class="action">tự khai hồ sơ B201</span><span class="audit-t">hôm qua</span></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== STATE 2: Search active ===== -->
+  <div class="section-sep">
+    <p class="section-label">Trạng thái: Đang tìm kiếm — nhập "Hoàng Minh"</p>
+  </div>
+
+  <div class="crm-top">
+    <h2>Chào buổi sáng, Trung</h2>
+    <div class="crm-search">
+      <div class="crm-search-input" style="border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.1);background:#fff">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" style="color:var(--gold);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" value="Hoàng Minh" style="color:var(--ink)">
+        <span style="font-size:11px;color:var(--ink-m);cursor:pointer">✕</span>
+      </div>
+
+      <!-- Dropdown results -->
+      <div class="search-dropdown">
+        <div class="search-group-hd">Thành viên</div>
+        <div class="search-result active">
+          <div class="search-icon person">👤</div>
+          <div class="search-result-text">
+            <div class="search-result-title">Hoàng <b>Minh</b> Quang</div>
+            <div class="search-result-meta">Mã A091 · Đời 5 · Còn sống</div>
+          </div>
+          <span class="search-result-type">Thành viên</span>
+        </div>
+        <div class="search-result">
+          <div class="search-icon person">👤</div>
+          <div class="search-result-text">
+            <div class="search-result-title">Hoàng <b>Minh</b> Anh</div>
+            <div class="search-result-meta">Mã A203 · Đời 5 · Còn sống</div>
+          </div>
+          <span class="search-result-type">Thành viên</span>
+        </div>
+        <div class="search-result">
+          <div class="search-icon person">👤</div>
+          <div class="search-result-text">
+            <div class="search-result-title">Hoàng <b>Minh</b> Khoa</div>
+            <div class="search-result-meta">Mã A089 · Đời 5 · Còn sống</div>
+          </div>
+          <span class="search-result-type">Thành viên</span>
+        </div>
+        <div class="search-group-hd">Bài viết</div>
+        <div class="search-result">
+          <div class="search-icon post">📰</div>
+          <div class="search-result-text">
+            <div class="search-result-title">Tác giả: <b>Hoàng Minh</b> An — Lịch sử chi Đông</div>
+            <div class="search-result-meta">Đã xuất bản · 10/03/2025</div>
+          </div>
+          <span class="search-result-type">Bài viết</span>
+        </div>
+        <div class="search-group-hd">Đóng góp quỹ</div>
+        <div class="search-result">
+          <div class="search-icon event">💰</div>
+          <div class="search-result-text">
+            <div class="search-result-title"><b>Hoàng Minh</b> Quang — 500.000đ</div>
+            <div class="search-result-meta">Quỹ xây nhà thờ 2025 · Chờ xác nhận</div>
+          </div>
+          <span class="search-result-type">Công đức</span>
+        </div>
+        <div class="search-footer">Xem tất cả kết quả cho "Hoàng Minh" → </div>
+      </div>
+    </div>
+    <div class="crm-avatar">TB</div>
+  </div>
+
+</div>
+</body>
+</html>

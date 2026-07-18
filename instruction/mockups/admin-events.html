@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Sự kiện dòng họ</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;--ok-bd:#A5D6A7;
+  --warn:#F57C00;--warn-bg:#FFF8E1;--warn-bd:#FFE082;
+  --err:#C62828;--err-bg:#FFEBEE;--err-bd:#EF9A9A;
+  --info:#1565C0;--info-bg:#E3F2FD;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 12px rgba(0,0,0,.12);
+}
+body{font-family:var(--fb);background:var(--s2);color:var(--ink);min-height:100vh}
+.page{max-width:1140px;margin:0 auto;padding:24px 20px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.page-head h1{font-family:var(--fd);font-size:26px;color:var(--ink)}
+.page-head p{font-size:13px;color:var(--ink-m);margin-top:4px;max-width:500px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold-l)}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--bd)}.btn-sec:hover{background:var(--s2)}
+.btn-ok{background:var(--ok);color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:3px}
+
+/* tabs */
+.tabs{display:flex;gap:4px;background:var(--s3);padding:5px;border-radius:var(--r);margin-bottom:24px;width:fit-content}
+.tab{padding:7px 18px;border-radius:var(--r-sm);border:none;background:none;font-size:13px;font-weight:600;color:var(--ink-m);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.tab.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.tab-ct{font-size:11px;font-weight:800;padding:1px 6px;border-radius:10px}
+
+/* stat row */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.6px;margin-bottom:5px}
+.stat-val{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--ink)}
+.stat-sub{font-size:11px;color:var(--ink-m);margin-top:2px}
+
+/* event cards grid */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;margin-bottom:24px}
+.ev-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:all .15s}
+.ev-card:hover{border-color:var(--gold-bd);box-shadow:var(--sh-md);transform:translateY(-1px)}
+.ev-card.active{border-color:var(--gold);border-width:2px}
+.ev-banner{height:6px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold-l) 100%)}
+.ev-banner.past{background:linear-gradient(90deg,var(--bd) 0%,var(--s3) 100%)}
+.ev-body{padding:16px}
+.ev-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px}
+.ev-head h3{font-family:var(--fd);font-size:15px;color:var(--ink);line-height:1.3}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-up{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.badge-past{background:var(--s3);color:var(--ink-m)}
+.badge-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+.ev-meta{font-size:12px;color:var(--ink-m);display:flex;flex-direction:column;gap:3px;margin-bottom:12px}
+.ev-meta span{display:flex;align-items:center;gap:5px}
+.ev-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.ev-stat{text-align:center;background:var(--s2);border-radius:var(--r-sm);padding:8px 4px}
+.ev-stat-val{font-family:var(--fd);font-size:18px;font-weight:700;color:var(--ink)}
+.ev-stat-lbl{font-size:10px;color:var(--ink-m);margin-top:2px}
+.ev-checklist{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.ev-task{font-size:11px;padding:2px 8px;background:var(--s2);border-radius:10px;color:var(--ink2)}
+.ev-task.done{background:var(--ok-bg);color:var(--ok);text-decoration:line-through}
+.ev-actions{display:flex;gap:6px;padding-top:12px;border-top:1px solid var(--bd)}
+
+/* RSVP section */
+.rsvp-section{background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh)}
+.rsvp-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd);background:var(--s2);border-radius:var(--r) var(--r) 0 0}
+.rsvp-header h2{font-family:var(--fd);font-size:17px;color:var(--ink)}
+.rsvp-filter{display:flex;gap:8px}
+.fi{padding:6px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:13px;background:#fff;outline:none}
+.fi:focus{border-color:var(--gold)}
+
+.rsvp-table-head{display:grid;grid-template-columns:2fr 80px 60px 60px 180px 60px;gap:12px;padding:8px 18px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px}
+.rsvp-row{display:grid;grid-template-columns:2fr 80px 60px 60px 180px 60px;gap:12px;padding:11px 18px;border-bottom:1px solid var(--bd);align-items:center;font-size:13px;transition:background .12s}
+.rsvp-row:hover{background:var(--s2)}
+.rsvp-row:last-child{border-bottom:none}
+.rsvp-household{font-weight:600;color:var(--ink)}
+.rsvp-rep{font-size:11px;color:var(--ink-m);margin-top:2px}
+.assignments{display:flex;flex-wrap:wrap;gap:3px}
+.assign-tag{font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--bd);background:#fff;cursor:pointer;color:var(--ink-m);transition:all .15s}
+.assign-tag:hover{border-color:var(--gold);color:var(--gold)}
+.assign-tag.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+.assign-tag.ok{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+
+/* form */
+.new-event-form{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:24px;box-shadow:var(--sh)}
+.new-event-form h2{font-family:var(--fd);font-size:20px;color:var(--ink);margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.fl label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;display:block;margin-bottom:4px}
+.fi-full{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:13px;outline:none}
+.fi-full:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.1)}
+.checklist-builder{border:1px solid var(--bd);border-radius:var(--r-sm);padding:10px;background:var(--s2)}
+.checklist-item{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:var(--r-sm);background:#fff;margin-bottom:4px;border:1px solid var(--bd)}
+.checklist-item input{flex:1;border:none;outline:none;font-size:13px;background:transparent}
+.checklist-item .rm{cursor:pointer;color:var(--ink-m);font-size:16px;flex-shrink:0}.checklist-item .rm:hover{color:var(--err)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:10px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <div>
+      <h1>Sự kiện dòng họ</h1>
+      <p>Tổ chức họp họ, giỗ tổ — quản lý đăng ký tham dự, phân công ban tổ chức và theo dõi hậu cần.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sec btn-sm">⬇ Xuất danh sách</button>
+      <button class="btn btn-gold btn-sm">+ Tạo sự kiện</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-lbl">Sắp tới</div>
+      <div class="stat-val" style="color:var(--ok)">2 sự kiện</div>
+      <div class="stat-sub">Gần nhất: 15/08/2025</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Đăng ký tham dự</div>
+      <div class="stat-val">148 hộ</div>
+      <div class="stat-sub">342 người · 67 xe</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Đã phân công</div>
+      <div class="stat-val">86%</div>
+      <div class="stat-sub">Còn 20 hộ chưa có ban</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Sự kiện đã tổ chức</div>
+      <div class="stat-val">12</div>
+      <div class="stat-sub">từ 2019 đến nay</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab on">📋 Danh sách sự kiện</button>
+    <button class="tab">👥 Đăng ký tham dự <span class="tab-ct" style="background:var(--warn-bg);color:var(--warn)">148</span></button>
+    <button class="tab">+ Tạo sự kiện</button>
+  </div>
+
+  <!-- Event cards -->
+  <div class="ev-grid">
+
+    <!-- Upcoming -->
+    <div class="ev-card active">
+      <div class="ev-banner"></div>
+      <div class="ev-body">
+        <div class="ev-head">
+          <h3>Giỗ Tổ lần thứ 12 — Năm Ất Tỵ</h3>
+          <span class="badge badge-up">Sắp tới</span>
+        </div>
+        <div class="ev-meta">
+          <span>📅 Thứ Sáu, 15/08/2025 · 07:00 — 17:00</span>
+          <span>🌙 20 tháng 6 Ất Tỵ</span>
+          <span>📍 Nhà từ đường — Phú Xuyên, Hà Nội</span>
+        </div>
+        <div class="ev-stats">
+          <div class="ev-stat">
+            <div class="ev-stat-val" style="color:var(--gold)">148</div>
+            <div class="ev-stat-lbl">Hộ đăng ký</div>
+          </div>
+          <div class="ev-stat">
+            <div class="ev-stat-val">342</div>
+            <div class="ev-stat-lbl">Người tham dự</div>
+          </div>
+          <div class="ev-stat">
+            <div class="ev-stat-val">67</div>
+            <div class="ev-stat-lbl">Xe ô tô</div>
+          </div>
+        </div>
+        <div class="ev-checklist">
+          <span class="ev-task done">Ban tế (12)</span>
+          <span class="ev-task done">Hậu cần (24)</span>
+          <span class="ev-task">Khánh tiết (18)</span>
+          <span class="ev-task">Tiếp tân (30)</span>
+        </div>
+        <div class="ev-actions">
+          <button class="btn btn-gold btn-sm" style="flex:1">👥 Xem đăng ký</button>
+          <button class="btn btn-sec btn-sm">⚙ Cài đặt</button>
+          <button class="btn btn-sec btn-sm">⬇ Xuất DS</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Another upcoming -->
+    <div class="ev-card">
+      <div class="ev-banner"></div>
+      <div class="ev-body">
+        <div class="ev-head">
+          <h3>Họp họ thường niên 2025</h3>
+          <span class="badge badge-up">Sắp tới</span>
+        </div>
+        <div class="ev-meta">
+          <span>📅 Chủ Nhật, 12/10/2025 · 08:00</span>
+          <span>📍 Hội trường UBND xã Phú Xuyên</span>
+        </div>
+        <div class="ev-stats">
+          <div class="ev-stat">
+            <div class="ev-stat-val" style="color:var(--gold)">52</div>
+            <div class="ev-stat-lbl">Hộ đăng ký</div>
+          </div>
+          <div class="ev-stat">
+            <div class="ev-stat-val">89</div>
+            <div class="ev-stat-lbl">Người</div>
+          </div>
+          <div class="ev-stat">
+            <div class="ev-stat-val">21</div>
+            <div class="ev-stat-lbl">Xe</div>
+          </div>
+        </div>
+        <div class="ev-checklist">
+          <span class="ev-task done">Ban tổ chức (5)</span>
+          <span class="ev-task">Ghi chép (2)</span>
+        </div>
+        <div class="ev-actions">
+          <button class="btn btn-gold btn-sm" style="flex:1">👥 Xem đăng ký</button>
+          <button class="btn btn-sec btn-sm">⚙ Cài đặt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Past event -->
+    <div class="ev-card">
+      <div class="ev-banner past"></div>
+      <div class="ev-body">
+        <div class="ev-head">
+          <h3>Giỗ Tổ lần thứ 11 — 2024</h3>
+          <span class="badge badge-past">Đã qua</span>
+        </div>
+        <div class="ev-meta">
+          <span>📅 25/07/2024 · Đã hoàn thành</span>
+          <span>📍 Nhà từ đường — Phú Xuyên</span>
+        </div>
+        <div class="ev-stats">
+          <div class="ev-stat">
+            <div class="ev-stat-val">134</div>
+            <div class="ev-stat-lbl">Hộ tham dự</div>
+          </div>
+          <div class="ev-stat">
+            <div class="ev-stat-val">298</div>
+            <div class="ev-stat-lbl">Người</div>
+          </div>
+          <div class="ev-stat">
+            <div class="ev-stat-val">58</div>
+            <div class="ev-stat-lbl">Xe</div>
+          </div>
+        </div>
+        <div class="ev-actions">
+          <button class="btn btn-sec btn-sm" style="flex:1">📊 Xem báo cáo</button>
+          <button class="btn btn-sec btn-sm">📷 Album ảnh</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RSVP Table -->
+  <div class="rsvp-section">
+    <div class="rsvp-header">
+      <div>
+        <h2>Đăng ký tham dự — Giỗ Tổ lần thứ 12</h2>
+        <p style="font-size:12px;color:var(--ink-m);margin-top:3px">148 hộ · 342 người · 67 xe · 20 hộ chưa được phân công</p>
+      </div>
+      <div class="rsvp-filter">
+        <input class="fi" placeholder="Tìm hộ…" style="width:180px"/>
+        <select class="fi">
+          <option>Tất cả ban</option>
+          <option>Ban tế</option>
+          <option>Hậu cần</option>
+          <option>Khánh tiết</option>
+          <option>Tiếp tân</option>
+          <option>Chưa phân công</option>
+        </select>
+        <button class="btn btn-gold btn-sm">⬇ Xuất Excel</button>
+      </div>
+    </div>
+
+    <div class="rsvp-table-head">
+      <span>Hộ gia đình</span>
+      <span>Số người</span>
+      <span>Xe ô tô</span>
+      <span>Xe máy</span>
+      <span>Phân công ban</span>
+      <span></span>
+    </div>
+
+    <div class="rsvp-row">
+      <div>
+        <div class="rsvp-household">Hộ Hoàng Minh Quang</div>
+        <div class="rsvp-rep">Đại diện: Hoàng Minh Quang · A3a</div>
+      </div>
+      <div style="font-weight:700;text-align:center">4</div>
+      <div style="text-align:center">1</div>
+      <div style="text-align:center">2</div>
+      <div class="assignments">
+        <span class="assign-tag ok">✓ Ban tế</span>
+      </div>
+      <div><button class="btn btn-sec btn-xs">Sửa</button></div>
+    </div>
+
+    <div class="rsvp-row">
+      <div>
+        <div class="rsvp-household">Hộ Hoàng Quang Bình</div>
+        <div class="rsvp-rep">Đại diện: Hoàng Quang Bình · A4a</div>
+      </div>
+      <div style="font-weight:700;text-align:center">6</div>
+      <div style="text-align:center">2</div>
+      <div style="text-align:center">1</div>
+      <div class="assignments">
+        <span class="assign-tag ok">✓ Hậu cần</span>
+      </div>
+      <div><button class="btn btn-sec btn-xs">Sửa</button></div>
+    </div>
+
+    <div class="rsvp-row">
+      <div>
+        <div class="rsvp-household">Hộ Hoàng Văn Lộc</div>
+        <div class="rsvp-rep">Đại diện: Hoàng Văn Lộc · A4h</div>
+      </div>
+      <div style="font-weight:700;text-align:center">3</div>
+      <div style="text-align:center">1</div>
+      <div style="text-align:center">0</div>
+      <div class="assignments">
+        <span class="assign-tag" title="Nhấn để phân công">Ban tế</span>
+        <span class="assign-tag on">Hậu cần</span>
+        <span class="assign-tag">Khánh tiết</span>
+        <span class="assign-tag">Tiếp tân</span>
+      </div>
+      <div><button class="btn btn-sec btn-xs">Lưu</button></div>
+    </div>
+
+    <div class="rsvp-row" style="background:var(--warn-bg)">
+      <div>
+        <div class="rsvp-household">Hộ Hoàng Trung Bảo</div>
+        <div class="rsvp-rep" style="color:var(--warn)">⚠ Chưa phân công</div>
+      </div>
+      <div style="font-weight:700;text-align:center">5</div>
+      <div style="text-align:center">2</div>
+      <div style="text-align:center">3</div>
+      <div class="assignments">
+        <span class="assign-tag">Ban tế</span>
+        <span class="assign-tag">Hậu cần</span>
+        <span class="assign-tag">Khánh tiết</span>
+        <span class="assign-tag">Tiếp tân</span>
+      </div>
+      <div><button class="btn btn-gold btn-xs">Gán</button></div>
+    </div>
+
+    <div class="rsvp-row">
+      <div>
+        <div class="rsvp-household">Hộ Hoàng Cường Hải</div>
+        <div class="rsvp-rep">Đại diện: Hoàng Cường Hải · A6g</div>
+      </div>
+      <div style="font-weight:700;text-align:center">2</div>
+      <div style="text-align:center">0</div>
+      <div style="text-align:center">1</div>
+      <div class="assignments">
+        <span class="assign-tag ok">✓ Tiếp tân</span>
+      </div>
+      <div><button class="btn btn-sec btn-xs">Sửa</button></div>
+    </div>
+
+    <div style="padding:12px 18px;text-align:center;color:var(--ink-m);font-size:13px;border-top:1px solid var(--bd)">
+      Hiển thị 5 / 148 · <a href="#" style="color:var(--gold)">Xem thêm</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

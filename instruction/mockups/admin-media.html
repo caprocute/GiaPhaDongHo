@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Thư viện ảnh</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;
+  --err:#C62828;--err-bg:#FFEBEE;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 12px rgba(0,0,0,.12);
+}
+body{font-family:var(--fb);background:var(--s2);color:var(--ink);min-height:100vh}
+.page{max-width:1180px;margin:0 auto;padding:24px 20px}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.page-head h1{font-family:var(--fd);font-size:26px}
+.page-head p{font-size:13px;color:var(--ink-m);margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--bd)}
+.btn-danger{background:var(--err);color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px}
+
+/* stats */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.stat{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.6px;margin-bottom:5px}
+.stat-val{font-family:var(--fd);font-size:20px;font-weight:700}
+.stat-sub{font-size:11px;color:var(--ink-m);margin-top:2px}
+
+/* tabs */
+.tabs{display:flex;gap:4px;background:var(--s3);padding:5px;border-radius:var(--r);margin-bottom:20px;width:fit-content}
+.tab{padding:7px 18px;border-radius:var(--r-sm);border:none;background:none;font-size:13px;font-weight:600;color:var(--ink-m);cursor:pointer;display:flex;align-items:center;gap:6px}
+.tab.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+
+/* toolbar */
+.toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.fi{padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:13px;background:#fff;outline:none}
+.fi:focus{border-color:var(--gold)}
+.toolbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.view-toggle{display:flex;gap:2px;background:var(--s3);padding:3px;border-radius:var(--r-sm)}
+.vt-btn{width:30px;height:28px;border:none;background:none;border-radius:3px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.vt-btn.on{background:#fff;box-shadow:var(--sh)}
+
+/* album strip */
+.album-strip{display:flex;gap:10px;margin-bottom:20px;overflow-x:auto;padding-bottom:6px}
+.album{
+  flex-shrink:0;width:140px;border-radius:var(--r);overflow:hidden;cursor:pointer;
+  border:2px solid transparent;transition:all .15s;box-shadow:var(--sh)
+}
+.album:hover{border-color:var(--gold-bd);box-shadow:var(--sh-md)}
+.album.active{border-color:var(--gold)}
+.album-cover{height:88px;background:linear-gradient(135deg,var(--s3) 0%,var(--s2) 100%);position:relative;overflow:hidden}
+.album-cover-img{width:100%;height:100%;object-fit:cover;display:block}
+.album-cover-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;opacity:.5}
+.album-ct{
+  position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);color:#fff;
+  font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px
+}
+.album-info{background:#fff;padding:8px 10px;border-top:1px solid var(--bd)}
+.album-name{font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.album-sub{font-size:10px;color:var(--ink-m)}
+
+/* add album card */
+.album-add{
+  flex-shrink:0;width:140px;border-radius:var(--r);
+  border:2px dashed var(--bd);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:16px;gap:6px;color:var(--ink-m);font-size:12px;transition:all .15s;
+  background:#fff;box-shadow:var(--sh)
+}
+.album-add:hover{border-color:var(--gold);color:var(--gold)}
+.album-add-ico{font-size:24px;opacity:.6}
+
+/* selection bar */
+.sel-bar{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  background:var(--gold-pale);border:1px solid var(--gold-bd);border-radius:var(--r);
+  margin-bottom:14px;
+}
+.sel-bar-txt{flex:1;font-size:13px;font-weight:600;color:var(--ink2)}
+
+/* photo grid */
+.photo-grid{
+  display:grid;gap:8px;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+}
+.photo-thumb{
+  position:relative;border-radius:var(--r-sm);overflow:hidden;
+  aspect-ratio:1;background:var(--s3);cursor:pointer;
+  border:2px solid transparent;transition:all .15s;
+}
+.photo-thumb:hover{border-color:var(--gold-bd)}
+.photo-thumb.selected{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.2)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.photo-thumb:hover img{transform:scale(1.04)}
+.photo-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.45);
+  opacity:0;transition:opacity .15s;display:flex;align-items:flex-end;padding:8px;
+}
+.photo-thumb:hover .photo-overlay{opacity:1}
+.photo-actions{display:flex;gap:5px}
+.photo-act-btn{
+  background:rgba(255,255,255,.92);color:var(--ink);border:none;border-radius:3px;
+  padding:4px 7px;font-size:11px;cursor:pointer;font-weight:600;
+}
+.photo-act-btn:hover{background:#fff}
+.photo-act-btn.del{color:var(--err)}
+.photo-check{
+  position:absolute;top:6px;left:6px;width:18px;height:18px;border-radius:50%;
+  background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.6);
+  display:flex;align-items:center;justify-content:center;
+}
+.photo-thumb.selected .photo-check{background:var(--gold);border-color:var(--gold)}
+.photo-check-ico{font-size:10px;color:#fff;display:none}
+.photo-thumb.selected .photo-check-ico{display:block}
+
+/* placeholder colors for demo */
+.c1{background:linear-gradient(135deg,#4A235A 0%,#7B1FA2 100%)}
+.c2{background:linear-gradient(135deg,#1D4E89 0%,#1565C0 100%)}
+.c3{background:linear-gradient(135deg,#1B5E20 0%,#2E7D32 100%)}
+.c4{background:linear-gradient(135deg,#B8860B 0%,#D4A017 100%)}
+.c5{background:linear-gradient(135deg,#7D1D3F 0%,#C62828 100%)}
+.c6{background:linear-gradient(135deg,#004D40 0%,#00695C 100%)}
+.c7{background:linear-gradient(135deg,#37474F 0%,#546E7A 100%)}
+.c8{background:linear-gradient(135deg,#5C3A1E 0%,#8D5524 100%)}
+
+/* modal */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+}
+.modal-photo{
+  background:#000;border-radius:var(--r);overflow:hidden;
+  max-width:900px;width:95vw;max-height:90vh;
+  display:flex;box-shadow:0 24px 64px rgba(0,0,0,.5);
+}
+.modal-img{flex:1;min-width:0;position:relative}
+.modal-img-display{width:100%;height:100%;object-fit:contain;max-height:80vh;display:block;background:#111}
+.modal-img-placeholder{width:100%;min-height:400px;display:flex;align-items:center;justify-content:center;font-size:64px}
+.modal-sidebar{width:260px;flex-shrink:0;background:#1a1a1a;color:#e0e0e0;padding:20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.modal-title{font-family:var(--fd);font-size:16px;color:#fff;margin-bottom:4px}
+.modal-meta-row{font-size:12px;color:#aaa;display:flex;justify-content:space-between}
+.modal-meta-lbl{font-weight:700;color:#ccc}
+.modal-tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.modal-tag{font-size:11px;padding:2px 8px;background:rgba(255,255,255,.1);border-radius:10px;color:#ccc}
+.modal-sep{height:1px;background:rgba(255,255,255,.1)}
+.modal-actions-panel{display:flex;flex-direction:column;gap:6px;margin-top:auto}
+.modal-btn{padding:8px;border-radius:var(--r-sm);border:none;font-size:12px;font-weight:600;cursor:pointer;text-align:center}
+.modal-btn-gold{background:var(--gold);color:#fff}
+.modal-btn-del{background:rgba(198,40,40,.2);color:#EF9A9A;border:1px solid rgba(198,40,40,.3)}
+.modal-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.modal-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.5);color:#fff;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center}
+.modal-nav-l{left:12px}
+.modal-nav-r{right:12px}
+
+/* upload zone */
+.upload-zone{
+  border:2px dashed var(--bd);border-radius:var(--r);
+  padding:48px 24px;text-align:center;background:#fff;cursor:pointer;
+  transition:all .15s;margin-bottom:20px;
+}
+.upload-zone:hover{border-color:var(--gold);background:var(--gold-pale)}
+.upload-ico{font-size:40px;margin-bottom:12px;opacity:.6}
+.upload-title{font-family:var(--fd);font-size:17px;color:var(--ink);margin-bottom:6px}
+.upload-hint{font-size:13px;color:var(--ink-m)}
+.upload-hint b{color:var(--gold)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:10px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <div>
+      <h1>Thư viện ảnh</h1>
+      <p>Quản lý ảnh tư liệu dòng họ theo album sự kiện — xem chi tiết, gắn thẻ thành viên, xóa.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sec btn-sm">📁 Tạo album mới</button>
+      <button class="btn btn-gold btn-sm">⬆ Tải ảnh lên</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-lbl">Tổng ảnh</div>
+      <div class="stat-val" style="color:var(--gold)">1,248</div>
+      <div class="stat-sub">ảnh · 2.4 GB</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Số album</div>
+      <div class="stat-val">14</div>
+      <div class="stat-sub">album sự kiện</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Ảnh có thẻ người</div>
+      <div class="stat-val" style="color:var(--ok)">847</div>
+      <div class="stat-sub">68% đã gắn tag</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Cần phê duyệt</div>
+      <div class="stat-val" style="color:var(--err)">32</div>
+      <div class="stat-sub">ảnh chưa duyệt</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab on">🖼 Ảnh</button>
+    <button class="tab">📁 Album</button>
+    <button class="tab">⬆ Tải lên</button>
+    <button class="tab">⚠ Chờ duyệt <span style="font-size:10px;background:var(--err-bg);color:var(--err);padding:1px 6px;border-radius:10px;font-weight:800">32</span></button>
+  </div>
+
+  <!-- Album strip -->
+  <div class="album-strip">
+    <div class="album active">
+      <div class="album-cover">
+        <div class="album-cover-placeholder c4">🏛</div>
+        <div class="album-ct">247</div>
+      </div>
+      <div class="album-info">
+        <div class="album-name">Giỗ Tổ 2025</div>
+        <div class="album-sub">15/08/2025</div>
+      </div>
+    </div>
+    <div class="album">
+      <div class="album-cover">
+        <div class="album-cover-placeholder c1">🎓</div>
+        <div class="album-ct">84</div>
+      </div>
+      <div class="album-info">
+        <div class="album-name">Bảng vàng 2025</div>
+        <div class="album-sub">30/06/2025</div>
+      </div>
+    </div>
+    <div class="album">
+      <div class="album-cover">
+        <div class="album-cover-placeholder c2">🤝</div>
+        <div class="album-ct">156</div>
+      </div>
+      <div class="album-info">
+        <div class="album-name">Họp họ 2024</div>
+        <div class="album-sub">12/10/2024</div>
+      </div>
+    </div>
+    <div class="album">
+      <div class="album-cover">
+        <div class="album-cover-placeholder c3">🌳</div>
+        <div class="album-ct">312</div>
+      </div>
+      <div class="album-info">
+        <div class="album-name">Giỗ Tổ 2024</div>
+        <div class="album-sub">25/07/2024</div>
+      </div>
+    </div>
+    <div class="album">
+      <div class="album-cover">
+        <div class="album-cover-placeholder c5">🏗</div>
+        <div class="album-ct">98</div>
+      </div>
+      <div class="album-info">
+        <div class="album-name">Xây nhà từ đường</div>
+        <div class="album-sub">2023–2024</div>
+      </div>
+    </div>
+    <div class="album">
+      <div class="album-cover">
+        <div class="album-cover-placeholder c6">📜</div>
+        <div class="album-ct">43</div>
+      </div>
+      <div class="album-info">
+        <div class="album-name">Tư liệu lịch sử</div>
+        <div class="album-sub">Gia phả cũ</div>
+      </div>
+    </div>
+    <div class="album-add">
+      <div class="album-add-ico">+</div>
+      <span>Tạo album mới</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <input class="fi" placeholder="Tìm trong album…" style="width:200px"/>
+    <select class="fi">
+      <option>Tất cả loại</option>
+      <option>Ảnh chân dung</option>
+      <option>Ảnh sự kiện</option>
+      <option>Tư liệu lịch sử</option>
+    </select>
+    <select class="fi">
+      <option>Sắp xếp: Mới nhất</option>
+      <option>Sắp xếp: Cũ nhất</option>
+      <option>Sắp xếp: Tên A–Z</option>
+    </select>
+    <div class="toolbar-right">
+      <span style="font-size:13px;color:var(--ink-m)">247 ảnh</span>
+      <div class="view-toggle">
+        <button class="vt-btn on" title="Lưới nhỏ">⊞</button>
+        <button class="vt-btn" title="Lưới lớn">⊟</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selection bar (appears when photos selected) -->
+  <div class="sel-bar">
+    <div class="sel-bar-txt">Đã chọn 5 ảnh</div>
+    <button class="btn btn-sec btn-sm">📥 Tải xuống</button>
+    <button class="btn btn-sec btn-sm">📁 Chuyển album</button>
+    <button class="btn btn-sec btn-sm" style="color:var(--err);border-color:var(--err-bg)">🗑 Xóa 5 ảnh</button>
+    <button class="btn btn-sec btn-sm" onclick="this.closest('.sel-bar').style.display='none'">✕ Bỏ chọn</button>
+  </div>
+
+  <!-- Photo grid -->
+  <div class="photo-grid">
+
+    <div class="photo-thumb selected">
+      <div style="width:100%;height:100%" class="c4"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb selected">
+      <div style="width:100%;height:100%" class="c8"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb">
+      <div style="width:100%;height:100%" class="c1"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb selected">
+      <div style="width:100%;height:100%" class="c2"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb">
+      <div style="width:100%;height:100%" class="c3"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb selected">
+      <div style="width:100%;height:100%" class="c5"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb">
+      <div style="width:100%;height:100%" class="c6"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb selected">
+      <div style="width:100%;height:100%" class="c7"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb">
+      <div style="width:100%;height:100%" class="c4" style="opacity:.8"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb">
+      <div style="width:100%;height:100%" class="c1" style="filter:saturate(.7)"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb">
+      <div style="width:100%;height:100%" class="c2"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photo-thumb">
+      <div style="width:100%;height:100%" class="c3"></div>
+      <div class="photo-check"><span class="photo-check-ico">✓</span></div>
+      <div class="photo-overlay">
+        <div class="photo-actions">
+          <button class="photo-act-btn">🔍 Xem</button>
+          <button class="photo-act-btn">✏ Tag</button>
+          <button class="photo-act-btn del">🗑</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Load more -->
+  <div style="text-align:center;margin-top:24px">
+    <button class="btn btn-sec">Tải thêm ảnh (235 ảnh còn lại)</button>
+  </div>
+
+</div>
+
+<!-- MODAL: Photo detail -->
+<div class="modal-overlay" id="photoModal" style="display:none">
+  <div class="modal-photo">
+    <div class="modal-img">
+      <div class="modal-img-placeholder c4">🏛</div>
+      <button class="modal-close" onclick="document.getElementById('photoModal').style.display='none'">✕</button>
+      <button class="modal-nav modal-nav-l">‹</button>
+      <button class="modal-nav modal-nav-r">›</button>
+    </div>
+    <div class="modal-sidebar">
+      <div>
+        <div class="modal-title">Giỗ Tổ 2025 — Lễ dâng hương</div>
+        <div class="modal-meta-row" style="margin-top:6px"><span class="modal-meta-lbl">Ngày chụp</span><span>15/08/2025 07:42</span></div>
+        <div class="modal-meta-row"><span class="modal-meta-lbl">Kích thước</span><span>4032×3024 · 3.2MB</span></div>
+        <div class="modal-meta-row"><span class="modal-meta-lbl">Album</span><span>Giỗ Tổ 2025</span></div>
+      </div>
+      <div class="modal-sep"></div>
+      <div>
+        <div class="modal-meta-lbl" style="margin-bottom:6px">Người trong ảnh</div>
+        <div class="modal-tag-row">
+          <span class="modal-tag">Hoàng Minh Quang</span>
+          <span class="modal-tag">Hoàng Quang Bình</span>
+          <span class="modal-tag">Hoàng Văn Lộc</span>
+          <span class="modal-tag">+ 4 người</span>
+        </div>
+      </div>
+      <div class="modal-sep"></div>
+      <div>
+        <div class="modal-meta-lbl" style="margin-bottom:6px">Mô tả</div>
+        <div style="font-size:12px;color:#aaa;line-height:1.5">Lễ dâng hương tại nhà từ đường Giỗ Tổ lần thứ 12, năm Ất Tỵ 2025.</div>
+      </div>
+      <div class="modal-sep"></div>
+      <div class="modal-actions-panel">
+        <button class="modal-btn modal-btn-gold">📥 Tải xuống</button>
+        <button class="modal-btn" style="background:rgba(255,255,255,.08);color:#ccc">📋 Sao chép link</button>
+        <button class="modal-btn" style="background:rgba(255,255,255,.08);color:#ccc">✏ Chỉnh sửa tag</button>
+        <button class="modal-btn modal-btn-del">🗑 Xóa ảnh này</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Demo: click any photo to open modal
+document.querySelectorAll('.photo-thumb').forEach(t=>{
+  t.addEventListener('click', e=>{
+    if(e.target.closest('.photo-act-btn')) return;
+    document.getElementById('photoModal').style.display='flex';
+  });
+});
+// Demo: toggle selection
+document.querySelectorAll('.photo-thumb').forEach(t=>{
+  t.addEventListener('click', e=>{
+    if(!e.target.closest('.photo-act-btn') && !e.target.closest('.photo-check')) return;
+    t.classList.toggle('selected');
+  });
+});
+document.querySelector('.modal-close')?.addEventListener('click',()=>{
+  document.getElementById('photoModal').style.display='none';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DualDatePicker — Mockup</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;--ink-d:#0A0806;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 16px rgba(0,0,0,.13);--sh-lg:0 8px 28px rgba(0,0,0,.18);
+  --lunar:#6B3A6B;--lunar-pale:#F9F0F9;--lunar-bd:#D4A8D4;
+  --ram:#C62828;--ram-bg:#FFF3F3;
+  --today-ring: 2px solid var(--gold);
+}
+body{font-family:var(--fb);background:#e8e0d0;color:var(--ink);padding:32px 24px;min-height:100vh}
+.demo-wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+.demo-title{font-family:var(--fd);font-size:22px;color:var(--ink);margin-bottom:4px}
+.demo-sub{font-size:12px;color:var(--ink-m);margin-bottom:16px}
+.sep{border:none;border-top:2px dashed var(--bd);margin:8px 0}
+
+/* ===== INPUT TRIGGER ===== */
+.dp-input-wrap{position:relative;display:inline-flex;flex-direction:column;gap:3px}
+.dp-input{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fff;border:1.5px solid var(--bd);border-radius:var(--r-sm);cursor:pointer;min-width:200px;transition:border-color .15s}
+.dp-input:hover,.dp-input.open{border-color:var(--gold)}
+.dp-input.open{box-shadow:0 0 0 3px rgba(184,134,11,.13)}
+.dp-input-val{flex:1;font-size:13px;color:var(--ink)}
+.dp-input-val.placeholder{color:var(--ink-m)}
+.dp-input-lunar{font-size:10px;color:var(--lunar);font-weight:600}
+.dp-input-icon{color:var(--ink-m);font-size:14px;flex-shrink:0}
+.dp-input-clear{font-size:11px;color:var(--ink-m);cursor:pointer;padding:0 2px;border-radius:2px}
+.dp-input-clear:hover{color:var(--ink)}
+.dp-range{display:flex;align-items:center;gap:0}
+.dp-range-sep{padding:0 8px;color:var(--ink-m);font-size:13px;flex-shrink:0}
+.dp-input-range{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#fff;border:1.5px solid var(--bd);border-radius:var(--r-sm);cursor:pointer;min-width:170px;transition:border-color .15s}
+.dp-input-range.left{border-radius:var(--r-sm) 0 0 var(--r-sm);border-right:none}
+.dp-input-range.right{border-radius:0 var(--r-sm) var(--r-sm) 0}
+.dp-input-range.focus,.dp-input-range:hover{border-color:var(--gold)}
+.dp-input-range.left.focus{border-right:none}
+
+/* ===== PICKER PANEL ===== */
+.dp-panel{background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh-lg);display:flex;overflow:hidden;width:fit-content}
+
+/* Presets sidebar */
+.dp-presets{width:148px;border-right:1px solid var(--bd);background:var(--s2);padding:10px 0;display:flex;flex-direction:column;gap:0;flex-shrink:0}
+.dp-presets-hd{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-m);padding:6px 14px 4px}
+.dp-preset{padding:7px 14px;font-size:12px;color:var(--ink2);cursor:pointer;border-left:2px solid transparent;transition:all .1s;white-space:nowrap}
+.dp-preset:hover{background:var(--s3);border-left-color:var(--gold-bd);color:var(--ink)}
+.dp-preset.active{background:var(--gold-pale);border-left-color:var(--gold);color:var(--gold);font-weight:700}
+.dp-presets-div{height:1px;background:var(--bd);margin:6px 12px}
+
+/* Calendar area */
+.dp-cal-area{display:flex;flex-direction:column}
+.dp-cal-toolbar{display:flex;align-items:center;justify-content:space-between;padding:11px 16px 8px;border-bottom:1px solid var(--bd);gap:8px}
+.dp-cal-months{display:flex;gap:0}
+.dp-cal-main{display:flex}
+
+/* Month block */
+.dp-month{padding:12px 14px;width:290px;flex-shrink:0}
+.dp-month+.dp-month{border-left:1px solid var(--bd)}
+.dp-month-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dp-month-nav{width:26px;height:26px;border:1px solid var(--bd);border-radius:var(--r-sm);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink-m);transition:all .1s}
+.dp-month-nav:hover{border-color:var(--gold);color:var(--gold)}
+.dp-month-label{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:5px}
+.dp-month-label:hover{color:var(--gold)}
+.dp-month-label-lunar{font-size:10px;color:var(--lunar);font-weight:600;font-family:var(--fb)}
+.dow-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.dow{text-align:center;font-size:10px;font-weight:700;color:var(--ink-m);padding:4px 0;letter-spacing:.3px}
+.dow.weekend{color:var(--lunar)}
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
+
+/* Day cell */
+.day{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px 2px;border-radius:var(--r-sm);cursor:pointer;position:relative;transition:background .1s;min-height:42px;border:1.5px solid transparent}
+.day:hover:not(.disabled):not(.selected):not(.range-start):not(.range-end){background:var(--s2)}
+.day.other-month{opacity:.38}
+.day.other-month .solar-num{color:var(--ink-m)}
+.day.disabled{opacity:.3;cursor:not-allowed}
+.day.today{border-color:var(--gold)}
+.day.today .solar-num{color:var(--gold);font-weight:800}
+.day.selected,.day.range-start,.day.range-end{background:var(--gold);border-color:var(--gold)}
+.day.selected .solar-num,.day.range-start .solar-num,.day.range-end .solar-num{color:#fff;font-weight:800}
+.day.selected .lunar-num,.day.range-start .lunar-num,.day.range-end .lunar-num{color:rgba(255,255,255,.8)}
+.day.range-start{border-radius:var(--r-sm) 0 0 var(--r-sm)}
+.day.range-end{border-radius:0 var(--r-sm) var(--r-sm) 0}
+.day.in-range{background:var(--gold-pale);border-radius:0;border-color:transparent}
+.day.in-range .solar-num{color:var(--ink2)}
+.day.ram .lunar-num{color:var(--ram);font-weight:800}
+.day.mong-mot .lunar-num{color:var(--ok);font-weight:800}
+
+/* Day numbers */
+.solar-num{font-size:14px;font-weight:600;color:var(--ink);line-height:1.1}
+.lunar-num{font-size:9px;color:var(--ink-m);line-height:1.2;white-space:nowrap}
+.lunar-num.is-ram{color:var(--ram);font-weight:700}
+.lunar-num.is-mong{color:var(--ok);font-weight:700}
+
+/* ===== LUNAR MODE ===== */
+.lunar-mode .solar-num{font-size:9px;color:var(--ink-m);font-weight:500;line-height:1.2}
+.lunar-mode .lunar-num{font-size:14px;font-weight:600;color:var(--lunar);line-height:1.1}
+.lunar-mode .day.today{border-color:var(--lunar)}
+.lunar-mode .day.today .lunar-num{color:var(--lunar);font-weight:800}
+.lunar-mode .day.selected,.lunar-mode .day.range-start,.lunar-mode .day.range-end{background:var(--lunar);border-color:var(--lunar)}
+.lunar-mode .day.selected .lunar-num,.lunar-mode .day.range-start .lunar-num,.lunar-mode .day.range-end .lunar-num{color:#fff}
+.lunar-mode .day.selected .solar-num,.lunar-mode .day.range-start .solar-num,.lunar-mode .day.range-end .solar-num{color:rgba(255,255,255,.7)}
+.lunar-mode .day.in-range{background:var(--lunar-pale)}
+.lunar-mode .dp-month-label{color:var(--lunar)}
+
+/* Mode toggle */
+.mode-toggle{display:flex;align-items:center;background:var(--s3);border-radius:20px;padding:3px;gap:2px;flex-shrink:0}
+.mode-btn{padding:5px 13px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--ink-m);transition:all .15s;display:flex;align-items:center;gap:4px;white-space:nowrap}
+.mode-btn.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.mode-btn.on.solar-on{color:var(--gold)}
+.mode-btn.on.lunar-on{color:var(--lunar)}
+
+/* Footer */
+.dp-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--bd);background:var(--s2);gap:10px}
+.dp-footer-left{display:flex;align-items:center;gap:8px}
+.dp-footer-right{display:flex;align-items:center;gap:6px}
+.dp-foot-date{font-size:11px;color:var(--ink2)}
+.dp-foot-date strong{font-weight:700}
+.dp-foot-lunar{font-size:10px;color:var(--lunar);font-weight:600}
+.btn-ghost{padding:6px 12px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px;background:#fff;color:var(--ink);cursor:pointer;font-weight:600}
+.btn-ghost:hover{border-color:var(--gold)}
+.btn-primary{padding:6px 18px;border:none;border-radius:var(--r-sm);font-size:12px;background:var(--gold);color:#fff;cursor:pointer;font-weight:700}
+.btn-primary:hover{background:var(--gold-l)}
+.btn-lunar-primary{background:var(--lunar);color:#fff}
+
+/* Input row demos */
+.input-row{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end}
+.input-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:4px;display:block}
+.input-state-tag{display:inline-block;font-size:9px;font-weight:800;text-transform:uppercase;color:#fff;background:var(--ink-m);border-radius:3px;padding:1px 5px;margin-bottom:5px;letter-spacing:.4px}
+
+/* Year/Month jump overlay */
+.ym-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px}
+.ym-cell{padding:6px 4px;text-align:center;border-radius:var(--r-sm);cursor:pointer;font-size:12px;color:var(--ink2);border:1px solid transparent;transition:all .1s}
+.ym-cell:hover{background:var(--s2);border-color:var(--bd)}
+.ym-cell.cur{background:var(--gold-pale);color:var(--gold);border-color:var(--gold-bd);font-weight:700}
+.ym-cell.past{color:var(--ink-m)}
+
+/* Section cards */
+.demo-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.demo-card-hd{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.demo-card-sub{font-size:11px;color:var(--ink-m);margin-bottom:16px}
+
+/* Tooltip / legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-m)}
+.leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="demo-wrap">
+
+  <div>
+    <h1 style="font-family:var(--fd);font-size:28px;color:var(--ink)">DualDatePicker</h1>
+    <p style="font-size:13px;color:var(--ink-m);margin-top:4px">Mockup đầy đủ — lịch dương + âm · chọn ngày đơn · chọn khoảng · preset nhanh · chuyển chế độ ÂL/DL</p>
+  </div>
+
+  <!-- ===== SECTION 1: Input states ===== -->
+  <div class="demo-card">
+    <div class="demo-card-hd">Input trigger — các trạng thái</div>
+    <div class="demo-card-sub">Input cho phép xem nhanh ngày âm ngay trong field; bấm mở lịch dropdown</div>
+    <div class="input-row">
+      <div>
+        <span class="input-state-tag">Trống</span><br>
+        <label class="input-label">Ngày</label>
+        <div class="dp-input">
+          <span class="dp-input-icon">📅</span>
+          <span class="dp-input-val placeholder">dd/mm/yyyy</span>
+        </div>
+      </div>
+      <div>
+        <span class="input-state-tag">Đã chọn</span><br>
+        <label class="input-label">Ngày sinh</label>
+        <div class="dp-input">
+          <span class="dp-input-icon">📅</span>
+          <div style="flex:1">
+            <div class="dp-input-val">18/07/2026</div>
+            <div class="dp-input-lunar">24 tháng 5 ÂL</div>
+          </div>
+          <span class="dp-input-clear">✕</span>
+        </div>
+      </div>
+      <div>
+        <span class="input-state-tag" style="background:var(--gold)">Đang mở</span><br>
+        <label class="input-label">Ngày mất</label>
+        <div class="dp-input open">
+          <span class="dp-input-icon" style="color:var(--gold)">📅</span>
+          <div style="flex:1">
+            <div class="dp-input-val">30/07/2026</div>
+            <div class="dp-input-lunar">7 tháng 6 ÂL</div>
+          </div>
+          <span class="dp-input-clear">✕</span>
+        </div>
+      </div>
+      <div>
+        <span class="input-state-tag" style="background:var(--lunar)">Chế độ ÂL</span><br>
+        <label class="input-label">Ngày giỗ</label>
+        <div class="dp-input" style="border-color:var(--lunar-bd)">
+          <span class="dp-input-icon" style="color:var(--lunar)">🌙</span>
+          <div style="flex:1">
+            <div class="dp-input-val" style="color:var(--lunar);font-weight:700">24 tháng 5 năm 2026 ÂL</div>
+            <div class="dp-input-lunar" style="color:var(--ink-m)">18/07/2026 DL</div>
+          </div>
+          <span class="dp-input-clear">✕</span>
+        </div>
+      </div>
+      <div>
+        <span class="input-state-tag">Khoảng ngày</span><br>
+        <label class="input-label">Từ ngày — Đến ngày</label>
+        <div class="dp-range">
+          <div class="dp-input-range left focus">
+            <span style="font-size:12px;color:var(--gold)">📅</span>
+            <div>
+              <div style="font-size:12px;color:var(--ink)">01/07/2026</div>
+              <div style="font-size:9px;color:var(--ink-m)">7/5 ÂL</div>
+            </div>
+          </div>
+          <div style="padding:0 8px;color:var(--ink-m);font-size:13px;background:#fff;border-top:1.5px solid var(--gold);border-bottom:1.5px solid var(--gold)">→</div>
+          <div class="dp-input-range right focus">
+            <div>
+              <div style="font-size:12px;color:var(--ink)">31/07/2026</div>
+              <div style="font-size:9px;color:var(--ink-m)">8/6 ÂL</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 2: Single picker — Solar mode (default) ===== -->
+  <div class="demo-card">
+    <div class="demo-card-hd">Chọn ngày đơn — Chế độ Dương lịch (mặc định)</div>
+    <div class="demo-card-sub">Ngày dương to, ngày âm nhỏ bên dưới. Ngày 18/07 được chọn (hôm nay). Đặc biệt: Rằm (15 ÂL) đỏ, Mồng 1 (1 ÂL) xanh.</div>
+    <div class="dp-panel" style="width:fit-content">
+      <!-- Presets -->
+      <div class="dp-presets">
+        <div class="dp-presets-hd">Chọn nhanh</div>
+        <div class="dp-preset active">Hôm nay</div>
+        <div class="dp-preset">Hôm qua</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Tuần</div>
+        <div class="dp-preset">Tuần này</div>
+        <div class="dp-preset">Tuần trước</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Tháng</div>
+        <div class="dp-preset">Tháng này</div>
+        <div class="dp-preset">Tháng trước</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Quý</div>
+        <div class="dp-preset">Quý 3 (Q3)</div>
+        <div class="dp-preset">Quý 2 (Q2)</div>
+        <div class="dp-preset">Quý 1 (Q1)</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Năm</div>
+        <div class="dp-preset">Năm nay</div>
+        <div class="dp-preset">Năm ngoái</div>
+      </div>
+
+      <!-- Calendar -->
+      <div class="dp-cal-area">
+        <div class="dp-cal-toolbar">
+          <div class="mode-toggle">
+            <button class="mode-btn solar-on on">☀ Dương lịch</button>
+            <button class="mode-btn">🌙 Âm lịch</button>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:11px;color:var(--ink-m)">Nhảy đến:</span>
+            <select style="padding:5px 8px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px;outline:none">
+              <option>Tháng 7</option></select>
+            <select style="padding:5px 8px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px;outline:none">
+              <option>2026</option><option>2025</option><option>2024</option></select>
+          </div>
+        </div>
+
+        <div class="dp-cal-main">
+          <!-- July 2026 -->
+          <div class="dp-month">
+            <div class="dp-month-hd">
+              <button class="dp-month-nav">‹</button>
+              <div class="dp-month-label">
+                Tháng 7 năm 2026
+                <span class="dp-month-label-lunar">Tháng 5–6 ÂL</span>
+              </div>
+              <button class="dp-month-nav">›</button>
+            </div>
+            <div class="dow-row">
+              <div class="dow">T2</div><div class="dow">T3</div><div class="dow">T4</div>
+              <div class="dow">T5</div><div class="dow">T6</div>
+              <div class="dow weekend">T7</div><div class="dow weekend">CN</div>
+            </div>
+            <div class="day-grid">
+              <!-- Jun trailing: 29,30 -->
+              <div class="day other-month"><span class="solar-num">29</span><span class="lunar-num">5/5</span></div>
+              <div class="day other-month"><span class="solar-num">30</span><span class="lunar-num">6/5</span></div>
+              <!-- Jul 1 starts Wed (3rd col) -->
+              <div class="day"><span class="solar-num">1</span><span class="lunar-num">7/5</span></div>
+              <div class="day"><span class="solar-num">2</span><span class="lunar-num">8/5</span></div>
+              <div class="day"><span class="solar-num">3</span><span class="lunar-num">9/5</span></div>
+              <div class="day"><span class="solar-num">4</span><span class="lunar-num">10/5</span></div>
+              <div class="day"><span class="solar-num">5</span><span class="lunar-num">11/5</span></div>
+              <div class="day"><span class="solar-num">6</span><span class="lunar-num">12/5</span></div>
+              <div class="day"><span class="solar-num">7</span><span class="lunar-num">13/5</span></div>
+              <div class="day"><span class="solar-num">8</span><span class="lunar-num">14/5</span></div>
+              <div class="day ram"><span class="solar-num">9</span><span class="lunar-num is-ram">15/5 ▲</span></div>
+              <div class="day"><span class="solar-num">10</span><span class="lunar-num">16/5</span></div>
+              <div class="day"><span class="solar-num">11</span><span class="lunar-num">17/5</span></div>
+              <div class="day"><span class="solar-num">12</span><span class="lunar-num">18/5</span></div>
+              <div class="day"><span class="solar-num">13</span><span class="lunar-num">19/5</span></div>
+              <div class="day"><span class="solar-num">14</span><span class="lunar-num">20/5</span></div>
+              <div class="day"><span class="solar-num">15</span><span class="lunar-num">21/5</span></div>
+              <div class="day"><span class="solar-num">16</span><span class="lunar-num">22/5</span></div>
+              <div class="day"><span class="solar-num">17</span><span class="lunar-num">23/5</span></div>
+              <div class="day selected today"><span class="solar-num">18</span><span class="lunar-num">24/5</span></div>
+              <div class="day"><span class="solar-num">19</span><span class="lunar-num">25/5</span></div>
+              <div class="day"><span class="solar-num">20</span><span class="lunar-num">26/5</span></div>
+              <div class="day"><span class="solar-num">21</span><span class="lunar-num">27/5</span></div>
+              <div class="day"><span class="solar-num">22</span><span class="lunar-num">28/5</span></div>
+              <div class="day"><span class="solar-num">23</span><span class="lunar-num">29/5</span></div>
+              <div class="day mong-mot"><span class="solar-num">24</span><span class="lunar-num is-mong">1/6 ●</span></div>
+              <div class="day"><span class="solar-num">25</span><span class="lunar-num">2/6</span></div>
+              <div class="day"><span class="solar-num">26</span><span class="lunar-num">3/6</span></div>
+              <div class="day"><span class="solar-num">27</span><span class="lunar-num">4/6</span></div>
+              <div class="day"><span class="solar-num">28</span><span class="lunar-num">5/6</span></div>
+              <div class="day"><span class="solar-num">29</span><span class="lunar-num">6/6</span></div>
+              <div class="day"><span class="solar-num">30</span><span class="lunar-num">7/6</span></div>
+              <div class="day"><span class="solar-num">31</span><span class="lunar-num">8/6</span></div>
+              <!-- Aug leading -->
+              <div class="day other-month"><span class="solar-num">1</span><span class="lunar-num">9/6</span></div>
+              <div class="day other-month"><span class="solar-num">2</span><span class="lunar-num">10/6</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dp-footer">
+          <div class="dp-footer-left">
+            <div>
+              <div class="dp-foot-date">Đã chọn: <strong>18/07/2026</strong></div>
+              <div class="dp-foot-lunar">24 tháng 5 năm Bính Ngọ ÂL</div>
+            </div>
+          </div>
+          <div class="dp-footer-right">
+            <button class="btn-ghost">Xóa</button>
+            <button class="btn-primary">Xác nhận</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="border:2px solid var(--gold);background:var(--gold)"></div>Hôm nay / Đã chọn</div>
+      <div class="leg"><div class="leg-dot" style="border:2px solid var(--gold)"></div>Hôm nay</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--ram-bg);border:1px solid var(--ram)"></div>Ngày Rằm (15 ÂL)</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--ok-bg);border:1px solid var(--ok)"></div>Mồng 1 ÂL</div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 3: Range picker — hai tháng ===== -->
+  <div class="demo-card">
+    <div class="demo-card-hd">Chọn khoảng ngày — Range Picker (hai tháng song song)</div>
+    <div class="demo-card-sub">Từ 10/07 đến 25/07 — range highlight màu vàng nhạt. Thanh preset cho phép chọn nhanh Tuần/Tháng/Quý.</div>
+    <div class="dp-panel" style="width:fit-content">
+
+      <div class="dp-presets" style="width:136px">
+        <div class="dp-presets-hd">Chọn nhanh</div>
+        <div class="dp-preset">Hôm nay</div>
+        <div class="dp-preset">7 ngày qua</div>
+        <div class="dp-preset">30 ngày qua</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Tuần</div>
+        <div class="dp-preset">Tuần này</div>
+        <div class="dp-preset">Tuần trước</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Tháng</div>
+        <div class="dp-preset active">Tháng 7/2026</div>
+        <div class="dp-preset">Tháng 6/2026</div>
+        <div class="dp-preset">Tháng 5/2026</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Quý</div>
+        <div class="dp-preset">Q3 (7–9/2026)</div>
+        <div class="dp-preset">Q2 (4–6/2026)</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Năm</div>
+        <div class="dp-preset">Năm 2026</div>
+        <div class="dp-preset">Năm 2025</div>
+      </div>
+
+      <div class="dp-cal-area">
+        <div class="dp-cal-toolbar">
+          <div style="font-size:12px;color:var(--ink2)">
+            Từ: <strong>10/07/2026</strong> <span style="color:var(--ink-m);font-size:10px">(17/5 ÂL)</span>
+            &nbsp;→&nbsp;
+            Đến: <strong>25/07/2026</strong> <span style="color:var(--ink-m);font-size:10px">(2/6 ÂL)</span>
+            <span style="color:var(--ink-m);font-size:11px;margin-left:6px">· 16 ngày</span>
+          </div>
+          <div class="mode-toggle">
+            <button class="mode-btn solar-on on">☀ DL</button>
+            <button class="mode-btn">🌙 ÂL</button>
+          </div>
+        </div>
+
+        <div class="dp-cal-main">
+          <!-- June 2026 -->
+          <div class="dp-month">
+            <div class="dp-month-hd">
+              <button class="dp-month-nav">‹</button>
+              <div class="dp-month-label">Tháng 6 năm 2026</div>
+              <div></div>
+            </div>
+            <div class="dow-row">
+              <div class="dow">T2</div><div class="dow">T3</div><div class="dow">T4</div>
+              <div class="dow">T5</div><div class="dow">T6</div>
+              <div class="dow weekend">T7</div><div class="dow weekend">CN</div>
+            </div>
+            <div class="day-grid">
+              <div class="day"><span class="solar-num">1</span><span class="lunar-num">5/4</span></div>
+              <div class="day"><span class="solar-num">2</span><span class="lunar-num">6/4</span></div>
+              <div class="day"><span class="solar-num">3</span><span class="lunar-num">7/4</span></div>
+              <div class="day"><span class="solar-num">4</span><span class="lunar-num">8/4</span></div>
+              <div class="day"><span class="solar-num">5</span><span class="lunar-num">9/4</span></div>
+              <div class="day"><span class="solar-num">6</span><span class="lunar-num">10/4</span></div>
+              <div class="day"><span class="solar-num">7</span><span class="lunar-num">11/4</span></div>
+              <div class="day"><span class="solar-num">8</span><span class="lunar-num">12/4</span></div>
+              <div class="day"><span class="solar-num">9</span><span class="lunar-num">13/4</span></div>
+              <div class="day"><span class="solar-num">10</span><span class="lunar-num">14/4</span></div>
+              <div class="day ram"><span class="solar-num">11</span><span class="lunar-num is-ram">15/4 ▲</span></div>
+              <div class="day"><span class="solar-num">12</span><span class="lunar-num">16/4</span></div>
+              <div class="day"><span class="solar-num">13</span><span class="lunar-num">17/4</span></div>
+              <div class="day"><span class="solar-num">14</span><span class="lunar-num">18/4</span></div>
+              <div class="day"><span class="solar-num">15</span><span class="lunar-num">19/4</span></div>
+              <div class="day"><span class="solar-num">16</span><span class="lunar-num">20/4</span></div>
+              <div class="day"><span class="solar-num">17</span><span class="lunar-num">21/4</span></div>
+              <div class="day"><span class="solar-num">18</span><span class="lunar-num">22/4</span></div>
+              <div class="day"><span class="solar-num">19</span><span class="lunar-num">23/4</span></div>
+              <div class="day"><span class="solar-num">20</span><span class="lunar-num">24/4</span></div>
+              <div class="day"><span class="solar-num">21</span><span class="lunar-num">25/4</span></div>
+              <div class="day"><span class="solar-num">22</span><span class="lunar-num">26/4</span></div>
+              <div class="day"><span class="solar-num">23</span><span class="lunar-num">27/4</span></div>
+              <div class="day"><span class="solar-num">24</span><span class="lunar-num">28/4</span></div>
+              <div class="day"><span class="solar-num">25</span><span class="lunar-num">29/4</span></div>
+              <div class="day mong-mot"><span class="solar-num">26</span><span class="lunar-num is-mong">1/5 ●</span></div>
+              <div class="day"><span class="solar-num">27</span><span class="lunar-num">2/5</span></div>
+              <div class="day"><span class="solar-num">28</span><span class="lunar-num">3/5</span></div>
+              <div class="day"><span class="solar-num">29</span><span class="lunar-num">4/5</span></div>
+              <div class="day"><span class="solar-num">30</span><span class="lunar-num">5/5</span></div>
+              <div class="day other-month"><span class="solar-num">1</span><span class="lunar-num">6/5</span></div>
+            </div>
+          </div>
+
+          <!-- July 2026 with range 10–25 -->
+          <div class="dp-month">
+            <div class="dp-month-hd">
+              <div></div>
+              <div class="dp-month-label">Tháng 7 năm 2026</div>
+              <button class="dp-month-nav">›</button>
+            </div>
+            <div class="dow-row">
+              <div class="dow">T2</div><div class="dow">T3</div><div class="dow">T4</div>
+              <div class="dow">T5</div><div class="dow">T6</div>
+              <div class="dow weekend">T7</div><div class="dow weekend">CN</div>
+            </div>
+            <div class="day-grid">
+              <div class="day other-month"><span class="solar-num">29</span><span class="lunar-num">5/5</span></div>
+              <div class="day other-month"><span class="solar-num">30</span><span class="lunar-num">6/5</span></div>
+              <div class="day"><span class="solar-num">1</span><span class="lunar-num">7/5</span></div>
+              <div class="day"><span class="solar-num">2</span><span class="lunar-num">8/5</span></div>
+              <div class="day"><span class="solar-num">3</span><span class="lunar-num">9/5</span></div>
+              <div class="day"><span class="solar-num">4</span><span class="lunar-num">10/5</span></div>
+              <div class="day"><span class="solar-num">5</span><span class="lunar-num">11/5</span></div>
+              <div class="day"><span class="solar-num">6</span><span class="lunar-num">12/5</span></div>
+              <div class="day"><span class="solar-num">7</span><span class="lunar-num">13/5</span></div>
+              <div class="day"><span class="solar-num">8</span><span class="lunar-num">14/5</span></div>
+              <div class="day ram"><span class="solar-num">9</span><span class="lunar-num is-ram">15/5 ▲</span></div>
+              <div class="day range-start"><span class="solar-num">10</span><span class="lunar-num">16/5</span></div>
+              <div class="day in-range"><span class="solar-num">11</span><span class="lunar-num">17/5</span></div>
+              <div class="day in-range"><span class="solar-num">12</span><span class="lunar-num">18/5</span></div>
+              <div class="day in-range"><span class="solar-num">13</span><span class="lunar-num">19/5</span></div>
+              <div class="day in-range"><span class="solar-num">14</span><span class="lunar-num">20/5</span></div>
+              <div class="day in-range"><span class="solar-num">15</span><span class="lunar-num">21/5</span></div>
+              <div class="day in-range"><span class="solar-num">16</span><span class="lunar-num">22/5</span></div>
+              <div class="day in-range today"><span class="solar-num">17</span><span class="lunar-num">23/5</span></div>
+              <div class="day in-range today" style="border:1.5px solid var(--gold);background:var(--gold-pale)"><span class="solar-num" style="color:var(--gold);font-weight:800">18</span><span class="lunar-num">24/5</span></div>
+              <div class="day in-range"><span class="solar-num">19</span><span class="lunar-num">25/5</span></div>
+              <div class="day in-range"><span class="solar-num">20</span><span class="lunar-num">26/5</span></div>
+              <div class="day in-range"><span class="solar-num">21</span><span class="lunar-num">27/5</span></div>
+              <div class="day in-range"><span class="solar-num">22</span><span class="lunar-num">28/5</span></div>
+              <div class="day in-range"><span class="solar-num">23</span><span class="lunar-num">29/5</span></div>
+              <div class="day in-range mong-mot"><span class="solar-num">24</span><span class="lunar-num is-mong">1/6 ●</span></div>
+              <div class="day range-end"><span class="solar-num">25</span><span class="lunar-num">2/6</span></div>
+              <div class="day"><span class="solar-num">26</span><span class="lunar-num">3/6</span></div>
+              <div class="day"><span class="solar-num">27</span><span class="lunar-num">4/6</span></div>
+              <div class="day"><span class="solar-num">28</span><span class="lunar-num">5/6</span></div>
+              <div class="day"><span class="solar-num">29</span><span class="lunar-num">6/6</span></div>
+              <div class="day"><span class="solar-num">30</span><span class="lunar-num">7/6</span></div>
+              <div class="day"><span class="solar-num">31</span><span class="lunar-num">8/6</span></div>
+              <div class="day other-month"><span class="solar-num">1</span><span class="lunar-num">9/6</span></div>
+              <div class="day other-month"><span class="solar-num">2</span><span class="lunar-num">10/6</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dp-footer">
+          <div class="dp-footer-left">
+            <div>
+              <div class="dp-foot-date">
+                <strong>10/07/2026</strong> (17/5 ÂL) → <strong>25/07/2026</strong> (2/6 ÂL)
+              </div>
+              <div class="dp-foot-lunar">16 ngày · giao 2 tháng âm lịch (T.5 và T.6)</div>
+            </div>
+          </div>
+          <div class="dp-footer-right">
+            <button class="btn-ghost">Xóa</button>
+            <button class="btn-primary">Áp dụng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 4: Lunar mode ===== -->
+  <div class="demo-card lunar-mode">
+    <div class="demo-card-hd">Chế độ Âm lịch — Ngày âm to, ngày dương thu nhỏ</div>
+    <div class="demo-card-sub">Người dùng chọn theo âm lịch. Ngày âm hiển thị lớn màu tím, ngày dương nhỏ phía trên. 24/5 ÂL được chọn (hôm nay).</div>
+    <div class="dp-panel lunar-mode" style="width:fit-content">
+      <div class="dp-presets">
+        <div class="dp-presets-hd">Tháng ÂL</div>
+        <div class="dp-preset active">T.5 ÂL (hiện tại)</div>
+        <div class="dp-preset">T.6 ÂL</div>
+        <div class="dp-preset">T.4 ÂL</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Quý ÂL</div>
+        <div class="dp-preset">Q3 ÂL (7–9)</div>
+        <div class="dp-preset">Q2 ÂL (4–6)</div>
+        <div class="dp-presets-div"></div>
+        <div class="dp-presets-hd">Năm ÂL</div>
+        <div class="dp-preset">Bính Ngọ 2026</div>
+        <div class="dp-preset">Ất Tỵ 2025</div>
+      </div>
+
+      <div class="dp-cal-area">
+        <div class="dp-cal-toolbar">
+          <div class="mode-toggle">
+            <button class="mode-btn">☀ Dương lịch</button>
+            <button class="mode-btn lunar-on on">🌙 Âm lịch</button>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select style="padding:5px 8px;border:1px solid var(--lunar-bd);border-radius:var(--r-sm);font-size:12px;outline:none;color:var(--lunar)">
+              <option>Tháng 5 ÂL</option></select>
+            <select style="padding:5px 8px;border:1px solid var(--lunar-bd);border-radius:var(--r-sm);font-size:12px;outline:none;color:var(--lunar)">
+              <option>Bính Ngọ 2026</option><option>Ất Tỵ 2025</option></select>
+          </div>
+        </div>
+
+        <div class="dp-cal-main">
+          <div class="dp-month">
+            <div class="dp-month-hd">
+              <button class="dp-month-nav">‹</button>
+              <div class="dp-month-label" style="color:var(--lunar)">
+                Tháng 5 ÂL — Bính Ngọ
+                <span style="font-size:10px;color:var(--ink-m);font-family:var(--fb)">(Jun–Jul 2026 DL)</span>
+              </div>
+              <button class="dp-month-nav">›</button>
+            </div>
+            <div class="dow-row">
+              <div class="dow">T2</div><div class="dow">T3</div><div class="dow">T4</div>
+              <div class="dow">T5</div><div class="dow">T6</div>
+              <div class="dow weekend">T7</div><div class="dow weekend">CN</div>
+            </div>
+            <!-- In lunar mode: solar-num is small top, lunar-num is big bottom -->
+            <div class="day-grid">
+              <!-- T.5 ÂL day 1 = June 26 DL, starts Friday -->
+              <div class="day other-month"><span class="solar-num">23/6</span><span class="lunar-num">29/4</span></div>
+              <div class="day other-month"><span class="solar-num">24/6</span><span class="lunar-num">30/4</span></div>
+              <div class="day other-month"><span class="solar-num">25/6</span><span class="lunar-num">30/4</span></div>
+              <div class="day other-month"><span class="solar-num">26/6</span><span class="lunar-num">30/4</span></div>
+              <div class="day mong-mot"><span class="solar-num">27/6</span><span class="lunar-num is-mong">1/5 ●</span></div>
+              <div class="day"><span class="solar-num">28/6</span><span class="lunar-num">2/5</span></div>
+              <div class="day"><span class="solar-num">29/6</span><span class="lunar-num">3/5</span></div>
+              <div class="day"><span class="solar-num">30/6</span><span class="lunar-num">4/5</span></div>
+              <div class="day"><span class="solar-num">1/7</span><span class="lunar-num">5/5</span></div>
+              <div class="day"><span class="solar-num">2/7</span><span class="lunar-num">6/5</span></div>
+              <div class="day"><span class="solar-num">3/7</span><span class="lunar-num">7/5</span></div>
+              <div class="day"><span class="solar-num">4/7</span><span class="lunar-num">8/5</span></div>
+              <div class="day"><span class="solar-num">5/7</span><span class="lunar-num">9/5</span></div>
+              <div class="day"><span class="solar-num">6/7</span><span class="lunar-num">10/5</span></div>
+              <div class="day"><span class="solar-num">7/7</span><span class="lunar-num">11/5</span></div>
+              <div class="day"><span class="solar-num">8/7</span><span class="lunar-num">12/5</span></div>
+              <div class="day"><span class="solar-num">9/7</span><span class="lunar-num">13/5</span></div>
+              <div class="day"><span class="solar-num">10/7</span><span class="lunar-num">14/5</span></div>
+              <div class="day ram"><span class="solar-num">11/7</span><span class="lunar-num is-ram">15/5 ▲</span></div>
+              <div class="day"><span class="solar-num">12/7</span><span class="lunar-num">16/5</span></div>
+              <div class="day"><span class="solar-num">13/7</span><span class="lunar-num">17/5</span></div>
+              <div class="day"><span class="solar-num">14/7</span><span class="lunar-num">18/5</span></div>
+              <div class="day"><span class="solar-num">15/7</span><span class="lunar-num">19/5</span></div>
+              <div class="day"><span class="solar-num">16/7</span><span class="lunar-num">20/5</span></div>
+              <div class="day"><span class="solar-num">17/7</span><span class="lunar-num">21/5</span></div>
+              <div class="day"><span class="solar-num">18/7</span><span class="lunar-num">22/5</span></div>
+              <div class="day selected today" style="background:var(--lunar);border-color:var(--lunar)"><span class="solar-num">19/7</span><span class="lunar-num" style="color:#fff;font-weight:800;font-size:14px">23/5</span></div>
+              <div class="day"><span class="solar-num">20/7</span><span class="lunar-num">24/5</span></div>
+              <div class="day"><span class="solar-num">21/7</span><span class="lunar-num">25/5</span></div>
+              <div class="day"><span class="solar-num">22/7</span><span class="lunar-num">26/5</span></div>
+              <div class="day"><span class="solar-num">23/7</span><span class="lunar-num">27/5</span></div>
+              <div class="day"><span class="solar-num">24/7</span><span class="lunar-num">28/5</span></div>
+              <div class="day"><span class="solar-num">25/7</span><span class="lunar-num">29/5</span></div>
+              <!-- next month overflow -->
+              <div class="day other-month mong-mot"><span class="solar-num">26/7</span><span class="lunar-num is-mong">1/6 ●</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dp-footer" style="background:var(--lunar-pale)">
+          <div class="dp-footer-left">
+            <div>
+              <div class="dp-foot-date">Đã chọn: <strong>23 tháng 5 ÂL</strong> (Bính Ngọ)</div>
+              <div class="dp-foot-lunar" style="color:var(--ink-m)">Tương đương: 19/07/2026 DL</div>
+            </div>
+          </div>
+          <div class="dp-footer-right">
+            <button class="btn-ghost">Xóa</button>
+            <button class="btn-primary btn-lunar-primary">Xác nhận</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 5: Year/Month jump overlay ===== -->
+  <div class="demo-card">
+    <div class="demo-card-hd">Nhảy nhanh Tháng / Năm — Overlay khi click tiêu đề tháng</div>
+    <div class="demo-card-sub">Click vào "Tháng 7 năm 2026" → hiện grid chọn tháng + năm. Tháng hiện tại highlighted vàng.</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <!-- Month grid -->
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh-md);width:260px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--s2)">
+          <button class="dp-month-nav">‹</button>
+          <span style="font-weight:700;font-size:14px">2026</span>
+          <button class="dp-month-nav">›</button>
+        </div>
+        <div class="ym-grid">
+          <div class="ym-cell past">T.1</div><div class="ym-cell past">T.2</div>
+          <div class="ym-cell past">T.3</div><div class="ym-cell past">T.4</div>
+          <div class="ym-cell past">T.5</div><div class="ym-cell past">T.6</div>
+          <div class="ym-cell cur">T.7 ★</div><div class="ym-cell">T.8</div>
+          <div class="ym-cell">T.9</div><div class="ym-cell">T.10</div>
+          <div class="ym-cell">T.11</div><div class="ym-cell">T.12</div>
+        </div>
+      </div>
+
+      <!-- Year grid -->
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh-md);width:260px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--s2)">
+          <button class="dp-month-nav">‹</button>
+          <span style="font-weight:700;font-size:14px">2020–2027</span>
+          <button class="dp-month-nav">›</button>
+        </div>
+        <div class="ym-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="ym-cell past">2020</div><div class="ym-cell past">2021</div>
+          <div class="ym-cell past">2022</div><div class="ym-cell past">2023</div>
+          <div class="ym-cell past">2024</div><div class="ym-cell past">2025</div>
+          <div class="ym-cell cur">2026 ★</div><div class="ym-cell">2027</div>
+          <div class="ym-cell">2028</div><div class="ym-cell">2029</div>
+          <div class="ym-cell">2030</div><div class="ym-cell">2031</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SECTION 6: Input disabled / read-only (âm lịch tự tính) ===== -->
+  <div class="demo-card">
+    <div class="demo-card-hd">Trường âm lịch tự tính (dùng trong form nhập liệu)</div>
+    <div class="demo-card-sub">Người dùng nhập dương lịch → âm lịch tự tính, hiển thị readonly. Dùng trong PersonFormPage.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:520px">
+      <div>
+        <label class="input-label">Ngày sinh (dương lịch)</label>
+        <div class="dp-input" style="border-color:var(--gold)">
+          <span class="dp-input-icon" style="color:var(--gold)">📅</span>
+          <span class="dp-input-val">18/07/2026</span>
+          <span class="dp-input-clear">✕</span>
+        </div>
+      </div>
+      <div>
+        <label class="input-label" style="color:var(--lunar)">↳ Tương ứng âm lịch (tự tính)</label>
+        <div class="dp-input" style="background:var(--lunar-pale);border-color:var(--lunar-bd);cursor:default">
+          <span class="dp-input-icon" style="color:var(--lunar)">🌙</span>
+          <div style="flex:1">
+            <div style="font-size:13px;color:var(--lunar);font-weight:700">24 tháng 5 ÂL</div>
+            <div style="font-size:9px;color:var(--ink-m)">Năm Bính Ngọ · tự tính</div>
+          </div>
+          <span style="font-size:9px;color:var(--lunar);opacity:.6;font-weight:600;padding:2px 4px;background:var(--lunar-bd);border-radius:2px">chỉ đọc</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

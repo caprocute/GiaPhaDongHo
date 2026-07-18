@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Ngày giỗ &amp; Nhắc nhở</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;--ok-bd:#A5D6A7;
+  --warn:#F57C00;--warn-bg:#FFF8E1;--warn-bd:#FFE082;
+  --err:#C62828;--err-bg:#FFEBEE;--err-bd:#EF9A9A;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 12px rgba(0,0,0,.12);
+}
+body{font-family:var(--fb);background:var(--s2);color:var(--ink);min-height:100vh}
+.page{max-width:1100px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:20px}
+.section-sep{border-top:2px dashed var(--bd);padding-top:24px;margin-top:4px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.8px;margin-bottom:12px}
+
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-head h1{font-family:var(--fd);font-size:24px;color:var(--ink);margin:0}
+.page-head p{font-size:13px;color:var(--ink-m);margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;color:inherit}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--bd)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.link-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--r-sm);font-size:12px;font-weight:600;text-decoration:none;background:#fff;color:var(--ink);border:1px solid var(--bd)}
+
+/* Stats row */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;box-shadow:var(--sh)}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:4px}
+.stat-val{font-family:var(--fd);font-size:20px;font-weight:700;color:var(--ink)}
+.stat-sub{font-size:11px;color:var(--ink-m);margin-top:2px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;background:var(--s3);padding:5px;border-radius:var(--r);width:fit-content}
+.tab{padding:7px 20px;border-radius:var(--r-sm);border:none;background:none;font-size:13px;font-weight:600;color:var(--ink-m);cursor:pointer;display:flex;align-items:center;gap:6px}
+.tab.on{background:#fff;color:var(--ink);box-shadow:var(--sh)}
+.tab-ct{font-size:10px;font-weight:800;padding:1px 5px;border-radius:8px;background:var(--warn-bg);color:var(--warn)}
+
+/* Filter / toolbar */
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fi{padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px;background:#fff;outline:none}
+.fi:focus{border-color:var(--gold)}
+.fi-search{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--bd);border-radius:var(--r-sm);padding:7px 10px;flex:1;min-width:160px}
+.fi-search input{border:none;outline:none;font-size:12px;flex:1}
+
+/* Giỗ grid */
+.gio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.gio-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:13px;box-shadow:var(--sh);display:flex;align-items:flex-start;gap:11px;transition:border-color .15s;cursor:pointer}
+.gio-card:hover{border-color:var(--gold-bd)}
+.gio-card.near{border-color:var(--warn-bd);background:var(--warn-bg)}
+.gio-badge{display:flex;flex-direction:column;align-items:center;background:var(--gold-pale);border:1px solid var(--gold-bd);border-radius:var(--r-sm);padding:5px 9px;min-width:54px;flex-shrink:0}
+.gio-badge-mm{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.4px;text-transform:uppercase}
+.gio-badge-dd{font-family:var(--fd);font-size:22px;font-weight:700;color:var(--ink);line-height:1.1}
+.gio-card-body{flex:1;min-width:0}
+.gio-card-name{font-weight:700;font-size:13px;color:var(--ink);margin-bottom:2px}
+.gio-card-meta{font-size:11px;color:var(--ink-m);margin-bottom:6px}
+.gio-card-foot{display:flex;align-items:center;gap:5px}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.badge-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+.badge-def{background:var(--s3);color:var(--ink-m);border:1px solid var(--bd)}
+.days-left{font-size:10px;color:var(--warn);font-weight:700}
+
+/* Outbox list */
+.outbox-wrap{display:flex;flex-direction:column;gap:6px}
+.outbox-row{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:12px 16px;box-shadow:var(--sh);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px}
+.outbox-left{display:flex;align-items:center;gap:7px;min-width:160px}
+.outbox-channel{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:var(--s2);border:1px solid var(--bd);color:var(--ink-m);white-space:nowrap}
+.outbox-body{font-size:13px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.outbox-meta{font-size:11px;color:var(--ink-m);text-align:right;white-space:nowrap}
+
+/* Two-column: giỗ list + config panel */
+.gio-layout{display:grid;grid-template-columns:1fr 300px;gap:16px}
+.config-panel{background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh)}
+.config-hd{padding:12px 14px;background:var(--s2);border-bottom:1px solid var(--bd);font-family:var(--fd);font-size:15px;color:var(--ink)}
+.config-body{padding:14px;display:flex;flex-direction:column;gap:12px}
+.config-field label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:4px}
+.config-select{width:100%;padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:13px;outline:none}
+.config-select:focus{border-color:var(--gold)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)}
+.toggle-row:last-of-type{border-bottom:none}
+.toggle-label{font-size:13px;color:var(--ink2)}
+.toggle-sub{font-size:11px;color:var(--ink-m)}
+.toggle{position:relative;display:inline-block;width:38px;height:21px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{position:absolute;cursor:pointer;inset:0;background:var(--bd);border-radius:22px;transition:.2s}
+.toggle-track::before{content:'';position:absolute;height:15px;width:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-track{background:var(--ok)}
+.toggle input:checked+.toggle-track::before{transform:translateX(17px)}
+.config-preview{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);padding:10px;font-size:12px;color:var(--ink2);line-height:1.6}
+.config-preview .channel-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+
+/* Pager */
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-m);padding-top:6px}
+.pager-btns{display:flex;gap:4px}
+.pager-btn{padding:4px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);background:#fff;font-size:12px;cursor:pointer;color:var(--ink)}
+.pager-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+.help-text{font-size:12px;color:var(--ink-m);background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);padding:9px 13px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-head">
+    <div>
+      <h1>Ngày giỗ</h1>
+      <p>Danh sách ngày giỗ trong phả hệ, cấu hình tin nhắc nhắc nhở và xem lịch sử gửi.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="#" class="link-btn">⬇ Tải lịch (iCal)</a>
+      <button class="btn btn-gold btn-sm">▶ Gửi nhắc ngay</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-lbl">Tổng ngày giỗ</div>
+      <div class="stat-val">84</div>
+      <div class="stat-sub">Từ 3.241 thành viên</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Trong 30 ngày tới</div>
+      <div class="stat-val" style="color:var(--warn)">8</div>
+      <div class="stat-sub">Gần nhất: 05/07 ÂL (3 ngày)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Đã gửi nhắc</div>
+      <div class="stat-val">142</div>
+      <div class="stat-sub">Trong 12 tháng qua</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Thất bại gần đây</div>
+      <div class="stat-val" style="color:var(--err)">2</div>
+      <div class="stat-sub">Zalo OA lỗi kết nối</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab on" role="tab">📅 Danh sách giỗ</button>
+    <button class="tab" role="tab">🔔 Lịch sử nhắc <span class="tab-ct">2</span></button>
+    <button class="tab" role="tab">⚙ Cấu hình nhắc</button>
+  </div>
+
+  <!-- ===== TAB 1: Danh sách giỗ + Config panel ===== -->
+  <div class="gio-layout">
+
+    <!-- Left: giỗ list -->
+    <div>
+      <div class="filter-bar" style="margin-bottom:12px">
+        <div class="fi-search">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Tìm tên người, mã hiệu…">
+        </div>
+        <select class="fi"><option>Tất cả tháng ÂL</option>
+          <option>Tháng 1 ÂL</option><option>Tháng 2 ÂL</option><option>Tháng 3 ÂL</option>
+          <option>Tháng 4 ÂL</option><option>Tháng 5 ÂL</option><option>Tháng 6 ÂL</option>
+          <option selected>Tháng 7 ÂL</option><option>Tháng 8 ÂL</option>
+        </select>
+        <select class="fi"><option>Tất cả đời</option><option>Đời 1–3</option><option>Đời 4–6</option><option>Đời 7+</option></select>
+        <button class="btn btn-sec btn-sm">↻ Tải lại</button>
+      </div>
+
+      <div class="gio-grid">
+        <div class="gio-card near">
+          <div class="gio-badge" style="background:#fff3e0;border-color:var(--warn-bd)"><span class="gio-badge-mm" style="color:var(--warn)">7 ÂL</span><span class="gio-badge-dd">05</span></div>
+          <div class="gio-card-body">
+            <div class="gio-card-name">Hoàng Ngọc Bình</div>
+            <div class="gio-card-meta">Mã A001 · Đời 3 · Nam</div>
+            <div class="gio-card-foot">
+              <span class="badge badge-warn">Chưa nhắc</span>
+              <span class="days-left">còn 3 ngày</span>
+            </div>
+          </div>
+        </div>
+        <div class="gio-card">
+          <div class="gio-badge"><span class="gio-badge-mm">7 ÂL</span><span class="gio-badge-dd">18</span></div>
+          <div class="gio-card-body">
+            <div class="gio-card-name">Hoàng Thị Mây</div>
+            <div class="gio-card-meta">Mã B022 · Đời 4 · Nữ · Giỗ đầu</div>
+            <div class="gio-card-foot"><span class="badge badge-ok">Đã nhắc</span></div>
+          </div>
+        </div>
+        <div class="gio-card">
+          <div class="gio-badge"><span class="gio-badge-mm">8 ÂL</span><span class="gio-badge-dd">03</span></div>
+          <div class="gio-card-body">
+            <div class="gio-card-name">Hoàng Văn Đức</div>
+            <div class="gio-card-meta">Mã A005 · Đời 2 · Nam</div>
+            <div class="gio-card-foot"><span class="badge badge-def">Chưa đến</span></div>
+          </div>
+        </div>
+        <div class="gio-card">
+          <div class="gio-badge"><span class="gio-badge-mm">8 ÂL</span><span class="gio-badge-dd">12</span></div>
+          <div class="gio-card-body">
+            <div class="gio-card-name">Hoàng Thị Cúc</div>
+            <div class="gio-card-meta">Mã B034 · Đời 4 · Nữ</div>
+            <div class="gio-card-foot"><span class="badge badge-def">Chưa đến</span></div>
+          </div>
+        </div>
+        <div class="gio-card">
+          <div class="gio-badge"><span class="gio-badge-mm">8 ÂL</span><span class="gio-badge-dd">25</span></div>
+          <div class="gio-card-body">
+            <div class="gio-card-name">Hoàng Đình Lợi</div>
+            <div class="gio-card-meta">Mã C009 · Đời 5 · Nam</div>
+            <div class="gio-card-foot"><span class="badge badge-def">Chưa đến</span></div>
+          </div>
+        </div>
+        <div class="gio-card">
+          <div class="gio-badge"><span class="gio-badge-mm">9 ÂL</span><span class="gio-badge-dd">01</span></div>
+          <div class="gio-card-body">
+            <div class="gio-card-name">Hoàng Thị Sen</div>
+            <div class="gio-card-meta">Mã D001 · Đời 6 · Nữ</div>
+            <div class="gio-card-foot"><span class="badge badge-def">Chưa đến</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pager">
+        <span>Hiển thị 1–6 / 84 ngày giỗ</span>
+        <div class="pager-btns">
+          <button class="pager-btn on">1</button><button class="pager-btn">2</button>
+          <button class="pager-btn">3</button><button class="pager-btn">…</button>
+          <button class="pager-btn">14</button><button class="pager-btn">›</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Config panel (always visible) -->
+    <div class="config-panel">
+      <div class="config-hd">⚙ Cấu hình nhắc giỗ</div>
+      <div class="config-body">
+        <div class="config-field">
+          <label>Nhắc trước bao nhiêu ngày</label>
+          <select class="config-select"><option>1 ngày trước</option><option>2 ngày trước</option><option selected>3 ngày trước</option><option>5 ngày trước</option><option>7 ngày trước</option></select>
+        </div>
+        <div class="config-field">
+          <label>Giờ gửi tin nhắc</label>
+          <select class="config-select"><option>06:00</option><option selected>08:00</option><option>09:00</option><option>Tùy chỉnh…</option></select>
+        </div>
+        <div style="border-top:1px solid var(--bd);padding-top:10px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:8px">Kênh gửi</div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Zalo OA</div><div class="toggle-sub">Gửi qua trang Zalo dòng họ</div></div>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Email</div><div class="toggle-sub">Gửi qua địa chỉ email</div></div>
+            <label class="toggle"><input type="checkbox"><span class="toggle-track"></span></label>
+          </div>
+          <div class="toggle-row">
+            <div><div class="toggle-label">Thông báo web</div><div class="toggle-sub">Push notification trên cổng</div></div>
+            <label class="toggle"><input type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+        </div>
+        <div style="border-top:1px solid var(--bd);padding-top:10px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:8px">Nội dung mẫu (Zalo OA)</div>
+          <div class="config-preview">
+            <div class="channel-label">Zalo OA</div>
+            Kính gửi bà con họ Hoàng,<br>
+            Nhắc nhở: <b>Ngày giỗ cụ {tên}</b> sẽ diễn ra vào ngày <b>{ngày_am_lich} ÂL</b> ({ngày_duong_lich}).<br>
+            Trân trọng — Ban quản trị gia phả.
+          </div>
+          <a href="#" style="font-size:11px;color:var(--gold);font-weight:600;display:block;margin-top:8px">✎ Chỉnh sửa mẫu →</a>
+        </div>
+        <button class="btn btn-gold" style="width:100%;justify-content:center">Lưu cấu hình</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB 2: Lịch sử nhắc (outbox) ===== -->
+  <div class="section-sep">
+    <p class="section-label">Tab: Lịch sử nhắc — outbox</p>
+  </div>
+
+  <div class="filter-bar">
+    <select class="fi"><option selected>Chờ gửi</option><option>Đã gửi</option><option>Thất bại</option><option>Thử nghiệm</option><option>Tất cả</option></select>
+    <select class="fi"><option>Tất cả kênh</option><option>Zalo OA</option><option>Email</option><option>Web</option></select>
+    <button class="btn btn-sec btn-sm">↻ Tải lại</button>
+  </div>
+
+  <p class="help-text">Hệ thống tự động tạo tin nhắc nhắc giỗ <b>3 ngày trước</b> ngày âm lịch. Nhấn <b>Gửi nhắc ngay</b> để xử lý thủ công tất cả hàng đợi.</p>
+
+  <div class="outbox-wrap">
+    <div class="outbox-row">
+      <div class="outbox-left">
+        <span class="badge badge-warn">Chờ gửi</span>
+        <span class="outbox-channel">Zalo OA</span>
+      </div>
+      <div class="outbox-body">Nhắc giỗ Hoàng Ngọc Bình — 05/07 ÂL (còn 3 ngày)</div>
+      <div class="outbox-meta">Tạo: 18/07 08:00</div>
+    </div>
+    <div class="outbox-row">
+      <div class="outbox-left">
+        <span class="badge badge-warn">Chờ gửi</span>
+        <span class="outbox-channel">Thông báo web</span>
+      </div>
+      <div class="outbox-body">Nhắc giỗ Hoàng Ngọc Bình — 05/07 ÂL (còn 3 ngày)</div>
+      <div class="outbox-meta">Tạo: 18/07 08:00</div>
+    </div>
+    <div class="outbox-row">
+      <div class="outbox-left">
+        <span class="badge badge-ok">Đã gửi</span>
+        <span class="outbox-channel">Zalo OA</span>
+      </div>
+      <div class="outbox-body">Nhắc giỗ Hoàng Thị Mây — 18/07 ÂL</div>
+      <div class="outbox-meta">Gửi: 15/07 08:01</div>
+    </div>
+    <div class="outbox-row" style="background:var(--err-bg);border-color:var(--err-bd)">
+      <div class="outbox-left">
+        <span class="badge" style="background:var(--err-bg);color:var(--err);border:1px solid var(--err-bd)">Thất bại</span>
+        <span class="outbox-channel">Zalo OA</span>
+      </div>
+      <div class="outbox-body">Nhắc giỗ Hoàng Đình Lợi — lỗi kết nối Zalo OA (timeout)</div>
+      <div class="outbox-meta" style="color:var(--err)">Lỗi: 08/07 08:02 <a href="#" style="color:var(--err);font-weight:600;margin-left:5px">Gửi lại</a></div>
+    </div>
+    <div class="outbox-row">
+      <div class="outbox-left">
+        <span class="badge badge-def">Thử nghiệm</span>
+        <span class="outbox-channel">Thông báo web</span>
+      </div>
+      <div class="outbox-body">DRY RUN — Nhắc giỗ Hoàng Thị Cúc — 12/08 ÂL</div>
+      <div class="outbox-meta">Tạo: 05/07 14:30</div>
+    </div>
+  </div>
+
+  <div class="pager">
+    <span>Hiển thị 1–5 / 47 bản ghi</span>
+    <div class="pager-btns">
+      <button class="pager-btn on">1</button><button class="pager-btn">2</button>
+      <button class="pager-btn">3</button><button class="pager-btn">›</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

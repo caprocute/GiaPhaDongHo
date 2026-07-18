@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Quản lý bài viết (CMS)</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;--ok-bd:#A5D6A7;
+  --warn:#F57C00;--warn-bg:#FFF8E1;--warn-bd:#FFE082;
+  --err:#C62828;--err-bg:#FFEBEE;--err-bd:#EF9A9A;
+  --info:#1565C0;--info-bg:#E3F2FD;--info-bd:#90CAF9;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 14px rgba(0,0,0,.12);
+}
+body{font-family:var(--fb);background:var(--s2);color:var(--ink);min-height:100vh}
+.page{max-width:1240px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:18px}
+.section-sep{border-top:2px dashed var(--bd);padding-top:24px;margin-top:4px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.8px;margin-bottom:14px}
+
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-head h1{font-family:var(--fd);font-size:24px;color:var(--ink);margin:0}
+.page-head p{font-size:13px;color:var(--ink-m);margin-top:4px}
+.page-head-acts{display:flex;gap:8px;flex-shrink:0}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;color:inherit}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold-l)}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--bd)}.btn-sec:hover{background:var(--s2)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-xs{padding:4px 9px;font-size:11px;border-radius:3px;font-weight:700}
+.btn-danger{background:none;color:var(--err);border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:var(--fb);padding:4px 6px}
+
+/* Two-panel layout */
+.cms-layout{display:grid;grid-template-columns:210px 1fr;gap:0;background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh-md);overflow:hidden}
+
+/* Left sidebar */
+.cms-sidebar{border-right:1px solid var(--bd);padding:14px 0}
+.cms-sidebar-section{margin-bottom:18px}
+.cms-sidebar-hd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-m);padding:0 14px;margin-bottom:6px}
+.cat-item{display:flex;align-items:center;justify-content:space-between;padding:6px 14px;font-size:13px;cursor:pointer;transition:background .12s;color:var(--ink2)}
+.cat-item:hover{background:var(--s2)}
+.cat-item.on{background:var(--gold-pale);color:var(--ink);font-weight:600;border-left:3px solid var(--gold)}
+.cat-item.on{padding-left:11px}
+.cat-count{font-size:11px;font-weight:700;background:var(--s3);color:var(--ink-m);padding:1px 6px;border-radius:10px;min-width:22px;text-align:center}
+.cat-count.active{background:var(--gold-pale);color:var(--gold)}
+.cat-add{display:flex;align-items:center;gap:5px;padding:6px 14px;font-size:12px;color:var(--gold);cursor:pointer;font-weight:600}
+.cat-add:hover{background:var(--s2)}
+.sidebar-divider{height:1px;background:var(--bd);margin:8px 0}
+.quick-item{display:flex;align-items:center;justify-content:space-between;padding:5px 14px;font-size:12px;color:var(--ink-m);cursor:pointer}
+.quick-item:hover{color:var(--gold)}
+
+/* Main content area */
+.cms-main{display:flex;flex-direction:column}
+
+/* Status tabs */
+.cms-tabs{display:flex;gap:0;border-bottom:2px solid var(--bd);background:var(--s2)}
+.cms-tab{padding:10px 18px;font-size:13px;font-weight:600;color:var(--ink-m);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;display:flex;align-items:center;gap:6px;transition:all .15s}
+.cms-tab.on{color:var(--gold);border-bottom-color:var(--gold);background:#fff}
+.cms-tab:hover:not(.on){color:var(--ink)}
+.cms-tab-ct{font-size:10px;font-weight:800;padding:1px 6px;border-radius:10px;background:var(--s3);color:var(--ink-m)}
+.cms-tab.on .cms-tab-ct{background:var(--gold-pale);color:var(--gold)}
+
+/* Filter bar */
+.cms-filter{display:flex;gap:8px;align-items:center;padding:12px 16px;background:#fff;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);padding:7px 10px;flex:1;min-width:180px}
+.search-box input{border:none;background:transparent;outline:none;font-size:13px;flex:1;color:var(--ink)}
+.search-box input::placeholder{color:var(--ink-m)}
+.fi{padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px;background:#fff;outline:none}
+.fi:focus{border-color:var(--gold)}
+.sort-lbl{font-size:11px;color:var(--ink-m);white-space:nowrap}
+
+/* Bulk actions bar */
+.bulk-bar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--info-bg);border-bottom:1px solid var(--info-bd);font-size:13px}
+.bulk-bar b{color:var(--info)}
+.bulk-bar-acts{display:flex;gap:6px;margin-left:auto}
+.bulk-btn{padding:4px 10px;border-radius:3px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:#fff;border:1px solid var(--bd);color:var(--ink)}
+.bulk-btn.danger{color:var(--err);border-color:var(--err-bd)}
+.bulk-btn.ok{color:var(--ok);border-color:var(--ok-bd)}
+
+/* Table */
+.post-table{width:100%;border-collapse:collapse}
+.post-table thead tr{background:var(--s2);border-bottom:2px solid var(--bd)}
+.post-table thead th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-m)}
+.post-table thead th:first-child{width:36px;text-align:center}
+.post-table tbody tr{border-bottom:1px solid var(--bd);transition:background .12s}
+.post-table tbody tr:hover{background:var(--gold-pale)}
+.post-table tbody tr.selected{background:var(--info-bg)}
+.post-table tbody tr:last-child{border-bottom:none}
+.post-table td{padding:12px 14px;font-size:13px;vertical-align:top}
+.post-table td:first-child{text-align:center;vertical-align:middle}
+.post-title-cell .title{font-weight:700;color:var(--ink);margin-bottom:3px}
+.post-title-cell .excerpt{font-size:11px;color:var(--ink-m);line-height:1.4;max-width:420px}
+.post-title-cell .slug{font-size:10px;font-family:monospace;color:var(--ink-m);background:var(--s3);padding:1px 5px;border-radius:3px;margin-top:4px;display:inline-block}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.badge-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.badge-def{background:var(--s3);color:var(--ink-m);border:1px solid var(--bd)}
+.badge-arch{background:#f3f0e8;color:var(--ink-m);border:1px solid var(--bd)}
+.badge-sched{background:var(--info-bg);color:var(--info);border:1px solid var(--info-bd)}
+.act-row{display:flex;gap:4px;align-items:center}
+.act-link{color:var(--gold);text-decoration:none;font-size:12px;font-weight:600}
+
+/* Table footer */
+.table-footer{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-top:1px solid var(--bd);background:var(--s2);font-size:12px;color:var(--ink-m)}
+.pager-btns{display:flex;gap:4px}
+.pager-btn{padding:4px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);background:#fff;font-size:12px;cursor:pointer;color:var(--ink)}
+.pager-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* ===== FORM ===== */
+.form-layout{display:grid;grid-template-columns:1fr 280px;gap:0;background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh-md);overflow:hidden}
+
+/* Content area */
+.form-content{padding:24px;border-right:1px solid var(--bd)}
+.form-title-input{width:100%;font-family:var(--fd);font-size:22px;color:var(--ink);border:none;outline:none;margin-bottom:4px;padding:0;background:transparent}
+.form-title-input::placeholder{color:var(--ink-m)}
+.form-slug-row{display:flex;align-items:center;gap:6px;margin-bottom:18px;padding:6px 0;border-bottom:1px solid var(--bd)}
+.form-slug-row span{font-size:11px;color:var(--ink-m)}
+.form-slug-input{font-size:12px;font-family:monospace;color:var(--gold);border:none;outline:none;background:transparent;flex:1}
+.form-field-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-m);margin-bottom:4px;display:block}
+.fi-full{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:13px;outline:none;background:#fff}
+.fi-full:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.1)}
+.fi-textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:13px;outline:none;resize:vertical;font-family:var(--fb)}
+.fi-textarea:focus{border-color:var(--gold)}
+
+/* Content tabs inside form */
+.form-tabs{display:flex;gap:0;border:1px solid var(--bd);border-radius:var(--r-sm);overflow:hidden;margin-bottom:12px;width:fit-content;background:var(--s2)}
+.form-tab{padding:6px 14px;font-size:12px;font-weight:600;color:var(--ink-m);cursor:pointer;border-right:1px solid var(--bd)}
+.form-tab:last-child{border-right:none}
+.form-tab.on{background:#fff;color:var(--ink)}
+
+/* Rich text editor */
+.rte{border:1px solid var(--bd);border-radius:var(--r-sm);overflow:hidden}
+.rte-toolbar{display:flex;gap:2px;padding:6px 8px;background:var(--s2);border-bottom:1px solid var(--bd);flex-wrap:wrap}
+.rte-btn{padding:4px 8px;border:1px solid transparent;border-radius:3px;background:none;font-size:12px;cursor:pointer;color:var(--ink2)}
+.rte-btn:hover,.rte-btn.on{background:#fff;border-color:var(--bd)}
+.rte-sep{width:1px;background:var(--bd);margin:2px 4px;align-self:stretch}
+.rte-body{min-height:200px;padding:14px;font-size:14px;line-height:1.7;color:var(--ink2)}
+.rte-body h2{font-family:var(--fd);font-size:18px;margin-bottom:8px}
+.rte-body p{margin-bottom:10px}
+
+/* SEO tab */
+.seo-field{margin-bottom:14px}
+.seo-meta-preview{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);padding:12px;margin-top:12px}
+.seo-preview-url{font-size:11px;color:var(--ok);margin-bottom:3px}
+.seo-preview-title{font-size:15px;color:#1a0dab;font-weight:600;margin-bottom:3px;cursor:pointer}
+.seo-preview-desc{font-size:12px;color:var(--ink-m);line-height:1.5}
+
+/* Publish sidebar */
+.form-sidebar{padding:20px 16px;display:flex;flex-direction:column;gap:16px;background:var(--s2)}
+.sidebar-section{background:#fff;border:1px solid var(--bd);border-radius:var(--r-sm);overflow:hidden}
+.sidebar-section-hd{padding:9px 12px;background:var(--s3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-m);border-bottom:1px solid var(--bd)}
+.sidebar-section-body{padding:12px}
+.pub-option{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:13px}
+.pub-radio{width:15px;height:15px;border-radius:50%;border:2px solid var(--bd);display:inline-block;flex-shrink:0}
+.pub-radio.on{border-color:var(--gold);background:radial-gradient(circle, var(--gold) 5px, transparent 5px)}
+.schedule-fields{margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);display:flex;gap:6px}
+.schedule-fields input{flex:1;padding:6px 8px;border:1px solid var(--bd);border-radius:3px;font-size:12px;outline:none}
+/* categories in sidebar */
+.cat-check{display:flex;align-items:center;gap:7px;padding:5px 0;font-size:13px;cursor:pointer}
+.cat-checkbox{width:14px;height:14px;border:2px solid var(--bd);border-radius:3px;display:inline-block;flex-shrink:0;position:relative}
+.cat-checkbox.on{background:var(--gold);border-color:var(--gold)}
+.cat-checkbox.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900}
+/* featured image */
+.feat-img-zone{border:2px dashed var(--bd);border-radius:var(--r-sm);padding:20px;text-align:center;cursor:pointer;transition:all .15s}
+.feat-img-zone:hover{border-color:var(--gold);background:var(--gold-pale)}
+.feat-img-preview{width:100%;height:80px;object-fit:cover;border-radius:3px;border:1px solid var(--bd)}
+/* author */
+.author-fi{width:100%;padding:7px 9px;border:1px solid var(--bd);border-radius:3px;font-size:13px;outline:none}
+/* form actions */
+.form-actions-bar{display:flex;gap:8px;flex-direction:column}
+.form-actions-bar .preview-link{font-size:11px;color:var(--gold);text-decoration:none;text-align:center;font-weight:600}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-head">
+    <div>
+      <h1>Bài viết</h1>
+      <p>Quản lý tin tức và nội dung CMS — đăng bài, lên lịch xuất bản, phân loại chuyên mục.</p>
+    </div>
+    <div class="page-head-acts">
+      <button class="btn btn-sec btn-sm">🔗 Xem trang công khai ↗</button>
+      <a href="#form-section" class="btn btn-gold btn-sm">+ Viết bài</a>
+    </div>
+  </div>
+
+  <!-- ===== LIST VIEW (two-panel) ===== -->
+  <div class="cms-layout">
+
+    <!-- Left: Category sidebar -->
+    <div class="cms-sidebar">
+      <div class="cms-sidebar-section">
+        <div class="cms-sidebar-hd">Chuyên mục</div>
+        <div class="cat-item on">Tất cả bài viết<span class="cat-count active">12</span></div>
+        <div class="cat-item">Giới thiệu<span class="cat-count">2</span></div>
+        <div class="cat-item">Thông báo<span class="cat-count">5</span></div>
+        <div class="cat-item">Lịch sử dòng họ<span class="cat-count">3</span></div>
+        <div class="cat-item">Văn hoá truyền thống<span class="cat-count">2</span></div>
+        <div class="cat-add">+ Thêm chuyên mục</div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="cms-sidebar-section">
+        <div class="cms-sidebar-hd">Truy cập nhanh</div>
+        <div class="quick-item">📝 Nháp <span style="margin-left:auto;font-size:11px;font-weight:700">3</span></div>
+        <div class="quick-item">⏰ Lên lịch <span style="margin-left:auto;font-size:11px;font-weight:700">1</span></div>
+        <div class="quick-item">📦 Lưu trữ <span style="margin-left:auto;font-size:11px;font-weight:700">1</span></div>
+      </div>
+      <div class="sidebar-divider"></div>
+      <div class="cms-sidebar-section">
+        <div class="cms-sidebar-hd">Thống kê tháng này</div>
+        <div class="quick-item">Bài mới <span style="margin-left:auto;font-weight:700;color:var(--ok)">+3</span></div>
+        <div class="quick-item">Lượt xem <span style="margin-left:auto;font-weight:700">1.284</span></div>
+        <div class="quick-item">Bình luận chờ <span style="margin-left:auto;font-weight:700;color:var(--warn)">3</span></div>
+      </div>
+    </div>
+
+    <!-- Right: Main content -->
+    <div class="cms-main">
+
+      <!-- Status tabs -->
+      <div class="cms-tabs">
+        <div class="cms-tab on">Tất cả <span class="cms-tab-ct">12</span></div>
+        <div class="cms-tab">Đã xuất bản <span class="cms-tab-ct">8</span></div>
+        <div class="cms-tab">Nháp <span class="cms-tab-ct">3</span></div>
+        <div class="cms-tab">Lên lịch <span class="cms-tab-ct">1</span></div>
+        <div class="cms-tab">Lưu trữ <span class="cms-tab-ct">1</span></div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="cms-filter">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" style="color:var(--ink-m);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Tìm tiêu đề, nội dung, tác giả…">
+        </div>
+        <select class="fi"><option>Chuyên mục…</option><option>Giới thiệu</option><option>Thông báo</option></select>
+        <select class="fi"><option>Tác giả…</option><option>Ban quản trị</option><option>Hoàng Văn A</option></select>
+        <select class="fi"><option>Sắp xếp: Mới nhất</option><option>Cũ nhất</option><option>A–Z</option><option>Nhiều xem</option></select>
+      </div>
+
+      <!-- Bulk actions bar (2 items selected) -->
+      <div class="bulk-bar">
+        <input type="checkbox" checked style="accent-color:var(--gold)">
+        <span>Đã chọn <b>2</b> bài viết</span>
+        <div class="bulk-bar-acts">
+          <button class="bulk-btn ok">✓ Xuất bản tất cả</button>
+          <button class="bulk-btn">📦 Lưu trữ</button>
+          <button class="bulk-btn danger">✕ Xóa đã chọn</button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <table class="post-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" style="accent-color:var(--gold)"></th>
+            <th>Bài viết</th>
+            <th style="width:110px">Trạng thái</th>
+            <th style="width:130px">Chuyên mục</th>
+            <th style="width:100px">Tác giả</th>
+            <th style="width:100px">Ngày</th>
+            <th style="width:100px">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="selected">
+            <td><input type="checkbox" checked style="accent-color:var(--gold)"></td>
+            <td class="post-title-cell">
+              <div class="title">Thông báo họp họ tháng 8 năm 2026</div>
+              <div class="excerpt">Ban quản lý gia phả trân trọng thông báo lịch họp họ thường niên năm 2026 sẽ diễn ra vào…</div>
+              <span class="slug">thong-bao-hop-ho-thang-8-2026</span>
+            </td>
+            <td><span class="badge badge-ok">Xuất bản</span></td>
+            <td style="font-size:12px">Thông báo</td>
+            <td style="font-size:12px">Ban quản trị</td>
+            <td style="font-size:11px;color:var(--ink-m)">05/07/2026</td>
+            <td><div class="act-row"><a href="#form-section" class="act-link">Sửa</a><button class="btn-danger">Xóa</button></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" style="accent-color:var(--gold)"></td>
+            <td class="post-title-cell">
+              <div class="title">Giới thiệu trang web gia phả dòng họ Hoàng</div>
+              <div class="excerpt">Trang web gia phả số dòng họ Hoàng được xây dựng nhằm lưu giữ và truyền bá lịch sử dòng họ…</div>
+              <span class="slug">gioi-thieu-trang-gia-pha</span>
+            </td>
+            <td><span class="badge badge-ok">Xuất bản</span></td>
+            <td style="font-size:12px">Giới thiệu</td>
+            <td style="font-size:12px">Ban quản trị</td>
+            <td style="font-size:11px;color:var(--ink-m)">01/01/2026</td>
+            <td><div class="act-row"><a href="#form-section" class="act-link">Sửa</a><button class="btn-danger">Xóa</button></div></td>
+          </tr>
+          <tr class="selected">
+            <td><input type="checkbox" checked style="accent-color:var(--gold)"></td>
+            <td class="post-title-cell">
+              <div class="title">Kế hoạch xây dựng nhà thờ tổ 2027</div>
+              <div class="excerpt">Dự thảo kế hoạch xây dựng và tu bổ nhà thờ tổ — đang trong giai đoạn lấy ý kiến bà con.</div>
+              <span class="slug">ke-hoach-xay-nha-tho-to-2027</span>
+            </td>
+            <td><span class="badge badge-def">Nháp</span></td>
+            <td style="font-size:12px">—</td>
+            <td style="font-size:12px">Hoàng Văn A</td>
+            <td style="font-size:11px;color:var(--ink-m)">15/07/2026</td>
+            <td><div class="act-row"><a href="#form-section" class="act-link">Sửa</a><button class="btn-danger">Xóa</button></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" style="accent-color:var(--gold)"></td>
+            <td class="post-title-cell">
+              <div class="title">Họp mặt kỷ niệm 200 năm dòng họ</div>
+              <div class="excerpt">Thông báo chương trình họp mặt lớn kỷ niệm 200 năm thành lập dòng họ Hoàng, dự kiến năm 2027.</div>
+              <span class="slug">hop-mat-200-nam</span>
+            </td>
+            <td><span class="badge badge-sched">⏰ Lên lịch</span></td>
+            <td style="font-size:12px">Thông báo</td>
+            <td style="font-size:12px">Ban quản trị</td>
+            <td style="font-size:11px;color:var(--ink-m)">01/01/2027</td>
+            <td><div class="act-row"><a href="#form-section" class="act-link">Sửa</a><button class="btn-danger">Xóa</button></div></td>
+          </tr>
+          <tr>
+            <td><input type="checkbox" style="accent-color:var(--gold)"></td>
+            <td class="post-title-cell">
+              <div class="title">Lịch sử dòng họ Hoàng — Chi Đông</div>
+              <div class="excerpt">Tóm lược lịch sử hình thành và phát triển dòng họ Hoàng chi Đông từ thế kỷ 19 đến nay.</div>
+              <span class="slug">lich-su-dong-ho-hoang-chi-dong</span>
+            </td>
+            <td><span class="badge badge-ok">Xuất bản</span></td>
+            <td style="font-size:12px">Lịch sử dòng họ</td>
+            <td style="font-size:12px">Ban quản trị</td>
+            <td style="font-size:11px;color:var(--ink-m)">10/03/2025</td>
+            <td><div class="act-row"><a href="#form-section" class="act-link">Sửa</a><button class="btn-danger">Xóa</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-footer">
+        <span>Hiển thị 1–5 / 12 bài viết</span>
+        <div class="pager-btns">
+          <button class="pager-btn on">1</button>
+          <button class="pager-btn">2</button>
+          <button class="pager-btn">3</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FORM: Viết bài mới ===== -->
+  <div class="section-sep" id="form-section">
+    <p class="section-label">Form viết bài / sửa bài — /posts/new hoặc /posts/1</p>
+  </div>
+
+  <div class="form-layout">
+    <!-- Content column -->
+    <div class="form-content">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <a href="#" style="font-size:12px;color:var(--gold);text-decoration:none;font-weight:600">← Danh sách bài viết</a>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-sec btn-sm">👁 Xem trước</button>
+          <span style="font-size:11px;color:var(--ink-m);align-self:center">Lưu tự động 14:32</span>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <input class="form-title-input" placeholder="Nhập tiêu đề bài viết…" value="Thông báo họp họ tháng 8 năm 2026">
+      <div class="form-slug-row">
+        <span>🔗 Đường dẫn:</span>
+        <input class="form-slug-input" value="thong-bao-hop-ho-thang-8-2026">
+        <button style="font-size:11px;color:var(--gold);background:none;border:none;cursor:pointer;font-weight:600">Chỉnh</button>
+      </div>
+
+      <!-- Content tabs -->
+      <div class="form-tabs" style="margin-bottom:10px">
+        <div class="form-tab on">📝 Nội dung</div>
+        <div class="form-tab">🔍 SEO</div>
+        <div class="form-tab">🔗 Liên kết</div>
+      </div>
+
+      <!-- Summary -->
+      <div style="margin-bottom:12px">
+        <label class="form-field-lbl">Tóm tắt</label>
+        <textarea class="fi-textarea" rows="2">Ban quản lý gia phả trân trọng thông báo lịch họp họ thường niên năm 2026.</textarea>
+      </div>
+
+      <!-- Rich text editor -->
+      <label class="form-field-lbl" style="margin-bottom:6px">Nội dung <span style="color:var(--err)">*</span></label>
+      <div class="rte">
+        <div class="rte-toolbar">
+          <button class="rte-btn on"><b>B</b></button>
+          <button class="rte-btn"><i>I</i></button>
+          <button class="rte-btn"><u>U</u></button>
+          <button class="rte-btn" style="text-decoration:line-through">S</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn">H1</button>
+          <button class="rte-btn">H2</button>
+          <button class="rte-btn">H3</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn">≡ DS</button>
+          <button class="rte-btn">1. DS</button>
+          <button class="rte-btn">❝ Trích</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn">🔗 Link</button>
+          <button class="rte-btn">🖼 Ảnh</button>
+          <button class="rte-btn">📊 Bảng</button>
+          <div class="rte-sep"></div>
+          <button class="rte-btn">⎇ Hoàn tác</button>
+          <button class="rte-btn" style="margin-left:auto">Xóa định dạng</button>
+        </div>
+        <div class="rte-body" contenteditable="true">
+          <h2>Kính gửi bà con họ Hoàng</h2>
+          <p>Ban quản lý gia phả trân trọng thông báo lịch họp họ thường niên năm 2026 như sau:</p>
+          <p>⏰ <strong>Thời gian:</strong> 08:00 – 12:00, ngày 15/8 âm lịch (06/09/2026 dương lịch)</p>
+          <p>📍 <strong>Địa điểm:</strong> Nhà thờ tổ họ Hoàng, thôn Đông Bình, xã Hòa Phú</p>
+          <p>Trân trọng kính mời toàn thể bà con tham dự đầy đủ và đúng giờ.</p>
+        </div>
+      </div>
+
+      <!-- SEO tab (shown as hidden reference) -->
+      <div style="margin-top:14px;border:1px dashed var(--bd);border-radius:var(--r-sm);padding:14px;display:none" id="seo-tab">
+        <div class="seo-field">
+          <label class="form-field-lbl">Meta title (SEO)</label>
+          <input class="fi-full" value="Thông báo họp họ tháng 8 năm 2026 | Gia phả họ Hoàng">
+          <span style="font-size:10px;color:var(--ink-m)">55/60 ký tự</span>
+        </div>
+        <div class="seo-field">
+          <label class="form-field-lbl">Meta description</label>
+          <textarea class="fi-textarea" rows="2">Ban quản lý gia phả thông báo lịch họp họ thường niên năm 2026 tại nhà thờ tổ họ Hoàng.</textarea>
+          <span style="font-size:10px;color:var(--ink-m)">141/160 ký tự</span>
+        </div>
+        <div class="seo-meta-preview">
+          <div class="seo-preview-url">giapha.vn › thong-bao › thong-bao-hop-ho-thang-8-2026</div>
+          <div class="seo-preview-title">Thông báo họp họ tháng 8 năm 2026 | Gia phả họ Hoàng</div>
+          <div class="seo-preview-desc">Ban quản lý gia phả thông báo lịch họp họ thường niên năm 2026 tại nhà thờ tổ họ Hoàng.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Publish sidebar -->
+    <div class="form-sidebar">
+
+      <!-- Status / publish -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-hd">Xuất bản</div>
+        <div class="sidebar-section-body">
+          <div class="pub-option"><span class="pub-radio on"></span>Xuất bản ngay</div>
+          <div class="pub-option"><span class="pub-radio"></span>Lên lịch xuất bản
+            <div class="schedule-fields" style="display:none">
+              <input type="date" placeholder="DD/MM/YYYY">
+              <input type="time" placeholder="HH:MM">
+            </div>
+          </div>
+          <div class="pub-option"><span class="pub-radio"></span>Giữ làm nháp</div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)">
+            <div class="pub-option" style="gap:6px;font-size:12px"><span>👁 Hiển thị:</span>
+              <select style="border:none;font-size:12px;outline:none;color:var(--gold);font-weight:600"><option>Thành viên</option><option>Công khai</option><option>Riêng tư</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-hd">Chuyên mục</div>
+        <div class="sidebar-section-body">
+          <div class="cat-check"><span class="cat-checkbox"></span>Giới thiệu</div>
+          <div class="cat-check"><span class="cat-checkbox on"></span>Thông báo</div>
+          <div class="cat-check"><span class="cat-checkbox"></span>Lịch sử dòng họ</div>
+          <div class="cat-check"><span class="cat-checkbox"></span>Văn hoá truyền thống</div>
+          <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)">
+            <a href="#" style="font-size:11px;color:var(--gold);font-weight:600">+ Thêm chuyên mục</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Author -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-hd">Tác giả</div>
+        <div class="sidebar-section-body">
+          <input class="author-fi" value="Ban quản trị" placeholder="Tên tác giả">
+        </div>
+      </div>
+
+      <!-- Featured image -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-hd">Ảnh đại diện bài</div>
+        <div class="sidebar-section-body">
+          <img class="feat-img-preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='80' viewBox='0 0 200 80'%3E%3Crect width='200' height='80' fill='%23EDE3CC'/%3E%3Ctext x='100' y='45' text-anchor='middle' fill='%238A7060' font-family='sans-serif' font-size='12'%3EẢnh đại diện%3C/text%3E%3C/svg%3E" alt="">
+          <div style="display:flex;gap:5px;margin-top:7px">
+            <button class="btn btn-sec btn-xs" style="flex:1">🔄 Đổi ảnh</button>
+            <button class="btn-danger" style="border:1px solid var(--err-bd)">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEO quick -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-hd">SEO</div>
+        <div class="sidebar-section-body">
+          <div style="margin-bottom:8px">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.4px;display:block;margin-bottom:3px">Meta title</label>
+            <input style="width:100%;padding:6px 8px;border:1px solid var(--bd);border-radius:3px;font-size:12px;outline:none" placeholder="Để trống sẽ dùng tiêu đề bài">
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.4px;display:block;margin-bottom:3px">Meta description</label>
+            <textarea style="width:100%;padding:6px 8px;border:1px solid var(--bd);border-radius:3px;font-size:12px;outline:none;resize:none;font-family:var(--fb)" rows="2" placeholder="Để trống sẽ dùng tóm tắt"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions-bar">
+        <button class="btn btn-gold" style="width:100%;justify-content:center">Xuất bản</button>
+        <button class="btn btn-sec" style="width:100%;justify-content:center">Lưu nháp</button>
+        <a href="#" class="preview-link">Xem trước trên cổng thông tin ↗</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

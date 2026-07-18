@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Duyệt bình luận</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;--ok-bd:#A5D6A7;
+  --warn:#F57C00;--warn-bg:#FFF8E1;--warn-bd:#FFE082;
+  --err:#C62828;--err-bg:#FFEBEE;--err-bd:#EF9A9A;
+  --info:#1565C0;--info-bg:#E3F2FD;--info-bd:#90CAF9;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 12px rgba(0,0,0,.12);
+}
+body{font-family:var(--fb);background:var(--s2);color:var(--ink);min-height:100vh}
+.page{max-width:1100px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;gap:20px}
+.section-sep{border-top:2px dashed var(--bd);padding-top:24px;margin-top:4px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.8px;margin-bottom:12px}
+
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.page-head-text h1{font-family:var(--fd);font-size:24px;color:var(--ink);margin:0}
+.page-head-text p{font-size:13px;color:var(--ink-m);margin-top:4px}
+
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--bd)}
+.btn-err{color:var(--err);border:1px solid var(--err-bd);background:none;font-size:11px;padding:4px 9px;border-radius:3px;cursor:pointer;font-weight:700;font-family:var(--fb)}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* Toolbar strip */
+.cms-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fi{padding:7px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px;background:#fff;outline:none}
+.fi:focus{border-color:var(--gold)}
+.fi-search{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--bd);border-radius:var(--r-sm);padding:6px 10px;min-width:200px}
+.fi-search input{border:none;outline:none;font-size:12px;flex:1}
+
+/* Status tabs */
+.status-tabs{display:flex;gap:0;border-bottom:2px solid var(--bd)}
+.status-tab{padding:9px 16px;font-size:13px;font-weight:600;color:var(--ink-m);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;display:flex;align-items:center;gap:5px}
+.status-tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.status-tab .ct{font-size:10px;font-weight:800;padding:1px 5px;border-radius:8px;background:var(--s3);color:var(--ink-m)}
+.status-tab.on .ct{background:var(--gold-pale);color:var(--gold)}
+.status-tab .ct.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* Bulk bar */
+.bulk-bar{display:flex;align-items:center;gap:10px;padding:8px 16px;background:var(--info-bg);border-bottom:1px solid var(--info-bd);font-size:13px}
+.bulk-bar b{color:var(--info)}
+.bulk-acts{display:flex;gap:6px;margin-left:auto}
+.bulk-btn{padding:4px 10px;border-radius:3px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;border:1px solid var(--bd);color:var(--ink)}
+.bulk-btn.ok{color:var(--ok);border-color:var(--ok-bd)}
+.bulk-btn.rej{color:var(--warn);border-color:var(--warn-bd)}
+.bulk-btn.del{color:var(--err);border-color:var(--err-bd)}
+
+/* Card-based comment rows */
+.comment-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:10px;overflow:hidden;transition:border-color .15s}
+.comment-card:hover{border-color:var(--gold-bd)}
+.comment-card.selected{border-color:var(--info);background:var(--info-bg)}
+.comment-card.pending{border-left:4px solid var(--warn)}
+.comment-card.approved{border-left:4px solid var(--ok)}
+.comment-card.rejected{border-left:4px solid var(--ink-m);opacity:.75}
+
+/* Post context bar */
+.comment-post-ctx{display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:12px;color:var(--ink-m)}
+.comment-post-ctx a{color:var(--gold);text-decoration:none;font-weight:600}
+.comment-post-ctx a:hover{text-decoration:underline}
+.post-ctx-icon{font-size:12px}
+
+/* Comment body */
+.comment-main{display:flex;align-items:flex-start;gap:12px;padding:14px}
+.comment-check{padding-top:2px;flex-shrink:0}
+.comment-avatar{width:36px;height:36px;border-radius:50%;background:var(--s3);color:var(--ink-m);font-family:var(--fd);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.comment-content{flex:1;min-width:0}
+.comment-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.comment-author{font-weight:700;font-size:13px}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.badge-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+.badge-def{background:var(--s3);color:var(--ink-m);border:1px solid var(--bd)}
+.comment-time{font-size:11px;color:var(--ink-m);margin-left:auto}
+.comment-body-text{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:8px}
+.comment-body-text .highlight{background:#fff3cd;padding:1px 2px;border-radius:2px}
+/* parent comment context */
+.comment-parent-ctx{background:var(--s2);border-left:3px solid var(--bd);padding:6px 10px;border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:12px;color:var(--ink-m);margin-bottom:8px}
+.comment-parent-ctx b{color:var(--ink2)}
+/* actions */
+.comment-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.comment-actions .divider{width:1px;height:16px;background:var(--bd)}
+.act-approve{padding:5px 12px;border-radius:var(--r-sm);background:var(--ok);color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer}
+.act-reject{padding:5px 12px;border-radius:var(--r-sm);background:#fff;color:var(--ink);border:1px solid var(--bd);font-size:12px;font-weight:600;cursor:pointer}
+.act-delete{padding:5px 12px;border-radius:var(--r-sm);background:none;color:var(--err);border:1px solid var(--err-bd);font-size:12px;font-weight:600;cursor:pointer}
+.act-view{font-size:11px;color:var(--gold);text-decoration:none;font-weight:600;padding:5px 8px}
+.act-note{font-size:11px;color:var(--ink-m);cursor:pointer;padding:5px 8px}
+
+/* Pager */
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--ink-m);padding:8px 0}
+.pager-btns{display:flex;gap:4px}
+.pager-btn{padding:4px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);background:#fff;font-size:12px;cursor:pointer;color:var(--ink)}
+.pager-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* Empty state */
+.empty-state{padding:48px;text-align:center}
+.empty-state h3{font-family:var(--fd);font-size:18px;color:var(--ink);margin-bottom:6px}
+.empty-state p{font-size:13px;color:var(--ink-m)}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-head">
+    <div class="page-head-text">
+      <h1>Duyệt bình luận</h1>
+      <p>Kiểm duyệt bình luận trên bài viết trước khi hiển thị công khai — xem ngữ cảnh bài, duyệt hoặc từ chối từng bình luận.</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:flex-start;flex-shrink:0">
+      <button class="btn btn-sec btn-sm">⚙ Cấu hình kiểm duyệt</button>
+    </div>
+  </div>
+
+  <!-- ===== CHỜ DUYỆT ===== -->
+  <p class="section-label">Trạng thái: Chờ duyệt — 3 bình luận (2 được chọn)</p>
+
+  <!-- Status tabs -->
+  <div class="status-tabs">
+    <div class="status-tab on">Chờ duyệt <span class="ct warn">3</span></div>
+    <div class="status-tab">Đã duyệt <span class="ct">18</span></div>
+    <div class="status-tab">Từ chối <span class="ct">4</span></div>
+    <div class="status-tab">Tất cả <span class="ct">25</span></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="cms-toolbar">
+    <div class="fi-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Tìm nội dung, tác giả, bài viết…">
+    </div>
+    <select class="fi"><option>Tất cả bài viết</option><option>Thông báo họp họ</option><option>Giới thiệu trang</option></select>
+    <select class="fi"><option>Sắp xếp: Mới nhất</option><option>Cũ nhất</option></select>
+  </div>
+
+  <!-- Bulk actions bar (2 selected) -->
+  <div class="bulk-bar">
+    <input type="checkbox" checked style="accent-color:var(--gold)">
+    <b>2</b> bình luận được chọn
+    <div class="bulk-acts">
+      <button class="bulk-btn ok">✓ Duyệt tất cả</button>
+      <button class="bulk-btn rej">✕ Từ chối tất cả</button>
+      <button class="bulk-btn del">🗑 Xóa tất cả</button>
+    </div>
+  </div>
+
+  <!-- Comment card 1 (selected, pending) -->
+  <div class="comment-card pending selected">
+    <div class="comment-post-ctx">
+      <span class="post-ctx-icon">📰</span>
+      Bài viết: <a href="#">Thông báo họp họ tháng 8 năm 2026</a>
+      <span style="margin-left:auto">Xuất bản 05/07/2026 · 3 bình luận trên bài này</span>
+    </div>
+    <div class="comment-main">
+      <div class="comment-check"><input type="checkbox" checked style="accent-color:var(--gold)"></div>
+      <div class="comment-avatar">MA</div>
+      <div class="comment-content">
+        <div class="comment-header">
+          <span class="comment-author">Hoàng Minh Anh</span>
+          <span class="badge badge-warn">Chờ duyệt</span>
+          <span class="comment-time">18/07/2026 09:32</span>
+        </div>
+        <div class="comment-body-text">
+          Cảm ơn ban tổ chức đã thông báo sớm. Gia đình chúng tôi <span class="highlight">sẽ tham dự đầy đủ</span>. Xin hỏi thêm có cần đăng ký trước hay cứ đến trực tiếp thưa ạ?
+        </div>
+        <div class="comment-actions">
+          <button class="act-approve">✓ Duyệt</button>
+          <button class="act-reject">Từ chối</button>
+          <button class="act-delete">Xóa</button>
+          <div class="divider"></div>
+          <a href="#" class="act-view">Xem bài viết ↗</a>
+          <span class="act-note">📌 Ghim chú thích</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment card 2 (selected, pending, is reply) -->
+  <div class="comment-card pending selected">
+    <div class="comment-post-ctx">
+      <span class="post-ctx-icon">📰</span>
+      Bài viết: <a href="#">Lịch sử dòng họ Hoàng — Chi Đông</a>
+      <span style="margin-left:auto;color:var(--warn)">Trả lời bình luận đã được duyệt</span>
+    </div>
+    <div class="comment-main">
+      <div class="comment-check"><input type="checkbox" checked style="accent-color:var(--gold)"></div>
+      <div class="comment-avatar" style="background:#e8f5e9;color:#2e7d32">DA</div>
+      <div class="comment-content">
+        <div class="comment-header">
+          <span class="comment-author">Ẩn danh</span>
+          <span class="badge badge-warn">Chờ duyệt</span>
+          <span style="font-size:10px;color:var(--ink-m);background:var(--s3);padding:1px 6px;border-radius:3px">↩ Trả lời</span>
+          <span class="comment-time">17/07/2026 15:10</span>
+        </div>
+        <!-- Parent comment context -->
+        <div class="comment-parent-ctx">
+          <b>Hoàng Văn Trung</b> (bình luận gốc — đã duyệt): <em>"Trang web rất có ý nghĩa, mong ban quản trị tiếp tục bổ sung thêm thông tin…"</em>
+        </div>
+        <div class="comment-body-text">
+          Tôi muốn đóng góp thêm thông tin về chi họ Hoàng phía Nam. Dòng chi này có nguồn gốc từ thế kỷ 19, di cư từ Nghệ An vào Gia Lai. Xin liên hệ qua email: <span style="color:var(--gold)">hoang.nam@example.com</span>
+        </div>
+        <div class="comment-actions">
+          <button class="act-approve">✓ Duyệt</button>
+          <button class="act-reject">Từ chối</button>
+          <button class="act-delete">Xóa</button>
+          <div class="divider"></div>
+          <a href="#" class="act-view">Xem bài viết ↗</a>
+          <span style="font-size:11px;color:var(--err);cursor:pointer;padding:5px 8px">⚠ Báo spam</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comment card 3 (not selected, pending) -->
+  <div class="comment-card pending">
+    <div class="comment-post-ctx">
+      <span class="post-ctx-icon">📰</span>
+      Bài viết: <a href="#">Kế hoạch xây dựng nhà thờ tổ 2027</a>
+      <span style="margin-left:auto">Nháp — bình luận sẽ ẩn khi bài chưa xuất bản</span>
+    </div>
+    <div class="comment-main">
+      <div class="comment-check"><input type="checkbox" style="accent-color:var(--gold)"></div>
+      <div class="comment-avatar" style="background:#fce4ec;color:#880e4f">TL</div>
+      <div class="comment-content">
+        <div class="comment-header">
+          <span class="comment-author">Hoàng Thị Lan</span>
+          <span class="badge badge-warn">Chờ duyệt</span>
+          <span class="comment-time">17/07/2026 11:45</span>
+        </div>
+        <div class="comment-body-text">
+          Rất vui được biết về kế hoạch này. Hy vọng toàn thể con cháu sẽ chung tay góp sức. Gia đình tôi sẵn sàng đóng góp nguyên vật liệu xây dựng.
+        </div>
+        <div class="comment-actions">
+          <button class="act-approve">✓ Duyệt</button>
+          <button class="act-reject">Từ chối</button>
+          <button class="act-delete">Xóa</button>
+          <div class="divider"></div>
+          <a href="#" class="act-view">Xem bài viết ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pager">
+    <span>Hiển thị 1–3 / 3 bình luận chờ duyệt</span>
+    <div class="pager-btns"><button class="pager-btn on">1</button></div>
+  </div>
+
+  <!-- ===== ĐÃ DUYỆT ===== -->
+  <div class="section-sep">
+    <p class="section-label">Trạng thái: Đã duyệt — 18 bình luận</p>
+  </div>
+
+  <div class="status-tabs">
+    <div class="status-tab">Chờ duyệt <span class="ct warn">3</span></div>
+    <div class="status-tab on">Đã duyệt <span class="ct">18</span></div>
+    <div class="status-tab">Từ chối <span class="ct">4</span></div>
+    <div class="status-tab">Tất cả <span class="ct">25</span></div>
+  </div>
+
+  <div class="cms-toolbar">
+    <div class="fi-search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input type="text" placeholder="Tìm nội dung, tác giả…"></div>
+    <select class="fi"><option>Tất cả bài viết</option></select>
+  </div>
+
+  <!-- Approved comment -->
+  <div class="comment-card approved">
+    <div class="comment-post-ctx">
+      <span class="post-ctx-icon">📰</span>
+      Bài viết: <a href="#">Giới thiệu trang web gia phả dòng họ Hoàng</a>
+      <span style="margin-left:auto">6 bình luận trên bài này</span>
+    </div>
+    <div class="comment-main">
+      <div class="comment-check"><input type="checkbox" style="accent-color:var(--gold)"></div>
+      <div class="comment-avatar alive" style="background:var(--ok-bg);color:var(--ok)">VT</div>
+      <div class="comment-content">
+        <div class="comment-header">
+          <span class="comment-author">Hoàng Văn Trung</span>
+          <span class="badge badge-ok">Đã duyệt</span>
+          <span style="font-size:10px;color:var(--ink-m)">Duyệt bởi admin · 15/07/2026</span>
+          <span class="comment-time">15/07/2026 08:20</span>
+        </div>
+        <div class="comment-body-text">Trang web rất đẹp và thông tin đầy đủ. Cảm ơn ban quản trị đã bỏ công xây dựng. Mong tiếp tục bổ sung thêm ảnh lịch sử dòng họ.</div>
+        <div class="comment-actions">
+          <button class="act-reject" style="font-size:11px;padding:4px 9px">Thu hồi duyệt</button>
+          <button class="act-delete" style="font-size:11px;padding:4px 9px">Xóa</button>
+          <div class="divider"></div>
+          <a href="#" class="act-view">Xem trên cổng thông tin ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TỪ CHỐI ===== -->
+  <div class="section-sep">
+    <p class="section-label">Trạng thái: Từ chối — 4 bình luận</p>
+  </div>
+
+  <div class="comment-card rejected">
+    <div class="comment-post-ctx" style="background:var(--err-bg);border-color:var(--err-bd)">
+      <span class="post-ctx-icon">🚫</span>
+      Đã từ chối — Bài viết: <a href="#" style="color:var(--err)">Thông báo họp họ tháng 8 năm 2026</a>
+    </div>
+    <div class="comment-main">
+      <div class="comment-check"><input type="checkbox" style="accent-color:var(--gold)"></div>
+      <div class="comment-avatar" style="background:var(--s3);color:var(--ink-m)">?</div>
+      <div class="comment-content">
+        <div class="comment-header">
+          <span class="comment-author" style="color:var(--ink-m)">Ẩn danh</span>
+          <span class="badge" style="background:#f5f5f5;color:var(--ink-m);border:1px solid var(--bd)">Từ chối</span>
+          <span style="font-size:10px;color:var(--ink-m)">Từ chối bởi admin · 16/07/2026</span>
+          <span class="comment-time">16/07/2026 10:00</span>
+        </div>
+        <div class="comment-body-text" style="text-decoration:line-through;color:var(--ink-m)">
+          Quảng cáo bán đất Hà Nội, giá rẻ, liên hệ 0912xxx. Click vào link này...
+        </div>
+        <div class="comment-actions">
+          <button class="act-approve" style="font-size:11px;padding:4px 9px">Khôi phục duyệt</button>
+          <button class="act-delete" style="font-size:11px;padding:4px 9px">Xóa vĩnh viễn</button>
+          <div class="divider"></div>
+          <span style="font-size:11px;color:var(--ink-m)">Lý do: Spam / quảng cáo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EMPTY STATE ===== -->
+  <div class="section-sep">
+    <p class="section-label">Trạng thái: Hàng đợi trống</p>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh)">
+    <div class="empty-state">
+      <div style="font-size:48px;margin-bottom:12px">💬</div>
+      <h3>Không có bình luận chờ duyệt</h3>
+      <p>Tất cả bình luận đã được xử lý. Hệ thống sẽ thông báo khi có bình luận mới.</p>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

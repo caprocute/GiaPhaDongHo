@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup — Quản lý thành viên</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#B8860B;--gold-l:#D4A017;--gold-pale:#FDF6E3;--gold-bd:#E8C96A;
+  --ink:#1C1410;--ink2:#3D2B1F;--ink-m:#8A7060;
+  --s:#FEFCF8;--s2:#F5EFE0;--s3:#EDE3CC;--bd:#D9CBAA;
+  --r:8px;--r-sm:4px;
+  --fd:'Georgia',serif;--fb:system-ui,-apple-system,sans-serif;
+  --ok:#2E7D32;--ok-bg:#E8F5E9;--ok-bd:#A5D6A7;
+  --warn:#F57C00;--warn-bg:#FFF8E1;--warn-bd:#FFE082;
+  --err:#C62828;--err-bg:#FFEBEE;--err-bd:#EF9A9A;
+  --blue:#1565C0;--blue-bg:#E3F2FD;--blue-bd:#90CAF9;
+  --purple:#6A1B9A;--purple-bg:#F3E5F5;--purple-bd:#CE93D8;
+  --sh:0 1px 3px rgba(0,0,0,.08);--sh-md:0 4px 14px rgba(0,0,0,.12);
+}
+body{font-family:var(--fb);background:var(--s2);color:var(--ink);min-height:100vh}
+.page{max-width:1400px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+
+/* --- Utility --- */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.badge-def{background:var(--s3);color:var(--ink-m);border:1px solid var(--bd)}
+.badge-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+.badge-err{background:var(--err-bg);color:var(--err);border:1px solid var(--err-bd)}
+.badge-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+.badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-bd)}
+.badge-priv{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd);font-size:10px;padding:1px 7px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;text-decoration:none;color:inherit;font-family:var(--fb)}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:hover{background:var(--gold-l)}
+.btn-sec{background:#fff;color:var(--ink);border:1px solid var(--bd)}.btn-sec:hover{background:var(--s2)}
+.btn-ghost{background:none;color:var(--ink-m);border:1px solid transparent}.btn-ghost:hover{background:var(--s2);border-color:var(--bd)}
+.btn-err-ghost{background:none;color:var(--err);border:1px solid var(--err-bd);font-size:11px;padding:4px 9px;border-radius:3px;font-weight:700;cursor:pointer;font-family:var(--fb)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;font-weight:700;border-radius:3px}
+.mono{font-family:monospace;font-size:11px;background:var(--s3);padding:1px 5px;border-radius:3px;border:1px solid var(--bd);color:var(--ink2)}
+
+/* --- Page header --- */
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-head h1{font-family:var(--fd);font-size:22px;color:var(--ink)}
+.page-head p{font-size:12px;color:var(--ink-m);margin-top:3px}
+.page-head-acts{display:flex;gap:8px;flex-shrink:0;align-items:center}
+
+/* --- Stats bar --- */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.stat-card-num{font-family:var(--fd);font-size:22px;color:var(--ink);font-weight:700}
+.stat-card-lbl{font-size:11px;color:var(--ink-m)}
+.stat-card-sub{font-size:10px;color:var(--gold);font-weight:600;margin-top:2px}
+
+/* --- Master-detail shell --- */
+.master-detail{display:grid;grid-template-columns:320px 1fr;gap:0;background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh-md);overflow:hidden;min-height:700px}
+
+/* ========================
+   LEFT SIDEBAR
+   ======================== */
+.persons-sidebar{border-right:1px solid var(--bd);display:flex;flex-direction:column;min-height:700px}
+
+/* Search area */
+.sidebar-search{padding:12px;border-bottom:1px solid var(--bd);display:flex;flex-direction:column;gap:8px}
+.search-wrap{display:flex;align-items:center;gap:0}
+.search-input-wrap{flex:1;display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm) 0 0 var(--r-sm);padding:7px 10px}
+.search-input-wrap input{border:none;background:transparent;outline:none;font-size:13px;flex:1;color:var(--ink);font-family:var(--fb)}
+.search-input-wrap input::placeholder{color:var(--ink-m)}
+.search-adv-btn{padding:7px 10px;border:1px solid var(--bd);border-left:none;border-radius:0 var(--r-sm) var(--r-sm) 0;background:#fff;cursor:pointer;font-size:11px;font-weight:600;color:var(--ink-m);font-family:var(--fb);white-space:nowrap}
+.search-adv-btn.on{background:var(--gold-pale);color:var(--gold);border-color:var(--gold-bd)}
+
+/* Quick filter chips */
+.filter-row{display:flex;gap:4px;flex-wrap:wrap}
+.filter-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--bd);background:#fff;cursor:pointer;color:var(--ink-m);transition:all .12s;white-space:nowrap}
+.filter-chip.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* Sort row */
+.sort-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--ink-m)}
+.sort-select{border:none;background:transparent;font-size:11px;font-weight:600;cursor:pointer;color:var(--gold);outline:none;font-family:var(--fb)}
+
+/* Advanced filter panel (expanded) */
+.adv-filter{background:var(--s2);border-bottom:1px solid var(--bd);padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.adv-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.adv-field label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;display:block;margin-bottom:3px}
+.adv-field select,.adv-field input{width:100%;padding:5px 8px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px;outline:none;background:#fff;font-family:var(--fb)}
+.adv-field select:focus,.adv-field input:focus{border-color:var(--gold)}
+.adv-actions{display:flex;gap:6px;justify-content:flex-end}
+
+/* Bulk select bar */
+.bulk-bar{background:var(--gold-pale);border-bottom:1px solid var(--gold-bd);padding:7px 12px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--ink2)}
+
+/* Person list */
+.person-list{flex:1;overflow-y:auto}
+.person-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-bottom:1px solid var(--s3);cursor:pointer;transition:background .1s;position:relative}
+.person-item:hover{background:var(--s2)}
+.person-item.selected{background:var(--gold-pale);border-left:3px solid var(--gold)}
+.person-item.selected .person-item-name{color:var(--gold)}
+.person-item:last-child{border-bottom:none}
+.person-check{width:15px;height:15px;border:1.5px solid var(--bd);border-radius:3px;flex-shrink:0;cursor:pointer;background:#fff}
+.person-check.on{background:var(--gold);border-color:var(--gold);position:relative}
+.person-check.on::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700}
+.person-avatar{width:34px;height:34px;border-radius:50%;background:var(--s3);color:var(--ink-m);font-family:var(--fd);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid var(--bd)}
+.person-avatar.female{background:#fce4ec;color:#880e4f;border-color:#f48fb1}
+.person-avatar.alive{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-bd)}
+.person-item-info{flex:1;min-width:0}
+.person-item-name{font-weight:700;font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.person-item-meta{font-size:11px;color:var(--ink-m);margin-top:1px;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.badge-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.badge-dot.alive{background:var(--ok)}
+.badge-dot.deceased{background:var(--ink-m)}
+.pending-dot{width:6px;height:6px;border-radius:50%;background:var(--warn);position:absolute;top:9px;right:9px}
+
+/* Sidebar footer */
+.sidebar-footer{padding:9px 12px;border-top:1px solid var(--bd);background:var(--s2);font-size:11px;color:var(--ink-m);display:flex;justify-content:space-between;align-items:center;gap:6px}
+.pager-mini{display:flex;gap:2px;align-items:center}
+.pager-mini-btn{padding:2px 8px;border:1px solid var(--bd);border-radius:3px;background:#fff;font-size:11px;cursor:pointer;color:var(--ink);font-family:var(--fb)}
+.pager-mini-btn.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* ========================
+   RIGHT DETAIL PANEL
+   ======================== */
+.person-detail{display:flex;flex-direction:column;overflow:hidden}
+
+/* Empty state */
+.detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--ink-m);padding:48px}
+.detail-empty p{font-size:13px;text-align:center;line-height:1.6}
+
+/* Detail header */
+.detail-header{display:flex;align-items:flex-start;gap:14px;padding:18px 22px;border-bottom:1px solid var(--bd);background:var(--s2);flex-shrink:0}
+.detail-avatar{width:58px;height:58px;border-radius:50%;background:var(--ok-bg);color:var(--ok);font-family:var(--fd);font-size:20px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--ok-bd);flex-shrink:0;position:relative}
+.avatar-edit-btn{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid #fff}
+.detail-header-main{flex:1;min-width:0}
+.detail-name{font-family:var(--fd);font-size:20px;color:var(--ink);margin-bottom:4px}
+.detail-subline{font-size:12px;color:var(--ink-m);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.detail-quick-stats{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--ink-m)}
+.dqs-item{display:flex;align-items:center;gap:3px}
+.dqs-item strong{color:var(--ink2);font-weight:600}
+.detail-acts{display:flex;gap:6px;flex-shrink:0;align-items:flex-start}
+
+/* Tab bar */
+.detail-tabs{display:flex;border-bottom:2px solid var(--bd);background:#fff;flex-shrink:0;overflow-x:auto}
+.tab-item{padding:10px 16px;font-size:12px;font-weight:600;color:var(--ink-m);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;display:flex;align-items:center;gap:5px}
+.tab-item:hover{color:var(--ink);background:var(--s2)}
+.tab-item.on{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-badge{background:var(--warn-bg);color:var(--warn);border-radius:10px;font-size:10px;font-weight:700;padding:1px 5px}
+
+/* Tab content */
+.tab-content{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:18px}
+
+/* Section heading */
+.sec-head{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-m);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-head::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* Bio grid */
+.bio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.bio-field{background:var(--s2);border-radius:var(--r-sm);padding:8px 10px;border:1px solid var(--s3)}
+.bio-field-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-m);margin-bottom:3px}
+.bio-field-val{font-size:13px;color:var(--ink);font-weight:500}
+.bio-field-sub{font-size:11px;color:var(--gold);margin-top:1px}
+
+/* Privacy notice */
+.privacy-notice{display:flex;align-items:center;gap:8px;background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:var(--r-sm);padding:8px 12px;font-size:11px;color:var(--warn)}
+.privacy-notice strong{font-weight:700}
+
+/* Family grid */
+.family-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.family-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border-radius:var(--r-sm);border:1px solid var(--bd)}
+.family-role{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.4px;min-width:32px;flex-shrink:0}
+.family-link{color:var(--gold);text-decoration:none;font-weight:600;font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.family-link:hover{text-decoration:underline}
+.family-link.empty{color:var(--ink-m);font-weight:400;font-style:italic}
+
+/* Children list */
+.children-list{display:flex;flex-direction:column;gap:4px}
+.child-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--s2);border-radius:var(--r-sm);border:1px solid var(--bd);font-size:12px}
+.child-row a{color:var(--gold);text-decoration:none;font-weight:600}
+.child-row a:hover{text-decoration:underline}
+
+/* Notes */
+.notes-box{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);padding:12px;font-size:13px;color:var(--ink2);line-height:1.65}
+
+/* === TAB: Mini family tree === */
+.tree-preview{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;overflow-x:auto}
+.tree-level{display:flex;align-items:flex-start;justify-content:center;gap:12px;margin-bottom:0}
+.tree-branch{display:flex;flex-direction:column;align-items:center;gap:6px;position:relative}
+.tree-connector{display:flex;align-items:flex-start;gap:20px;position:relative}
+.tree-connector::before{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:1px;height:10px;background:var(--bd)}
+.tree-connector::after{content:'';position:absolute;top:-10px;left:0;right:0;height:1px;background:var(--bd)}
+.tree-node{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.tree-node-ava{width:38px;height:38px;border-radius:50%;background:var(--ok-bg);color:var(--ok);font-family:var(--fd);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--ok-bd)}
+.tree-node-ava.self{border-color:var(--gold);background:var(--gold-pale);color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.2)}
+.tree-node-ava.dec{background:var(--s3);color:var(--ink-m);border-color:var(--bd)}
+.tree-node-ava.female{background:#fce4ec;color:#880e4f;border-color:#f48fb1}
+.tree-node-name{font-size:10px;font-weight:600;color:var(--ink);text-align:center;max-width:60px}
+.tree-node-code{font-size:9px;color:var(--ink-m);font-family:monospace}
+.tree-gen-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:8px}
+
+/* === TAB: Lịch sử & hoạt động === */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--s3)}
+.tl-item:last-child{border-bottom:none}
+.tl-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.tl-dot.create{background:var(--ok)}
+.tl-dot.update{background:var(--gold)}
+.tl-dot.delete{background:var(--err)}
+.tl-dot.event{background:var(--blue)}
+.tl-dot.donation{background:var(--purple)}
+.tl-dot.moderation{background:var(--warn)}
+.tl-line{width:1px;flex:1;background:var(--s3);margin:3px auto}
+.tl-body{flex:1}
+.tl-action{font-size:12px;font-weight:600;color:var(--ink2)}
+.tl-meta{font-size:11px;color:var(--ink-m);margin-top:2px}
+.tl-detail{font-size:11px;color:var(--ink-m);background:var(--s2);border-radius:var(--r-sm);padding:5px 8px;margin-top:4px;border-left:2px solid var(--bd)}
+.tl-time{font-size:10px;color:var(--ink-m);white-space:nowrap;flex-shrink:0;margin-top:4px}
+
+/* === TAB: Liên kết hệ thống === */
+.link-section{display:flex;flex-direction:column;gap:6px}
+.link-card{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border-radius:var(--r-sm);border:1px solid var(--bd)}
+.link-card-icon{width:32px;height:32px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.link-card-icon.blue{background:var(--blue-bg)}
+.link-card-icon.purple{background:var(--purple-bg)}
+.link-card-icon.warn{background:var(--warn-bg)}
+.link-card-icon.ok{background:var(--ok-bg)}
+.link-card-body{flex:1;min-width:0}
+.link-card-title{font-size:12px;font-weight:600;color:var(--ink2)}
+.link-card-meta{font-size:11px;color:var(--ink-m);margin-top:1px}
+.link-card-action{font-size:11px;color:var(--gold);text-decoration:none;font-weight:600;flex-shrink:0}
+.link-card-action:hover{text-decoration:underline}
+.link-tag-warn{background:var(--warn-bg);color:var(--warn);border-radius:20px;font-size:10px;font-weight:700;padding:1px 6px}
+
+/* Linked post row */
+.post-row{display:flex;gap:10px;padding:10px 12px;background:var(--s2);border-radius:var(--r-sm);border:1px solid var(--bd)}
+.post-row-thumb{width:48px;height:36px;border-radius:3px;background:var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden}
+.post-row-body{flex:1;min-width:0}
+.post-row-title{font-size:12px;font-weight:600;color:var(--ink2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.post-row-meta{font-size:11px;color:var(--ink-m);margin-top:2px}
+
+/* Media grid */
+.media-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px}
+.media-thumb{width:100%;aspect-ratio:1;border-radius:var(--r-sm);background:var(--s3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;overflow:hidden;position:relative}
+.media-thumb:hover::after{content:'🔍';position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:18px}
+
+/* === SECTION: Form (Add / Edit) === */
+.section-sep{border-top:2px dashed var(--bd);padding-top:22px;margin-top:6px}
+.section-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.8px;margin-bottom:14px}
+.form-card{background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);padding:22px}
+.form-card-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--bd)}
+.form-card-head h2{font-family:var(--fd);font-size:19px;color:var(--ink)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
+.form-field label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:4px}
+.form-field input,.form-field select,.form-field textarea{width:100%;padding:8px 10px;border:1px solid var(--bd);border-radius:var(--r-sm);font-size:13px;outline:none;font-family:var(--fb);transition:border-color .12s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--gold)}
+.form-field input:disabled{background:var(--s2);color:var(--ink-m)}
+.form-field .hint{font-size:10px;color:var(--ink-m);margin-top:3px}
+.req{color:var(--err)}
+/* Date picker widget */
+.date-pick{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);padding:9px 12px}
+.date-mode-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.date-mode-lbl.solar{color:var(--ink-m)}
+.date-mode-lbl.lunar{color:var(--gold)}
+.date-fields{display:flex;gap:3px;align-items:flex-end}
+.date-fields span{padding-bottom:4px;color:var(--ink-m)}
+.date-sub-wrap{display:flex;flex-direction:column;gap:1px}
+.date-sub-wrap span.sub-lbl{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink-m)}
+.date-sub-wrap.lunar span.sub-lbl{color:var(--gold)}
+.date-input{width:50px;padding:5px 7px;border:1px solid var(--bd);border-radius:3px;font-size:13px;text-align:center;outline:none;font-family:var(--fb)}
+.date-input.lunar{border-color:var(--gold-bd);background:var(--gold-pale);width:44px}
+.date-input.year{width:66px}
+.date-input.cchi{width:78px;font-size:12px}
+.date-divider{width:1px;height:26px;background:var(--bd);margin:0 4px}
+/* family form */
+.family-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* Form actions */
+.form-actions{display:flex;gap:8px;padding-top:4px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-head">
+    <div>
+      <h1>Thành viên</h1>
+      <p>Hồ sơ người trong phả hệ — tra cứu, bổ sung, chỉnh sửa thông tin cá nhân và quan hệ gia đình.</p>
+    </div>
+    <div class="page-head-acts">
+      <button class="btn btn-ghost btn-sm">⬇ Xuất CSV</button>
+      <button class="btn btn-ghost btn-sm">📋 Nhập Excel</button>
+      <a href="#form-add" class="btn btn-gold btn-sm">+ Thêm người</a>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-card-num">3.241</div>
+      <div class="stat-card-lbl">Tổng thành viên</div>
+      <div class="stat-card-sub">+12 tháng này</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num">1.487</div>
+      <div class="stat-card-lbl">Còn sống</div>
+      <div class="stat-card-sub" style="color:var(--ok)">45.9%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num">47</div>
+      <div class="stat-card-lbl">Chờ duyệt tự khai</div>
+      <div class="stat-card-sub" style="color:var(--warn)">Cần xem xét</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-num">218</div>
+      <div class="stat-card-lbl">Thiếu thông tin</div>
+      <div class="stat-card-sub" style="color:var(--ink-m)">Ngày sinh hoặc quan hệ</div>
+    </div>
+  </div>
+
+  <!-- ===== MASTER-DETAIL: list selected = A091 ===== -->
+  <div class="master-detail">
+
+    <!-- -------- LEFT: Sidebar -------- -->
+    <div class="persons-sidebar">
+
+      <!-- Search -->
+      <div class="sidebar-search">
+        <div class="search-wrap">
+          <div class="search-input-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" style="color:var(--ink-m);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="Tìm tên, mã hiệu, tên húy, ghi chú…" value="Hoàng">
+          </div>
+          <button class="search-adv-btn on">Lọc nâng cao ▲</button>
+        </div>
+
+        <!-- Quick filter chips -->
+        <div class="filter-row">
+          <span class="filter-chip on">Tất cả (3241)</span>
+          <span class="filter-chip">Còn sống (1487)</span>
+          <span class="filter-chip">Đã mất (1754)</span>
+          <span class="filter-chip" style="color:var(--warn)">Chờ duyệt (47)</span>
+        </div>
+
+        <!-- Sort row -->
+        <div class="sort-row">
+          <span>147 kết quả</span>
+          <select class="sort-select">
+            <option>Sắp xếp: Tên A→Z</option>
+            <option>Sắp xếp: Đời tăng dần</option>
+            <option>Sắp xếp: Mới cập nhật</option>
+            <option>Sắp xếp: Ngày sinh</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Advanced filter (expanded) -->
+      <div class="adv-filter">
+        <div class="adv-row">
+          <div class="adv-field">
+            <label>Giới tính</label>
+            <select><option value="">Tất cả</option><option>Nam</option><option>Nữ</option><option>Khác</option></select>
+          </div>
+          <div class="adv-field">
+            <label>Quyền xem</label>
+            <select><option value="">Tất cả</option><option>Công khai</option><option>Thành viên</option><option>Riêng tư</option></select>
+          </div>
+        </div>
+        <div class="adv-row">
+          <div class="adv-field">
+            <label>Đời từ</label>
+            <input type="number" placeholder="1" min="1">
+          </div>
+          <div class="adv-field">
+            <label>Đời đến</label>
+            <input type="number" placeholder="10" min="1">
+          </div>
+        </div>
+        <div class="adv-row">
+          <div class="adv-field">
+            <label>Trạng thái duyệt</label>
+            <select><option value="">Tất cả</option><option>Có tự khai chờ duyệt</option><option>Đã duyệt</option></select>
+          </div>
+          <div class="adv-field">
+            <label>Thiếu thông tin</label>
+            <select><option value="">Tất cả</option><option>Thiếu ngày sinh</option><option>Thiếu cha/mẹ</option></select>
+          </div>
+        </div>
+        <div class="adv-actions">
+          <button class="btn btn-ghost btn-xs">Xóa bộ lọc</button>
+          <button class="btn btn-gold btn-xs">Áp dụng</button>
+        </div>
+      </div>
+
+      <!-- Bulk select bar (2 checked) -->
+      <div class="bulk-bar">
+        <div class="person-check on" style="margin-right:2px"></div>
+        <span>Đã chọn 2 người</span>
+        <button class="btn btn-xs btn-sec" style="margin-left:auto">Xuất CSV</button>
+        <button class="btn btn-xs" style="background:var(--err-bg);color:var(--err);border:1px solid var(--err-bd)">Xóa</button>
+      </div>
+
+      <!-- Person list -->
+      <div class="person-list">
+
+        <div class="person-item selected">
+          <div class="person-check on"></div>
+          <div class="person-avatar alive">MQ</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Minh Quang</div>
+            <div class="person-item-meta"><span class="mono">A091</span> · Đời 5 · Nam <span class="badge-dot alive" style="margin-left:2px"></span></div>
+          </div>
+          <div class="pending-dot" title="Có tự khai chờ duyệt"></div>
+        </div>
+
+        <div class="person-item">
+          <div class="person-check on"></div>
+          <div class="person-avatar">NB</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Ngọc Bình</div>
+            <div class="person-item-meta"><span class="mono">A001</span> · Đời 3 · Nam <span class="badge-dot deceased" style="margin-left:2px"></span></div>
+          </div>
+        </div>
+
+        <div class="person-item">
+          <div class="person-check"></div>
+          <div class="person-avatar female">TL</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Thị Lan</div>
+            <div class="person-item-meta"><span class="mono">A147</span> · Đời 5 · Nữ <span class="badge-dot alive" style="margin-left:2px"></span></div>
+          </div>
+        </div>
+
+        <div class="person-item">
+          <div class="person-check"></div>
+          <div class="person-avatar">VT</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Văn Trung</div>
+            <div class="person-item-meta"><span class="mono">B022</span> · Đời 4 · Nam <span class="badge-dot deceased" style="margin-left:2px"></span></div>
+          </div>
+        </div>
+
+        <div class="person-item">
+          <div class="person-check"></div>
+          <div class="person-avatar female">TC</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Thị Cúc</div>
+            <div class="person-item-meta"><span class="mono">B034</span> · Đời 4 · Nữ <span class="badge-dot deceased" style="margin-left:2px"></span></div>
+          </div>
+        </div>
+
+        <div class="person-item">
+          <div class="person-check"></div>
+          <div class="person-avatar alive">DK</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Đình Khoa</div>
+            <div class="person-item-meta"><span class="mono">C009</span> · Đời 6 · Nam <span class="badge-dot alive" style="margin-left:2px"></span></div>
+          </div>
+        </div>
+
+        <div class="person-item">
+          <div class="person-check"></div>
+          <div class="person-avatar female">TP</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Thị Phương</div>
+            <div class="person-item-meta"><span class="mono">C015</span> · Đời 6 · Nữ <span class="badge-dot alive" style="margin-left:2px"></span></div>
+          </div>
+          <div class="pending-dot" title="Có tự khai chờ duyệt"></div>
+        </div>
+
+        <div class="person-item">
+          <div class="person-check"></div>
+          <div class="person-avatar alive">VD</div>
+          <div class="person-item-info">
+            <div class="person-item-name">Hoàng Văn Đức</div>
+            <div class="person-item-meta"><span class="mono">D201</span> · Đời 7 · Nam <span class="badge-dot alive" style="margin-left:2px"></span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="sidebar-footer">
+        <span>147 / 3.241 thành viên</span>
+        <div class="pager-mini">
+          <button class="pager-mini-btn on">1</button>
+          <button class="pager-mini-btn">2</button>
+          <button class="pager-mini-btn">3</button>
+          <button class="pager-mini-btn">›</button>
+        </div>
+      </div>
+    </div><!-- /sidebar -->
+
+    <!-- -------- RIGHT: Detail panel (A091) -------- -->
+    <div class="person-detail">
+
+      <!-- Header -->
+      <div class="detail-header">
+        <div class="detail-avatar">
+          MQ
+          <div class="avatar-edit-btn">✎</div>
+        </div>
+        <div class="detail-header-main">
+          <div class="detail-name">Hoàng Minh Quang <span style="font-size:14px;color:var(--ink-m);font-family:var(--fb)">(Phúc)</span></div>
+          <div class="detail-subline">
+            <span class="mono">A091</span>
+            <span class="badge badge-ok">Còn sống</span>
+            <span class="badge-priv">🔒 Thành viên</span>
+            <span>Đời 5</span>
+            <span>·</span>
+            <span>Nam</span>
+          </div>
+          <div class="detail-quick-stats">
+            <span class="dqs-item">👨‍👦 <strong>2</strong> con</span>
+            <span class="dqs-item">📝 <strong>3</strong> bài viết</span>
+            <span class="dqs-item">💰 <strong>2,0M</strong> đóng góp</span>
+            <span class="dqs-item">🎉 <strong>2</strong> sự kiện</span>
+            <span class="dqs-item" style="color:var(--warn)">⚠ <strong>1</strong> chờ duyệt</span>
+          </div>
+        </div>
+        <div class="detail-acts">
+          <button class="btn btn-gold btn-xs">✎ Sửa hồ sơ</button>
+          <button class="btn-err-ghost">Xóa</button>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="detail-tabs">
+        <div class="tab-item on">📋 Hồ sơ</div>
+        <div class="tab-item">🌳 Vị trí trong cây</div>
+        <div class="tab-item">📜 Lịch sử <span class="tab-badge">12</span></div>
+        <div class="tab-item">🔗 Liên kết <span class="tab-badge" style="color:var(--warn)">1</span></div>
+        <div class="tab-item">🖼 Ảnh & tài liệu</div>
+      </div>
+
+      <!-- Tab content: Hồ sơ -->
+      <div class="tab-content">
+
+        <!-- Privacy notice (living person) -->
+        <div class="privacy-notice">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span><strong>PII — Người còn sống.</strong> Ngày sinh đầy đủ và SĐT không hiển thị cho khách. Theo NĐ 13/2023.</span>
+        </div>
+
+        <!-- Thông tin cá nhân -->
+        <div>
+          <div class="sec-head">Thông tin cá nhân</div>
+          <div class="bio-grid">
+            <div class="bio-field">
+              <div class="bio-field-lbl">Tên húy</div>
+              <div class="bio-field-val">Phúc</div>
+            </div>
+            <div class="bio-field">
+              <div class="bio-field-lbl">Giới tính</div>
+              <div class="bio-field-val">Nam</div>
+            </div>
+            <div class="bio-field">
+              <div class="bio-field-lbl">Ngày sinh (dương)</div>
+              <div class="bio-field-val">05/11/1988</div>
+              <div class="bio-field-sub">25/09 ÂL — Mậu Thìn</div>
+            </div>
+            <div class="bio-field">
+              <div class="bio-field-lbl">Giỗ (âm lịch)</div>
+              <div class="bio-field-val" style="color:var(--ink-m);font-style:italic">— (còn sống)</div>
+            </div>
+            <div class="bio-field">
+              <div class="bio-field-lbl">Đời</div>
+              <div class="bio-field-val">5</div>
+            </div>
+            <div class="bio-field">
+              <div class="bio-field-lbl">Quyền xem</div>
+              <div class="bio-field-val"><span class="badge badge-warn">Thành viên</span></div>
+            </div>
+            <div class="bio-field">
+              <div class="bio-field-lbl">SĐT (ẩn với khách)</div>
+              <div class="bio-field-val">0912 *** ***</div>
+            </div>
+            <div class="bio-field">
+              <div class="bio-field-lbl">Tài khoản web</div>
+              <div class="bio-field-val"><span class="badge badge-ok">Đã đăng ký</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gia đình -->
+        <div>
+          <div class="sec-head">Quan hệ gia đình</div>
+          <div class="family-grid">
+            <div class="family-row">
+              <span class="family-role">Cha</span>
+              <a href="#" class="family-link">Hoàng Văn Bình</a>
+              <span class="mono">A045</span>
+            </div>
+            <div class="family-row">
+              <span class="family-role">Mẹ</span>
+              <a href="#" class="family-link">Lê Thị Hoa</a>
+              <span class="mono">A046</span>
+            </div>
+            <div class="family-row">
+              <span class="family-role">Vợ</span>
+              <a href="#" class="family-link">Nguyễn Thị Mai</a>
+              <span style="font-size:10px;color:var(--ink-m)">(ngoài phả)</span>
+            </div>
+            <div class="family-row">
+              <span class="family-role">Anh</span>
+              <a href="#" class="family-link">Hoàng Minh Khoa</a>
+              <span class="mono">A089</span>
+            </div>
+            <div class="family-row">
+              <span class="family-role">Em</span>
+              <a href="#" class="family-link" style="font-style:italic;color:var(--ink-m)">Chưa nhập</a>
+            </div>
+            <div class="family-row">
+              <span class="family-role">Ông</span>
+              <a href="#" class="family-link">Hoàng Ngọc Bình</a>
+              <span class="mono">A001</span>
+            </div>
+          </div>
+          <div style="margin-top:4px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:6px">Con cái (2 người)</div>
+            <div class="children-list">
+              <div class="child-row">
+                <div class="person-avatar alive" style="width:26px;height:26px;font-size:10px">NB</div>
+                <a href="#">Hoàng Ngọc Bảo</a>
+                <span class="mono">C201</span>
+                <span style="font-size:11px;color:var(--ink-m);margin-left:auto">Đời 6 · Nam · Còn sống</span>
+              </div>
+              <div class="child-row">
+                <div class="person-avatar female" style="width:26px;height:26px;font-size:10px">NL</div>
+                <a href="#">Hoàng Ngọc Linh</a>
+                <span class="mono">C202</span>
+                <span style="font-size:11px;color:var(--ink-m);margin-left:auto">Đời 6 · Nữ · Còn sống</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ghi chú -->
+        <div>
+          <div class="sec-head">Ghi chú</div>
+          <div class="notes-box">Thạc sĩ Kinh tế, Đại học Kinh tế Quốc dân. Hiện công tác tại Hà Nội. Phụ trách đóng góp cho quỹ xây nhà thờ tổ. Thành viên Ban liên lạc họ Hoàng — Hà Nội.</div>
+        </div>
+
+      </div><!-- /tab-content -->
+
+    </div><!-- /person-detail -->
+  </div><!-- /master-detail -->
+
+
+  <!-- ===== SECTION 2: TAB — Vị trí trong cây ===== -->
+  <div class="section-sep">
+    <p class="section-label">Tab: Vị trí trong cây gia phả</p>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden">
+    <div class="detail-tabs" style="border-bottom:2px solid var(--bd)">
+      <div class="tab-item">📋 Hồ sơ</div>
+      <div class="tab-item on">🌳 Vị trí trong cây</div>
+      <div class="tab-item">📜 Lịch sử</div>
+      <div class="tab-item">🔗 Liên kết</div>
+      <div class="tab-item">🖼 Ảnh & tài liệu</div>
+    </div>
+    <div style="padding:20px 24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <span style="font-size:12px;color:var(--ink-m)">Hiển thị 3 thế hệ xung quanh — <a href="#" style="color:var(--gold);font-weight:600">Mở cây đầy đủ →</a></span>
+        <button class="btn btn-sec btn-xs">🔍 Tập trung vào A091</button>
+      </div>
+      <div class="tree-preview">
+
+        <!-- Gen 3 (Ông nội) -->
+        <div style="text-align:center;margin-bottom:4px"><div class="tree-gen-label">Đời 3 (Ông)</div></div>
+        <div style="display:flex;justify-content:center;gap:60px;margin-bottom:0">
+          <div class="tree-node">
+            <div class="tree-node-ava dec">NB</div>
+            <div class="tree-node-name">Hoàng Ngọc Bình</div>
+            <div class="tree-node-code">A001</div>
+          </div>
+        </div>
+
+        <!-- Connector gen3→gen4 -->
+        <div style="display:flex;justify-content:center"><div style="width:1px;height:16px;background:var(--bd)"></div></div>
+
+        <!-- Gen 4 (Cha) -->
+        <div style="text-align:center;margin-bottom:4px"><div class="tree-gen-label">Đời 4 (Cha)</div></div>
+        <div style="display:flex;justify-content:center;gap:40px;margin-bottom:0">
+          <div class="tree-node">
+            <div class="tree-node-ava dec">VB</div>
+            <div class="tree-node-name">Hoàng Văn Bình</div>
+            <div class="tree-node-code">A045</div>
+          </div>
+          <div class="tree-node">
+            <div class="tree-node-ava female dec">TH</div>
+            <div class="tree-node-name">Lê Thị Hoa (Mẹ)</div>
+            <div class="tree-node-code">A046</div>
+          </div>
+        </div>
+
+        <!-- Connector gen4→gen5 -->
+        <div style="display:flex;justify-content:center"><div style="width:1px;height:16px;background:var(--bd)"></div></div>
+
+        <!-- Gen 5 (Bản thân + anh em) -->
+        <div style="text-align:center;margin-bottom:4px"><div class="tree-gen-label">Đời 5 (Bản thân & Anh em)</div></div>
+        <div style="display:flex;justify-content:center;gap:24px;align-items:flex-start;margin-bottom:0">
+          <div class="tree-node">
+            <div class="tree-node-ava dec">MK</div>
+            <div class="tree-node-name">Hoàng Minh Khoa</div>
+            <div class="tree-node-code">A089</div>
+          </div>
+          <div class="tree-node">
+            <div class="tree-node-ava self">MQ</div>
+            <div class="tree-node-name" style="color:var(--gold);font-weight:700">Hoàng Minh Quang ←</div>
+            <div class="tree-node-code">A091</div>
+          </div>
+          <div class="tree-node">
+            <div class="tree-node-ava female dec">TL</div>
+            <div class="tree-node-name">Hoàng Thị Lan</div>
+            <div class="tree-node-code">A147</div>
+          </div>
+        </div>
+
+        <!-- Connector gen5→gen6 -->
+        <div style="display:flex;justify-content:center"><div style="width:1px;height:16px;background:var(--bd)"></div></div>
+
+        <!-- Gen 6 (Con) -->
+        <div style="text-align:center;margin-bottom:4px"><div class="tree-gen-label">Đời 6 (Con)</div></div>
+        <div style="display:flex;justify-content:center;gap:24px">
+          <div class="tree-node">
+            <div class="tree-node-ava">NB</div>
+            <div class="tree-node-name">Hoàng Ngọc Bảo</div>
+            <div class="tree-node-code">C201</div>
+          </div>
+          <div class="tree-node">
+            <div class="tree-node-ava female">NL</div>
+            <div class="tree-node-name">Hoàng Ngọc Linh</div>
+            <div class="tree-node-code">C202</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== SECTION 3: TAB — Lịch sử & hoạt động ===== -->
+  <div class="section-sep">
+    <p class="section-label">Tab: Lịch sử & hoạt động (A091)</p>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden">
+    <div class="detail-tabs">
+      <div class="tab-item">📋 Hồ sơ</div>
+      <div class="tab-item">🌳 Vị trí trong cây</div>
+      <div class="tab-item on">📜 Lịch sử <span class="tab-badge">12</span></div>
+      <div class="tab-item">🔗 Liên kết</div>
+      <div class="tab-item">🖼 Ảnh & tài liệu</div>
+    </div>
+    <div style="padding:18px 22px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-gold btn-xs">Tất cả</button>
+          <button class="btn btn-sec btn-xs">Chỉnh sửa</button>
+          <button class="btn btn-sec btn-xs">Sự kiện</button>
+          <button class="btn btn-sec btn-xs">Đóng góp</button>
+          <button class="btn btn-sec btn-xs">Kiểm duyệt</button>
+        </div>
+        <span style="font-size:11px;color:var(--ink-m)">12 hoạt động</span>
+      </div>
+      <div class="timeline">
+
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot moderation"></div><div class="tl-line"></div></div>
+          <div class="tl-body">
+            <div class="tl-action">Tự khai chờ duyệt <span class="badge badge-warn" style="font-size:10px;padding:1px 6px;margin-left:4px">Đang chờ</span></div>
+            <div class="tl-meta">Hoàng Minh Quang (A091) tự cập nhật ảnh đại diện và SĐT</div>
+            <div class="tl-detail">Ảnh mới: <em>portrait-2024.jpg</em> · SĐT: 0912xxxxxx → 0978xxxxxx (ẩn)</div>
+          </div>
+          <div class="tl-time">3 giờ trước</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot donation"></div><div class="tl-line"></div></div>
+          <div class="tl-body">
+            <div class="tl-action">Đóng góp công đức được xác nhận <span class="badge badge-ok" style="font-size:10px;padding:1px 6px;margin-left:4px">Đã xác nhận</span></div>
+            <div class="tl-meta">Ban quản trị xác nhận đóng góp quỹ xây nhà thờ</div>
+            <div class="tl-detail">Số tiền: 1.500.000 đ · Mục đích: Quỹ xây nhà thờ tổ</div>
+          </div>
+          <div class="tl-time">15/06/2026</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot event"></div><div class="tl-line"></div></div>
+          <div class="tl-body">
+            <div class="tl-action">Tham dự sự kiện</div>
+            <div class="tl-meta">Họp họ thường niên 2025 — Làng Trung Hòa, Hà Nội</div>
+            <div class="tl-detail">Đăng ký: 3 người (1 người lớn + 2 trẻ em)</div>
+          </div>
+          <div class="tl-time">20/04/2025</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot update"></div><div class="tl-line"></div></div>
+          <div class="tl-body">
+            <div class="tl-action">Admin chỉnh sửa hồ sơ</div>
+            <div class="tl-meta">Nguyễn Văn Admin cập nhật thông tin</div>
+            <div class="tl-detail">Thêm ghi chú: "Thành viên Ban liên lạc họ Hoàng" · Sửa quyền xem: Công khai → Thành viên</div>
+          </div>
+          <div class="tl-time">10/03/2025</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot event"></div><div class="tl-line"></div></div>
+          <div class="tl-body">
+            <div class="tl-action">Tham dự sự kiện</div>
+            <div class="tl-meta">Giỗ Tổ Hoàng Tộc lần 12 — 2024</div>
+            <div class="tl-detail">Đóng góp đồ lễ: 500.000 đ</div>
+          </div>
+          <div class="tl-time">12/08/2024</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot-wrap"><div class="tl-dot create"></div></div>
+          <div class="tl-body">
+            <div class="tl-action">Hồ sơ được tạo</div>
+            <div class="tl-meta">Ban quản trị nhập liệu từ gia phả bản giấy</div>
+            <div class="tl-detail">Số hoá từ gia phả in năm 2010 — đời 5, nhánh A</div>
+          </div>
+          <div class="tl-time">05/01/2024</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ===== SECTION 4: TAB — Liên kết hệ thống ===== -->
+  <div class="section-sep">
+    <p class="section-label">Tab: Liên kết hệ thống — cross-module</p>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden">
+    <div class="detail-tabs">
+      <div class="tab-item">📋 Hồ sơ</div>
+      <div class="tab-item">🌳 Vị trí trong cây</div>
+      <div class="tab-item">📜 Lịch sử</div>
+      <div class="tab-item on">🔗 Liên kết <span class="tab-badge" style="color:var(--warn)">1</span></div>
+      <div class="tab-item">🖼 Ảnh & tài liệu</div>
+    </div>
+    <div style="padding:18px 22px;display:flex;flex-direction:column;gap:18px">
+
+      <!-- Kiểm duyệt tự khai -->
+      <div>
+        <div class="sec-head">Kiểm duyệt tự khai</div>
+        <div class="link-section">
+          <div class="link-card" style="border-color:var(--warn-bd);background:var(--warn-bg)">
+            <div class="link-card-icon warn">⚠</div>
+            <div class="link-card-body">
+              <div class="link-card-title">Tự khai đang chờ duyệt <span class="link-tag-warn">1 yêu cầu</span></div>
+              <div class="link-card-meta">Cập nhật ảnh đại diện và số điện thoại — gửi 3 giờ trước</div>
+            </div>
+            <a href="#" class="link-card-action">Xét duyệt →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Đóng góp -->
+      <div>
+        <div class="sec-head">Đóng góp công đức</div>
+        <div class="link-section">
+          <div class="link-card">
+            <div class="link-card-icon purple">💰</div>
+            <div class="link-card-body">
+              <div class="link-card-title">2 lần đóng góp đã xác nhận — tổng 2.000.000 đ</div>
+              <div class="link-card-meta">Gần nhất: 1.500.000 đ ngày 15/06/2026 · Quỹ nhà thờ tổ</div>
+            </div>
+            <a href="#" class="link-card-action">Xem chi tiết →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sự kiện -->
+      <div>
+        <div class="sec-head">Sự kiện đã tham dự</div>
+        <div class="link-section">
+          <div class="link-card">
+            <div class="link-card-icon blue">🎉</div>
+            <div class="link-card-body">
+              <div class="link-card-title">Họp họ thường niên 2025</div>
+              <div class="link-card-meta">20/04/2025 · Làng Trung Hòa · 3 người tham dự</div>
+            </div>
+            <a href="#" class="link-card-action">Xem →</a>
+          </div>
+          <div class="link-card">
+            <div class="link-card-icon blue">🎉</div>
+            <div class="link-card-body">
+              <div class="link-card-title">Giỗ Tổ Hoàng Tộc lần 12 — 2024</div>
+              <div class="link-card-meta">12/08/2024 · Đóng góp đồ lễ 500.000 đ</div>
+            </div>
+            <a href="#" class="link-card-action">Xem →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bài viết liên quan -->
+      <div>
+        <div class="sec-head">Bài viết nhắc đến người này</div>
+        <div class="link-section">
+          <div class="post-row">
+            <div class="post-row-thumb">📰</div>
+            <div class="post-row-body">
+              <div class="post-row-title">Chân dung người trẻ gìn giữ gia phả — Hoàng Minh Quang (A091)</div>
+              <div class="post-row-meta">Đã xuất bản · 10/05/2026 · 1.240 lượt xem</div>
+            </div>
+            <a href="#" style="font-size:11px;color:var(--gold);font-weight:600;flex-shrink:0">Xem →</a>
+          </div>
+          <div class="post-row">
+            <div class="post-row-thumb">📰</div>
+            <div class="post-row-body">
+              <div class="post-row-title">Kết quả họp họ 2025 — Ban liên lạc họ Hoàng Hà Nội</div>
+              <div class="post-row-meta">Đã xuất bản · 25/04/2025 · 890 lượt xem</div>
+            </div>
+            <a href="#" style="font-size:11px;color:var(--gold);font-weight:600;flex-shrink:0">Xem →</a>
+          </div>
+          <div class="post-row">
+            <div class="post-row-thumb">📰</div>
+            <div class="post-row-body">
+              <div class="post-row-title">Danh sách đóng góp Quỹ Xây Nhà Thờ Tổ 2026</div>
+              <div class="post-row-meta">Bản nháp · Chưa xuất bản</div>
+            </div>
+            <a href="#" style="font-size:11px;color:var(--gold);font-weight:600;flex-shrink:0">Sửa →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Học bổng -->
+      <div>
+        <div class="sec-head">Học bổng</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--s2);border-radius:var(--r-sm);border:1px solid var(--bd);font-size:12px;color:var(--ink-m)">
+          <span>Không có hồ sơ học bổng liên kết.</span>
+          <a href="#" style="color:var(--gold);font-weight:600;font-size:11px;margin-left:auto">Gắn hồ sơ →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ===== SECTION 5: TAB — Ảnh & tài liệu ===== -->
+  <div class="section-sep">
+    <p class="section-label">Tab: Ảnh & tài liệu đính kèm</p>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden">
+    <div class="detail-tabs">
+      <div class="tab-item">📋 Hồ sơ</div>
+      <div class="tab-item">🌳 Vị trí trong cây</div>
+      <div class="tab-item">📜 Lịch sử</div>
+      <div class="tab-item">🔗 Liên kết</div>
+      <div class="tab-item on">🖼 Ảnh & tài liệu</div>
+    </div>
+    <div style="padding:18px 22px;display:flex;flex-direction:column;gap:16px">
+
+      <!-- Ảnh đại diện -->
+      <div>
+        <div class="sec-head">Ảnh đại diện</div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <div style="width:80px;height:80px;border-radius:50%;background:var(--ok-bg);border:2px solid var(--ok-bd);display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:28px;color:var(--ok);flex-shrink:0">MQ</div>
+          <div>
+            <div style="font-size:12px;color:var(--ink2);margin-bottom:8px">Chưa có ảnh thực — đang hiển thị avatar chữ cái.</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-sec btn-sm">⬆ Tải ảnh lên</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--warn)">⚠ Xét duyệt ảnh mới →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Album ảnh -->
+      <div>
+        <div class="sec-head" style="display:flex;align-items:center">Album ảnh (6 ảnh) <button class="btn btn-gold btn-xs" style="margin-left:auto;margin-right:0">+ Thêm ảnh</button></div>
+        <div class="media-grid">
+          <div class="media-thumb">🏞️</div>
+          <div class="media-thumb">👨‍👩‍👧‍👦</div>
+          <div class="media-thumb">🎉</div>
+          <div class="media-thumb">🏛️</div>
+          <div class="media-thumb">📸</div>
+          <div class="media-thumb">🌄</div>
+        </div>
+      </div>
+
+      <!-- Tài liệu -->
+      <div>
+        <div class="sec-head" style="display:flex;align-items:center">Tài liệu đính kèm <button class="btn btn-sec btn-xs" style="margin-left:auto;margin-right:0">+ Đính kèm</button></div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px">
+            <span style="font-size:20px">📄</span>
+            <span style="flex:1;color:var(--ink2);font-weight:500">Bằng cấp THẠC SĨ - Đại học KTQD 2012.pdf</span>
+            <span style="color:var(--ink-m);font-size:11px">1.2 MB</span>
+            <a href="#" style="color:var(--gold);font-size:11px;font-weight:600">Tải về</a>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r-sm);font-size:12px">
+            <span style="font-size:20px">📄</span>
+            <span style="flex:1;color:var(--ink2);font-weight:500">CMND cũ (scan) - số hoá gia phả.jpg</span>
+            <span style="color:var(--ink-m);font-size:11px">340 KB · <span style="color:var(--warn)">Riêng tư</span></span>
+            <a href="#" style="color:var(--gold);font-size:11px;font-weight:600">Xem</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ===== SECTION 6: Form thêm / sửa ===== -->
+  <div class="section-sep" id="form-add">
+    <p class="section-label">Form: Thêm / Sửa hồ sơ — /persons/new hoặc /persons/A091</p>
+  </div>
+
+  <div class="form-card">
+    <div class="form-card-head">
+      <h2>Sửa hồ sơ — Hoàng Minh Quang <span class="mono">A091</span></h2>
+      <a href="#" style="font-size:12px;color:var(--gold);text-decoration:none;font-weight:600">← Quay lại danh sách</a>
+    </div>
+
+    <!-- Nhóm 1: Định danh -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-m);margin-bottom:10px">Định danh</div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-field">
+        <label>Mã hiệu</label>
+        <input value="A091" disabled>
+        <div class="hint">Không thể thay đổi sau khi tạo</div>
+      </div>
+      <div class="form-field">
+        <label>Họ tên <span class="req">*</span></label>
+        <input value="Hoàng Minh Quang">
+      </div>
+      <div class="form-field">
+        <label>Tên húy <span style="font-size:10px;font-weight:400;text-transform:none;color:var(--ink-m)">(tên đặt khi sinh)</span></label>
+        <input value="Phúc">
+      </div>
+      <div class="form-field">
+        <label>Giới tính <span class="req">*</span></label>
+        <select><option selected>Nam</option><option>Nữ</option><option>Khác / không rõ</option></select>
+      </div>
+      <div class="form-field">
+        <label>Trạng thái <span class="req">*</span></label>
+        <select><option selected>Còn sống</option><option>Đã mất</option></select>
+      </div>
+      <div class="form-field">
+        <label>Đời <span class="req">*</span></label>
+        <input type="number" min="1" value="5">
+      </div>
+    </div>
+
+    <!-- Nhóm 2: Ngày sinh / mất -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-m);margin-bottom:10px">Ngày sinh — ngày mất</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:4px">Ngày sinh <span style="font-size:10px;font-weight:400;text-transform:none;color:var(--ink-m)">(dương / âm lịch — tuỳ chọn)</span></div>
+        <div class="date-pick">
+          <span class="date-mode-lbl solar">Dương lịch</span>
+          <div class="date-fields">
+            <div class="date-sub-wrap"><span class="sub-lbl">Ngày</span><input class="date-input" value="05"></div>
+            <span>/</span>
+            <div class="date-sub-wrap"><span class="sub-lbl">Tháng</span><input class="date-input" value="11"></div>
+            <span>/</span>
+            <div class="date-sub-wrap"><span class="sub-lbl">Năm</span><input class="date-input year" value="1988"></div>
+          </div>
+          <div class="date-divider"></div>
+          <span class="date-mode-lbl lunar">ÂL ← tự tính</span>
+          <div class="date-fields">
+            <div class="date-sub-wrap lunar"><span class="sub-lbl">Ngày</span><input class="date-input lunar" value="25" readonly></div>
+            <span>/</span>
+            <div class="date-sub-wrap lunar"><span class="sub-lbl">Tháng</span><input class="date-input lunar" value="09" readonly></div>
+            <span>/</span>
+            <div class="date-sub-wrap lunar"><span class="sub-lbl">Can Chi</span><input class="date-input cchi lunar" value="Mậu Thìn" readonly></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--ink-m);letter-spacing:.5px;margin-bottom:4px">Ngày mất <span style="font-size:10px;font-weight:400;text-transform:none;color:var(--ink-m)">(nếu đã mất)</span></div>
+        <div class="date-pick" style="opacity:.5">
+          <span class="date-mode-lbl solar">Dương lịch</span>
+          <div class="date-fields">
+            <div class="date-sub-wrap"><span class="sub-lbl">Ngày</span><input class="date-input" placeholder="DD" disabled></div>
+            <span>/</span>
+            <div class="date-sub-wrap"><span class="sub-lbl">Tháng</span><input class="date-input" placeholder="MM" disabled></div>
+            <span>/</span>
+            <div class="date-sub-wrap"><span class="sub-lbl">Năm</span><input class="date-input year" placeholder="YYYY" disabled></div>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:4px">Chỉ nhập khi Trạng thái = Đã mất</div>
+      </div>
+    </div>
+
+    <!-- Nhóm 3: Liên hệ & quyền riêng tư -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-m);margin-bottom:10px">Liên hệ & quyền riêng tư</div>
+    <div class="form-grid" style="margin-bottom:16px">
+      <div class="form-field">
+        <label>SĐT <span style="font-size:10px;font-weight:400;text-transform:none;color:var(--warn)">— PII ẩn với khách</span></label>
+        <input value="0912xxxxxx" placeholder="Nhập SĐT">
+      </div>
+      <div class="form-field">
+        <label>Email liên hệ <span style="font-size:10px;font-weight:400;text-transform:none;color:var(--warn)">— PII</span></label>
+        <input value="" placeholder="Nhập email (tuỳ chọn)">
+      </div>
+      <div class="form-field">
+        <label>Quyền xem hồ sơ <span class="req">*</span></label>
+        <select><option>Công khai</option><option selected>Thành viên</option><option>Riêng tư</option></select>
+      </div>
+    </div>
+
+    <!-- Nhóm 4: Quan hệ gia đình -->
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-m);margin-bottom:10px">Quan hệ gia đình</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div class="form-field">
+        <label>Cha <span style="font-size:10px;font-weight:400;text-transform:none">(mã hiệu hoặc tìm tên)</span></label>
+        <input value="A045 — Hoàng Văn Bình" placeholder="Tìm theo tên hoặc mã…">
+      </div>
+      <div class="form-field">
+        <label>Mẹ</label>
+        <input value="A046 — Lê Thị Hoa" placeholder="Tìm theo tên hoặc mã…">
+      </div>
+      <div class="form-field">
+        <label>Vợ / Chồng</label>
+        <input value="Nguyễn Thị Mai (ngoài phả)" placeholder="Mã hoặc ghi tên ngoài phả…">
+      </div>
+      <div class="form-field">
+        <label>Ghi chú quan hệ</label>
+        <input value="" placeholder="VD: Con thứ 2, nhà thờ nhánh B…">
+      </div>
+    </div>
+
+    <!-- Ghi chú -->
+    <div class="form-field" style="margin-bottom:18px">
+      <label>Ghi chú</label>
+      <textarea rows="3">Thạc sĩ Kinh tế, Đại học Kinh tế Quốc dân. Hiện công tác tại Hà Nội. Phụ trách đóng góp cho quỹ xây nhà thờ tổ.</textarea>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-gold">Lưu hồ sơ</button>
+      <button class="btn btn-sec">Hủy thay đổi</button>
+      <button class="btn btn-ghost btn-sm" style="margin-left:auto;color:var(--err)">Xóa hồ sơ này…</button>
+    </div>
+  </div>
+
+</div><!-- /page -->
+</body>
+</html>
