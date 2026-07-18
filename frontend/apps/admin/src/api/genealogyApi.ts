@@ -160,7 +160,7 @@ export type DonationCampaignDto = {
   raisedAmount?: number | string | null;
   vietqrPayload?: string | null;
   status?: string | null;
-  /** general | scholarship */
+  /** general | scholarship | tomb | ancestral_house | genealogy | event | relief | other */
   purpose?: string | null;
 };
 

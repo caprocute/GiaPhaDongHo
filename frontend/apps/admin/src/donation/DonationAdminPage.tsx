@@ -69,6 +69,44 @@ const KIND_LABEL: Record<string, string> = {
   pending:        "Chờ đối soát",
 };
 
+/** Mục đích quỹ — khớp DonationStatuses.PURPOSE_* (BE). */
+const PURPOSE_OPTIONS = [
+  { value: "general", label: "Công đức / công trình chung" },
+  { value: "scholarship", label: "Quỹ khuyến học (trao học bổng)" },
+  { value: "tomb", label: "Tôn tạo lăng mộ / mộ phần" },
+  { value: "ancestral_house", label: "Nhà thờ họ / từ đường" },
+  { value: "genealogy", label: "Biên soạn / in ấn gia phả" },
+  { value: "event", label: "Sự kiện / giỗ tổ / lễ hội" },
+  { value: "relief", label: "Cứu trợ / hỗ trợ thành viên" },
+  { value: "other", label: "Mục đích khác" },
+] as const;
+
+const PURPOSE_LABEL: Record<string, string> = Object.fromEntries(
+  PURPOSE_OPTIONS.map((o) => [o.value, o.label]),
+);
+
+const PURPOSE_BADGE: Record<string, string> = {
+  general: "Chung",
+  scholarship: "Khuyến học",
+  tomb: "Lăng mộ",
+  ancestral_house: "Nhà thờ",
+  genealogy: "Gia phả",
+  event: "Sự kiện",
+  relief: "Cứu trợ",
+  other: "Khác",
+};
+
+const PURPOSE_TONE: Record<string, BadgeTone> = {
+  general: "default",
+  scholarship: "warning",
+  tomb: "accent",
+  ancestral_house: "accent",
+  genealogy: "success",
+  event: "success",
+  relief: "error",
+  other: "default",
+};
+
 const BANK_OPTIONS = [
   { value: "",       label: "— Chọn ngân hàng —" },
   { value: "970436", label: "Vietcombank (970436)" },
@@ -244,7 +282,7 @@ function initForm(c?: DonationCampaignDto): CampaignForm {
     title:       c?.title ?? "",
     goal:        c?.goalAmount != null ? String(c.goalAmount) : "",
     status:      c?.status ?? "open",
-    purpose:     c?.purpose === "scholarship" ? "scholarship" : "general",
+    purpose:     PURPOSE_LABEL[c?.purpose ?? ""] ? (c!.purpose as string) : "general",
     bankBin:     qr.bankBin ?? "",
     accountNo:   qr.accountNo ?? "",
     accountName: qr.accountName ?? "",
@@ -328,10 +366,7 @@ function CampaignDialog({ open, initial, slug, onClose, onSaved, getToken }: Cam
           <Select
             value={form.purpose}
             onChange={(e) => patch("purpose", e.target.value)}
-            options={[
-              { value: "general", label: "Công đức / công trình chung" },
-              { value: "scholarship", label: "Quỹ khuyến học (trao học bổng)" },
-            ]}
+            options={[...PURPOSE_OPTIONS]}
           />
         </FormField>
 
@@ -611,8 +646,10 @@ function CampaignItem({ cv, selected, onClick }: {
       <div className="fund-campaign-item-top">
         <span className="fund-campaign-name">{c.title}</span>
         <span style={{ flexShrink: 0, display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          {c.purpose === "scholarship" ? (
-            <Badge tone="warning">Khuyến học</Badge>
+          {c.purpose && c.purpose !== "general" ? (
+            <Badge tone={PURPOSE_TONE[c.purpose] ?? "default"}>
+              {PURPOSE_BADGE[c.purpose] ?? PURPOSE_LABEL[c.purpose] ?? c.purpose}
+            </Badge>
           ) : null}
           <Badge tone={STATUS_TONE[st] ?? "default"}>
             {STATUS_LABEL[st] ?? st}
@@ -922,6 +959,13 @@ export function DonationAdminPage() {
               {/* Campaign header */}
               <div className="fund-detail-head">
                 <h2 className="fund-detail-title">{selectedCv.campaign.title}</h2>
+                {selectedCv.campaign.purpose ? (
+                  <Badge tone={PURPOSE_TONE[selectedCv.campaign.purpose] ?? "default"}>
+                    {PURPOSE_BADGE[selectedCv.campaign.purpose] ??
+                      PURPOSE_LABEL[selectedCv.campaign.purpose] ??
+                      selectedCv.campaign.purpose}
+                  </Badge>
+                ) : null}
                 <Badge tone={STATUS_TONE[stCurrent] ?? "default"}>
                   {STATUS_LABEL[stCurrent] ?? stCurrent}
                 </Badge>

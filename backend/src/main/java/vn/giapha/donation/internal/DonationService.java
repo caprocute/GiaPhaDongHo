@@ -97,7 +97,7 @@ public class DonationService {
         if (dto.getRaisedAmount() == null) {
             dto.setRaisedAmount(BigDecimal.ZERO);
         }
-        String purpose = normalizePurpose(dto.getPurpose());
+        String purpose = DonationStatuses.normalizePurpose(dto.getPurpose());
         dto.setPurpose(purpose);
         FamilyTreeDTO treeDto = familyTreeMapper.toDto(tree);
         dto.setTree(treeDto);
@@ -272,17 +272,6 @@ public class DonationService {
         DonationCampaign camp = requireCampaign(treeSlug, c.getCampaign().getId());
         c.setCampaign(camp);
         return c;
-    }
-
-    private static String normalizePurpose(String purpose) {
-        if (purpose == null || purpose.isBlank()) {
-            return DonationStatuses.PURPOSE_GENERAL;
-        }
-        String p = purpose.trim().toLowerCase(Locale.ROOT);
-        if (DonationStatuses.PURPOSE_SCHOLARSHIP.equals(p)) {
-            return DonationStatuses.PURPOSE_SCHOLARSHIP;
-        }
-        return DonationStatuses.PURPOSE_GENERAL;
     }
 
     private static String escape(String s) {

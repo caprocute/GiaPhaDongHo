@@ -18,7 +18,7 @@ entity DonationCampaign {
   raisedAmount BigDecimal
   vietqrPayload TextBlob
   status String
-  /** general | scholarship — mục đích quỹ (không đoán theo tên) */
+  /** general|scholarship|tomb|ancestral_house|genealogy|event|relief|other */
   purpose String
 }
 
