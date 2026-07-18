@@ -4,6 +4,7 @@ import {
   memo,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -73,7 +74,7 @@ const _CSS = `
 .ddp-range-trigger--open,.ddp-range-trigger:hover{border-color:var(--color-heritage-accent)}
 .ddp-range-sep{display:flex;align-items:center;padding:0 8px;background:var(--color-surface-card);border-top:1.5px solid var(--color-border-default);border-bottom:1.5px solid var(--color-border-default);color:var(--color-text-muted);font-size:13px}
 
-.ddp-panel{position:fixed;z-index:9999;display:flex;background:var(--color-surface-card);border:1px solid var(--color-border-default);border-radius:var(--radius-md);box-shadow:0 8px 28px rgba(0,0,0,.18);overflow:hidden}
+.ddp-panel{position:fixed;z-index:9999;display:flex;background:var(--color-surface-card);border:1px solid var(--color-border-default);border-radius:var(--radius-md);box-shadow:0 8px 28px rgba(0,0,0,.18)}
 
 .ddp-presets{width:144px;border-right:1px solid var(--color-border-default);background:var(--color-surface-sunken);padding:8px 0;overflow-y:auto;flex-shrink:0}
 .ddp-presets-hd{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--color-text-muted);padding:6px 14px 2px}
@@ -253,6 +254,106 @@ function addMonths(year: number, month: number, delta: number): { year: number; 
   while (m > 12) { m -= 12; y++; }
   while (m < 1) { m += 12; y--; }
   return { year: y, month: m };
+}
+
+// ── Smart floating position ───────────────────────────────────────────────────
+
+const _GAP = 6;    // px between trigger bottom and panel top
+const _MARGIN = 8; // min distance from viewport edge
+
+interface _FloatStyle {
+  top: number;
+  left: number;
+  maxHeight: number;
+  overflowY?: "auto";
+  visibility: "hidden" | "visible";
+}
+
+function computeFloatPos(trig: DOMRect, pw: number, ph: number): _FloatStyle {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  // ── Vertical: prefer below, flip above if more space ──
+  const spaceBelow = vh - trig.bottom - _MARGIN;
+  const spaceAbove = trig.top - _MARGIN;
+  const fitsBelow = spaceBelow >= ph;
+  const placeBelow = fitsBelow || spaceBelow >= spaceAbove;
+
+  let top: number;
+  let maxHeight: number;
+  if (placeBelow) {
+    top = trig.bottom + _GAP;
+    maxHeight = Math.max(200, spaceBelow);
+  } else {
+    maxHeight = Math.max(200, spaceAbove);
+    top = trig.top - _GAP - Math.min(ph, maxHeight);
+  }
+
+  // ── Horizontal: left-align to trigger, flip/clamp if needed ──
+  let left = trig.left;
+
+  // If panel overflows right edge → try right-aligning to trigger's right edge
+  if (left + pw > vw - _MARGIN) {
+    left = trig.right - pw;
+  }
+  // Hard clamp to both edges
+  left = Math.max(_MARGIN, Math.min(left, vw - pw - _MARGIN));
+
+  return {
+    top,
+    left,
+    maxHeight,
+    overflowY: ph > maxHeight ? "auto" : undefined,
+    visibility: "visible",
+  };
+}
+
+/**
+ * Measures panel size after render then computes the best fixed-position
+ * placement (flip above/right when viewport space is tight).
+ * Returns a CSSProperties to spread onto the panel div.
+ */
+function useSmartPos(
+  triggerRef: React.RefObject<HTMLElement | null>,
+  panelRef: React.RefObject<HTMLElement | null>,
+  open: boolean,
+): CSSProperties {
+  const [style, setStyle] = useState<CSSProperties>({ visibility: "hidden", top: 0, left: 0 });
+
+  const reposition = useCallback(() => {
+    const trig = triggerRef.current;
+    const panel = panelRef.current;
+    if (!trig || !panel) return;
+    const trigRect = trig.getBoundingClientRect();
+    const pw = panel.offsetWidth;
+    const ph = panel.offsetHeight;
+    if (!pw || !ph) return;
+    const pos = computeFloatPos(trigRect, pw, ph);
+    setStyle(pos);
+  }, [triggerRef, panelRef]);
+
+  // Run synchronously before paint — panel is in DOM but not yet painted,
+  // so offsetWidth/Height are available and we can position without flicker.
+  useLayoutEffect(() => {
+    if (!open) {
+      setStyle({ visibility: "hidden", top: 0, left: 0 });
+      return;
+    }
+    reposition();
+  }, [open, reposition]);
+
+  // Keep aligned on scroll / resize
+  useEffect(() => {
+    if (!open) return;
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+    return () => {
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
+    };
+  }, [open, reposition]);
+
+  return style;
 }
 
 // ── Range presets ─────────────────────────────────────────────────────────────
@@ -468,12 +569,14 @@ export function DualDatePicker({
 
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<CMode>("solar");
-  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
   const [vy, setVy] = useState(() => value?.solar?.year ?? new Date().getFullYear());
   const [vm, setVm] = useState(() => value?.solar?.month ?? new Date().getMonth() + 1);
   const today = useMemo(todaySolar, []);
+
+  const panelStyle = useSmartPos(triggerRef, panelRef, open);
 
   // Single date picker presets
   const singlePresets: RPreset[] = useMemo(() => {
@@ -488,11 +591,6 @@ export function DualDatePicker({
 
   const openPanel = useCallback(() => {
     if (disabled) return;
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setPanelPos({ top: rect.bottom + 6, left: rect.left });
-    }
-    // Navigate to selected month when opening
     if (value?.solar) { setVy(value.solar.year); setVm(value.solar.month); }
     else { setVy(today.year); setVm(today.month); }
     setOpen(true);
@@ -519,10 +617,7 @@ export function DualDatePicker({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        const panel = document.querySelector("[data-ddp-panel]");
-        if (!panel || !panel.contains(e.target as Node)) setOpen(false);
-      }
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
     document.addEventListener("mousedown", onDown);
@@ -534,25 +629,6 @@ export function DualDatePicker({
   const lunarLabel = value?.lunarLabel ?? (value?.solar ? buildLunarLabel(value.solar) : null);
   const hasValue = !!value?.solar;
   const displayVal = hasValue ? fmtDisplay(value!.solar) : null;
-
-  // Re-compute panel pos on scroll/resize to keep it anchored
-  useEffect(() => {
-    if (!open) return;
-    const update = () => {
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        setPanelPos({ top: rect.bottom + 6, left: rect.left });
-      }
-    };
-    window.addEventListener("scroll", update, true);
-    window.addEventListener("resize", update);
-    return () => { window.removeEventListener("scroll", update, true); window.removeEventListener("resize", update); };
-  }, [open]);
-
-  const panelStyle: CSSProperties = {
-    top: panelPos.top,
-    left: panelPos.left,
-  };
 
   const picker = (
     <div ref={rootRef} className="ddp-root">
@@ -580,6 +656,7 @@ export function DualDatePicker({
 
       {open && (
         <div
+          ref={panelRef}
           className={`ddp-panel${mode === "lunar" ? " ddp-panel--lunar" : ""}`}
           style={panelStyle}
           role="dialog"
@@ -694,9 +771,9 @@ export function DualDateRangePicker({
 
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<CMode>("solar");
-  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 });
   const [vy, setVy] = useState(() => new Date().getFullYear());
   const [vm, setVm] = useState(() => new Date().getMonth() + 1);
   // Pending = user clicked "from", waiting for "to"
@@ -706,6 +783,8 @@ export function DualDateRangePicker({
   const today = useMemo(todaySolar, []);
   const presets = useMemo(buildRangePresets, []);
 
+  const panelStyle = useSmartPos(triggerRef, panelRef, open);
+
   const from = value?.from?.solar ?? null;
   const to = value?.to?.solar ?? null;
   // While pending (first date clicked, waiting for second), treat pendingFrom as rangeFrom
@@ -714,13 +793,8 @@ export function DualDateRangePicker({
 
   const openPanel = useCallback(() => {
     if (disabled) return;
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      setPanelPos({ top: rect.bottom + 6, left: rect.left });
-    }
     setPendingFrom(null);
     setHoverDate(null);
-    // View: show month of "from" date, or today
     const v = from ?? today;
     setVy(v.year); setVm(v.month);
     setOpen(true);
@@ -762,10 +836,7 @@ export function DualDateRangePicker({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        const panel = document.querySelector("[data-ddp-range-panel]");
-        if (!panel || !panel.contains(e.target as Node)) closePanel();
-      }
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) closePanel();
     };
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") closePanel(); };
     document.addEventListener("mousedown", onDown);
@@ -773,21 +844,7 @@ export function DualDateRangePicker({
     return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
   }, [open, closePanel]);
 
-  useEffect(() => {
-    if (!open) return;
-    const update = () => {
-      if (triggerRef.current) {
-        const rect = triggerRef.current.getBoundingClientRect();
-        setPanelPos({ top: rect.bottom + 6, left: rect.left });
-      }
-    };
-    window.addEventListener("scroll", update, true);
-    window.addEventListener("resize", update);
-    return () => { window.removeEventListener("scroll", update, true); window.removeEventListener("resize", update); };
-  }, [open]);
-
   const { year: rvy, month: rvm } = useMemo(() => addMonths(vy, vm, 1), [vy, vm]);
-  const panelStyle: CSSProperties = { top: panelPos.top, left: panelPos.left };
 
   const leftLunarLabel = useMemo(() => lunarMonthRangeLabel(vy, vm), [vy, vm]);
   const rightLunarLabel = useMemo(() => lunarMonthRangeLabel(rvy, rvm), [rvy, rvm]);
@@ -841,6 +898,7 @@ export function DualDateRangePicker({
 
       {open && (
         <div
+          ref={panelRef}
           className={`ddp-panel${mode === "lunar" ? " ddp-panel--lunar" : ""}`}
           style={panelStyle}
           role="dialog"
