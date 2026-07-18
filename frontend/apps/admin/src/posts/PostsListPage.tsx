@@ -1,14 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@giapha/auth";
-import { Alert, Badge, Button, DataTable, EmptyState, Input, Pagination } from "@giapha/ui";
-import { deleteCmsPost, listCmsPosts } from "../api/cmsApi";
+import {
+  Alert,
+  Badge,
+  Button,
+  Input,
+  ProTable,
+} from "@giapha/ui";
+import type { ProTableColumn } from "@giapha/ui";
+import { deleteCmsPost, listCmsCategories, listCmsPosts } from "../api/cmsApi";
+import type { CmsCategoryDto } from "../api/cmsTypes";
 import { ApiError } from "../api/http";
 import { AdminPageHeader } from "../components/AdminPageHeader";
 import { fromCmsPost } from "./postMappers";
 import type { PostRecord } from "./types";
 
 type Row = PostRecord & Record<string, unknown>;
+type StatusFilter = "all" | PostRecord["status"];
+
 const PAGE_SIZE = 20;
 
 const statusLabel: Record<PostRecord["status"], string> = {
@@ -20,6 +30,9 @@ const statusLabel: Record<PostRecord["status"], string> = {
 export function PostsListPage() {
   const { getAccessToken } = useAuth();
   const [query, setQuery] = useState("");
+  const [status, setStatus] = useState<StatusFilter>("all");
+  const [category, setCategory] = useState("all");
+  const [categories, setCategories] = useState<CmsCategoryDto[]>([]);
   const [page, setPage] = useState(0);
   const [rows, setRows] = useState<PostRecord[]>([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -32,10 +45,14 @@ export function PostsListPage() {
     setError(null);
     try {
       const token = await getAccessToken();
-      const result = await listCmsPosts(token, page, PAGE_SIZE);
+      const [result, cats] = await Promise.all([
+        listCmsPosts(token, page, PAGE_SIZE),
+        listCmsCategories(token),
+      ]);
       setRows(result.content.map(fromCmsPost));
       setTotalElements(result.totalElements);
-      setTotalPages(result.totalPages);
+      setTotalPages(Math.max(1, result.totalPages));
+      setCategories(cats);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được danh sách bài viết.");
       setRows([]);
@@ -48,66 +65,91 @@ export function PostsListPage() {
     void reload();
   }, [reload]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [status, category, query]);
+
+  const counts = useMemo(() => {
+    return {
+      all: rows.length,
+      published: rows.filter((p) => p.status === "published").length,
+      draft: rows.filter((p) => p.status === "draft").length,
+      archived: rows.filter((p) => p.status === "archived").length,
+    };
+  }, [rows]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return rows.filter(
-      (p) =>
-        !q ||
+    return rows.filter((p) => {
+      if (status !== "all" && p.status !== status) return false;
+      if (category !== "all" && (p.categorySlug ?? "") !== category) return false;
+      if (!q) return true;
+      return (
         p.title.toLowerCase().includes(q) ||
         p.slug.toLowerCase().includes(q) ||
-        (p.summary?.toLowerCase().includes(q) ?? false),
-    ) as Row[];
-  }, [query, rows]);
+        (p.summary?.toLowerCase().includes(q) ?? false)
+      );
+    }) as Row[];
+  }, [category, query, rows, status]);
 
-  const columns = [
+  const columns: ProTableColumn<Row>[] = [
     {
       key: "title",
       header: "Tiêu đề",
-      render: (row: Row) => row.title,
-    },
-    {
-      key: "slug",
-      header: "Đường dẫn",
-      render: (row: Row) => <code>{row.slug}</code>,
+      render: (row) => (
+        <div className="cms-title-cell">
+          <strong>{row.title as string}</strong>
+          {row.summary ? <small>{(row.summary as string).slice(0, 90)}{((row.summary as string).length ?? 0) > 90 ? "…" : ""}</small> : null}
+          <code>{row.slug as string}</code>
+        </div>
+      ),
+      sortable: true,
+      exportValue: (row) => String(row.title ?? ""),
     },
     {
       key: "status",
       header: "Trạng thái",
-      render: (row: Row) => (
+      render: (row) => (
         <Badge tone={row.status === "published" ? "success" : "default"}>
-          {statusLabel[row.status]}
+          {statusLabel[row.status as PostRecord["status"]]}
         </Badge>
       ),
+      width: 130,
+      exportValue: (row) => statusLabel[row.status as PostRecord["status"]] ?? String(row.status ?? ""),
     },
     {
       key: "categorySlug",
       header: "Chuyên mục",
-      render: (row: Row) => row.categorySlug ?? "—",
+      render: (row) => (row.categorySlug as string | null | undefined) ?? "—",
+      exportValue: (row) => String(row.categorySlug ?? ""),
+    },
+    {
+      key: "authorName",
+      header: "Tác giả",
+      render: (row) => (row.authorName as string | null | undefined) ?? "—",
+      exportValue: (row) => String(row.authorName ?? ""),
     },
     {
       key: "actions",
       header: "Thao tác",
-      render: (row: Row) => (
+      hideable: false,
+      width: 100,
+      render: (row) => (
         <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
           <Link to={`/posts/${row.id}`}>Sửa</Link>
           <button
             type="button"
-            style={{
-              border: "none",
-              background: "transparent",
-              color: "var(--color-status-error-fg)",
-              cursor: "pointer",
-              fontFamily: "var(--font-body)",
-            }}
-            onClick={() => {
+            className="link-danger"
+            onClick={(e) => {
+              e.stopPropagation();
               void (async () => {
                 if (!confirm(`Xóa «${row.title}»?`)) return;
                 try {
                   const token = await getAccessToken();
-                  await deleteCmsPost(Number(row.id), token);
+                  await deleteCmsPost(Number(String(row.id)), token);
                   await reload();
-                } catch (e) {
-                  setError(e instanceof ApiError ? e.message : "Xóa thất bại.");
+                } catch (err) {
+                  setError(err instanceof ApiError ? err.message : "Xóa thất bại.");
                 }
               })();
             }}
@@ -119,6 +161,13 @@ export function PostsListPage() {
     },
   ];
 
+  const statusTabs: { key: StatusFilter; label: string; count: number }[] = [
+    { key: "all", label: "Tất cả", count: counts.all },
+    { key: "published", label: "Xuất bản", count: counts.published },
+    { key: "draft", label: "Nháp", count: counts.draft },
+    { key: "archived", label: "Lưu trữ", count: counts.archived },
+  ];
+
   return (
     <div className="admin-stack">
       <AdminPageHeader
@@ -126,7 +175,7 @@ export function PostsListPage() {
         description="Tin tức và thông báo hiển thị trên trang công khai khi đã xuất bản."
         actions={
           <Link to="/posts/new">
-            <Button type="button">Viết bài</Button>
+            <Button type="button">+ Viết bài</Button>
           </Link>
         }
       />
@@ -135,39 +184,88 @@ export function PostsListPage() {
           {error}
         </Alert>
       ) : null}
-      <Input
-        placeholder="Lọc trên trang hiện tại theo tiêu đề…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label="Tìm bài viết"
-      />
-      {loading ? (
-        <p style={{ fontFamily: "var(--font-body)", color: "var(--color-text-muted)" }}>Đang tải…</p>
-      ) : filtered.length === 0 ? (
-        <EmptyState
-          title="Chưa có bài viết"
-          description="Tạo bài mới — bài đã xuất bản sẽ hiện trên mục Tin tức của cổng thông tin."
-          action={
-            <Link to="/posts/new">
-              <Button>Viết bài</Button>
-            </Link>
-          }
-        />
-      ) : (
-        <>
-          <div className="admin-table-wrap">
-            <DataTable columns={columns} rows={filtered} />
+
+      <div className="cms-layout">
+        <aside className="cms-sidebar" aria-label="Chuyên mục">
+          <div className="cms-sidebar-hd">Chuyên mục</div>
+          <button
+            type="button"
+            className={`cms-cat${category === "all" ? " on" : ""}`}
+            onClick={() => setCategory("all")}
+          >
+            Tất cả chuyên mục
+          </button>
+          {categories.map((c) => (
+            <button
+              key={c.slug}
+              type="button"
+              className={`cms-cat${category === c.slug ? " on" : ""}`}
+              onClick={() => setCategory(c.slug)}
+            >
+              {c.name}
+            </button>
+          ))}
+          <div className="cms-sidebar-note">
+            Tháng này: <b>{counts.published}</b> bài đã xuất bản trên trang hiện tại.
           </div>
-          <div className="admin-table-footer">
-            <Pagination
-              page={page + 1}
-              totalPages={totalPages}
-              totalItems={totalElements}
-              onPageChange={(p) => setPage(p - 1)}
-            />
+        </aside>
+
+        <div className="cms-main">
+          <div className="status-tabs" role="tablist">
+            {statusTabs.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={status === t.key}
+                className={`status-tab${status === t.key ? " on" : ""}`}
+                onClick={() => setStatus(t.key)}
+              >
+                {t.label}
+                <span className="ct">{t.count}</span>
+              </button>
+            ))}
           </div>
-        </>
-      )}
+
+          <div className="cms-toolbar">
+            <label className="fi-search">
+              <span aria-hidden>⌕</span>
+              <Input
+                placeholder="Tìm tiêu đề, đường dẫn…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                aria-label="Tìm bài viết"
+              />
+            </label>
+          </div>
+
+          <ProTable
+            rowKey="id"
+            columns={columns}
+            rows={filtered}
+            loading={loading}
+            exportable
+            exportFilename="bai-viet"
+            onRefresh={() => void reload()}
+            emptyState={{
+              title: "Chưa có bài viết",
+              description: "Tạo bài mới — soạn nội dung bằng trình soạn thảo, rồi xuất bản lên cổng thông tin.",
+              action: (
+                <Link to="/posts/new">
+                  <Button>Viết bài</Button>
+                </Link>
+              ),
+            }}
+            pagination={{
+              page: page + 1,
+              totalPages,
+              totalItems: totalElements,
+              pageSize: PAGE_SIZE,
+              onPageChange: (p) => setPage(p - 1),
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 }

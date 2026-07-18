@@ -4,11 +4,12 @@ import {
   Alert,
   Badge,
   Button,
-  DataTable,
   EmptyState,
   Input,
+  ProTable,
   Select,
 } from "@giapha/ui";
+import type { ProTableColumn } from "@giapha/ui";
 import { KeyRound, Shield, UserCheck, UserX } from "lucide-react";
 import { ApiError } from "../api/http";
 import {
@@ -156,44 +157,54 @@ export function UsersAdminPage() {
     }
   }
 
-  const columns = useMemo(
+  const columns = useMemo<ProTableColumn<Row>[]>(
     () => [
       {
         key: "displayName",
         header: "Họ tên",
-        render: (row: Row) => row.displayName || row.username || "—",
+        render: (row) => (row.displayName as string | undefined) || (row.username as string | undefined) || "—",
+        sortable: true,
+        exportValue: (row) => String(row.displayName || row.username || ""),
       },
       {
         key: "username",
         header: "Tên đăng nhập",
-        render: (row: Row) => <code>{row.username}</code>,
+        render: (row) => <code>{row.username as string}</code>,
+        exportValue: (row) => String(row.username ?? ""),
       },
       {
         key: "email",
         header: "Email",
-        render: (row: Row) => row.email || "—",
+        render: (row) => (row.email as string | undefined) || "—",
+        exportValue: (row) => String(row.email ?? ""),
       },
       {
         key: "enabled",
         header: "Trạng thái",
-        render: (row: Row) => (
+        render: (row) => (
           <Badge tone={row.enabled ? "success" : "default"}>
             {row.enabled ? "Đang hoạt động" : "Đã khóa"}
           </Badge>
         ),
+        width: 140,
+        exportValue: (row) => (row.enabled ? "Đang hoạt động" : "Đã khóa"),
       },
       {
         key: "roles",
         header: "Nhóm quyền",
-        render: (row: Row) =>
-          (row.realmRoles ?? []).length
-            ? (row.realmRoles ?? []).map((c) => roleLabel(c, roles)).join(", ")
+        render: (row) =>
+          (row.realmRoles as string[] | undefined ?? []).length
+            ? (row.realmRoles as string[]).map((c) => roleLabel(c, roles)).join(", ")
             : "—",
+        exportValue: (row) =>
+          (row.realmRoles as string[] | undefined ?? []).map((c) => roleLabel(c, roles)).join(", "),
       },
       {
         key: "actions",
         header: "Thao tác",
-        render: (row: Row) => (
+        hideable: false,
+        width: 100,
+        render: (row) => (
           <Button type="button" variant="secondary" onClick={() => void openDetail(row)}>
             Chi tiết
           </Button>
@@ -262,7 +273,22 @@ export function UsersAdminPage() {
       ) : (
         <div className={styles.layout}>
           <div className={styles.list}>
-            <DataTable columns={columns} rows={rows as Row[]} />
+            <ProTable
+              rowKey="id"
+              columns={columns}
+              rows={rows as Row[]}
+              loading={false}
+              exportable
+              exportFilename="tai-khoan"
+              onRefresh={() => void reload()}
+              emptyState={{
+                title: "Chưa có tài khoản",
+                description: available
+                  ? "Chưa có người đăng ký khớp bộ lọc."
+                  : "Kết nối máy chủ đăng nhập để xem danh sách.",
+              }}
+              onRowClick={(row) => void openDetail(row)}
+            />
           </div>
 
           {selected ? (

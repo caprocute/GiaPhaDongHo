@@ -3,14 +3,13 @@ import { useAuth } from "@giapha/auth";
 import {
   Alert,
   Button,
-  DataTable,
-  EmptyState,
   FormField,
   Input,
-  Pagination,
+  ProTable,
   Select,
   Textarea,
 } from "@giapha/ui";
+import type { ProTableColumn } from "@giapha/ui";
 import { ApiError } from "../api/http";
 import {
   createMediaAlbum,
@@ -147,40 +146,34 @@ export function MediaLibraryPage() {
     }
   }
 
-  const photoColumns = [
+  const photoColumns: ProTableColumn<PhotoRow>[] = [
     {
       key: "id",
       header: "ID",
-      render: (row: PhotoRow) => row.id ?? "—",
+      render: (row) => row.id ?? "—",
     },
     {
       key: "objectKey",
       header: "Mã lưu trữ",
-      render: (row: PhotoRow) => <code style={{ fontSize: "var(--font-size-sm)" }}>{row.objectKey}</code>,
+      render: (row) => <code style={{ fontSize: "var(--font-size-sm)" }}>{row.objectKey}</code>,
     },
     {
       key: "caption",
       header: "Chú thích",
-      render: (row: PhotoRow) => row.caption ?? "—",
+      render: (row) => row.caption ?? "—",
     },
     {
       key: "album",
       header: "Album",
-      render: (row: PhotoRow) => row.album?.title ?? "—",
+      render: (row) => row.album?.title ?? "—",
     },
     {
       key: "actions",
       header: "Thao tác",
-      render: (row: PhotoRow) => (
+      render: (row) => (
         <button
           type="button"
-          style={{
-            border: "none",
-            background: "transparent",
-            color: "var(--color-status-error-fg)",
-            cursor: "pointer",
-            fontFamily: "var(--font-body)",
-          }}
+          className="link-danger"
           onClick={() => {
             void (async () => {
               if (row.id == null || !confirm(`Xóa ảnh #${row.id}?`)) return;
@@ -188,8 +181,8 @@ export function MediaLibraryPage() {
                 const token = await getAccessToken();
                 await deleteMediaPhoto(row.id, token);
                 await reload();
-              } catch (e) {
-                setError(e instanceof ApiError ? e.message : "Xóa ảnh thất bại.");
+              } catch (err) {
+                setError(err instanceof ApiError ? err.message : "Xóa ảnh thất bại.");
               }
             })();
           }}
@@ -200,30 +193,24 @@ export function MediaLibraryPage() {
     },
   ];
 
-  const albumColumns = [
+  const albumColumns: ProTableColumn<AlbumRow>[] = [
     {
       key: "title",
       header: "Tên album",
-      render: (row: AlbumRow) => row.title,
+      render: (row) => row.title,
     },
     {
       key: "description",
       header: "Mô tả",
-      render: (row: AlbumRow) => row.description ?? "—",
+      render: (row) => row.description ?? "—",
     },
     {
       key: "actions",
       header: "Thao tác",
-      render: (row: AlbumRow) => (
+      render: (row) => (
         <button
           type="button"
-          style={{
-            border: "none",
-            background: "transparent",
-            color: "var(--color-status-error-fg)",
-            cursor: "pointer",
-            fontFamily: "var(--font-body)",
-          }}
+          className="link-danger"
           onClick={() => {
             void (async () => {
               if (row.id == null || !confirm(`Xóa album «${row.title}»?`)) return;
@@ -231,8 +218,8 @@ export function MediaLibraryPage() {
                 const token = await getAccessToken();
                 await deleteMediaAlbum(row.id, token);
                 await reload();
-              } catch (e) {
-                setError(e instanceof ApiError ? e.message : "Xóa album thất bại.");
+              } catch (err) {
+                setError(err instanceof ApiError ? err.message : "Xóa album thất bại.");
               }
             })();
           }}
@@ -330,43 +317,41 @@ export function MediaLibraryPage() {
         <>
           <section style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}>
             <h2 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Album</h2>
-            {albums.length === 0 ? (
-              <EmptyState title="Chưa có album" description="Tạo album ở panel bên trái." />
-            ) : (
-              <>
-                <div className="admin-table-wrap">
-                  <DataTable columns={albumColumns} rows={albums as AlbumRow[]} />
-                </div>
-                <div className="admin-table-footer">
-                  <Pagination
-                    page={albumPage + 1}
-                    totalPages={albumTotalPages}
-                    totalItems={albumTotal}
-                    onPageChange={(p) => setAlbumPage(p - 1)}
-                  />
-                </div>
-              </>
-            )}
+            <ProTable
+              rowKey="id"
+              columns={albumColumns}
+              rows={albums as AlbumRow[]}
+              loading={loading}
+              exportable
+              exportFilename="albums"
+              onRefresh={() => void reload()}
+              emptyState={{ title: "Chưa có album", description: "Tạo album ở panel bên trái." }}
+              pagination={{
+                page: albumPage + 1,
+                totalPages: albumTotalPages,
+                totalItems: albumTotal,
+                onPageChange: (p) => setAlbumPage(p - 1),
+              }}
+            />
           </section>
           <section style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}>
             <h2 style={{ fontFamily: "var(--font-display)", margin: 0 }}>Ảnh</h2>
-            {photos.length === 0 ? (
-              <EmptyState title="Chưa có ảnh" description="Tải ảnh lên để bổ sung thư viện." />
-            ) : (
-              <>
-                <div className="admin-table-wrap">
-                  <DataTable columns={photoColumns} rows={photos as PhotoRow[]} />
-                </div>
-                <div className="admin-table-footer">
-                  <Pagination
-                    page={photoPage + 1}
-                    totalPages={photoTotalPages}
-                    totalItems={photoTotal}
-                    onPageChange={(p) => setPhotoPage(p - 1)}
-                  />
-                </div>
-              </>
-            )}
+            <ProTable
+              rowKey="id"
+              columns={photoColumns}
+              rows={photos as PhotoRow[]}
+              loading={loading}
+              exportable
+              exportFilename="photos"
+              onRefresh={() => void reload()}
+              emptyState={{ title: "Chưa có ảnh", description: "Tải ảnh lên để bổ sung thư viện." }}
+              pagination={{
+                page: photoPage + 1,
+                totalPages: photoTotalPages,
+                totalItems: photoTotal,
+                onPageChange: (p) => setPhotoPage(p - 1),
+              }}
+            />
           </section>
         </>
       )}

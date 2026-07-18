@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
@@ -151,27 +151,17 @@ export function PersonFormPage() {
     );
   }
 
-  const grid: CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "var(--spacing-md)",
-    maxWidth: 880,
-  };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          gap: "var(--spacing-md)",
-        }}
-      >
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>
-          {isNew ? "Thêm thành viên" : `Sửa — ${existing!.fullName}`}
-        </h1>
-        <Link to="/persons" style={{ fontFamily: "var(--font-body)" }}>
+    <div className="admin-stack">
+      <div className="form-page-hd">
+        <div>
+          <h1>{isNew ? "Thêm thành viên" : `Sửa — ${existing!.fullName}`}</h1>
+          <p>
+            Nhập ngày sinh / ngày mất bằng lịch dương và âm lịch (hai chiều). Người đã mất có thể tạo
+            ngày giỗ tự động.
+          </p>
+        </div>
+        <Link to="/persons" className="admin-link-btn">
           ← Danh sách
         </Link>
       </div>
@@ -182,115 +172,117 @@ export function PersonFormPage() {
         </Alert>
       ) : null}
 
-      <form
-        onSubmit={onSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}
-      >
-        <div style={grid}>
-          <FormField label="Mã hiệu" hint="Để trống sẽ tự sinh A…" error={errors.code?.message}>
-            <Input placeholder="A7" disabled={!isNew} {...register("code")} />
-          </FormField>
-          <FormField label="Họ tên" required error={errors.fullName?.message}>
-            <Input {...register("fullName")} />
-          </FormField>
-          <FormField label="Tên húy" error={errors.tenHuy?.message}>
-            <Input {...register("tenHuy")} />
-          </FormField>
-          <FormField label="Giới tính" required error={errors.gender?.message}>
-            <Select
-              options={[
-                { value: "M", label: "Nam" },
-                { value: "F", label: "Nữ" },
-                { value: "U", label: "Khác / không rõ" },
-              ]}
-              {...register("gender")}
-            />
-          </FormField>
-          <FormField label="Trạng thái" required error={errors.lifeStatus?.message}>
-            <Select
-              options={[
-                { value: "alive", label: "Còn sống" },
-                { value: "deceased", label: "Đã mất" },
-              ]}
-              {...register("lifeStatus")}
-            />
-          </FormField>
-          <FormField label="Đời" error={errors.generation?.message}>
-            <Input type="number" min={1} {...register("generation")} />
-          </FormField>
-          <FormField label="Riêng tư" error={errors.privacy?.message}>
-            <Select
-              options={[
-                { value: "public", label: "Công khai" },
-                { value: "members", label: "Thành viên" },
-                { value: "private", label: "Riêng tư" },
-              ]}
-              {...register("privacy")}
-            />
-          </FormField>
-        </div>
+      <form className="person-form" onSubmit={onSubmit}>
+        <section className="form-section">
+          <h2 className="form-section-title">Thông tin cơ bản</h2>
+          <div className="form-grid">
+            <FormField label="Mã hiệu" hint="Để trống sẽ tự sinh A…" error={errors.code?.message}>
+              <Input placeholder="A7" disabled={!isNew} {...register("code")} />
+            </FormField>
+            <FormField label="Họ tên" required error={errors.fullName?.message}>
+              <Input {...register("fullName")} />
+            </FormField>
+            <FormField label="Tên húy" error={errors.tenHuy?.message}>
+              <Input {...register("tenHuy")} />
+            </FormField>
+            <FormField label="Giới tính" required error={errors.gender?.message}>
+              <Select
+                options={[
+                  { value: "M", label: "Nam" },
+                  { value: "F", label: "Nữ" },
+                  { value: "U", label: "Khác / không rõ" },
+                ]}
+                {...register("gender")}
+              />
+            </FormField>
+            <FormField label="Trạng thái" required error={errors.lifeStatus?.message}>
+              <Select
+                options={[
+                  { value: "alive", label: "Còn sống" },
+                  { value: "deceased", label: "Đã mất" },
+                ]}
+                {...register("lifeStatus")}
+              />
+            </FormField>
+            <FormField label="Đời" error={errors.generation?.message}>
+              <Input type="number" min={1} {...register("generation")} />
+            </FormField>
+            <FormField label="Riêng tư" error={errors.privacy?.message}>
+              <Select
+                options={[
+                  { value: "public", label: "Công khai" },
+                  { value: "members", label: "Thành viên" },
+                  { value: "private", label: "Riêng tư" },
+                ]}
+                {...register("privacy")}
+              />
+            </FormField>
+          </div>
+        </section>
 
-        <Controller
-          name="birthSolar"
-          control={control}
-          render={({ field }) => (
-            <DualDatePicker
-              label="Ngày sinh (dương / âm)"
-              optional
-              value={isoToDual(field.value)}
-              onChange={(v) => {
-                if (!v) {
-                  field.onChange("");
-                  return;
-                }
-                const iso = `${v.solar.year}-${String(v.solar.month).padStart(2, "0")}-${String(v.solar.day).padStart(2, "0")}`;
-                field.onChange(iso);
-              }}
-            />
-          )}
-        />
-        {errors.birthSolar ? (
-          <p style={{ color: "var(--color-status-error-fg)", fontFamily: "var(--font-body)" }}>
-            {errors.birthSolar.message}
-          </p>
-        ) : null}
+        <section className="form-section">
+          <h2 className="form-section-title">Ngày tháng (dương / âm)</h2>
+          <Controller
+            name="birthSolar"
+            control={control}
+            render={({ field }) => (
+              <DualDatePicker
+                label="Ngày sinh"
+                optional
+                value={isoToDual(field.value)}
+                onChange={(v) => {
+                  if (!v) {
+                    field.onChange("");
+                    return;
+                  }
+                  const iso = `${v.solar.year}-${String(v.solar.month).padStart(2, "0")}-${String(v.solar.day).padStart(2, "0")}`;
+                  field.onChange(iso);
+                }}
+              />
+            )}
+          />
+          {errors.birthSolar ? (
+            <p className="field-error">{errors.birthSolar.message}</p>
+          ) : null}
 
-        {lifeStatus === "deceased" ? (
-          <>
-            <Controller
-              name="deathSolar"
-              control={control}
-              render={({ field }) => (
-                <DualDatePicker
-                  label="Ngày mất (dương / âm) — tạo ngày giỗ"
-                  optional
-                  value={isoToDual(field.value)}
-                  onChange={(v) => {
-                    if (!v) {
-                      field.onChange("");
-                      return;
-                    }
-                    const iso = `${v.solar.year}-${String(v.solar.month).padStart(2, "0")}-${String(v.solar.day).padStart(2, "0")}`;
-                    field.onChange(iso);
-                  }}
-                />
-              )}
-            />
-            {errors.deathSolar ? (
-              <p style={{ color: "var(--color-status-error-fg)", fontFamily: "var(--font-body)" }}>
-                {errors.deathSolar.message}
-              </p>
-            ) : null}
-          </>
-        ) : null}
+          {lifeStatus === "deceased" ? (
+            <>
+              <Controller
+                name="deathSolar"
+                control={control}
+                render={({ field }) => (
+                  <DualDatePicker
+                    label="Ngày mất — dùng để tạo ngày giỗ"
+                    optional
+                    value={isoToDual(field.value)}
+                    onChange={(v) => {
+                      if (!v) {
+                        field.onChange("");
+                        return;
+                      }
+                      const iso = `${v.solar.year}-${String(v.solar.month).padStart(2, "0")}-${String(v.solar.day).padStart(2, "0")}`;
+                      field.onChange(iso);
+                    }}
+                  />
+                )}
+              />
+              {errors.deathSolar ? (
+                <p className="field-error">{errors.deathSolar.message}</p>
+              ) : null}
+            </>
+          ) : null}
+        </section>
 
-        <FormField label="Ghi chú" error={errors.notes?.message}>
-          <Textarea rows={4} {...register("notes")} />
-        </FormField>
+        <section className="form-section">
+          <h2 className="form-section-title">Ghi chú</h2>
+          <FormField label="Ghi chú nội bộ" error={errors.notes?.message}>
+            <Textarea rows={4} {...register("notes")} />
+          </FormField>
+        </section>
 
-        <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
+        <div className="form-actions">
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Đang lưu…" : "Lưu"}
+            {isSubmitting ? "Đang lưu…" : isNew ? "Thêm thành viên" : "Lưu thay đổi"}
           </Button>
           <Button type="button" variant="secondary" onClick={() => navigate("/persons")}>
             Hủy

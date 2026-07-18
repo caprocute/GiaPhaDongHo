@@ -298,8 +298,8 @@ Chia từng route (1 PR / route nếu lớn):
 - [ ] Chương Phả ký / Tộc ước / Hương hỏa rich-text (FR-12.7) + portal đọc
 - [ ] Xuất PDF/Excel phả đồ theo cấu hình chương (FR-12.9 / F10 nâng độ tin cậy)
 - [ ] Import hàng loạt Excel tối thiểu (FR-12.9) hoặc GEDCOM subset — 1 trong 2 trước go-live
-- [x] Admin donation / events / media / scholarship / moderation: **parity mockup** tương ứng (`admin-*.html`) + bỏ empty demo — *donation + events + notifications/ngày giỗ (KPI/card/outbox/cấu hình) xong; media/scholarship/moderation còn*
-- [x] Dashboard: số liệu thật (thành viên, **giỗ tháng âm hiện tại**, CR pending, quỹ) — không số giả
+- [x] Admin donation / events / media / scholarship / moderation: **parity mockup** tương ứng (`admin-*.html`) + bỏ empty demo — *donation + events + notifications + dashboard + persons + posts + comments + system xong; media/scholarship/moderation còn*
+- [x] Dashboard: số liệu thật (thành viên, **giỗ tháng âm hiện tại**, CR pending, quỹ) + greeting/⌘K/quick actions/audit — không số giả
 - [ ] Menu CRM theo permission thực; ẩn mục không được phép
 - [x] **Tài khoản đăng nhập (FR-12.16):** admin `/users` — duyệt/khóa/kích hoạt, gán nhóm quyền, mật khẩu tạm, lịch sử đăng nhập (facade Admin API)
 

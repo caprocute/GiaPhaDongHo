@@ -27,8 +27,15 @@ export type {
   DualDateRangeValue,
 } from "./DualDatePicker/DualDatePicker";
 
-export { DataTable } from "./DataTable/DataTable";
-export type { DataTableColumn, DataTableProps } from "./DataTable/DataTable";
+export { ProTable } from "./ProTable/ProTable";
+export type {
+  ProTableColumn,
+  ProTableProps,
+  ProTablePagination,
+  ProTableToolbar,
+  ProTableBulkAction,
+  ProTableEmptyState,
+} from "./ProTable/ProTable";
 
 export { Pagination } from "./Pagination/Pagination";
 export type { PaginationProps } from "./Pagination/Pagination";

@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -161,30 +161,17 @@ export function PostFormPage() {
 
   const categoryOptions = [
     { value: "", label: "— Không chọn —" },
-    ...categories.map((c) => ({ value: c.slug, label: `${c.name} (${c.slug})` })),
+    ...categories.map((c) => ({ value: c.slug, label: c.name })),
   ];
 
-  const grid: CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "var(--spacing-md)",
-    maxWidth: 880,
-  };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          gap: "var(--spacing-md)",
-        }}
-      >
-        <h1 style={{ fontFamily: "var(--font-display)", margin: 0 }}>
-          {isNew ? "Viết bài mới" : `Sửa — ${existing!.title}`}
-        </h1>
-        <Link to="/posts" style={{ fontFamily: "var(--font-body)" }}>
+    <div className="admin-stack">
+      <div className="form-page-hd">
+        <div>
+          <h1>{isNew ? "Viết bài mới" : `Sửa — ${existing!.title}`}</h1>
+          <p>Soạn nội dung bằng trình soạn thảo, chọn chuyên mục và trạng thái xuất bản.</p>
+        </div>
+        <Link to="/posts" className="admin-link-btn">
           ← Danh sách
         </Link>
       </div>
@@ -195,56 +182,57 @@ export function PostFormPage() {
         </Alert>
       ) : null}
 
-      <form
-        onSubmit={onSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-sm)" }}
-      >
-        <div style={grid}>
+      <form className="post-form-layout" onSubmit={onSubmit}>
+        <div className="post-form-main">
           <FormField label="Tiêu đề" required error={errors.title?.message}>
-            <Input {...register("title")} />
+            <Input className="post-title-input" placeholder="Tiêu đề bài viết…" {...register("title")} />
           </FormField>
-          <FormField label="Slug" hint="Để trống sẽ tạo từ tiêu đề" error={errors.slug?.message}>
+          <FormField label="Đường dẫn" hint="Để trống sẽ tạo từ tiêu đề" error={errors.slug?.message}>
             <Input placeholder="gioi-thieu-dong-ho" {...register("slug")} />
           </FormField>
-          <FormField label="Trạng thái" required error={errors.status?.message}>
-            <Select
-              options={[
-                { value: "draft", label: "Nháp" },
-                { value: "published", label: "Đã xuất bản" },
-                { value: "archived", label: "Lưu trữ" },
-              ]}
-              {...register("status")}
+          <FormField label="Tóm tắt" error={errors.summary?.message}>
+            <Textarea rows={2} {...register("summary")} />
+          </FormField>
+          <FormField label="Nội dung" required error={errors.bodyHtml?.message}>
+            <Controller
+              name="bodyHtml"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor value={field.value} onChange={field.onChange} />
+              )}
             />
           </FormField>
-          <FormField label="Chuyên mục" error={errors.categorySlug?.message}>
-            <Select options={categoryOptions} {...register("categorySlug")} />
-          </FormField>
-          <FormField label="Tác giả" error={errors.authorName?.message}>
-            <Input {...register("authorName")} />
-          </FormField>
         </div>
-        <FormField label="Tóm tắt" error={errors.summary?.message}>
-          <Textarea rows={2} {...register("summary")} />
-        </FormField>
-        <FormField label="Nội dung" required error={errors.bodyHtml?.message}>
-          <Controller
-            name="bodyHtml"
-            control={control}
-            render={({ field }) => (
-              <RichTextEditor value={field.value} onChange={field.onChange} />
-            )}
-          />
-        </FormField>
-        <div style={{ display: "flex", gap: "var(--spacing-sm)" }}>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Đang lưu…" : "Lưu"}
-          </Button>
-          <Link to="/posts">
-            <Button type="button" variant="secondary">
-              Hủy
-            </Button>
-          </Link>
-        </div>
+
+        <aside className="post-form-side">
+          <div className="post-side-card">
+            <h2 className="form-section-title">Xuất bản</h2>
+            <FormField label="Trạng thái" required error={errors.status?.message}>
+              <Select
+                options={[
+                  { value: "draft", label: "Nháp" },
+                  { value: "published", label: "Đã xuất bản" },
+                  { value: "archived", label: "Lưu trữ" },
+                ]}
+                {...register("status")}
+              />
+            </FormField>
+            <FormField label="Chuyên mục" error={errors.categorySlug?.message}>
+              <Select options={categoryOptions} {...register("categorySlug")} />
+            </FormField>
+            <FormField label="Tác giả" error={errors.authorName?.message}>
+              <Input {...register("authorName")} />
+            </FormField>
+            <div className="form-actions">
+              <Button type="submit" disabled={isSubmitting} style={{ width: "100%" }}>
+                {isSubmitting ? "Đang lưu…" : isNew ? "Đăng bài" : "Lưu thay đổi"}
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => navigate("/posts")}>
+                Hủy
+              </Button>
+            </div>
+          </div>
+        </aside>
       </form>
     </div>
   );
