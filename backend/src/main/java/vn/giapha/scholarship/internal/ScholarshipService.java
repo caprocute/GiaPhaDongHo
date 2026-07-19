@@ -127,7 +127,13 @@ public class ScholarshipService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
 
-        ScholarshipAwardRound openRound = findLatestOpenRound(slug);
+        List<ScholarshipAwardRound> openRounds = roundRepository.findByTreeSlugAndStatus(
+            slug,
+            ScholarshipStatuses.ROUND_OPEN
+        );
+        List<Map<String, Object>> openRoundViews = openRounds.stream().map(this::toOpenRoundView).toList();
+        ScholarshipAwardRound openRound = openRounds.isEmpty() ? null : openRounds.get(0);
+
         Map<String, Object> out = new HashMap<>();
         out.put("pendingCount", pending);
         out.put("approvedCount", approved);
@@ -136,6 +142,8 @@ public class ScholarshipService {
         out.put("totalCount", all.size());
         out.put("advancedDegreeCount", advanced);
         out.put("awardedTotal", awardedTotal);
+        out.put("openRounds", openRoundViews);
+        out.put("openRoundCount", openRoundViews.size());
 
         if (openRound == null) {
             out.put("awardRoundId", null);
@@ -153,6 +161,43 @@ public class ScholarshipService {
             return out;
         }
 
+        putFundFields(out, openRound);
+        out.put("awardRoundId", openRound.getId());
+        out.put("awardRoundLabel", openRound.getTitle());
+        out.put("awardRoundStatus", openRound.getStatus());
+        out.put("awardRoundDefaultAmount", openRound.getDefaultAmount());
+        out.put("awardRoundOpenFrom", openRound.getOpenFrom());
+        out.put("awardRoundOpenTo", openRound.getOpenTo());
+        return out;
+    }
+
+    private Map<String, Object> toOpenRoundView(ScholarshipAwardRound r) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", r.getId());
+        m.put("title", r.getTitle());
+        m.put("defaultAmount", r.getDefaultAmount());
+        m.put("openFrom", r.getOpenFrom());
+        m.put("openTo", r.getOpenTo());
+        DonationCampaign fund = r.getFundCampaign();
+        m.put("fundCampaignId", fund != null ? fund.getId() : null);
+        m.put("fundTitle", fund != null ? fund.getTitle() : null);
+        BigDecimal fundRaised = fund != null && fund.getRaisedAmount() != null ? fund.getRaisedAmount() : BigDecimal.ZERO;
+        BigDecimal spentOnFund = BigDecimal.ZERO;
+        if (fund != null && fund.getId() != null) {
+            BigDecimal spent = awardRepository.sumAmountByFundCampaignId(fund.getId());
+            spentOnFund = spent != null ? spent : BigDecimal.ZERO;
+        }
+        BigDecimal fundRemaining = fundRaised.subtract(spentOnFund);
+        if (fundRemaining.signum() < 0) {
+            fundRemaining = BigDecimal.ZERO;
+        }
+        m.put("fundRaisedAmount", fundRaised);
+        m.put("fundRemaining", fundRemaining);
+        m.put("fundStatus", fund != null ? fund.getStatus() : null);
+        return m;
+    }
+
+    private void putFundFields(Map<String, Object> out, ScholarshipAwardRound openRound) {
         DonationCampaign fund = openRound.getFundCampaign();
         BigDecimal fundRaised = fund != null && fund.getRaisedAmount() != null ? fund.getRaisedAmount() : BigDecimal.ZERO;
         BigDecimal spentOnFund = BigDecimal.ZERO;
@@ -164,20 +209,12 @@ public class ScholarshipService {
         if (fundRemaining.signum() < 0) {
             fundRemaining = BigDecimal.ZERO;
         }
-
-        out.put("awardRoundId", openRound.getId());
-        out.put("awardRoundLabel", openRound.getTitle());
-        out.put("awardRoundStatus", openRound.getStatus());
-        out.put("awardRoundDefaultAmount", openRound.getDefaultAmount());
-        out.put("awardRoundOpenFrom", openRound.getOpenFrom());
-        out.put("awardRoundOpenTo", openRound.getOpenTo());
         out.put("fundCampaignId", fund != null ? fund.getId() : null);
         out.put("fundTitle", fund != null ? fund.getTitle() : null);
         out.put("fundRaisedAmount", fundRaised);
         out.put("fundGoalAmount", fund != null ? fund.getGoalAmount() : null);
         out.put("fundRemaining", fundRemaining);
         out.put("fundStatus", fund != null ? fund.getStatus() : null);
-        return out;
     }
 
     @Transactional(readOnly = true)
@@ -442,11 +479,6 @@ public class ScholarshipService {
             throw new IllegalArgumentException("Chỉ chọn chiến dịch có mục đích «Quỹ khuyến học»");
         }
         return c;
-    }
-
-    private ScholarshipAwardRound findLatestOpenRound(String slug) {
-        List<ScholarshipAwardRound> open = roundRepository.findByTreeSlugAndStatus(slug, ScholarshipStatuses.ROUND_OPEN);
-        return open.isEmpty() ? null : open.get(0);
     }
 
     private ScholarshipAwardRoundDTO toRoundDto(ScholarshipAwardRound r) {

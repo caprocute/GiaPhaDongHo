@@ -620,6 +620,19 @@ export type ScholarshipEntryDto = {
   person?: { id?: number; code?: string; fullName?: string } | null;
 };
 
+export type ScholarshipOpenRound = {
+  id: number;
+  title: string;
+  defaultAmount?: number | string | null;
+  openFrom?: string | null;
+  openTo?: string | null;
+  fundCampaignId?: number | null;
+  fundTitle?: string | null;
+  fundRaisedAmount?: number | string | null;
+  fundRemaining?: number | string | null;
+  fundStatus?: string | null;
+};
+
 export type ScholarshipStats = {
   pendingCount: number;
   approvedCount: number;
@@ -634,13 +647,15 @@ export type ScholarshipStats = {
   fundGoalAmount?: number | string | null;
   fundRemaining?: number | string | null;
   fundStatus?: string | null;
-  /** Tên đợt đang mở do admin tạo — không ghép từ lịch máy */
+  /** Đợt mặc định (mới nhất) — UI nên cho chọn khi có nhiều đợt open */
   awardRoundLabel?: string | null;
   awardRoundId?: number | null;
   awardRoundStatus?: string | null;
   awardRoundDefaultAmount?: number | string | null;
   awardRoundOpenFrom?: string | null;
   awardRoundOpenTo?: string | null;
+  openRoundCount?: number;
+  openRounds?: ScholarshipOpenRound[];
 };
 
 export type ScholarshipReviewBody = {

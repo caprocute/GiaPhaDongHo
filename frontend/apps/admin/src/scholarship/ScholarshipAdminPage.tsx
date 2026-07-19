@@ -40,6 +40,7 @@ import {
   type DonationCampaignDto,
   type ScholarshipAwardRoundDto,
   type ScholarshipEntryDto,
+  type ScholarshipOpenRound,
   type ScholarshipStats,
 } from "../api/genealogyApi";
 import { ApiError } from "../api/http";
@@ -224,12 +225,57 @@ export function ScholarshipAdminPage() {
     return [now, now - 1, now - 2, now - 3];
   }, []);
 
-  const hasOpenRound = stats?.awardRoundId != null;
+  /** Đợt đang chọn để trao suất (khi có nhiều đợt open). */
+  const [activeRoundId, setActiveRoundId] = useState<number | null>(null);
+
+  const openRounds: ScholarshipOpenRound[] = useMemo(() => {
+    if (stats?.openRounds && stats.openRounds.length > 0) return stats.openRounds;
+    if (stats?.awardRoundId != null) {
+      return [
+        {
+          id: stats.awardRoundId,
+          title: stats.awardRoundLabel ?? "Đợt đang mở",
+          defaultAmount: stats.awardRoundDefaultAmount,
+          openFrom: stats.awardRoundOpenFrom,
+          openTo: stats.awardRoundOpenTo,
+          fundCampaignId: stats.fundCampaignId,
+          fundTitle: stats.fundTitle,
+          fundRemaining: stats.fundRemaining,
+          fundRaisedAmount: stats.fundRaisedAmount,
+          fundStatus: stats.fundStatus,
+        },
+      ];
+    }
+    return [];
+  }, [stats]);
+
+  const activeRound = useMemo(() => {
+    if (openRounds.length === 0) return null;
+    return openRounds.find((r) => r.id === activeRoundId) ?? openRounds[0]!;
+  }, [openRounds, activeRoundId]);
+
+  const hasOpenRound = openRounds.length > 0;
 
   const [fundBalance, setFundBalance] = useState<CampaignBalanceDto | null>(null);
 
   useEffect(() => {
-    const cid = stats?.fundCampaignId;
+    if (openRounds.length === 0) {
+      setActiveRoundId(null);
+      return;
+    }
+    setActiveRoundId((prev) =>
+      prev != null && openRounds.some((r) => r.id === prev) ? prev : openRounds[0]!.id,
+    );
+  }, [openRounds]);
+
+  useEffect(() => {
+    if (!activeRound) return;
+    const def = toNumber(activeRound.defaultAmount);
+    if (def > 0) setAwardAmount(String(Math.round(def)));
+  }, [activeRound?.id, activeRound?.defaultAmount]);
+
+  useEffect(() => {
+    const cid = activeRound?.fundCampaignId;
     if (cid == null || !hasOpenRound) {
       setFundBalance(null);
       return;
@@ -242,7 +288,7 @@ export function ScholarshipAdminPage() {
         setFundBalance(null);
       }
     })();
-  }, [getAccessToken, hasOpenRound, slug, stats?.fundCampaignId]);
+  }, [getAccessToken, hasOpenRound, slug, activeRound?.fundCampaignId]);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -271,10 +317,6 @@ export function ScholarshipAdminPage() {
       setTotalElements(list.totalElements);
       setTotalPages(list.totalPages);
       setStats(st);
-      if (st.awardRoundDefaultAmount != null) {
-        const def = toNumber(st.awardRoundDefaultAmount);
-        if (def > 0) setAwardAmount(String(Math.round(def)));
-      }
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Không tải được đề cử khuyến học.");
       setRows([]);
@@ -551,7 +593,7 @@ export function ScholarshipAdminPage() {
   }
 
   function openAwardDialog() {
-    if (!hasOpenRound || stats?.awardRoundId == null) {
+    if (!hasOpenRound || activeRound == null) {
       setError("Chưa có đợt trao đang mở — mở «Quản lý đợt» để tạo đợt và chọn quỹ khuyến học.");
       return;
     }
@@ -584,8 +626,8 @@ export function ScholarshipAdminPage() {
   }
 
   async function confirmAward() {
-    if (stats?.awardRoundId == null) {
-      setError("Chưa có đợt trao đang mở.");
+    if (activeRound == null) {
+      setError("Chọn đợt trao đang mở trước khi ghi suất.");
       return;
     }
     const ids = awardCandidateIds();
@@ -601,15 +643,13 @@ export function ScholarshipAdminPage() {
       const token = await getAccessToken();
       const result = await grantScholarshipAwards(
         slug,
-        stats.awardRoundId,
+        activeRound.id,
         {
           entryIds: ids,
           amount,
           note: awardNote.trim() || undefined,
           createHonorEvent: createEvent,
-          honorEventTitle: stats.awardRoundLabel
-            ? `Lễ vinh danh — ${stats.awardRoundLabel}`
-            : undefined,
+          honorEventTitle: `Lễ vinh danh — ${activeRound.title}`,
         },
         token,
       );
@@ -619,7 +659,7 @@ export function ScholarshipAdminPage() {
         ? ` Đã tạo sự kiện «${result.honorEventTitle ?? "Lễ vinh danh"}» (mục Sự kiện).`
         : "";
       setMsg(
-        `Đã ghi nhận ${result.awardedCount} suất × ${formatVnd(amount)} trong đợt «${result.roundTitle ?? stats.awardRoundLabel}».${eventHint}`,
+        `Đã ghi nhận ${result.awardedCount} suất × ${formatVnd(amount)} trong đợt «${result.roundTitle ?? activeRound.title}».${eventHint}`,
       );
       await reload();
     } catch (e) {
@@ -708,9 +748,11 @@ export function ScholarshipAdminPage() {
   const rejectedCount = stats?.rejectedCount ?? 0;
   const awaitingAward = stats?.awaitingAwardCount ?? 0;
   const awardedTotal = toNumber(stats?.awardedTotal);
-  const fundRemaining = toNumber(stats?.fundRemaining);
+  const fundRemaining = toNumber(activeRound?.fundRemaining ?? stats?.fundRemaining);
   const advanced = stats?.advancedDegreeCount ?? 0;
   const awardIdsPreview = awardCandidateIds();
+  const activeFundTitle = activeRound?.fundTitle ?? stats?.fundTitle;
+  const activeFundCampaignId = activeRound?.fundCampaignId ?? stats?.fundCampaignId;
 
   return (
     <div className="admin-stack">
@@ -799,13 +841,35 @@ export function ScholarshipAdminPage() {
           <Award size={28} />
         </div>
         <div className="award-banner-text">
-          {hasOpenRound ? (
+          {hasOpenRound && activeRound ? (
             <>
-              <h3>{stats?.awardRoundLabel}</h3>
+              {openRounds.length > 1 ? (
+                <div className="sch-round-pick">
+                  <label htmlFor="active-award-round">
+                    Đợt đang thao tác ({openRounds.length} đợt đang mở)
+                  </label>
+                  <select
+                    id="active-award-round"
+                    className="fi"
+                    value={activeRound.id}
+                    onChange={(e) => setActiveRoundId(Number(e.target.value))}
+                  >
+                    {openRounds.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.title}
+                        {r.fundTitle ? ` — quỹ «${r.fundTitle}»` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <h3>{activeRound.title}</h3>
+              )}
+              {openRounds.length > 1 ? <h3>{activeRound.title}</h3> : null}
               <p>
-                {stats?.fundTitle ? (
+                {activeFundTitle ? (
                   <>
-                    Nguồn tiền: quỹ «{stats.fundTitle}» còn{" "}
+                    Nguồn tiền: quỹ «{activeFundTitle}» còn{" "}
                     <strong>{formatVndCompact(fundRemaining)}</strong>
                     {fundBalance != null ? (
                       <>
@@ -817,11 +881,11 @@ export function ScholarshipAdminPage() {
                       </>
                     ) : null}
                     {awaitingAward > 0 ? ` · ${awaitingAward} hồ sơ bảng vàng chưa ghi suất` : null}
-                    {stats?.awardRoundOpenFrom || stats?.awardRoundOpenTo ? (
+                    {activeRound.openFrom || activeRound.openTo ? (
                       <>
                         {" "}
                         · Thời gian đợt:{" "}
-                        {[formatDay(stats.awardRoundOpenFrom), formatDay(stats.awardRoundOpenTo)]
+                        {[formatDay(activeRound.openFrom), formatDay(activeRound.openTo)]
                           .filter(Boolean)
                           .join(" – ")}
                       </>
@@ -844,9 +908,9 @@ export function ScholarshipAdminPage() {
         </div>
         <div className="award-banner-acts">
           <Button type="button" variant="secondary" onClick={() => void openRoundsDialog()}>
-            {hasOpenRound ? "Sửa đợt" : "Tạo đợt"}
+            {hasOpenRound ? "Quản lý đợt" : "Tạo đợt"}
           </Button>
-          {stats?.fundCampaignId != null ? (
+          {activeFundCampaignId != null ? (
             <Link to="/donation">
               <Button type="button" variant="secondary">
                 Xem quỹ
@@ -1263,11 +1327,9 @@ export function ScholarshipAdminPage() {
       <Dialog
         open={awardOpen}
         title={
-          stats?.awardRoundLabel
-            ? `Trao suất — ${stats.awardRoundLabel}`
-            : "Trao suất học bổng"
+          activeRound ? `Trao suất — ${activeRound.title}` : "Trao suất học bổng"
         }
-        description="Ghi số tiền từ quỹ của đợt đang mở lên hồ sơ đã vào bảng vàng — không thay thế bước duyệt công bố."
+        description="Ghi số tiền từ quỹ của đợt đang chọn lên hồ sơ đã vào bảng vàng — không thay thế bước duyệt công bố."
         onClose={() => !bulkBusy && setAwardOpen(false)}
         size="md"
         footer={
@@ -1282,8 +1344,25 @@ export function ScholarshipAdminPage() {
         }
       >
         <div className="admin-form">
+          {openRounds.length > 1 ? (
+            <FormField label="Đợt trao" required htmlFor="award-round-pick">
+              <select
+                id="award-round-pick"
+                className="fi"
+                value={activeRound?.id ?? ""}
+                onChange={(e) => setActiveRoundId(Number(e.target.value))}
+              >
+                {openRounds.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.title}
+                    {r.fundTitle ? ` — «${r.fundTitle}»` : ""}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          ) : null}
           <p className="sch-award-explain">
-            <strong>Nguồn:</strong> quỹ «{stats?.fundTitle ?? "—"}» gắn với đợt đang mở.
+            <strong>Nguồn:</strong> quỹ «{activeFundTitle ?? "—"}» gắn với đợt đang chọn.
             <br />
             <strong>Đích:</strong> suất học bổng trên hồ sơ bảng vàng + (tuỳ chọn) sự kiện lễ vinh danh.
           </p>

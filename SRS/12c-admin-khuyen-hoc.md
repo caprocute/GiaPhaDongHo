@@ -83,6 +83,7 @@ Mỗi «Đợt …» trên UI **bắt buộc** là bản ghi này — **cấm** 
 **Quy tắc**
 
 - Chỉ đợt `open` mới được dùng để trao suất.
+- Có thể có **nhiều** đợt `open` cùng lúc — UI bắt buộc chọn «Đợt đang thao tác» (banner + dialog trao); không ngầm lấy đợt mới nhất khi đang trao.
 - Một đợt chỉ gắn **một** quỹ khuyến học; đổi quỹ = sửa đợt (audit).
 - Đóng đợt không xóa lịch sử suất đã trao.
 

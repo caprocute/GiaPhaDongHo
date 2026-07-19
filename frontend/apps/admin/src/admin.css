@@ -3254,6 +3254,23 @@ code {
   margin-left: auto;
 }
 
+.sch-round-pick {
+  display: grid;
+  gap: 6px;
+  margin-bottom: var(--spacing-sm);
+  max-width: 420px;
+}
+
+.sch-round-pick label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.sch-round-pick .fi {
+  width: 100%;
+}
+
 .sch-round-ul {
   list-style: none;
   margin: 0;
