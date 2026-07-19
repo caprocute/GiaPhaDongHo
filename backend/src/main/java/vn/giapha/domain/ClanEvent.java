@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
  * A ClanEvent.
@@ -30,14 +32,15 @@ public class ClanEvent implements Serializable {
     @Column(name = "start_solar")
     private Instant startSolar;
 
-    @Lob
+    /** Postgres text — không dùng @Lob (OID) kẻo JDBC đọc nhầm kiểu long. */
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "lunar_json")
     private String lunarJson;
 
     @Column(name = "location")
     private String location;
 
-    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(name = "checklist_json")
     private String checklistJson;
 
