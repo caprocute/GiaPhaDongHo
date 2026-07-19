@@ -31,25 +31,29 @@ function ensureCss() {
 .pt-toolbar{display:flex;align-items:center;gap:var(--spacing-sm);
   padding:var(--spacing-sm) var(--spacing-md);
   border-bottom:1px solid var(--color-border-subtle);
-  flex-wrap:wrap;min-height:50px}
+  flex-wrap:wrap;min-height:48px}
 .pt-toolbar-title{font-family:var(--font-display);font-size:15px;
   color:var(--color-text-primary);font-weight:600;flex-shrink:0;margin-right:auto}
 .pt-search{display:flex;align-items:center;gap:6px;
-  background:var(--color-surface-sunken,var(--color-surface-page));
+  background:var(--color-surface-sunken);
   border:1px solid var(--color-border-default);
-  border-radius:var(--radius-sm);padding:5px 10px;min-width:200px}
+  border-radius:var(--radius-sm);padding:5px 10px;
+  min-width:180px;flex:0 1 240px}
 .pt-search svg{color:var(--color-text-muted);flex-shrink:0}
 .pt-search input{border:none;background:transparent;outline:none;
   font-family:var(--font-body);font-size:13px;
   color:var(--color-text-primary);flex:1;min-width:0}
 .pt-search input::placeholder{color:var(--color-text-muted)}
+.pt-search-clear{background:none;border:none;cursor:pointer;
+  color:var(--color-text-muted);line-height:1;padding:0;font-size:14px;
+  display:inline-flex;align-items:center;flex-shrink:0}
+.pt-search-clear:hover{color:var(--color-text-primary)}
 .pt-icon-btn{display:inline-flex;align-items:center;justify-content:center;
   width:32px;height:32px;border-radius:var(--radius-sm);
   border:1px solid var(--color-border-default);
   background:var(--color-surface-card);
   color:var(--color-text-muted);cursor:pointer;flex-shrink:0;transition:all .12s}
-.pt-icon-btn:hover{background:var(--color-surface-sunken,var(--color-surface-page));
-  color:var(--color-text-primary)}
+.pt-icon-btn:hover{background:var(--color-surface-sunken);color:var(--color-text-primary)}
 .pt-icon-btn.on{background:var(--color-action-primary-bg);
   color:var(--color-action-primary-fg);border-color:var(--color-action-primary-bg)}
 
@@ -58,15 +62,24 @@ function ensureCss() {
   padding:7px var(--spacing-md);
   background:var(--color-action-primary-bg);
   color:var(--color-action-primary-fg);font-size:13px;font-weight:600;
-  border-bottom:1px solid var(--color-border-default)}
-.pt-bulk-bar button{border:1px solid rgba(255,255,255,.4);
+  border-bottom:1px solid var(--color-border-default);flex-wrap:wrap}
+.pt-bulk-bar button{
+  border:1px solid color-mix(in srgb,var(--color-action-primary-fg) 40%,transparent);
   background:transparent;color:inherit;padding:3px 10px;
   border-radius:var(--radius-sm);font-size:12px;font-weight:600;
   cursor:pointer;font-family:var(--font-body)}
-.pt-bulk-bar button:hover{background:rgba(255,255,255,.15)}
+.pt-bulk-bar button:hover{
+  background:color-mix(in srgb,var(--color-action-primary-fg) 15%,transparent)}
+.pt-bulk-bar button.pt-bulk-danger{
+  border-color:color-mix(in srgb,var(--color-status-danger) 60%,transparent);
+  background:color-mix(in srgb,var(--color-status-danger) 15%,transparent);
+  color:var(--color-status-danger)}
+.pt-bulk-bar button.pt-bulk-danger:hover{
+  background:color-mix(in srgb,var(--color-status-danger) 25%,transparent)}
+.pt-bulk-deselect{margin-left:auto;opacity:.75}
 
 /* table */
-.pt-table-wrap{overflow-x:auto;flex:1}
+.pt-table-wrap{overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch}
 .pt-table{width:100%;border-collapse:collapse;font-family:var(--font-body)}
 
 /* column toggle panel */
@@ -75,11 +88,13 @@ function ensureCss() {
   background:var(--color-surface-card);
   border:1px solid var(--color-border-default);
   border-radius:var(--radius-md);padding:8px;
-  box-shadow:0 4px 14px rgba(0,0,0,.12);min-width:180px}
+  box-shadow:var(--shadow-md);min-width:180px}
+.pt-col-panel-label{font-size:11px;font-weight:700;color:var(--color-text-muted);
+  text-transform:uppercase;letter-spacing:.6px;padding:2px 6px 6px;display:block}
 .pt-col-dropdown label{display:flex;align-items:center;gap:8px;
   padding:5px 6px;font-size:12px;cursor:pointer;
   color:var(--color-text-primary);border-radius:var(--radius-sm)}
-.pt-col-dropdown label:hover{background:var(--color-surface-sunken,var(--color-surface-page))}
+.pt-col-dropdown label:hover{background:var(--color-surface-sunken)}
 .pt-col-dropdown input[type=checkbox]{accent-color:var(--color-action-primary-bg);cursor:pointer}
 
 /* th */
@@ -109,7 +124,8 @@ function ensureCss() {
 .pt-tr:last-child .pt-td{border-bottom:none}
 .pt-tr:hover .pt-td{background:var(--color-surface-sunken)}
 .pt-tr.clickable{cursor:pointer}
-.pt-tr.selected .pt-td{background:color-mix(in srgb,var(--color-action-primary-bg) 8%,transparent)}
+.pt-tr.selected .pt-td{
+  background:color-mix(in srgb,var(--color-action-primary-bg) 8%,transparent)}
 
 /* checkbox cell */
 .pt-cb-th,.pt-cb-td{width:40px;padding:var(--spacing-xs) 0 var(--spacing-xs) var(--spacing-md)!important}
@@ -118,24 +134,48 @@ function ensureCss() {
 /* density */
 .pt-root.compact .pt-th{padding:4px var(--spacing-sm)}
 .pt-root.compact .pt-td{padding:4px var(--spacing-sm);font-size:13px}
-.pt-root.spacious .pt-th{padding:var(--spacing-md) var(--spacing-md)}
-.pt-root.spacious .pt-td{padding:var(--spacing-md) var(--spacing-md)}
+.pt-root.spacious .pt-th{padding:var(--spacing-md)}
+.pt-root.spacious .pt-td{padding:var(--spacing-md)}
 
 /* skeleton */
-.pt-skel{height:14px;border-radius:4px;
-  background:linear-gradient(90deg,var(--color-surface-sunken) 25%,
+.pt-skel{height:14px;border-radius:var(--radius-sm);
+  background:linear-gradient(90deg,
+    var(--color-surface-sunken) 25%,
     var(--color-surface-page) 50%,
     var(--color-surface-sunken) 75%);
   background-size:200% 100%;animation:pt-shimmer 1.4s infinite}
 @keyframes pt-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
 /* empty */
-.pt-empty{padding:var(--spacing-md);text-align:center;
-  color:var(--color-text-muted);font-size:13px;
+.pt-empty{padding:var(--spacing-lg) var(--spacing-md);text-align:center;
   display:flex;flex-direction:column;align-items:center;gap:var(--spacing-sm)}
+.pt-empty-icon{opacity:.3;color:var(--color-text-muted)}
+.pt-empty-title{font-size:14px;font-weight:600;color:var(--color-text-primary);
+  font-family:var(--font-body)}
+.pt-empty-desc{font-size:13px;color:var(--color-text-muted);font-family:var(--font-body)}
 
-/* pagination */
-.pt-footer{padding:0 var(--spacing-md)}
+/* pagination footer */
+.pt-footer{padding:var(--spacing-xs) var(--spacing-md);
+  border-top:1px solid var(--color-border-subtle)}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width:768px){
+  .pt-toolbar{padding:var(--spacing-xs) var(--spacing-sm);gap:var(--spacing-xs)}
+  .pt-search{min-width:0;flex:1 1 140px}
+  .pt-th{padding:var(--spacing-xs) var(--spacing-sm);font-size:11px}
+  .pt-td{padding:var(--spacing-xs) var(--spacing-sm);font-size:13px}
+  .pt-cb-th,.pt-cb-td{padding-left:var(--spacing-sm)!important}
+  .pt-footer{padding:var(--spacing-xs) var(--spacing-sm)}
+}
+@media (max-width:480px){
+  .pt-toolbar{flex-direction:column;align-items:stretch}
+  .pt-toolbar-title{margin-right:0}
+  .pt-search{flex:1 1 auto;width:100%}
+  .pt-toolbar-actions{display:flex;gap:var(--spacing-xs);flex-wrap:wrap}
+  .pt-th{font-size:10px;padding:3px var(--spacing-xs)}
+  .pt-td{font-size:12px;padding:3px var(--spacing-xs)}
+  .pt-empty{padding:var(--spacing-md) var(--spacing-sm)}
+}
 `;
   document.head.appendChild(el);
 }
@@ -392,8 +432,8 @@ export function ProTable<T extends Record<string, unknown>>({
               {toolbar.search.value ? (
                 <button
                   type="button"
+                  className="pt-search-clear"
                   aria-label="Xóa tìm kiếm"
-                  style={{ background: "none", border: "none", cursor: "pointer", color: "var(--color-text-muted)", lineHeight: 1, padding: 0, fontSize: 14 }}
                   onClick={() => toolbar.search!.onChange("")}
                 >
                   ✕
@@ -402,7 +442,9 @@ export function ProTable<T extends Record<string, unknown>>({
             </div>
           ) : null}
 
-          {toolbar?.actions ?? null}
+          {toolbar?.actions ? (
+            <div className="pt-toolbar-actions">{toolbar.actions}</div>
+          ) : null}
 
           {onRefresh ? (
             <button
@@ -454,7 +496,7 @@ export function ProTable<T extends Record<string, unknown>>({
               </button>
               {colPanelOpen ? (
                 <div className="pt-col-dropdown" role="dialog" aria-label="Chọn cột hiển thị">
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: ".6px", padding: "2px 6px 6px" }}>Cột hiển thị</div>
+                  <span className="pt-col-panel-label">Cột hiển thị</span>
                   {columns
                     .filter((c) => c.hideable !== false)
                     .map((c) => (
@@ -489,7 +531,7 @@ export function ProTable<T extends Record<string, unknown>>({
             <button
               key={a.label}
               type="button"
-              style={a.danger ? { borderColor: "rgba(220,38,38,.6)", background: "rgba(220,38,38,.15)" } : undefined}
+              className={a.danger ? "pt-bulk-danger" : undefined}
               onClick={() => a.onClick([...selectedKeys])}
             >
               {a.label}
@@ -497,7 +539,7 @@ export function ProTable<T extends Record<string, unknown>>({
           ))}
           <button
             type="button"
-            style={{ marginLeft: "auto", opacity: .7 }}
+            className="pt-bulk-deselect"
             onClick={() => updateSelected(new Set())}
           >
             Bỏ chọn
@@ -578,18 +620,18 @@ export function ProTable<T extends Record<string, unknown>>({
               <tr>
                 <td colSpan={visibleCols.length + (selectable ? 1 : 0)}>
                   <div className="pt-empty">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true" style={{ opacity: .3 }}>
+                    <svg className="pt-empty-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
                       <line x1="16" y1="13" x2="8" y2="13" />
                       <line x1="16" y1="17" x2="8" y2="17" />
                       <polyline points="10 9 9 9 8 9" />
                     </svg>
-                    <strong style={{ fontSize: 14, color: "var(--color-text-primary)" }}>
+                    <strong className="pt-empty-title">
                       {emptyState?.title ?? emptyMessage}
                     </strong>
                     {emptyState?.description ? (
-                      <span style={{ fontSize: 13 }}>{emptyState.description}</span>
+                      <span className="pt-empty-desc">{emptyState.description}</span>
                     ) : null}
                     {emptyState?.action ?? null}
                   </div>
