@@ -297,7 +297,7 @@ public class KeycloakAdminClient {
         }
         if (!isConfigured()) {
             throw new IllegalStateException(
-                "Chưa cấu hình kết nối quản trị tài khoản. Đặt KEYCLOAK_ADMIN và KEYCLOAK_ADMIN_PASSWORD."
+                "Chưa cấu hình kết nối quản trị tài khoản. Liên hệ quản trị hệ thống."
             );
         }
         String tokenUrl =

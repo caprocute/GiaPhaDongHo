@@ -61,8 +61,34 @@ async function readError(res: Response): Promise<never> {
   let detail = res.statusText;
   try {
     const text = await res.text();
-    if (text) detail = text.slice(0, 280);
-  } catch {
+    if (!text) {
+      throw new ApiError(res.status, detail || `HTTP ${res.status}`);
+    }
+    try {
+      const json = JSON.parse(text) as {
+        title?: string;
+        detail?: string;
+        message?: string;
+      };
+      const msgKey = typeof json.message === "string" ? json.message : "";
+      if (msgKey === "error.unavailable" || msgKey.endsWith(".unavailable")) {
+        detail = "Không kết nối được máy chủ đăng nhập để quản trị tài khoản.";
+      } else if (typeof json.detail === "string" && json.detail.trim()) {
+        detail = json.detail.trim();
+      } else if (typeof json.title === "string" && json.title.trim() && !msgKey.startsWith("error.")) {
+        detail = json.title.trim();
+      } else if (typeof json.title === "string" && json.title.trim()) {
+        detail = json.title.trim();
+      } else if (msgKey && !msgKey.startsWith("error.")) {
+        detail = msgKey;
+      } else {
+        detail = text.slice(0, 280);
+      }
+    } catch {
+      detail = text.slice(0, 280);
+    }
+  } catch (e) {
+    if (e instanceof ApiError) throw e;
     /* ignore */
   }
   throw new ApiError(res.status, detail || `HTTP ${res.status}`);
