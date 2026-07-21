@@ -1,0 +1,46 @@
+# ============================================================================
+# GiaPhaHub — Postgres độc lập để KHỞI TẠO LẠI DATABASE TỪ ĐẦU (Docker).
+# ============================================================================
+# Đây là compose GỌN cho việc dựng riêng Postgres của app (không kèm Redis/ES/
+# MinIO/Keycloak). Muốn dựng toàn bộ hạ tầng DEV, dùng:
+#   deploy/remote/docker-compose.giapha-infra.yml
+#
+# Cách chạy:  cd database/docker && docker compose up -d
+#
+# Lần đầu container khởi động với data-dir RỖNG, Postgres tự chạy mọi file trong
+# ./initdb/ theo thứ tự tên (00_ → 99_). Ta mount:
+#   - database/postgres/01_schema.sql                    (schema)
+#   - database/seed/10_seed_ho_hoang.sql (tuỳ chọn)      (data thật họ Hoàng)
+# Xem database/docker/initdb/ và README: xoá 10_seed_ho_hoang.sql nếu chỉ muốn schema.
+#
+# ⚠ Đổi POSTGRES_PASSWORD trước khi dùng ngoài máy local.
+# ============================================================================
+name: giapha-db
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: giapha-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-giapha}
+      POSTGRES_USER: ${POSTGRES_USER:-giapha}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme-strong-db}
+      # unaccent nằm trong contrib chuẩn của image, CREATE EXTENSION trong SQL là đủ.
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      # Map 15432 (khớp cổng tunnel DEV mà app dùng ở application-dev.yml).
+      - "127.0.0.1:${POSTGRES_PORT:-15432}:5432"
+    volumes:
+      - giapha_pgdata:/var/lib/postgresql/data
+      # Các file .sql/.sh trong initdb/ CHỈ chạy khi data-dir rỗng (lần đầu).
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-giapha} -d ${POSTGRES_DB:-giapha}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  giapha_pgdata:
+    name: giapha_pgdata
