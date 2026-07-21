@@ -1,0 +1,35 @@
+# Admin — Vite SPA phục vụ qua nginx (cổng 80 trong container). Quản trị dòng họ.
+# ⚠ VITE_* nhúng lúc BUILD image (build-arg) — build với URL/OIDC đúng (xem INSTALL.md).
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin
+  namespace: giapha
+  labels: { app: admin }
+spec:
+  selector: { app: admin }
+  ports:
+    - { name: http, port: 80, targetPort: 80 }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin
+  namespace: giapha
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: admin } }
+  template:
+    metadata:
+      labels: { app: admin }
+    spec:
+      containers:
+        - name: admin
+          image: ghcr.io/caprocute/giaphadongho/admin:main
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet: { path: /, port: 80 }
+            initialDelaySeconds: 10
+            periodSeconds: 10

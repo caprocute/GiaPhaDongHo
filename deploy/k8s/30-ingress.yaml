@@ -1,0 +1,28 @@
+# Ingress — định tuyến domain vào các service. Cần ingress-controller (vd ingress-nginx).
+# Đổi host thành domain thật. Prod: thêm TLS (cert-manter / Secret tls) — xem chú thích.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: giapha
+  namespace: giapha
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "26m"   # khớp multipart 25MB của API
+spec:
+  ingressClassName: nginx
+  # Prod — bật TLS:
+  # tls:
+  #   - hosts: [giapha.example.com, admin.giapha.example.com, api.giapha.example.com]
+  #     secretName: giapha-tls
+  rules:
+    - host: giapha.example.com          # Portal (khách)
+      http:
+        paths:
+          - { path: /, pathType: Prefix, backend: { service: { name: portal, port: { number: 3000 } } } }
+    - host: admin.giapha.example.com    # Admin
+      http:
+        paths:
+          - { path: /, pathType: Prefix, backend: { service: { name: admin, port: { number: 80 } } } }
+    - host: api.giapha.example.com      # API
+      http:
+        paths:
+          - { path: /, pathType: Prefix, backend: { service: { name: api, port: { number: 8080 } } } }

@@ -1,0 +1,60 @@
+# Keycloak 26 — OIDC. DB dùng chung Postgres (schema keycloak tự tạo).
+# start-dev + import realm; realm nạp từ ConfigMap 'giapha-kc-realm' (sinh bằng kubectl, xem INSTALL.md).
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: giapha
+  labels: { app: keycloak }
+spec:
+  selector: { app: keycloak }
+  ports:
+    - { name: http, port: 8081, targetPort: 8081 }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: giapha
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: keycloak } }
+  template:
+    metadata:
+      labels: { app: keycloak }
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.0
+          args: ["start-dev", "--import-realm"]
+          env:
+            - { name: KC_DB, value: postgres }
+            - name: KC_DB_URL
+              value: jdbc:postgresql://postgres:5432/giapha
+            - name: KC_DB_USERNAME
+              valueFrom: { configMapKeyRef: { name: giapha-config, key: DB_USER } }
+            - name: KC_DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: giapha-secret, key: DB_PASSWORD } }
+            - name: KEYCLOAK_ADMIN
+              valueFrom: { secretKeyRef: { name: giapha-secret, key: KEYCLOAK_ADMIN } }
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: giapha-secret, key: KEYCLOAK_ADMIN_PASSWORD } }
+            - { name: KC_HTTP_PORT, value: "8081" }
+            - { name: KC_HEALTH_ENABLED, value: "true" }
+            - { name: KC_HOSTNAME_STRICT, value: "false" }
+          ports:
+            - containerPort: 8081
+          volumeMounts:
+            - name: realm
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /realms/master, port: 8081 }
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: realm
+          configMap:
+            name: giapha-kc-realm
+            optional: true

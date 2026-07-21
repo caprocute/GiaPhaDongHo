@@ -1,0 +1,42 @@
+# imgproxy — resize/optimize ảnh từ MinIO (S3). Tuỳ chọn (app fallback nếu tắt).
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: imgproxy
+  namespace: giapha
+  labels: { app: imgproxy }
+spec:
+  selector: { app: imgproxy }
+  ports:
+    - { name: http, port: 8080, targetPort: 8080 }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imgproxy
+  namespace: giapha
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: imgproxy } }
+  template:
+    metadata:
+      labels: { app: imgproxy }
+    spec:
+      containers:
+        - name: imgproxy
+          image: ghcr.io/imgproxy/imgproxy:v3
+          env:
+            - { name: IMGPROXY_BIND, value: ":8080" }
+            - { name: IMGPROXY_USE_S3, value: "true" }
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: giapha-secret, key: MINIO_ACCESS_KEY } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: giapha-secret, key: MINIO_SECRET_KEY } }
+            - { name: IMGPROXY_S3_ENDPOINT, value: "http://minio:9000" }
+            - { name: IMGPROXY_S3_REGION, value: "us-east-1" }
+            # DEV: signing tắt (key/salt zeros). Prod: đặt IMGPROXY_KEY/SALT qua Secret.
+            - { name: IMGPROXY_KEY, value: "0000000000000000000000000000000000000000000000000000000000000000" }
+            - { name: IMGPROXY_SALT, value: "0000000000000000000000000000000000000000000000000000000000000000" }
+          ports:
+            - containerPort: 8080

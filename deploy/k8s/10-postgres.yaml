@@ -1,0 +1,68 @@
+# PostgreSQL 16 — StatefulSet + headless Service + PVC.
+# Init SQL (schema + seed) nạp từ ConfigMap 'giapha-db-init' (sinh bằng kubectl, xem INSTALL.md).
+# ConfigMap đó mount vào /docker-entrypoint-initdb.d và CHỈ chạy khi PVC rỗng (lần đầu).
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: giapha
+  labels: { app: postgres }
+spec:
+  clusterIP: None          # headless — StatefulSet DNS ổn định
+  selector: { app: postgres }
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: giapha
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector: { matchLabels: { app: postgres } }
+  template:
+    metadata:
+      labels: { app: postgres }
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom: { configMapKeyRef: { name: giapha-config, key: DB_NAME } }
+            - name: POSTGRES_USER
+              valueFrom: { configMapKeyRef: { name: giapha-config, key: DB_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: giapha-secret, key: DB_PASSWORD } }
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+          readinessProbe:
+            exec: { command: ["sh", "-c", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"] }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            exec: { command: ["sh", "-c", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"] }
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        - name: initdb
+          configMap:
+            name: giapha-db-init
+            optional: true      # nếu chưa tạo ConfigMap init, Postgres vẫn khởi động (DB rỗng)
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: 5Gi } }

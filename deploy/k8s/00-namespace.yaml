@@ -1,0 +1,7 @@
+# Namespace gom toàn bộ tài nguyên GiaPhaHub.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: giapha
+  labels:
+    app.kubernetes.io/part-of: giapha
