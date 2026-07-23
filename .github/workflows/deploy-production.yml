@@ -1,0 +1,81 @@
+# CHƯA KÍCH HOẠT — copy sang .github/workflows/ khi sẵn sàng (xem 00-PLAN §7.3).
+# Deploy PRODUCTION lên 14.232.210.125 — có cổng duyệt (environment: production).
+name: Deploy Production
+
+on:
+  workflow_run:
+    workflows: ["Build & Publish"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag image cần deploy (mặc định: sha của main)"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false      # KHÔNG huỷ giữa chừng khi đang deploy prod
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    # ⚠️ Bắt buộc cấu hình "Required reviewers" cho environment `production`
+    #    trên GitHub → Settings → Environments. Nếu không, deploy sẽ tự chạy.
+    environment:
+      name: production
+      url: ${{ vars.PROD_PORTAL_URL }}
+
+    steps:
+      - name: Xác định tag
+        id: tag
+        run: |
+          if [[ -n "${{ inputs.tag }}" ]]; then
+            echo "value=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${{ github.event.workflow_run.head_sha || github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy qua SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          port: ${{ secrets.PROD_SSH_PORT }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          command_timeout: 20m
+          script: |
+            set -euo pipefail
+            cd "$HOME/giapha-prod"
+            bash scripts/30-deploy-prod.sh "${{ steps.tag.outputs.value }}"
+
+      - name: Smoke test công khai (qua domain thật)
+        env:
+          API: ${{ vars.PROD_API_URL }}
+          PORTAL: ${{ vars.PROD_PORTAL_URL }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$API" || -z "$PORTAL" ]]; then
+            echo "::warning::Chưa cấu hình PROD_API_URL / PROD_PORTAL_URL — bỏ qua smoke qua domain."
+            exit 0
+          fi
+          for i in $(seq 1 20); do
+            if curl -fsS -m 10 "$API/management/health" | grep -q '"status":"UP"'; then
+              echo "API UP"; break
+            fi
+            [[ $i -eq 20 ]] && { echo "::error::API không phản hồi qua domain"; exit 1; }
+            sleep 15
+          done
+          curl -fsSI -m 10 "$PORTAL" > /dev/null
+          echo "✅ Smoke qua domain OK"
+
+      - name: Báo kết quả
+        if: always()
+        run: |
+          if [[ "${{ job.status }}" == "success" ]]; then
+            echo "### ✅ Deploy production thành công — tag \`${{ steps.tag.outputs.value }}\`" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ❌ Deploy production THẤT BẠI — script đã tự rollback về tag trước" >> "$GITHUB_STEP_SUMMARY"
+          fi
