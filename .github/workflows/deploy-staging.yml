@@ -1,9 +1,12 @@
 name: Deploy Staging
+# Chưa có môi trường staging (secrets STAGING_* chưa cấu hình) ⇒ workflow này
+# fail mỗi lần "Build & Publish" xong, gây nhiễu. Tạm chỉ chạy khi bấm tay.
+# Muốn bật lại tự động: bỏ comment khối workflow_run và điền secrets STAGING_*.
 on:
-  workflow_run:
-    workflows: ["Build & Publish"]
-    types: [completed]
-    branches: [main]
+  # workflow_run:
+  #   workflows: ["Build & Publish"]
+  #   types: [completed]
+  #   branches: [main]
   workflow_dispatch:
 
 jobs:
