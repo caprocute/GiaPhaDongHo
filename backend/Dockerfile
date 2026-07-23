@@ -10,6 +10,11 @@ COPY gradle ./gradle
 # buildSrc chứa convention plugin (jhipster.docker-conventions,
 # jhipster.code-quality-conventions) mà build.gradle khai báo — thiếu là build fail.
 COPY buildSrc ./buildSrc
+# code-quality-conventions đọc 2 file này NGAY LÚC apply plugin
+# (file("sonar-project.properties").withReader + configFile = file("checkstyle.xml"))
+# — thiếu là FileNotFoundException, build chết trước cả khi biên dịch.
+# README.md: nohttp khai báo source.include("build.gradle","README.md").
+COPY sonar-project.properties checkstyle.xml README.md ./
 COPY src ./src
 COPY jdl ./jdl
 RUN chmod +x gradlew && ./gradlew bootJar -x test --no-daemon \
