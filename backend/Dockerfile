@@ -7,6 +7,9 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /src
 COPY gradlew settings.gradle build.gradle gradle.properties ./
 COPY gradle ./gradle
+# buildSrc chứa convention plugin (jhipster.docker-conventions,
+# jhipster.code-quality-conventions) mà build.gradle khai báo — thiếu là build fail.
+COPY buildSrc ./buildSrc
 COPY src ./src
 COPY jdl ./jdl
 RUN chmod +x gradlew && ./gradlew bootJar -x test --no-daemon \

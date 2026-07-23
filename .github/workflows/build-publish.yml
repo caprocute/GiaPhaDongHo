@@ -61,10 +61,12 @@ jobs:
             ${{ env.NS }}/${{ matrix.app }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # FE nhúng URL LÚC BUILD — đổi domain phải build lại image, không sửa được lúc chạy.
+          # Ưu tiên biến PROD_*; chưa cấu hình thì lùi về biến cũ (staging).
           build-args: |
-            NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL }}
+            NEXT_PUBLIC_API_BASE_URL=${{ vars.PROD_API_URL || vars.NEXT_PUBLIC_API_BASE_URL }}
             NEXT_PUBLIC_DEFAULT_TREE_SLUG=ho-hoang
-            VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
-            VITE_OIDC_AUTHORITY=${{ vars.VITE_OIDC_AUTHORITY }}
+            VITE_API_BASE_URL=${{ vars.PROD_API_URL || vars.VITE_API_BASE_URL }}
+            VITE_OIDC_AUTHORITY=${{ vars.PROD_KC_ISSUER || vars.VITE_OIDC_AUTHORITY }}
             VITE_OIDC_CLIENT_ID=giapha_admin
             VITE_DEFAULT_TREE_SLUG=ho-hoang
