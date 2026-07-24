@@ -73,3 +73,4 @@ jobs:
             VITE_OIDC_CLIENT_ID=giapha_admin
             VITE_DEFAULT_TREE_SLUG=ho-hoang
             VITE_PORTAL_URL=${{ vars.PROD_PORTAL_URL }}
+            VITE_MINIO_PUBLIC_URL=${{ vars.PROD_MEDIA_URL }}

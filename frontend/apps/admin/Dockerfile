@@ -21,11 +21,14 @@ ARG VITE_OIDC_CLIENT_ID=giapha_admin
 ARG VITE_DEFAULT_TREE_SLUG=ho-hoang
 # Link "Cổng thông tin" + preview bài viết trỏ về portal — thiếu là fallback localhost:3000.
 ARG VITE_PORTAL_URL=
+# URL công khai của ảnh (MinIO/imgproxy) — thiếu là ảnh trong admin hỏng (fallback rỗng).
+ARG VITE_MINIO_PUBLIC_URL=
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
     VITE_OIDC_AUTHORITY=$VITE_OIDC_AUTHORITY \
     VITE_OIDC_CLIENT_ID=$VITE_OIDC_CLIENT_ID \
     VITE_DEFAULT_TREE_SLUG=$VITE_DEFAULT_TREE_SLUG \
-    VITE_PORTAL_URL=$VITE_PORTAL_URL
+    VITE_PORTAL_URL=$VITE_PORTAL_URL \
+    VITE_MINIO_PUBLIC_URL=$VITE_MINIO_PUBLIC_URL
 
 RUN pnpm --filter @giapha/admin build
 
