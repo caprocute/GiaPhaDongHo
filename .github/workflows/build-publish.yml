@@ -70,3 +70,4 @@ jobs:
             VITE_OIDC_AUTHORITY=${{ vars.PROD_KC_ISSUER || vars.VITE_OIDC_AUTHORITY }}
             VITE_OIDC_CLIENT_ID=giapha_admin
             VITE_DEFAULT_TREE_SLUG=ho-hoang
+            VITE_PORTAL_URL=${{ vars.PROD_PORTAL_URL }}

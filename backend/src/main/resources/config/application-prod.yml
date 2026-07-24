@@ -77,6 +77,16 @@ server:
 # ===================================================================
 
 jhipster:
+  # CORS: profile prod KHÔNG bật CORS mặc định (chỉ dev bật). FE prod (admin/portal)
+  # gọi API ở origin khác ⇒ phải khai origin ở đây, nếu không trình duyệt chặn và
+  # UI báo "Không kết nối được máy chủ". Origin lấy từ env để đổi domain không cần build lại.
+  cors:
+    allowed-origins: ${JHIPSTER_CORS_ALLOWED_ORIGINS:https://giapha.vtscloud.vn:8100,https://quantri-giapha.vtscloud.vn:8100}
+    allowed-methods: ${JHIPSTER_CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
+    allowed-headers: ${JHIPSTER_CORS_ALLOWED_HEADERS:'*'}
+    exposed-headers: ${JHIPSTER_CORS_EXPOSED_HEADERS:Authorization,Link,X-Total-Count}
+    allow-credentials: ${JHIPSTER_CORS_ALLOW_CREDENTIALS:true}
+    max-age: ${JHIPSTER_CORS_MAX_AGE:1800}
   http:
     cache: # Used by the CachingHttpHeadersFilter
       timeToLiveInDays: 1461
